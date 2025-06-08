@@ -60,11 +60,11 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal}) => {
     }
 };
 export const update = async ({inp,setisload,setInp,setopenmodal}) => {
-    console.log(inp);
-    const { department, description } = inp;
 
-    if (!department) {
-        alert('Please fill in both fields');
+    const {departmentId, department, description } = inp;
+
+    if (!department || !departmentId) {
+        alert('All fileds are Required');
         return;
     }
 
@@ -73,10 +73,9 @@ export const update = async ({inp,setisload,setInp,setopenmodal}) => {
 
     try {
         const res = await axios.post(
-            `${import.meta.env.VITE_API_ADDRESS}adddepartment`,
+            `${import.meta.env.VITE_API_ADDRESS}updatedepartment`,
             {
-                department,
-                description
+               departmentId, department, description
             },
             {
                 headers: {
