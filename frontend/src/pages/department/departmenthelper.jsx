@@ -59,6 +59,49 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal}) => {
         setisload(false);
     }
 };
+export const update = async ({inp,setisload,setInp,setopenmodal}) => {
+    console.log(inp);
+    const { department, description } = inp;
+
+    if (!department) {
+        alert('Please fill in both fields');
+        return;
+    }
+
+    const token = localStorage.getItem('emstoken');
+    setisload(true);
+
+    try {
+        const res = await axios.post(
+            `${import.meta.env.VITE_API_ADDRESS}adddepartment`,
+            {
+                department,
+                description
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        console.log('Query:', res);
+        toast.success(res.data.message, { autoClose: 1200 });
+        setInp(init);
+        setopenmodal(false);
+    } catch (error) {
+        console.log(error);
+        if (error.response) {
+            toast.warn(error.response.data.message, { autoClose: 1200 });
+        } else if (error.request) {
+            console.error('No response from server:', error.request);
+        } else {
+            console.error('Error:', error.message);
+        }
+    } finally {
+        setisload(false);
+    }
+};
 
 export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => {
     const token = localStorage.getItem('emstoken');

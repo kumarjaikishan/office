@@ -23,6 +23,28 @@ const addDepartment = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+const updatedepartment = async (req, res, next) => {
+    // console.log(req.body)
+    try {
+        const { department, description, departmentId } = req.body;
+        if (!department || !departmentId) {
+            return next({ status: 400, message: "all fields are required" });
+        }
+
+        const query = await departmentModal.findByIdAndUpdate({ departmentId }, { department, description });
+
+        if (!query) {
+            return next({ status: 400, message: "Something went wrong" });
+        }
+
+        res.status(200).json({
+            message: 'Department Updated Successfully'
+        })
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
 const departmentlist = async (req, res, next) => {
     try {
         const query = await departmentModal.find();
@@ -38,4 +60,4 @@ const departmentlist = async (req, res, next) => {
 }
 
 
-module.exports = { addDepartment, departmentlist };
+module.exports = { addDepartment, departmentlist, updatedepartment };

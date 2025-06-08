@@ -19,6 +19,7 @@ router.route('/signup').post(users.userRegister);
 
 router.route('/departmentlist').get(authmiddlewre,adminmiddleware,admin.departmentlist); 
 router.route('/adddepartment').post(authmiddlewre,adminmiddleware,admin.addDepartment); 
+router.route('/updatedepartment').post(authmiddlewre,adminmiddleware,admin.updatedepartment); 
 
 
 module.exports = router;

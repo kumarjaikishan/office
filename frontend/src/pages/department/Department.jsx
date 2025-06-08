@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import Modalbox from '../../components/custommodal/Modalbox';
 import axios from 'axios';
 import DataTable from 'react-data-table-component';
-import { adddepartment, columns, fetche } from './departmenthelper';
+import { adddepartment, columns, fetche, update } from './departmenthelper';
 import { MdDelete, MdEdit } from "react-icons/md";
 
 const Department = () => {
@@ -23,7 +23,7 @@ const Department = () => {
   }
   const [inp, setInp] = useState(init);
   useEffect(() => {
-    fetche({ setisload, setdepartmentlist ,edite,deletee});
+    fetche({ setisload, setdepartmentlist, edite, deletee });
   }, [])
 
   const handleChange = (e, name) => {
@@ -32,9 +32,9 @@ const Department = () => {
     })
   }
 
-  const adddepartcall =(e)=>{
+  const adddepartcall = (e) => {
     e.prevent.default;
-    adddepartment({inp,setisload,setInp,setopenmodal})
+    adddepartment({ inp, setisload, setInp, setopenmodal })
   }
 
 
@@ -48,9 +48,13 @@ const Department = () => {
     })
     setopenmodal(true);
   }
-  
+
   const deletee = (id) => {
     console.log("delete", id)
+  }
+  const updatee=()=>{
+    console.log("updateee",inp)
+    update({inp})
   }
 
   return (
@@ -77,7 +81,7 @@ const Department = () => {
               <TextField sx={{ width: '98%' }} required value={inp.department} onChange={(e) => handleChange(e, 'department')} label="Department" size="small" />
               <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
               <div>
-                <LoadingButton
+                {!isupdate && <LoadingButton
                   sx={{ mr: 2 }}
                   loading={isload}
                   loadingPosition="end"
@@ -86,8 +90,23 @@ const Department = () => {
                   type="submit"
                 >
                   Add
-                </LoadingButton>
-                <Button size="small" onClick={() => setopenmodal(false)} variant="outlined"> cancel</Button>
+                </LoadingButton>}
+
+                {isupdate && <LoadingButton
+                  sx={{ mr: 2 }}
+                  loading={isload}
+                  loadingPosition="end"
+                  endIcon={<IoIosSend />}
+                  variant="contained"
+                  onClick={updatee}
+                >
+                  Update
+                </LoadingButton>}
+                <Button size="small"
+                  onClick={() => {
+                    setopenmodal(false); setisupdate(false);setInp(init)
+                  }}
+                  variant="outlined"> cancel</Button>
               </div>
             </span>
           </form>
