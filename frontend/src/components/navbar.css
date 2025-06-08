@@ -1,0 +1,13 @@
+.navbar{
+    width: calc(100% - var(--sidebarwidth) );
+    position: fixed;
+    top: 0;
+    left: var(--sidebarwidth);
+    height: var(--navbarheight);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 10px;
+    background-color: teal;
+    color: white;
+}

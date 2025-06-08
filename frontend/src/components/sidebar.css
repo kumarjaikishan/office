@@ -1,0 +1,56 @@
+.sidebar {
+    width: 160px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: teal;
+    padding: 8px 5px;
+
+    .logo {
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+
+        svg {
+            font-size: 5em;
+            color: whitesmoke;
+        }
+    }
+
+    .menu {
+        color: white;
+        width: 100%;
+
+
+        a {
+            display: flex;
+            align-items: center;
+            padding: 10px 8px;
+            text-decoration: none;
+            color: white;
+            width: 100%;
+            gap: 10px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+            border-radius: 5px;
+            letter-spacing: 0.5px;
+
+            &:hover {
+                background: white;
+                color: teal;
+            }
+
+            svg {
+                font-size: 18px;
+            }
+        }
+
+        a.active {
+            background: white;
+            color: teal;
+        }
+    }
+}
