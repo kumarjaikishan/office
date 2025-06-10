@@ -8,20 +8,32 @@ export const columns = [
         selector: (row) => row.sno
     },
     {
+        name: "Image",
+        selector: (row) => row.photo
+    },
+    {
+        name: "Name",
+        selector: (row) => row.name
+    },
+    {
+        name: "DOB",
+        selector: (row) => row.dob
+    },
+    {
         name: "Department",
-        selector: (row) => row.dep_name
+        selector: (row) => row.department.department
     },
     {
         name: "Action",
         selector: (row) => row.action
     }
 ]
-export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) => {
+export const addemployee = async ({inp,setisload,setInp,setopenmodal,init}) => {
     console.log(inp);
-    const { department, description } = inp;
+    const { employeeName, dob ,department,description,salary} = inp;
 
-    if (!department) {
-        alert('Please fill in both fields');
+    if (!department || !employeeName || !dob) {
+        alert('Please fill all fields');
         return;
     }
 
@@ -30,10 +42,9 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) =>
 
     try {
         const res = await axios.post(
-            `${import.meta.env.VITE_API_ADDRESS}adddepartment`,
+            `${import.meta.env.VITE_API_ADDRESS}addemployee`,
             {
-                department,
-                description
+               employeeName, dob ,department,description,salary
             },
             {
                 headers: {
@@ -59,11 +70,11 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) =>
         setisload(false);
     }
 };
-export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
+export const employeeupdate = async ({inp,setisload,setInp,setopenmodal,init}) => {
 
-    const {departmentId, department, description } = inp;
+    const {employeeId, employeeName, dob,department,description } = inp;
 
-    if (!department || !departmentId) {
+    if (!department || !employeeId ) {
         alert('All fileds are Required');
         return;
     }
@@ -73,9 +84,9 @@ export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
 
     try {
         const res = await axios.post(
-            `${import.meta.env.VITE_API_ADDRESS}updatedepartment`,
+            `${import.meta.env.VITE_API_ADDRESS}updateemployee`,
             {
-               departmentId, department, description
+              employeeId, employeeName, dob,department,description
             },
             {
                 headers: {
@@ -101,9 +112,9 @@ export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
         setisload(false);
     }
 };
-export const delette = async ({departmentId,setisload}) => {
+export const employeedelette = async ({employeeId,setisload}) => {
 
-    if (!departmentId) {
+    if (!employeeId) {
         alert('All fileds are Required');
         return;
     }
@@ -113,9 +124,9 @@ export const delette = async ({departmentId,setisload}) => {
 
     try {
         const res = await axios.post(
-            `${import.meta.env.VITE_API_ADDRESS}deletedepartment`,
+            `${import.meta.env.VITE_API_ADDRESS}deleteemployee`,
             {
-               departmentId
+               employeeId
             },
             {
                 headers: {
@@ -140,13 +151,13 @@ export const delette = async ({departmentId,setisload}) => {
     }
 };
 
-export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => {
+export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,setdepartmentlist }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
     try {
         const res = await axios.get(
-            `${import.meta.env.VITE_API_ADDRESS}departmentlist`,
+            `${import.meta.env.VITE_API_ADDRESS}employeelist`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -154,21 +165,36 @@ export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => 
             }
         );
 
-        // console.log('Query:', res);
+        console.log('employee fetch Query:', res);
         let sno = 1;
-        const data = await res.data.list.map((dep) => {
+        const data = await res.data.list.map((emp) => {
             return {
-                id: dep._id,
+                id: emp._id,
                 sno: sno++,
-                dep_name: dep.department,
+                photo: emp.profileimage,
+                name: emp.employeename,
+                dob: emp.dob,
+                department: emp.department,
                 action: (<div className="action">
-                    <span className="edit" title="Edit" onClick={() => edite(dep)}><MdEdit /></span>
-                    <span className="delete" onClick={() => deletee(dep._id)}><MdDelete /></span>
+                    <span className="edit" title="Edit" onClick={() => edite(emp)}><MdEdit /></span>
+                    <span className="delete" onClick={() => deletee(emp._id)}><MdDelete /></span>
                 </div>)
             }
         })
         console.log(res.data.list)
-        setdepartmentlist(data);
+        setemployeelist(data);
+        setdepartmentlist(res.data.departmentlist)
+
+        let departmentwise={};
+        res.data.list.map((val)=>{
+            const depName =val.department.department;
+            if(departmentwise.hasOwnProperty(depName)){
+                 departmentwise[depName].push(val);
+            }else{
+                departmentwise[depName]=[val];
+            }
+        })
+        console.log("depart list wise:",departmentwise)
 
     } catch (error) {
         console.log(error);

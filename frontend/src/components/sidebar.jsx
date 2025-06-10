@@ -23,6 +23,10 @@ const Sidebar = () => {
                     <FaBuilding />
                     <span>Department</span>
                 </NavLink>
+                <NavLink to='/admin-dashboard/salary'>
+                    <FaBuilding />
+                    <span>Salary</span>
+                </NavLink>
             </div>
         </div>
     )

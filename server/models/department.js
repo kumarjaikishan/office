@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken')
 const departmentSchema = new mongoose.Schema({
     department: {
         type: String,
-        required: true
+        required: true,
+        unique:true
     },
     description: {
         type: String

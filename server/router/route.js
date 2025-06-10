@@ -20,6 +20,12 @@ router.route('/signup').post(users.userRegister);
 router.route('/departmentlist').get(authmiddlewre,adminmiddleware,admin.departmentlist); 
 router.route('/adddepartment').post(authmiddlewre,adminmiddleware,admin.addDepartment); 
 router.route('/updatedepartment').post(authmiddlewre,adminmiddleware,admin.updatedepartment); 
+router.route('/deletedepartment').post(authmiddlewre,adminmiddleware,admin.deletedepartment); 
+
+router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
+router.route('/addemployee').post(authmiddlewre,adminmiddleware,admin.addemployee); 
+router.route('/updateemployee').post(authmiddlewre,adminmiddleware,admin.updateemployee); 
+router.route('/deleteemployee').post(authmiddlewre,adminmiddleware,admin.deleteemployee); 
 
 
 module.exports = router;

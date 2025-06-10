@@ -2,14 +2,11 @@ import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
 import './department.css'
 import { useEffect, useState } from 'react';
-import LoadingButton from '@mui/lab/LoadingButton';
 import { IoIosSend } from "react-icons/io";
-import { toast } from 'react-toastify';
 import Modalbox from '../../components/custommodal/Modalbox';
-import axios from 'axios';
+import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
-import { adddepartment, columns, fetche, update } from './departmenthelper';
-import { MdDelete, MdEdit } from "react-icons/md";
+import { adddepartment, columns, delette, fetche, update } from './departmenthelper';
 
 const Department = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -33,8 +30,8 @@ const Department = () => {
   }
 
   const adddepartcall = (e) => {
-    e.prevent.default;
-    adddepartment({ inp, setisload, setInp, setopenmodal })
+     e.preventDefault();
+    adddepartment({ inp, setisload, setInp, setopenmodal,init })
   }
 
 
@@ -50,11 +47,24 @@ const Department = () => {
   }
 
   const deletee = (id) => {
-    console.log("delete", id)
+    console.log("delete", id);
+     swal({
+            title: 'Are you sure?',
+            text: 'Once deleted, you will not be able to recover this',
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true,
+        }).then(async (willDelete) => {
+            if (willDelete) {
+                delette({departmentId:id,setisload});
+            } else {
+
+            }
+        });
   }
   const updatee=()=>{
     console.log("updateee",inp)
-    update({inp})
+    update({inp,setisload,setInp,setopenmodal,init})
   }
 
   return (
@@ -81,7 +91,7 @@ const Department = () => {
               <TextField sx={{ width: '98%' }} required value={inp.department} onChange={(e) => handleChange(e, 'department')} label="Department" size="small" />
               <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
               <div>
-                {!isupdate && <LoadingButton
+                {!isupdate && <Button
                   sx={{ mr: 2 }}
                   loading={isload}
                   loadingPosition="end"
@@ -90,9 +100,9 @@ const Department = () => {
                   type="submit"
                 >
                   Add
-                </LoadingButton>}
+                </Button>}
 
-                {isupdate && <LoadingButton
+                {isupdate && <Button
                   sx={{ mr: 2 }}
                   loading={isload}
                   loadingPosition="end"
@@ -101,7 +111,7 @@ const Department = () => {
                   onClick={updatee}
                 >
                   Update
-                </LoadingButton>}
+                </Button>}
                 <Button size="small"
                   onClick={() => {
                     setopenmodal(false); setisupdate(false);setInp(init)

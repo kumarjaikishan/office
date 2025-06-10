@@ -5,9 +5,10 @@ import { ToastContainer } from 'react-toastify';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import AdminRoutes from './utils/AdminRoutes';
 import PrivateRoute from './utils/PrivateRoute';
-import Employe from './pages/Employe';
+import Employe from './pages/employee/Employe';
 import Department from './pages/department/Department';
 import Navbar from './components/Navbar';
+import Salary from './pages/salary/salary';
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="employe" element={<Employe />} />
           <Route path="department" element={<Department />} />
+          <Route path="salary" element={<Salary />} />
         </Route>
 
         <Route
