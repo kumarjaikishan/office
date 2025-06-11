@@ -154,7 +154,7 @@ const employeelist = async (req, res, next) => {
     try {
         const query = await employeeModal.find().populate('department', 'department');
         const departmentlist  = await departmentModal.find().select('department');
-        console.log(query)
+        // console.log(query)
 
         res.status(200).json({
             list: query,

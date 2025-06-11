@@ -3,6 +3,8 @@ const app = express();
 const router = express.Router();
 const users = require('../controllers/user');
 const admin = require('../controllers/admin');
+const salary = require('../controllers/salary');
+const attendance = require('../controllers/attandence');
 const authmiddlewre = require('../middleware/auth_middleware');
 const adminmiddleware = require('../middleware/isadmin_middleware');
 
@@ -26,6 +28,13 @@ router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeeli
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,admin.addemployee); 
 router.route('/updateemployee').post(authmiddlewre,adminmiddleware,admin.updateemployee); 
 router.route('/deleteemployee').post(authmiddlewre,adminmiddleware,admin.deleteemployee); 
+
+router.route('/addsalary').post(authmiddlewre,adminmiddleware,salary.addsalary); 
+router.route('/salaryfetch').get(authmiddlewre,adminmiddleware,salary.salaryfetch); 
+
+router.route('/allAttandence').get(authmiddlewre,attendance.allAttandence); 
+router.route('/checkout').post(authmiddlewre,attendance.checkout); 
+router.route('/checkin').post(authmiddlewre,attendance.checkin); 
 
 
 module.exports = router;

@@ -10,7 +10,7 @@ const AdminRoutes = () => {
   const admin = user.islogin && user.user.role == 'admin';
 
   useEffect(() => {
-    console.log(user)
+    // console.log(user)
     if (!admin) {
       toast.warn('Access denied. Admin authorization is required.', { autoClose: 1900 });
     }

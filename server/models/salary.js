@@ -20,7 +20,7 @@ const salarySchema = new mongoose.Schema({
         type: Number,
     },
     payDate: {
-        type: Number, required: true
+        type: String, required: true
     },
     description: {
         type: String
