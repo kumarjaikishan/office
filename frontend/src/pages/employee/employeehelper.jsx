@@ -1,6 +1,8 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdOutlineModeEdit } from "react-icons/md";
+import { AiOutlineDelete } from "react-icons/ai";
+import { IoEyeOutline } from "react-icons/io5";
 
 export const columns = [
     {
@@ -165,7 +167,7 @@ export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,
             }
         );
 
-        console.log('employee fetch Query:', res);
+        // console.log('employee fetch Query:', res);
         let sno = 1;
         const data = await res.data.list.map((emp) => {
             return {
@@ -175,13 +177,14 @@ export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,
                 name: emp.employeename,
                 dob: emp.dob,
                 department: emp.department,
-                action: (<div className="action">
-                    <span className="edit" title="Edit" onClick={() => edite(emp)}><MdEdit /></span>
-                    <span className="delete" onClick={() => deletee(emp._id)}><MdDelete /></span>
+                action: (<div className="action flex gap-2.5">
+                    <span className="eye edit text-[18px] text-green-500 cursor-pointer" ><IoEyeOutline /></span>
+                    <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
+                    <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
                 </div>)
             }
         })
-        console.log(res.data.list)
+        // console.log(res.data.list)
         setemployeelist(data);
         setdepartmentlist(res.data.departmentlist)
 
@@ -194,7 +197,7 @@ export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,
                 departmentwise[depName]=[val];
             }
         })
-        console.log("depart list wise:",departmentwise)
+        // console.log("depart list wise:",departmentwise)
 
     } catch (error) {
         console.log(error);

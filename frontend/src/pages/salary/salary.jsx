@@ -1,6 +1,7 @@
 import TextField from '@mui/material/TextField';
 import { Button, Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
+import './salary.css'
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../components/custommodal/Modalbox';
 import swal from 'sweetalert';
@@ -134,7 +135,7 @@ const Salary = () => {
     };
 
     return (
-        <div>
+        <div className='salary'>
             <h2>Salary Management</h2>
             <div className='head'>
                 <TextField size='small' id="outlined-basic" label="Search Department" variant="standard" />

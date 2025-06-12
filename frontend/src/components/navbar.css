@@ -1,5 +1,5 @@
-.navbar{
-    width: calc(100% - var(--sidebarwidth) );
+.navbar {
+    width: calc(100% - var(--sidebarwidth));
     position: fixed;
     top: 0;
     left: var(--sidebarwidth);
@@ -8,6 +8,16 @@
     align-items: center;
     justify-content: space-between;
     padding: 2px 10px;
-    background-color: teal;
-    color: white;
+    background-color: var(--sidenav);
+    color: grey;
+    box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+@media only screen and (max-width: 600px) {
+    .navbar {
+        width: calc(100% - var(--shortsidebar));
+        left: var(--shortsidebar);
+        height: var(--navbarheight);
+        padding: 2px 10px;
+    }
 }

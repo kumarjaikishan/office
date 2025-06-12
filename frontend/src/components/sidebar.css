@@ -1,36 +1,36 @@
 .sidebar {
-    width: 160px;
+    width: var(--sidebarwidth);
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
-    background: teal;
+    background: var(--sidenav);
+    color: var(--fontcolor);
     padding: 8px 5px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 
     .logo {
         height: 100px;
         display: flex;
         justify-content: center;
         align-items: center;
+        color: var(--maincolor);
         margin-bottom: 10px;
 
         svg {
             font-size: 5em;
-            color: whitesmoke;
         }
     }
 
     .menu {
-        color: white;
         width: 100%;
-
 
         a {
             display: flex;
             align-items: center;
             padding: 10px 8px;
             text-decoration: none;
-            color: white;
+            color: var(--fontcolor);
             width: 100%;
             gap: 10px;
             margin-bottom: 10px;
@@ -39,7 +39,7 @@
             letter-spacing: 0.5px;
 
             &:hover {
-                background: white;
+                background: rgba(0, 128, 128, 0.14);
                 color: teal;
             }
 
@@ -49,8 +49,41 @@
         }
 
         a.active {
-            background: white;
+            background: rgba(0, 128, 128, 0.14);
             color: teal;
+        }
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .sidebar {
+        width: var(--shortsidebar);
+        padding: 8px 5px;
+
+        .logo {
+            height: 60px;
+            margin-bottom: 10px;
+
+            svg {
+                font-size: 3em;
+            }
+        }
+
+        .menu {
+            width: 100%;
+
+            a {
+                justify-content: center;
+                padding: 10px 8px;
+                margin-bottom: 10px;
+                span {
+                    display: none;
+                }
+
+                svg {
+                    font-size: 18px;
+                }
+            }
         }
     }
 }

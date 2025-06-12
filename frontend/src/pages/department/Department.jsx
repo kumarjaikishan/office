@@ -71,7 +71,7 @@ const Department = () => {
     <div className='department'>
       <h2>Manage Departments</h2>
       <div className='head'>
-        <TextField size='small' id="outlined-basic" label="Search Department" variant="standard" />
+        <TextField size='small' id="outlined-basic" variant="outlined" label="Search Department" />
         <Button variant='contained' onClick={() => setopenmodal(true)}>Add Department</Button>
       </div>
       <div className="list">

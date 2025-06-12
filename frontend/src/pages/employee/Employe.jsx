@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeefetche, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import { Button } from '@mui/material';
+import { Button, OutlinedInput } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../components/custommodal/Modalbox';
@@ -10,11 +10,14 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-
+import { IoSearch } from "react-icons/io5";
+import InputAdornment from '@mui/material/InputAdornment';
+import { GoPlus } from "react-icons/go";
+import { FiDownload } from "react-icons/fi";
+import { CiFilter } from "react-icons/ci";
 
 
 const Employe = () => {
-
   const [openmodal, setopenmodal] = useState(false);
   const [isload, setisload] = useState(false);
   const [employeelist, setemployeelist] = useState([]);
@@ -40,7 +43,7 @@ const Employe = () => {
   }
 
   const adddepartcall = (e) => {
-     e.preventDefault();
+    e.preventDefault();
     addemployee({ inp, setisload, setInp, setopenmodal, init })
   }
 
@@ -74,24 +77,102 @@ const Employe = () => {
       }
     });
   }
-  
+
   const updatee = () => {
     console.log("updateee", inp)
     employeeupdate({ inp, setisload, setInp, setopenmodal, init })
   }
 
+  const customStyles = {
+    headCells: {
+      style: {
+        backgroundColor: 'teal', // header background
+        fontWeight: 'bold',         // font weight
+        fontSize: '14px',
+        color: 'white',
+        height: '56px',             // header cell height
+        padding: '8px 16px',
+      },
+    },
+    headRow: {
+      style: {
+        minHeight: '56px',          // height of header row
+
+      },
+    },
+    rows: {
+      style: {
+        minHeight: '48px',          // height of each row
+      },
+    },
+  };
+
   return (
-    <div className='department'>
-      <h2>Manage Employees</h2>
-      <div className='head'>
-        <TextField size='small' id="outlined-basic" label="Search Department" variant="standard" />
-        <Button variant='contained' onClick={() => setopenmodal(true)}>Add Employee</Button>
+    <div className='employee p-2.5'>
+      <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2>
+      <div className='flex justify-between'>
+        <div className="flex gap-1">
+          <TextField size='small'
+            sx={{ width: '160px' }}
+            id="outlined-basic"
+            InputProps={{
+              startAdornment: <InputAdornment position="start">
+                <IoSearch />
+              </InputAdornment>,
+            }}
+            label="Search Employee" variant="outlined"
+          />
+
+          <FormControl sx={{ width: '160px' }} required size="small">
+            <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
+            <Select
+              labelId="demo-simple-select-helper-label"
+              id="demo-simple-select-helper"
+              value={""}
+              name="Department"
+              label="Department"
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Department"
+                />
+              }
+            // onChange={(e) => handleChange(e, 'department')}
+            >
+
+              <MenuItem value={""}>Sales</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl sx={{ width: '160px' }} required size="small">
+            <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
+            <Select
+              labelId="demo-simple-select-helper-label"
+              id="demo-simple-select-helper"
+              value={""}
+              name="Department"
+              label="Department"
+            // onChange={(e) => handleChange(e, 'department')}
+            >
+
+              <MenuItem value={""}>Sales</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+        <div className="flex gap-1">
+        <Button variant='outlined' startIcon={<FiDownload />} >Export</Button>
+        <Button variant='contained' startIcon={<GoPlus/>} onClick={() => setopenmodal(true)}>Add Employee</Button>
+        </div>
       </div>
-      <div className="list">
+      <div className="mt-2">
         <DataTable
           columns={columns}
           data={employeelist}
           pagination
+          customStyles={customStyles}
           highlightOnHover
         />
       </div>

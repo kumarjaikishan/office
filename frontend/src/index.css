@@ -1,12 +1,18 @@
+@import "tailwindcss";
+
 * {
-    margin: 0;
-    padding: 0;
+    /* margin: 0;
+    padding: 0; */
     box-sizing: border-box;
 }
 
 :root {
     --sidebarwidth: 160px;
     --navbarheight: 60px;
+    --sidenav: rgb(255, 255, 255);
+    --maincolor:teal;
+    --fontcolor:grey;
+    --shortsidebar:60px;
 }
 
 body {
@@ -15,15 +21,13 @@ body {
 }
 
 .material {
-    /* position: relative; */
     width: calc(100% - var(--sidebarwidth));
     width: 100%;
     padding-left: var(--sidebarwidth);
     min-height: calc(100vh - var(--navbarheight));
     height: 100vh;
     padding-top: var(--navbarheight);
-    background: rgb(222, 220, 220);
-    /* border: 2px solid red; */
+    background: rgb(240, 242, 246);
 }
 .membermodal {
     width: 600px;

@@ -1,23 +1,15 @@
-.department {
-    padding: 20px;
+.salary{
+     padding: 20px;
 
-    h2 {
-        margin-bottom: 20px;
-    }
-
-    .head {
+     .head {
         display: flex;
         justify-content: space-between;
+        padding: 5px 10px;
         align-items: center;
         margin-bottom: 20px;
     }
 
-    .list {
-        width: 100%;
-        min-height: 50px;
-    }
-
-    .action {
+     .action {
         display: flex;
         align-items: center;
         gap: 5px;

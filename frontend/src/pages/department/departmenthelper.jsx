@@ -1,6 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdOutlineModeEdit } from "react-icons/md";
+import { AiOutlineDelete } from "react-icons/ai";
 
 export const columns = [
     {
@@ -162,8 +163,8 @@ export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => 
                 sno: sno++,
                 dep_name: dep.department,
                 action: (<div className="action">
-                    <span className="edit" title="Edit" onClick={() => edite(dep)}><MdEdit /></span>
-                    <span className="delete" onClick={() => deletee(dep._id)}><MdDelete /></span>
+                    <span className="edit" title="Edit" onClick={() => edite(dep)}><MdOutlineModeEdit /></span>
+                    <span className="delete" onClick={() => deletee(dep._id)}><AiOutlineDelete /></span>
                 </div>)
             }
         })

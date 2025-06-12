@@ -1,7 +1,10 @@
 import React from 'react'
-import { FaBuilding, FaTachometerAlt, FaUsers } from 'react-icons/fa'
+import { FaRegBuilding , FaTachometerAlt, FaUsers } from 'react-icons/fa'
 import { NavLink } from 'react-router-dom'
 import { SiAudiotechnica } from "react-icons/si";
+import { GoPeople } from "react-icons/go";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { VscDashboard } from "react-icons/vsc";
 import './sidebar.css'
 
 const Sidebar = () => {
@@ -12,19 +15,19 @@ const Sidebar = () => {
             </div>
             <div className="menu">
                 <NavLink to='/admin-dashboard' end>
-                    <FaTachometerAlt />
+                    <VscDashboard />
                     <span>Dashboard</span>
                 </NavLink>
                 <NavLink to='/admin-dashboard/employe'>
-                    <FaUsers />
+                    <GoPeople />
                     <span>Empoloyes</span>
                 </NavLink>
                 <NavLink to='/admin-dashboard/department'>
-                    <FaBuilding />
+                    <FaRegBuilding />
                     <span>Department</span>
                 </NavLink>
                 <NavLink to='/admin-dashboard/salary'>
-                    <FaBuilding />
+                    <GiTakeMyMoney />
                     <span>Salary</span>
                 </NavLink>
             </div>
