@@ -19,19 +19,20 @@ const Main = () => {
     <div className='adminDashboard'>
       <div className="overview">
         <h3>Dashboar overview</h3>
-        <div className="cards" >
+        <div className="car flex justify-between gap-3" >
           <DashboardCard logo={<FaUsers />} head="Total Employees" number="5" color="teal" />
-          <DashboardCard logo={<FaTachometerAlt />} head="Total Departments" number="3" color="orange" />
-          <DashboardCard logo={<FaBuilding />} head="Monthly Pay" number="$2500" color="red" />
+          <DashboardCard logo={<FaTachometerAlt />} head="Total Departments" number="3" color="amber" />
+          <DashboardCard logo={<FaTachometerAlt />} head="Total Departments" number="3" color="amber" />
+          <DashboardCard logo={<FaBuilding />} head="Monthly Pay" number="$2500" color="teal" />
         </div>
       </div>
       <div className="leaveDetail">
         <h3>Leave Details</h3>
         <div className="cards">
           <DashboardCard logo={<FaUsers />} head="Leave Applied" number="5" color="teal" />
-          <DashboardCard logo={<FaTachometerAlt />} head="Leave Approved" number="3" color="orange" />
-          <DashboardCard logo={<FaBuilding />} head="Leace Pending" number="1" color="red" />
-          <DashboardCard logo={<FaBuilding />} head="Leave Rejected" number="2" color="blue" />
+          <DashboardCard logo={<FaTachometerAlt />} head="Leave Approved" number="3" color="amber" />
+          <DashboardCard logo={<FaBuilding />} head="Leace Pending" number="1" color="teal" />
+          <DashboardCard logo={<FaBuilding />} head="Leave Rejected" number="2" color="amber" />
         </div>
       </div>
     </div>

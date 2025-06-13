@@ -89,15 +89,12 @@ const Employe = () => {
         backgroundColor: 'teal', // header background
         fontWeight: 'bold',         // font weight
         fontSize: '14px',
-        color: 'white',
-        height: '56px',             // header cell height
-        padding: '8px 16px',
+        color: 'white',             // header cell height
+        padding: '0px 5px',
       },
     },
     headRow: {
       style: {
-        minHeight: '56px',          // height of header row
-
       },
     },
     rows: {
@@ -172,6 +169,7 @@ const Employe = () => {
           columns={columns}
           data={employeelist}
           pagination
+          selectableRows 
           customStyles={customStyles}
           highlightOnHover
         />

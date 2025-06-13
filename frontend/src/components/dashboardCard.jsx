@@ -1,14 +1,15 @@
-import React from 'react'
 
 const DashboardCard = ({logo,head,number,color}) => {
     return (
-        <div className="card" style={{display:'flex'}}>
-            <div className="logo" style={{background:color}}>
-                {logo}
+        <div className="px-4 py-2 flex-1 flex-col bg-white  rounded" >
+            <div className="flex items-center gap-3" >
+                <span className={`p-2 bg-${color}-100 text-${color}-700 
+                rounded-full flex items-center justify-center`}>
+                 {logo} </span>
+                <div className="text-gray-800 font-bold text-[18px]" >{head}</div>
             </div>
             <div className="details" style={{ padding:'2px 8px'}}>
-                <div className="head" style={{fontWeight:600}}>{head}</div>
-                <div className="number">{number}</div>
+                <p className="text-2xl font-bold mt-2">{number}</p>
             </div>
         </div>
     )

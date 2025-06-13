@@ -50,6 +50,8 @@ body {
             text-align: center;
             letter-spacing: 1px;
             color: white;
+            font-size: 22px;
+            font-weight: 600;
         }
 
         .modalcontent {

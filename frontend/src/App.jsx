@@ -9,6 +9,7 @@ import Employe from './pages/employee/Employe';
 import Department from './pages/department/Department';
 import Navbar from './components/Navbar';
 import Salary from './pages/salary/salary';
+import Attandence from './pages/attandence/Attandence';
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
           <Route path="employe" element={<Employe />} />
           <Route path="department" element={<Department />} />
           <Route path="salary" element={<Salary />} />
+          <Route path="attandence" element={<Attandence />} />
         </Route>
 
         <Route
