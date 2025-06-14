@@ -1,5 +1,6 @@
 const departmentModal = require('../models/department');
 const employeeModal = require('../models/employee');
+const attendanceModal = require('../models/attandence');
 
 const addDepartment = async (req, res, next) => {
     // console.log(req.body)
@@ -166,8 +167,29 @@ const employeelist = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+const firstfetch = async (req, res, next) => {
+    try {
+        const query = await employeeModal.find().populate('department', 'department');
+        const departmentlist  = await departmentModal.find().select('department');
+        const attendance  = await attendanceModal.find()
+        .populate('employeeId','employeename')
+        .populate('departmentId','department');
+        // console.log(query)
+
+        res.status(200).json({
+            user:req.user,
+            employee: query,
+            departmentlist,
+            attendance
+        })
+
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
 
 
-module.exports = { addDepartment, departmentlist, updatedepartment ,deletedepartment,employeelist,addemployee,
+module.exports = { addDepartment, firstfetch,departmentlist, updatedepartment ,deletedepartment,employeelist,addemployee,
     updateemployee,deleteemployee
 };

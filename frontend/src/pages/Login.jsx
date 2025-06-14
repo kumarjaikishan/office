@@ -3,7 +3,7 @@ import { TextField, Button, Box, Typography, Paper } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useSelector, useDispatch } from 'react-redux';
-import { setloader, setlogin, setadmin } from '../../store/user';
+import { setloader, setlogin, setadmin } from '../../store/authSlice';
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Login = () => {

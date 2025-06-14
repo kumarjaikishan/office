@@ -7,12 +7,24 @@ import AdminRoutes from './utils/AdminRoutes';
 import PrivateRoute from './utils/PrivateRoute';
 import Employe from './pages/employee/Employe';
 import Department from './pages/department/Department';
-import Navbar from './components/Navbar';
 import Salary from './pages/salary/salary';
 import Attandence from './pages/attandence/Attandence';
+import { useDispatch, useSelector } from 'react-redux';
+import { FirstFetch } from '../store/userSlice';
+import { useEffect } from 'react';
+import Logout from './pages/logout';
 
 
 function App() {
+  const dispatch = useDispatch();
+  const { islogin } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    console.log("login check",islogin)
+    if (islogin) {
+      dispatch(FirstFetch());
+    }
+  }, [islogin, dispatch]);
 
   return (
     <>
@@ -21,6 +33,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/admin-dashboard" />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
 
         {/* <Route
           path="/admin-dashboard"

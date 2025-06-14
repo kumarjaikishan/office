@@ -2,12 +2,14 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
-  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
+  departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'department', required: true },
   date: { type: Date, required: true },
-  checkIn: { type: Date, required: true },
-  checkOut: { type: Date },
-  totalHours: { type: Number }, // calculated in hours
-  shortHours: { type: Number }  // hours short of 8
+  punchIn: { type: Date, required: true },
+  punchOut: { type: Date },
+  workingMinutes: { type: Number }, // calculated in hours
+  shortMinutes: { type: Number },  // hours short of 8
+  status: { type: Boolean }  
 });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

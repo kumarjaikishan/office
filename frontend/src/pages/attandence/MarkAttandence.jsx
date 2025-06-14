@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Modalbox from '../../components/custommodal/Modalbox'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Box } from '@mui/material';
+import { Autocomplete, Avatar, Box, Typography } from '@mui/material';
 import { Button, OutlinedInput } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import InputLabel from '@mui/material/InputLabel';
@@ -12,67 +12,163 @@ import { IoIosSend } from "react-icons/io";
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
+import { useSelector } from 'react-redux';
+import { FaRegUser } from "react-icons/fa";
+import { CgLayoutGrid } from 'react-icons/cg';
+import dayjs from 'dayjs';
 
-const MarkAttandence = ({ openmodal, setopenmodal,isUpdate,isload  }) => {
+const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
+
+    const { department, employee } = useSelector((state) => state.user);
+
+    useEffect(() => {
+        // console.log("department:", department)
+    }, [department]);
+
+    const minutesinhours = (minutes) => {
+        let hour = Math.floor(minutes / 60);
+        let minute = minutes % 60;
+        const formatted = `${hour}h ${minute}m`;
+        return formatted;
+    }
+
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
             <div className="membermodal">
-                <form onSubmit={""}>
+                <form onSubmit={submitHandle}>
                     <h2>Mark Attendance</h2>
                     <span className="modalcontent">
-                        <LocalizationProvider  dateAdapter={AdapterDayjs}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                                 slotProps={{
                                     textField: {
                                         size: 'small',
-                                        
-                                    },
-                                }} label="Delect date" />
-                        </LocalizationProvider>
-                        <FormControl sx={{ width: '100%' }} required size="small">
-                            <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={''}
-                                name="Department"
-                                label="Department"
-                            // onChange={(e) => handleChange(e, 'department')}
-                            >
 
-                                {/* {departmentlist.map((list) => {
-                                    return <MenuItem value={list._id}>{list.department}</MenuItem>
-                                })} */}
-                            </Select>
-                        </FormControl>
-                        <Box  sx={{width:'100%', gap:2}}>
+                                    },
+                                }}
+                                onChange={(newValue) => {
+                                    setinp({
+                                        ...inp, ['date']: newValue
+                                    })
+                                }}
+                                format="DD-MM-YYYY"
+                                value={inp?.date}
+                                sx={{ width: '100%' }}
+                                label="Select date"
+                            />
+                        </LocalizationProvider>
+
+                        <Autocomplete
+                            size="small"
+                            fullWidth
+                            value={employee?.find(emp => emp._id === inp.employeeId) || null}
+                            options={employee || []}
+                            getOptionLabel={(option) => option.employeename} // still needed for filtering
+                            onChange={(event, newValue) => {
+                                // console.log(newValue)
+                                setinp({
+                                    ...inp,
+                                    employeeId: newValue._id,
+                                    departmentId:newValue.department._id
+                                })
+                            }}
+                            renderOption={(props, option) => {
+                                const { key, ...rest } = props; // destructure key out
+
+                                return (
+                                    <Box
+                                        key={key} // pass key directly
+                                        component="li"
+                                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                                        {...rest} // spread the rest
+                                    >
+                                        <Avatar src={option.image} alt={option.employeename}>
+                                            {!option.image && <FaRegUser />}
+                                        </Avatar>
+                                        {/* <Avatar src={option.image || <FaRegUser/> } alt={option.employeename} /> */}
+                                        <Box>
+                                            <Typography variant="body2">{option.employeename}</Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                DOB: {option.dob}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                );
+                            }}
+
+                            renderInput={(params) => (
+                                <TextField {...params} label="Select Employee" required />
+                            )}
+                        />
+
+                        <Box sx={{ width: '100%', gap: 2 }}>
                             <LocalizationProvider  dateAdapter={AdapterDayjs}>
-                                <TimePicker sx={{width:'100%'}} label="Basic time picker" />
+                                <TimePicker
+                                    value={inp.punchIn}
+                                    slotProps={{
+                                        textField: {
+                                            size: 'small',
+
+                                        },
+                                    }}
+                                    onChange={(newValue) => {
+                                        setinp({
+                                            ...inp,
+                                            punchIn: newValue
+                                        })
+                                    }}
+                                    sx={{ width: '100%' }}
+                                    label="Punch In"
+                                />
                             </LocalizationProvider>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <TimePicker sx={{width:'100%'}} label="Basic time picker" />
+                                <TimePicker
+                                    value={inp.punchOut}
+                                    slotProps={{
+                                        textField: {
+                                            size: 'small',
+
+                                        },
+                                    }}
+                                    onChange={(newValue) => {
+                                        setinp({
+                                            ...inp,
+                                            punchOut: newValue
+                                        })
+                                    }} sx={{ width: '100%' }} label="Punch Out" />
                             </LocalizationProvider>
                         </Box>
-                        <TextField sx={{ width: '100%' }} required value={0} label="Working Hours" size="small" />
-                        <FormControl sx={{ width: '100%' }} required size="small">
-                            <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={''}
-                                name="Department"
-                                label="Department"
-                            // onChange={(e) => handleChange(e, 'department')}
-                            >
-
-                                {/* {departmentlist.map((list) => {
-                                    return <MenuItem value={list._id}>{list.department}</MenuItem>
-                                })} */}
-                            </Select>
-                        </FormControl>
-                        <div>
+                        <Box sx={{ width: '100%', gap: 2 }}>
+                            <TextField sx={{ width: '100%' }} disabled value={minutesinhours(inp.workingMinutes)} label="Working Hours" size="small" />
+                            <FormControl sx={{ width: '100%' }} size="small">
+                                <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-helper-label"
+                                    id="demo-simple-select-helper"
+                                    value={inp.status}
+                                    name="status"
+                                    label="Status"
+                                    required
+                                    onChange={(e) => {
+                                        setinp({
+                                            ...inp,
+                                            status: e.target.value
+                                        });
+                                    }}
+                                >
+                                    <MenuItem value={true}>Present</MenuItem>
+                                    <MenuItem value={false}>Absent</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+                        <div className='w-full flex gap-2'>
+                            <Button size="small"
+                                onClick={() => {
+                                    setopenmodal(false); setisUpdate(false); setinp(init)
+                                }}
+                                variant="outlined"> cancel</Button>
                             {!isUpdate && <Button
-                                sx={{ mr: 2 }}
+
                                 loading={isload}
                                 loadingPosition="end"
                                 endIcon={<IoIosSend />}
@@ -83,7 +179,7 @@ const MarkAttandence = ({ openmodal, setopenmodal,isUpdate,isload  }) => {
                             </Button>}
 
                             {isUpdate && <Button
-                                sx={{ mr: 2 }}
+
                                 loading={isload}
                                 loadingPosition="end"
                                 endIcon={<IoIosSend />}
@@ -92,11 +188,7 @@ const MarkAttandence = ({ openmodal, setopenmodal,isUpdate,isload  }) => {
                             >
                                 Update
                             </Button>}
-                            <Button size="small"
-                                onClick={() => {
-                                    setopenmodal(false); setisupdate(false); setInp(init)
-                                }}
-                                variant="outlined"> cancel</Button>
+
                         </div>
                     </span>
                 </form>

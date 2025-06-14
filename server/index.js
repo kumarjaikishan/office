@@ -2,13 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
-const route = require('./router/route');
 const errorHandle = require('./utils/error_util');
 require('./conn/conn')
 
 app.use(express.json());
 app.use(cors());
-app.use("/api", route);
+app.use("/api", require('./router/route'));
 app.use(errorHandle);
 
 app.get('/', (req,res)=>{

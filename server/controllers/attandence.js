@@ -3,6 +3,82 @@ const Attendance = require('../models/attandence');
 const Leave = require('../models/leave');
 const User = require('../models/user');
 
+
+const webattandence = async (req, res, next) => {
+  // console.log(req.body)
+  try {
+    let { employeeId, departmentId, date, punchIn, punchOut, status } = req.body;
+
+    // Validate required fields
+    if (!employeeId || !departmentId || !date) {
+      return res.status(400).json({ message: 'Missing required fields: employeeId, departmentId, or date' });
+    }
+
+    // Convert input to Date objects
+    const dateObj = new Date(date);
+    if (isNaN(dateObj)) {
+      return res.status(400).json({ message: 'Invalid date format' });
+    }
+
+    const dateOnly = dateObj.toDateString(); // Used to match one date per day
+
+    let attendance = await Attendance.findOne({ employeeId, date: dateOnly });
+
+    // === PUNCH-OUT FLOW ===
+    if (attendance) {
+      if (attendance.punchOut) {
+        return res.status(400).json({ message: 'Already punched out for this date' });
+      }
+
+      if (!punchOut) {
+        return res.status(400).json({ message: 'Missing punchOut time for punch-out' });
+      }
+
+      const punchOutTime = new Date(punchOut);
+      const punchInTime = new Date(attendance.punchIn);
+
+      if (isNaN(punchOutTime) || isNaN(punchInTime)) {
+        return res.status(400).json({ message: 'Invalid punchIn or punchOut time' });
+      }
+
+      const diffMs = punchOutTime - punchInTime;
+      const workingMinutes = Math.floor(diffMs / 60000);
+      const fullDayMinutes = 8 * 60;
+
+      attendance.punchOut = punchOutTime;
+      attendance.workingMinutes = workingMinutes;
+      attendance.status = status ?? attendance.status;
+      attendance.shortMinutes = Math.max(fullDayMinutes - workingMinutes, 0); // Ensure non-negative
+      await attendance.save();
+
+      return res.json({ message: 'Punch-out recorded', attendance });
+    }
+
+    // === PUNCH-IN FLOW ===
+    const punchInTime = punchIn ? new Date(punchIn) : new Date();
+    if (isNaN(punchInTime)) {
+      return res.status(400).json({ message: 'Invalid punchIn time' });
+    }
+
+    attendance = new Attendance({
+      employeeId,
+      departmentId,
+      date: dateOnly,
+      punchIn: punchInTime,
+      status: status ?? true,
+    });
+
+    await attendance.save();
+
+    return res.json({ message: 'Punch-in recorded', attendance });
+
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
 // Check-in
 const checkin = async (req, res, next) => {
     const { employeeId } = req.body;
@@ -69,4 +145,4 @@ const allAttandence = async (req, res, next) => {
 };
 
 
-module.exports = { checkout, checkin, allAttandence,leaveapply,leaveupdate,allleave };
+module.exports = { checkout, checkin,webattandence, allAttandence,leaveapply,leaveupdate,allleave };

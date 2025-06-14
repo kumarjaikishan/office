@@ -1,22 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const islogin = createSlice({
-    name:"user",
+const authSlice = createSlice({
+    name:"auth",
     initialState:{
         islogin:false,
         head:"LogIn",
-        user:{},
         loader:false,
         isadmin:false,
     },
     reducers:{
         setlogin(state, action){
            state.islogin = action.payload.login;
-           state.user = action.payload.user;
         },
         setlogout(state, action){
            state.islogin = action.payload.login;
-           state.user = action.payload.user;
            localStorage.removeItem('emstoken');
         },
         header(state, action){
@@ -31,5 +28,5 @@ const islogin = createSlice({
     }
 
 })
-export const {setadmin,setlogin,header,setloader,setlogout}= islogin.actions;
-export default islogin.reducer;
+export const {setadmin,setlogin,header,setloader,setlogout}= authSlice.actions;
+export default authSlice.reducer;

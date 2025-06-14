@@ -23,6 +23,7 @@ router.route('/departmentlist').get(authmiddlewre,adminmiddleware,admin.departme
 router.route('/adddepartment').post(authmiddlewre,adminmiddleware,admin.addDepartment); 
 router.route('/updatedepartment').post(authmiddlewre,adminmiddleware,admin.updatedepartment); 
 router.route('/deletedepartment').post(authmiddlewre,adminmiddleware,admin.deletedepartment); 
+router.route('/firstfetch').get(authmiddlewre,adminmiddleware,admin.firstfetch); 
 
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,admin.addemployee); 
@@ -33,6 +34,7 @@ router.route('/addsalary').post(authmiddlewre,adminmiddleware,salary.addsalary);
 router.route('/salaryfetch').get(authmiddlewre,adminmiddleware,salary.salaryfetch); 
 
 router.route('/allAttandence').get(authmiddlewre,attendance.allAttandence); 
+router.route('/webattandence').post(authmiddlewre,attendance.webattandence); 
 router.route('/checkout').post(authmiddlewre,attendance.checkout); 
 router.route('/checkin').post(authmiddlewre,attendance.checkin); 
 

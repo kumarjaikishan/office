@@ -1,5 +1,5 @@
 import { Button } from '@mui/material'
-import { setloader, setlogin, setlogout } from '../../store/user';
+import { setloader, setlogin, setlogout } from '../../store/authSlice';
 // import './navbar.css'
 import { useSelector, useDispatch } from 'react-redux';
 import { CiBullhorn } from "react-icons/ci";

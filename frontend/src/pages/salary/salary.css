@@ -1,15 +1,16 @@
-.salary{
-     padding: 20px;
+.salary {
+    padding: 20px;
 
-     .head {
+    .head {
         display: flex;
         justify-content: space-between;
         padding: 5px 10px;
         align-items: center;
         margin-bottom: 20px;
+        
     }
 
-     .action {
+    .action {
         display: flex;
         align-items: center;
         gap: 5px;
@@ -29,6 +30,7 @@
             /* background: rgb(230, 243, 247); */
             color: rgb(1, 77, 105);
         }
+
         .delete {
             /* background: rgb(251, 223, 223); */
             color: red;
