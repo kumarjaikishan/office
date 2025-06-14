@@ -29,7 +29,9 @@ const Attandence = () => {
   const [isload, setisload] = useState(false);
   const [openmodal, setopenmodal] = useState(false);
   const { attandence } = useSelector((state) => state.user);
-  const [attandencelist, setattandencelist] = useState([])
+  const [attandencelist, setattandencelist] = useState([]);
+  const [isPunchIn, setisPunchIn] = useState(true);
+
   const init = {
     employeeId: '',
     departmentId: '',
@@ -56,7 +58,7 @@ const Attandence = () => {
   }, [inp.punchIn, inp.punchOut]);
 
   useEffect(() => {
-   
+
     if (inp.employeeId && inp.date) {
       const punchedIn = attandence.find((val) => {
         return (
@@ -66,7 +68,7 @@ const Attandence = () => {
       });
       console.log("ckeck already punch", punchedIn)
       if (punchedIn) {
-        setinp({...inp,punchIn: dayjs(punchedIn.punchIn),status:punchedIn.status  })
+        setinp({ ...inp, punchIn: dayjs(punchedIn.punchIn), status: punchedIn.status })
       }
     } else {
       //  setinp({...inp,punchIn: null })
@@ -81,7 +83,6 @@ const Attandence = () => {
     formatted = `${hour}h ${minute}m`;
 
     if (minutes < 300) {
-      console.log("ab aya")
       formatted = `${hour}h ${minute}m short`;
     }
     return formatted;
@@ -98,7 +99,7 @@ const Attandence = () => {
         date: dayjs(emp.date).format('DD MMM, YYYY'),
         punchIn: <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchIn).format('hh:MM A')}</span>,
         punchOut: emp.punchOut && <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchOut).format('hh:MM A')}</span>,
-        workingHours: emp.workingMinutes && <span className={emp.workingMinutes < 300 && 'text-red-600'}>{minutesinhours(emp.workingMinutes)}</span> ,
+        workingHours: emp.workingMinutes && <span className={emp.workingMinutes < 300 && 'text-red-600'}>{minutesinhours(emp.workingMinutes)}</span>,
         action: (<div className="action flex gap-2.5">
           <span className="eye edit text-[18px] text-green-500 cursor-pointer" ><IoEyeOutline /></span>
           <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
@@ -240,7 +241,7 @@ const Attandence = () => {
           highlightOnHover
         />
       </div>
-      <MarkAttandence submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
+      <MarkAttandence isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
         setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
     </div>

@@ -6,7 +6,7 @@ const authSlice = createSlice({
         islogin:false,
         head:"LogIn",
         loader:false,
-        isadmin:false,
+        isadmin:true,
     },
     reducers:{
         setlogin(state, action){

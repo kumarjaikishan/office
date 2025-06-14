@@ -5,7 +5,8 @@ import { toast } from 'react-toastify';
 
 const PrivateRoute = () => {
   const user = useSelector((state) => state.user);
-  const isLogin = user.islogin;
+  // const isLogin = user.islogin;
+  const isLogin = true;
 
   useEffect(() => {
     // console.log(user)
@@ -18,7 +19,7 @@ const PrivateRoute = () => {
     <>
       <Outlet />
     </>
-    : <Navigate to="/login" />;
+    : null;
 };
 
 export default PrivateRoute;

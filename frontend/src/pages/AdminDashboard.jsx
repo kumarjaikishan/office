@@ -11,7 +11,7 @@ const Main = () => {
   let navigate = useNavigate();
 
   useEffect(() => {
-    !user.islogin && navigate('/login');
+    // !user.islogin && navigate('/login');
   }, [user.islogin])
 
 

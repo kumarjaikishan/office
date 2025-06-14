@@ -7,7 +7,8 @@ import Navbar from '../components/Navbar';
 
 const AdminRoutes = () => {
   const user = useSelector((state) => state.user);
-  const admin = user.islogin && user.user.role == 'admin';
+  // const admin = user.islogin && user.user.role == 'admin';
+  const admin = true;
 
   useEffect(() => {
     // console.log(user)

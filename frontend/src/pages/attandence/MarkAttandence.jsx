@@ -17,7 +17,7 @@ import { FaRegUser } from "react-icons/fa";
 import { CgLayoutGrid } from 'react-icons/cg';
 import dayjs from 'dayjs';
 
-const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
+const MarkAttandence = ({ openmodal,isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 
     const { department, employee } = useSelector((state) => state.user);
 
@@ -38,6 +38,23 @@ const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, 
                 <form onSubmit={submitHandle}>
                     <h2>Mark Attendance</h2>
                     <span className="modalcontent">
+                        <FormControl sx={{ width: '100%' }} size="small">
+                            <InputLabel id="demo-simple-select-helper-label">Action</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-helper-label"
+                                id="demo-simple-select-helper"
+                                value={inp.status}
+                                name="status"
+                                label="Status"
+                                required
+                                onChange={(e) => {
+                                    setisPunchIn(e.target.value)
+                                }}
+                            >
+                                <MenuItem value={true}>Punch In</MenuItem>
+                                <MenuItem value={false}>Punch Out</MenuItem>
+                            </Select>
+                        </FormControl>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                                 slotProps={{
@@ -69,7 +86,7 @@ const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, 
                                 setinp({
                                     ...inp,
                                     employeeId: newValue._id,
-                                    departmentId:newValue.department._id
+                                    departmentId: newValue.department._id
                                 })
                             }}
                             renderOption={(props, option) => {
@@ -100,9 +117,10 @@ const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, 
                                 <TextField {...params} label="Select Employee" required />
                             )}
                         />
-
+                     
                         <Box sx={{ width: '100%', gap: 2 }}>
-                            <LocalizationProvider  dateAdapter={AdapterDayjs}>
+                        {isPunchIn ? 
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <TimePicker
                                     value={inp.punchIn}
                                     slotProps={{
@@ -120,7 +138,7 @@ const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, 
                                     sx={{ width: '100%' }}
                                     label="Punch In"
                                 />
-                            </LocalizationProvider>
+                            </LocalizationProvider> :
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <TimePicker
                                     value={inp.punchOut}
@@ -137,6 +155,7 @@ const MarkAttandence = ({ openmodal,init, submitHandle, setopenmodal, isUpdate, 
                                         })
                                     }} sx={{ width: '100%' }} label="Punch Out" />
                             </LocalizationProvider>
+                        }
                         </Box>
                         <Box sx={{ width: '100%', gap: 2 }}>
                             <TextField sx={{ width: '100%' }} disabled value={minutesinhours(inp.workingMinutes)} label="Working Hours" size="small" />
