@@ -9,7 +9,6 @@ import { GiPlagueDoctorProfile } from "react-icons/gi";
 import { GoGear } from "react-icons/go";
 import { CgLogOut } from "react-icons/cg";
 import { TbReportAnalytics } from "react-icons/tb";
-import './sidebar.css'
 import swal from 'sweetalert';
 
 
@@ -31,7 +30,7 @@ const Sidebar = () => {
     };
 
     return (
-        <div className='sidebare w-full h-full px-2'>
+        <div className=' w-full h-full px-2 '>
             <div className="logo h-[60px]  flex items-center gap-4">
                 <span className='text-3xl'> <SiAudiotechnica /></span>
                 <span className='hidden lg:block'>company name</span>
@@ -45,7 +44,7 @@ const Sidebar = () => {
                             <button key={"sdjfh"}
                                 onClick={() => handleLogout()}
                                 className="flex justify-center lg:justify-start w-full mb-1 px-2 items-center gap-3 py-2 
-      rounded text-gray-600 hover:bg-teal-50"
+                              rounded text-gray-600 hover:bg-teal-50"
                             >
                                 <span className="text-[18px]">{iteme.icon}</span>
                                 <span className="hidden lg:block">{iteme.menu}</span>

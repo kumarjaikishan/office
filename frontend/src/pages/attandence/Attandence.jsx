@@ -174,9 +174,9 @@ const Attandence = () => {
   };
 
   return (
-    <div className='p-8'>
-      <div className="text-2xl text-gray-900 mb-8">Attendance Tracker</div>
-      <div className="bg-white flex flex-col rounded mb-8 p-2">
+    <div className='p-2.5'>
+      <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div>
+      <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
         <div className="flex justify-between items-center mb-4">
           <div className="flex p-1 items-center gap-2 rounded bg-teal-600">
             <p onClick={() => setmarkattandence(false)} className={`px-2 py-1 rounded cursor-pointer ${!markattandence && `  bg-white`}`}>View Attendance</p>

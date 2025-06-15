@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Modalbox from '../../components/custommodal/Modalbox'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Autocomplete, Avatar, Box, Typography } from '@mui/material';
+import { Autocomplete, Avatar, Box, Checkbox, Typography } from '@mui/material';
 import { Button, OutlinedInput } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import InputLabel from '@mui/material/InputLabel';
@@ -20,15 +20,38 @@ import dayjs from 'dayjs';
 const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 
     const { department, employee } = useSelector((state) => state.user);
+    const [checkedemployee, setcheckedemployee] = useState([]);
 
     useEffect(() => {
         // console.log("department:", department)
     }, [department]);
 
+    const handleCheckbox = (e) => {
+        const value = e.target.value;
+        const isAlreadyChecked = checkedemployee.includes(value);
+
+        if (isAlreadyChecked) {
+            setcheckedemployee(checkedemployee.filter((item) => item !== value));
+        } else {
+            setcheckedemployee([...checkedemployee, value]);
+        }
+    };
+    const submitHandlee = (e) => {
+        e.preventDefault();
+        console.log(checkedemployee)
+    }
+    const handleallselect = (e) => {
+        if (e.target.checked) {
+            setcheckedemployee(employee.map(e => e._id))
+        } else {
+            setcheckedemployee([])
+        }
+    }
+
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
             <div className="membermodal">
-                <form onSubmit={submitHandle}>
+                <form onSubmit={submitHandlee}>
                     <h2>Bulk Mark Attendance</h2>
                     <span className="modalcontent">
                         <FormControl sx={{ width: '100%' }} size="small">
@@ -68,48 +91,30 @@ const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, seto
                             />
                         </LocalizationProvider>
 
-                        <Autocomplete
-                            size="small"
-                            fullWidth
-                            value={employee?.find(emp => emp._id === inp.employeeId) || null}
-                            options={employee || []}
-                            getOptionLabel={(option) => option.employeename} // still needed for filtering
-                            onChange={(event, newValue) => {
-                                // console.log(newValue)
-                                setinp({
-                                    ...inp,
-                                    employeeId: newValue._id,
-                                    departmentId: newValue.department._id
-                                })
-                            }}
-                            renderOption={(props, option) => {
-                                const { key, ...rest } = props; // destructure key out
-
-                                return (
-                                    <Box
-                                        key={key} // pass key directly
-                                        component="li"
-                                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                                        {...rest} // spread the rest
-                                    >
-                                        <Avatar src={option.image} alt={option.employeename}>
-                                            {!option.image && <FaRegUser />}
-                                        </Avatar>
-                                        {/* <Avatar src={option.image || <FaRegUser/> } alt={option.employeename} /> */}
-                                        <Box>
-                                            <Typography variant="body2">{option.employeename}</Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                DOB: {option.dob}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                );
-                            }}
-
-                            renderInput={(params) => (
-                                <TextField {...params} label="Select Employee" required />
-                            )}
-                        />
+                        <Box sx={{ width: '100%', gap: 0, display: 'flex', flexDirection: 'column' }}>
+                            <div className='w-full  flex justify-between'>
+                                <Typography>Select Employee</Typography>
+                                <span className='flex gap-1'>
+                                    <input
+                                        type="checkbox"
+                                        onChange={handleallselect}
+                                    /> <label>Select All</label>
+                                </span>
+                            </div>
+                            <div className='flex max-h-[200px] pt-1 pl-1 flex-col border border-gray-400 w-full rounded' >
+                                {employee.map((val) => {
+                                    return <div className='m-0 p-0 gap-1 flex items-center'>
+                                        <input
+                                            type="checkbox"
+                                            value={val._id}
+                                            checked={checkedemployee.includes(val._id)}
+                                            onChange={handleCheckbox}
+                                        />
+                                        <span>{val.employeename}</span>
+                                    </div>
+                                })}
+                            </div>
+                        </Box>
 
                         <Box sx={{ width: '100%', gap: 2 }}>
                             {isPunchIn ?
