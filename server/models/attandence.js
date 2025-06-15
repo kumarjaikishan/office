@@ -5,7 +5,7 @@ const attendanceSchema = new mongoose.Schema({
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
   departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'department', required: true },
   date: { type: Date, required: true },
-  punchIn: { type: Date, required: true },
+  punchIn: { type: Date},
   punchOut: { type: Date },
   workingMinutes: { type: Number }, // calculated in hours
   shortMinutes: { type: Number },  // hours short of 8

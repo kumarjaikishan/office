@@ -17,7 +17,7 @@ import { FaRegUser } from "react-icons/fa";
 import { CgLayoutGrid } from 'react-icons/cg';
 import dayjs from 'dayjs';
 
-const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
+const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 
     const { department, employee } = useSelector((state) => state.user);
 
@@ -25,18 +25,11 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
         // console.log("department:", department)
     }, [department]);
 
-    const minutesinhours = (minutes) => {
-        let hour = Math.floor(minutes / 60);
-        let minute = minutes % 60;
-        const formatted = `${hour}h ${minute}m`;
-        return formatted;
-    }
-
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
             <div className="membermodal">
                 <form onSubmit={submitHandle}>
-                    <h2>Mark Attendance</h2>
+                    <h2>Bulk Mark Attendance</h2>
                     <span className="modalcontent">
                         <FormControl sx={{ width: '100%' }} size="small">
                             <InputLabel id="demo-simple-select-helper-label">Action</InputLabel>
@@ -156,27 +149,27 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         }} sx={{ width: '100%' }} label="Punch Out" />
                                 </LocalizationProvider>
                             }
-                            {isPunchIn && 
-                            <FormControl sx={{ width: '100%' }} size="small">
-                                <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-helper-label"
-                                    id="demo-simple-select-helper"
-                                    value={inp.status}
-                                    name="status"
-                                    label="Status"
-                                    required
-                                    onChange={(e) => {
-                                        setinp({
-                                            ...inp,
-                                            status: e.target.value
-                                        });
-                                    }}
-                                >
-                                    <MenuItem value={true}>Present</MenuItem>
-                                    <MenuItem value={false}>Absent</MenuItem>
-                                </Select>
-                            </FormControl>}
+                            {isPunchIn &&
+                                <FormControl sx={{ width: '100%' }} size="small">
+                                    <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-helper-label"
+                                        id="demo-simple-select-helper"
+                                        value={inp.status}
+                                        name="status"
+                                        label="Status"
+                                        required
+                                        onChange={(e) => {
+                                            setinp({
+                                                ...inp,
+                                                status: e.target.value
+                                            });
+                                        }}
+                                    >
+                                        <MenuItem value={true}>Present</MenuItem>
+                                        <MenuItem value={false}>Absent</MenuItem>
+                                    </Select>
+                                </FormControl>}
                         </Box>
 
                         <div className='w-full flex gap-2'>
@@ -215,4 +208,4 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
     )
 }
 
-export default MarkAttandence
+export default BulkMark

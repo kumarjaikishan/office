@@ -79,52 +79,101 @@ const webattandence = async (req, res, next) => {
 };
 
 
-// Check-in
 const checkin = async (req, res, next) => {
-    const { employeeId } = req.body;
-    const date = new Date().toDateString(); // Only the date part
+  try {
+    const { employeeId, departmentId, date, punchIn, status } = req.body;
+    console.log(req.body)
 
-    // Prevent double check-in
-    const existing = await Attendance.findOne({ employeeId, date });
-    if (existing) return res.status(400).json({ message: 'Already checked in' });
+    // Normalize date (strip time part)
+    const dateObj = new Date(date);
+    dateObj.setHours(0, 0, 0, 0);
 
-    const checkIn = new Date();
+    // Check for existing check-in
+    const existing = await Attendance.findOne({ employeeId, date: dateObj });
+    if (existing) {
+      return res.status(400).json({ message: 'Already checked in' });
+    }
 
-    const attendance = new Attendance({ employeeId, date, checkIn });
+    // Validate punchIn timestamp
+    const punchInTime = new Date(punchIn);
+    if (isNaN(punchInTime)) {
+      return res.status(400).json({ message: 'Invalid punchIn time' });
+    }
+
+    const attendance = new Attendance({
+      employeeId,
+      departmentId,
+      date: dateObj,
+      punchIn: punchInTime,
+      status, // Optional: depends if you want to record "present"/"late"/etc.
+    });
+
     await attendance.save();
-
-    res.json(attendance);
+    return res.status(200).json({ message: 'Punch-in recorded', attendance });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
 };
+
 
 
 const checkout = async (req, res, next) => {
-    const { employeeId } = req.body;
-    const date = new Date().toDateString();
+  try {
+    const { employeeId, date, punchOut } = req.body;
 
-    const record = await Attendance.findOne({ employeeId, date });
-    if (!record) return res.status(404).json({ message: 'Check-in not found' });
+    // Normalize date to 00:00:00 for matching
+    const dateObj = new Date(date);
+    dateObj.setHours(0, 0, 0, 0);
 
-    record.checkOut = new Date();
+    // Find the record
+    const record = await Attendance.findOne({ employeeId, date: dateObj });
 
-    const diff = (record.checkOut - record.checkIn) / (1000 * 60 * 60); // in hours
-    record.totalHours = parseFloat(diff.toFixed(2));
+    if (!record) {
+      return res.status(404).json({ message: 'Check-in not found' });
+    }
 
-    const shortHours = 8 - record.totalHours;
-    record.shortHours = shortHours > 0 ? parseFloat(shortHours.toFixed(2)) : 0;
+    if (record.punchOut) {
+      return res.status(400).json({ message: 'Already checked out' });
+    }
+
+    // Parse punchOut from frontend
+    const punchOutTime = new Date(punchOut);
+    if (isNaN(punchOutTime)) {
+      return res.status(400).json({ message: 'Invalid punchOut time' });
+    }
+
+    // Set punchOut
+    record.punchOut = punchOutTime;
+
+    // Calculate working minutes
+    const diffMinutes = (record.punchOut - record.punchIn) / (1000 * 60);
+    record.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+
+    // Calculate short minutes (assuming 8 hours = 480 minutes)
+    const short = 480 - record.workingMinutes;
+    record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
 
     await record.save();
-    res.json(record);
+
+    return res.status(200).json({ message: 'Punch-out recorded', record });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
 };
+
+
 
 // Get all attendance
 const allAttandence = async (req, res, next) => {
-    const data = await Attendance.find().populate('employeeId', 'name email');
-    res.json(data);
+  const data = await Attendance.find().populate('employeeId', 'name email');
+  res.json(data);
 };
 
 
 // Apply for leave
-    const leaveapply = async (req, res, next) => {
+const leaveapply = async (req, res, next) => {
   const { employeeId, date, reason } = req.body;
   const leave = new Leave({ employeeId, date, reason });
   await leave.save();
@@ -132,17 +181,17 @@ const allAttandence = async (req, res, next) => {
 };
 
 // Approve or reject leave (admin only)
-    const leaveupdate = async (req, res, next) => {
+const leaveupdate = async (req, res, next) => {
   const { leaveId, status } = req.body;
   const leave = await Leave.findByIdAndUpdate(leaveId, { status }, { new: true });
   res.json(leave);
 };
 
 // Get all leaves
-    const allleave = async (req, res, next) => {
+const allleave = async (req, res, next) => {
   const data = await Leave.find().populate('employeeId', 'name email');
   res.json(data);
 };
 
 
-module.exports = { checkout, checkin,webattandence, allAttandence,leaveapply,leaveupdate,allleave };
+module.exports = { checkout, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
