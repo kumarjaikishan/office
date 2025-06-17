@@ -43,7 +43,7 @@ const Sidebar = () => {
                         iteme.isLogout ? (
                             <button key={"sdjfh"}
                                 onClick={() => handleLogout()}
-                                className="flex justify-center lg:justify-start w-full mb-1 px-2 items-center gap-3 py-2 
+                                className="flex justify-center cursor-pointer lg:justify-start w-full mb-1 px-2 items-center gap-3 py-2 
                               rounded text-gray-600 hover:bg-teal-50"
                             >
                                 <span className="text-[18px]">{iteme.icon}</span>

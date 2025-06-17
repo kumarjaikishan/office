@@ -36,6 +36,9 @@ const userSlice = createSlice({
         updateAttendance(state, action) {
             state.attandence = action.payload;
         },
+        setuser(state, action) {
+            state.profile = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -52,5 +55,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout,updateAttendance } = userSlice.actions;
+export const { userlogout,updateAttendance,setuser } = userSlice.actions;
 export default userSlice.reducer;

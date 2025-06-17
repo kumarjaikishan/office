@@ -5,7 +5,6 @@ import DashboardCard from '../components/dashboardCard';
 import { FiUsers } from "react-icons/fi";
 import { FiClock } from "react-icons/fi";
 import { SlBag } from "react-icons/sl";
-import { toast } from 'react-toastify';
 import { FaBuilding, FaRegUser, FaTachometerAlt, FaUsers } from 'react-icons/fa'
 import './admindashboard.css'
 import dayjs from 'dayjs';
@@ -17,7 +16,7 @@ import { CiFilter } from 'react-icons/ci';
 const Main = () => {
 
   const { attandence, employee, department } = useSelector((state) => state.user);
-  const { islogin, isadmin } = useSelector((state) => state.auth);
+  const { islogin,isadmin } = useSelector((state) => state.auth);
   const [currentpresent, setcurrentpresent] = useState([])
   let navigate = useNavigate();
   const dispatch = useDispatch();
@@ -54,31 +53,23 @@ const Main = () => {
     const connectEventSource = () => {
       eventSource = new EventSource('http://localhost:5000/events');
 
-      eventSource.onopen = () => {
-        console.log('✅ SSE connection established successfully');
-        retryDelay = 1000; // Reset retry delay on success
-      };
-
       eventSource.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
           if (data.type === 'attendance_update') {
             console.log(data.payload.action, data.payload.data);
-            let datae = data.payload.data;
+
             if (data.payload.action === 'checkin') {
-              let updated = [...attandenceRef.current, datae];
-              // console.log("checkIn sse merger:",updated);
-               toast.success(`${datae.employeeId.employeename} has Punched In at ${dayjs(datae.punchIn).format('hh:mm A')}`, { autoClose: 8200 });
+              let updated = [...attandenceRef.current, data.payload.data];
               dispatch(updateAttendance(updated));
             }
 
             if (data.payload.action === "checkOut") {
               let filterout = attandenceRef.current.filter(
-                (e) => e._id !== datae._id
+                (e) => e._id !== data.payload.data._id
               );
-              let newlist = [...filterout, datae];
-               toast.success(`${datae.employeeId.employeename} has Punched Out at ${dayjs(datae.punchOut).format('hh:mm A')}`, { autoClose: 8200 });
-             dispatch(updateAttendance(newlist));
+              let newlist = [...filterout, data.payload.data];
+              dispatch(updateAttendance(newlist));
             }
           }
         } catch (err) {

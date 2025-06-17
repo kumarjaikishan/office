@@ -10,10 +10,10 @@ const authSlice = createSlice({
     },
     reducers:{
         setlogin(state, action){
-           state.islogin = action.payload.login;
+           state.islogin = action.payload;
         },
         setlogout(state, action){
-           state.islogin = action.payload.login;
+           state.islogin = action.payload;
            localStorage.removeItem('emstoken');
         },
         header(state, action){

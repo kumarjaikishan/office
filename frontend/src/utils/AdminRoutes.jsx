@@ -6,9 +6,9 @@ import Sidebar from '../components/sidebar';
 import Navbar from '../components/Navbar';
 
 const AdminRoutes = () => {
-  const user = useSelector((state) => state.user);
-  // const admin = user.islogin && user.user.role == 'admin';
-  const admin = true;
+  const {isadmin,islogin} = useSelector((state) => state.auth);
+  const admin = islogin && isadmin;
+  // const admin = true;
 
   useEffect(() => {
     // console.log(user)

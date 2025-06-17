@@ -90,7 +90,9 @@ const checkin = async (req, res, next) => {
     dateObj.setHours(0, 0, 0, 0);
 
     // Check for existing check-in
-    const existing = await Attendance.findOne({ employeeId, date: dateObj });
+    const existing = await Attendance.findOne({ employeeId, date: dateObj })
+      .populate('employeeId', 'employeename profileimage')
+      .populate('departmentId', 'department');
     if (existing) {
       return res.status(400).json({ message: 'Already checked in' });
     }
@@ -111,12 +113,16 @@ const checkin = async (req, res, next) => {
 
     await attendance.save();
 
+    const updatedRecord = await Attendance.findById(attendance._id)
+      .populate('employeeId', 'employeename profileimage')
+      .populate('departmentId', 'department');
+
     // Send live update to all clients
     sendToClients({
       type: 'attendance_update',
       payload: {
         action: 'checkin',
-        data: attendance
+        data: updatedRecord
       }
     });
 
@@ -166,12 +172,16 @@ const checkout = async (req, res, next) => {
 
     await record.save();
 
+    const updatedRecord = await Attendance.findById(record._id)
+      .populate('employeeId', 'employeename profileimage')
+      .populate('departmentId', 'department');
+
     // Send live update to all clients
     sendToClients({
       type: 'attendance_update',
       payload: {
         action: 'checkOut',
-        data: record
+        data: updatedRecord
       }
     });
 

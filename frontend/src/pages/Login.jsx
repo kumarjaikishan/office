@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { useSelector, useDispatch } from 'react-redux';
 import { setloader, setlogin, setadmin } from '../../store/authSlice';
 import { useNavigate, useLocation } from "react-router-dom";
+import { setuser } from '../../store/userSlice';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -27,15 +28,14 @@ const Login = () => {
                 password
             });
 
-            console.log('Login success:', res);
+            console.log('Login success:', res.data);
             toast.success(res.data.message, { autoClose: 1200 });
             localStorage.setItem('emstoken', res.data.token)
-            dispatch(setlogin({
-                login: true,
-                user: res.data.user
-            }));
+            dispatch(setlogin(true));
+            dispatch(setuser(res.data.user));
 
             if (res.data.user.role == "admin") {
+                dispatch(setadmin(true));
                 return navigate('/admin-dashboard');
             }
             return navigate('/employe-dashboard');
