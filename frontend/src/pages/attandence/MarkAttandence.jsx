@@ -102,7 +102,6 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         <Avatar src={option.image} alt={option.employeename}>
                                             {!option.image && <FaRegUser />}
                                         </Avatar>
-                                        {/* <Avatar src={option.image || <FaRegUser/> } alt={option.employeename} /> */}
                                         <Box>
                                             <Typography variant="body2">{option.employeename}</Typography>
                                             <Typography variant="caption" color="text.secondary">

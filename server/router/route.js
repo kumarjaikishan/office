@@ -7,6 +7,7 @@ const salary = require('../controllers/salary');
 const attendance = require('../controllers/attandence');
 const authmiddlewre = require('../middleware/auth_middleware');
 const adminmiddleware = require('../middleware/isadmin_middleware');
+const upload = require('../middleware/multer_middleware')
 
 
 router.route('/').get(async (req, res) => {
@@ -26,8 +27,8 @@ router.route('/deletedepartment').post(authmiddlewre,adminmiddleware,admin.delet
 router.route('/firstfetch').get(authmiddlewre,adminmiddleware,admin.firstfetch); 
 
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
-router.route('/addemployee').post(authmiddlewre,adminmiddleware,admin.addemployee); 
-router.route('/updateemployee').post(authmiddlewre,adminmiddleware,admin.updateemployee); 
+router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 
+router.route('/updateemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.updateemployee); 
 router.route('/deleteemployee').post(authmiddlewre,adminmiddleware,admin.deleteemployee); 
 
 router.route('/addsalary').post(authmiddlewre,adminmiddleware,salary.addsalary); 

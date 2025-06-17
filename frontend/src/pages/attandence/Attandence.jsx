@@ -1,5 +1,5 @@
 import { CiFilter } from "react-icons/ci";
-import { Button, OutlinedInput } from '@mui/material';
+import { Avatar, Box, Button, OutlinedInput, TextField, Typography } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -10,7 +10,7 @@ import { columns, customStyles } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
-import { IoEyeOutline } from "react-icons/io5";
+import { IoEyeOutline, IoSearch } from "react-icons/io5";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { FiDownload } from "react-icons/fi";
@@ -24,6 +24,7 @@ import { submitAttandence } from "./attandencehelper";
 import { useSelector } from "react-redux";
 import { IoMdTime } from "react-icons/io";
 import BulkMark from "./BulkMark";
+import { FaRegUser } from "react-icons/fa";
 
 const Attandence = () => {
   const [markattandence, setmarkattandence] = useState(false);
@@ -47,13 +48,20 @@ const Attandence = () => {
     status: '',
   }
   const [inp, setinp] = useState(init);
+
   const [filtere, setfiltere] = useState({
-    date: dayjs(),
+    date: null,
     departmente: 'all',
+    employee: '',
     status: ''
   })
-  const isFilterActive = filtere.departmente !== 'all' || filtere.status || !dayjs(filtere.date).isSame(dayjs(), 'day');
 
+  const isFilterActive = (
+    filtere.departmente !== 'all' ||
+    filtere.status !== '' ||
+    filtere.employee.trim() !== '' ||
+    filtere.date !== null
+  );
 
   useEffect(() => {
     if (inp.punchIn && inp.punchOut && dayjs(inp.punchOut).isAfter(dayjs(inp.punchIn))) {
@@ -70,18 +78,26 @@ const Attandence = () => {
   }, [inp.punchIn, inp.punchOut]);
 
   useEffect(() => {
-    console.log(attandencelist)
     if (!attandencelist) return;
+
     const fil = attandencelist.filter((val) => {
-      if (filtere.departmente == 'all') {
-        return dayjs(val.date, "DD MMM, YYYY").isSame(filtere.date, 'day')
-      } else {
-        return dayjs(val.date, "DD MMM, YYYY").isSame(filtere.date, 'day') && val.departmentId == filtere.departmente;
-      }
-    })
-    setfilterattandence(fil)
-    console.log(fil)
+      const matchDate =
+        !filtere.date || dayjs(val.date, "DD MMM, YYYY").isSame(filtere.date, 'day');
+      const matchDept =
+        filtere.departmente === 'all' || val.departmentId === filtere.departmente;
+      const matchStatus =
+        filtere.status === '' || val.status === filtere.status;
+      const matchEmployee =
+        filtere.employee.trim() === '' ||
+        val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
+
+      return matchDate && matchDept && matchStatus && matchEmployee;
+    });
+
+    setfilterattandence(fil);
   }, [filtere, attandencelist]);
+
+
 
   useEffect(() => {
 
@@ -118,7 +134,15 @@ const Attandence = () => {
         departmentId: emp.departmentId._id,
         employeeId: emp.employeeId._id,
         status: emp.status,
-        name: emp.employeeId.employeename,
+        rawname: emp.employeeId.employeename,
+        name: (<div className="flex items-center gap-3 ">
+          <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
+            {!emp.employeeId.profileimage && <FaRegUser />}
+          </Avatar>
+          <Box>
+            <Typography variant="body2">{emp.employeeId.employeename}</Typography>
+          </Box>
+        </div>),
         date: dayjs(emp.date).format('DD MMM, YYYY'),
         punchIn: <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchIn).format('hh:mm A')}
           {dayjs(emp.punchIn).isBefore(dayjs(emp.punchIn).startOf('day').add(9, 'hour').add(50, 'minute')) && (
@@ -166,8 +190,6 @@ const Attandence = () => {
     }
   }
 
-
-
   const handleRowSelect = ({ selectedRows }) => {
     console.log("Selected Rows:", selectedRows);
     setselectedRows(selectedRows)
@@ -178,9 +200,9 @@ const Attandence = () => {
       <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div>
       <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
         <div className="flex justify-between items-center mb-4">
-          <div className="flex p-1 items-center gap-2 rounded bg-teal-600">
-            <p onClick={() => setmarkattandence(false)} className={`px-2 py-1 rounded cursor-pointer ${!markattandence && `  bg-white`}`}>View Attendance</p>
-            <p onClick={() => setmarkattandence(true)} className={`px-2 py-1 rounded cursor-pointer ${markattandence && `  bg-white`}`}>Mark Attendance</p>
+          <div className="flex p-1 items-center gap-2 rounded bg-teal-600 text-white">
+            <p onClick={() => setmarkattandence(false)} className={`px-2 py-1 rounded cursor-pointer ${!markattandence && `text-teal-700  bg-white`}`}>View Attendance</p>
+            <p onClick={() => setmarkattandence(true)} className={`px-2 py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>
           </div>
 
           <div className="flex gap-2">
@@ -191,8 +213,8 @@ const Attandence = () => {
         <div className="flex items-center gap-4 ">
           {markattandence ?
             <div className="flex p-1 items-center gap-2">
-              <Button variant='contained'  onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
-              <Button variant='outlined' onClick={()=> setbullmodal(true)}  startIcon={<BiGroup />} >Mark Bulk</Button>
+              <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
+              <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
             <div className="flex items-center gap-4 ">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -208,6 +230,7 @@ const Attandence = () => {
                     },
                   }} label="Select date" />
               </LocalizationProvider>
+
               <FormControl sx={{ width: '160px' }} required size="small">
                 <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
                 <Select
@@ -236,6 +259,18 @@ const Attandence = () => {
 
                 </Select>
               </FormControl>
+
+              <TextField
+                size='small'
+                sx={{ width: '160px' }}
+                value={filtere.employee}
+                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><IoSearch /></InputAdornment>,
+                }}
+                label="Search Employee"
+              />
+
               <FormControl sx={{ width: '160px' }} required size="small">
                 <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
                 <Select
@@ -274,7 +309,7 @@ const Attandence = () => {
           highlightOnHover
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
-             <BiMessageRoundedError className="text-xl"/> No records found matching your criteria.
+              <BiMessageRoundedError className="text-xl" /> No records found matching your criteria.
             </div>
           }
         />

@@ -1,7 +1,7 @@
 import { columns, addemployee, employeedelette, employeefetche, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
 import { Button, OutlinedInput } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../components/custommodal/Modalbox';
 import swal from 'sweetalert';
@@ -13,16 +13,25 @@ import FormControl from '@mui/material/FormControl';
 import { IoSearch } from "react-icons/io5";
 import InputAdornment from '@mui/material/InputAdornment';
 import { GoPlus } from "react-icons/go";
+import { BsUpload } from "react-icons/bs";
+import { GrPowerReset } from "react-icons/gr";
 import { FiDownload } from "react-icons/fi";
 import { CiFilter } from "react-icons/ci";
-
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
   const [isload, setisload] = useState(false);
   const [employeelist, setemployeelist] = useState([]);
   const [departmentlist, setdepartmentlist] = useState([]);
-  const [isupdate, setisupdate] = useState(false)
+  const [isupdate, setisupdate] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [employeePhoto, setEmployeePhoto] = useState(null);
+  const [filters, setFilters] = useState({
+    searchText: '',
+    department: 'all'
+  });
+
+
   const init = {
     employeeId: '',
     employeeName: "",
@@ -30,39 +39,90 @@ const Employe = () => {
     salary: "",
     department: "",
     description: ''
-  }
+  };
   const [inp, setInp] = useState(init);
+
   useEffect(() => {
     employeefetche({ setisload, setemployeelist, edite, deletee, setdepartmentlist });
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    console.log(employeelist)
+  }, [employeelist])
+  useEffect(() => {
+    // console.log(departmentlist)
+  }, [departmentlist])
 
   const handleChange = (e, name) => {
     setInp({
       ...inp, [name]: e.target.value
-    })
-  }
+    });
+  };
 
-  const adddepartcall = (e) => {
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    setEmployeePhoto(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoPreview(null);
+    }
+  };
+
+  const adddepartcall = async (e) => {
     e.preventDefault();
-    addemployee({ inp, setisload, setInp, setopenmodal, init })
-  }
+    const formData = new FormData();
+    Object.keys(inp).forEach(key => {
+      formData.append(key, inp[key]);
+    });
+    if (employeePhoto) formData.append('photo', employeePhoto);
 
+    await addemployee({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
+  };
+
+  const updatee = async () => {
+    const formData = new FormData();
+    Object.keys(inp).forEach(key => {
+      formData.append(key, inp[key]);
+    });
+    if (employeePhoto) formData.append('photo', employeePhoto);
+
+    await employeeupdate({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
+  };
+
+  const resetPhoto = () => {
+    setPhotoPreview(null);
+    setEmployeePhoto(null);
+  };
 
   const edite = (employee) => {
-    console.log("eplyee edit", employee)
     setisupdate(true);
     setInp({
       employeeId: employee._id,
       employeeName: employee.employeename,
       dob: employee.dob,
+      salary: employee.salary,
       department: employee.department._id,
       description: employee.description
-    })
+    });
+    if (employee.profileimage) {
+      setPhotoPreview(employee.profileimage);
+    }
     setopenmodal(true);
-  }
+  };
 
   const deletee = (id) => {
-    console.log("delete", id);
     swal({
       title: 'Are you sure?',
       text: 'Once deleted, you will not be able to recover this',
@@ -72,62 +132,61 @@ const Employe = () => {
     }).then(async (willDelete) => {
       if (willDelete) {
         employeedelette({ employeeId: id, setisload });
-      } else {
-
       }
     });
-  }
-
-  const updatee = () => {
-    console.log("updateee", inp)
-    employeeupdate({ inp, setisload, setInp, setopenmodal, init })
-  }
+  };
 
   const customStyles = {
     headCells: {
       style: {
-        backgroundColor: 'teal', // header background
-        fontWeight: 'bold',         // font weight
+        backgroundColor: 'teal',
+        fontWeight: 'bold',
         fontSize: '14px',
-        color: 'white',             // header cell height
+        color: 'white',
         padding: '0px 5px',
-      },
-    },
-    headRow: {
-      style: {
       },
     },
     rows: {
       style: {
-        minHeight: '48px',          // height of each row
+        minHeight: '48px',
       },
     },
   };
+  const inputref = useRef(null);
+
+  const filteredEmployees = employeelist.filter(emp => {
+    const name = emp.rawname?.toLowerCase() || '';
+    const deptId = emp.department?._id || '';
+
+    const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
+    const deptMatch = filters.department === 'all' || deptId === filters.department;
+
+    return nameMatch && deptMatch;
+  });
+
+
 
   return (
     <div className='employee p-2.5'>
       <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2>
       <div className='flex justify-between'>
         <div className="flex gap-1">
-          <TextField size='small'
+          <TextField
+            size='small'
             sx={{ width: '160px' }}
-            id="outlined-basic"
+            value={filters.searchText}
+            onChange={(e) => handleFilterChange('searchText', e.target.value)}
             InputProps={{
-              startAdornment: <InputAdornment position="start">
-                <IoSearch />
-              </InputAdornment>,
+              startAdornment: <InputAdornment position="start"><IoSearch /></InputAdornment>,
             }}
-            label="Search Employee" variant="outlined"
+            label="Search Employee"
           />
 
-          <FormControl sx={{ width: '160px' }} required size="small">
-            <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
+          <FormControl sx={{ width: '160px' }} size="small">
+            <InputLabel>Department</InputLabel>
             <Select
-              labelId="demo-simple-select-helper-label"
-              id="demo-simple-select-helper"
-              value={""}
-              name="Department"
               label="Department"
+              value={filters.department}
               input={
                 <OutlinedInput
                   startAdornment={
@@ -138,102 +197,95 @@ const Employe = () => {
                   label="Department"
                 />
               }
-            // onChange={(e) => handleChange(e, 'department')}
+              onChange={(e) => handleFilterChange('department', e.target.value)}
             >
-
-              <MenuItem value={""}>Sales</MenuItem>
+              <MenuItem selected value="all">All</MenuItem>
+              {departmentlist.map((list) => (
+                <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
+              ))}
             </Select>
           </FormControl>
-          <FormControl sx={{ width: '160px' }} required size="small">
-            <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
-            <Select
-              labelId="demo-simple-select-helper-label"
-              id="demo-simple-select-helper"
-              value={""}
-              name="Department"
-              label="Department"
-            // onChange={(e) => handleChange(e, 'department')}
-            >
 
-              <MenuItem value={""}>Sales</MenuItem>
+          <FormControl sx={{ width: '160px' }} size="small">
+            <InputLabel>Status</InputLabel>
+            <Select label="Status" value="">
+              <MenuItem value="">Active</MenuItem>
             </Select>
           </FormControl>
         </div>
         <div className="flex gap-1">
-        <Button variant='outlined' startIcon={<FiDownload />} >Export</Button>
-        <Button variant='contained' startIcon={<GoPlus/>} onClick={() => setopenmodal(true)}>Add Employee</Button>
+          <Button variant='outlined' startIcon={<FiDownload />}>Export</Button>
+          <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Employee</Button>
         </div>
       </div>
+
       <div className="mt-2">
         <DataTable
           columns={columns}
-          data={employeelist}
+          // data={employeelist}
+          data={filteredEmployees}
           pagination
-          selectableRows 
+          selectableRows
           customStyles={customStyles}
           highlightOnHover
         />
       </div>
 
-      <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
+      <Modalbox open={openmodal} onClose={() => {
+        setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
+      }}>
         <div className="membermodal">
           <form onSubmit={adddepartcall}>
-            <h2>Add Employee</h2>
+            <h2>{isupdate ? "Update Employee" : "Add Employee"}</h2>
             <span className="modalcontent">
-              <TextField sx={{ width: '98%' }} required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
-              <FormControl sx={{ width: '98%' }} required size="small">
-                <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
+              <TextField fullWidth required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
+              <FormControl fullWidth required size="small">
+                <InputLabel>Department</InputLabel>
                 <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
                   value={inp.department}
-                  name="Department"
                   label="Department"
                   onChange={(e) => handleChange(e, 'department')}
                 >
-
-                  {departmentlist.map((list) => {
-                    return <MenuItem value={list._id}>{list.department}</MenuItem>
-                  })}
+                  {departmentlist.map((list) => (
+                    <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-              <TextField sx={{ width: '98%' }} required value={inp.dob} onChange={(e) => handleChange(e, 'dob')} label="D.O.B" size="small" />
-              <TextField sx={{ width: '98%' }} required value={inp.salary} onChange={(e) => handleChange(e, 'salary')} label="salary" size="small" />
-              <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
-              <div>
-                {!isupdate && <Button
-                  sx={{ mr: 2 }}
-                  loading={isload}
-                  loadingPosition="end"
-                  endIcon={<IoIosSend />}
-                  variant="contained"
-                  type="submit"
-                >
-                  Add
-                </Button>}
+              <TextField fullWidth required value={inp.dob} onChange={(e) => handleChange(e, 'dob')} label="D.O.B" size="small" />
+              <TextField fullWidth required value={inp.salary} onChange={(e) => handleChange(e, 'salary')} label="Salary" size="small" />
+              <TextField fullWidth multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} label="Description" size="small" />
 
-                {isupdate && <Button
-                  sx={{ mr: 2 }}
-                  loading={isload}
-                  loadingPosition="end"
-                  endIcon={<IoIosSend />}
-                  variant="contained"
-                  onClick={updatee}
-                >
-                  Update
-                </Button>}
-                <Button size="small"
-                  onClick={() => {
-                    setopenmodal(false); setisupdate(false); setInp(init)
-                  }}
-                  variant="outlined"> cancel</Button>
+              <div className="mt-1 gap-2 flex items-center">
+                {!photoPreview && <div className="chooseFile w-[250px] h-[90px] rounded flex flex-col justify-center
+                items-center gap-2 cursor-pointer border-teal-700 text-teal-700 border-2 border-dashed " onClick={() => inputref.current.click()}>
+                  <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
+                  <BsUpload className="text-2xl" />
+                  Upload
+                </div>}
+                {photoPreview && <img src={photoPreview} alt="Preview" className="mt-2" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />}
+                {photoPreview && <Button color="warning" onClick={resetPhoto} startIcon={<GrPowerReset />} size="small" sx={{ height: '30px' }} variant="outlined">Reset</Button>}
+              </div>
+
+              <div className="mt-2">
+                {!isupdate ? (
+                  <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" type="submit">
+                    Add
+                  </Button>
+                ) : (
+                  <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" onClick={updatee}>
+                    Update
+                  </Button>
+                )}
+                <Button size="small" onClick={() => {
+                  setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
+                }} variant="outlined">Cancel</Button>
               </div>
             </span>
           </form>
         </div>
       </Modalbox>
     </div>
-  )
-}
+  );
+};
 
 export default Employe;

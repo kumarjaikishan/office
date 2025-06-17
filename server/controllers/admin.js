@@ -1,6 +1,15 @@
 const departmentModal = require('../models/department');
 const employeeModal = require('../models/employee');
 const attendanceModal = require('../models/attandence');
+const cloudinary = require('cloudinary').v2;
+const fs = require('fs');
+
+
+cloudinary.config({
+    cloud_name: 'dusxlxlvm',
+    api_key: '214119961949842',
+    api_secret: "kAFLEVAA5twalyNYte001m_zFno"
+});
 
 const addDepartment = async (req, res, next) => {
     // console.log(req.body)
@@ -33,7 +42,7 @@ const updatedepartment = async (req, res, next) => {
             return next({ status: 400, message: "all fields are required" });
         }
 
-        const query = await departmentModal.findByIdAndUpdate( departmentId , { department, description });
+        const query = await departmentModal.findByIdAndUpdate(departmentId, { department, description });
 
         if (!query) {
             return next({ status: 400, message: "Something went wrong" });
@@ -85,50 +94,116 @@ const departmentlist = async (req, res, next) => {
 
 
 const addemployee = async (req, res, next) => {
-    // console.log(req.body)
+    if (!req.file) {
+        return res.status(400).json({
+            message: 'No file uploaded.'
+        });
+    }
+
+    const { employeeName, dob, department, description, salary } = req.body;
+
+    if (!department) {
+        return next({ status: 400, message: "all fields are required" });
+    }
+
     try {
-        const { employeeName, dob ,department,description,salary } = req.body;
-        if (!department) {
-            return next({ status: 400, message: "all fields are required" });
-        }
+        await cloudinary.uploader.upload(req.file.path, { folder: 'ems/employee' }, async (error, result) => {
+            // console.log(error, result);
+            if (error) {
+                return res.status(500).json({
+                    message: error
+                });
+            }
 
-        const query = new employeeModal({employeename:employeeName, dob,salary ,department,description });
-        const result = await query.save();
-        if (!result) {
-            return next({ status: 400, message: "Something went wrong" });
-        }
+            const imageurl = result.secure_url;
+            // console.log("photo upload ho gaya", imageurl);
 
-        res.status(200).json({
-            message: 'employee Created Successfully'
+            fs.unlink(req.file.path, (err => {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).json("error occured while deleting file");
+                }
+                //   getFilesInDirectory(); 
+                // }
+            }));
+
+            const query = new employeeModal({ employeename: employeeName,profileimage:imageurl, dob, salary, department, description });
+            const resulte = await query.save();
+            if (!resulte) {
+                return next({ status: 400, message: "Something went wrong" });
+            }
+
+            res.status(200).json({
+                message: 'employee Created Successfully'
+            })
         })
-
     } catch (error) {
         console.log(error.message)
         return next({ status: 500, message: error.message });
     }
 }
+
 const updateemployee = async (req, res, next) => {
-    // console.log(req.body)
     try {
-        const { employeeId, employeeName, dob,department,description } = req.body;
-        if (!department || !employeeId) {
-            return next({ status: 400, message: "all fields are required" });
+        const { employeeId, employeeName, dob, department, description, salary } = req.body;
+
+        if (!employeeId || !department) {
+            return next({ status: 400, message: "All fields are required" });
         }
 
-        const query = await employeeModal.findByIdAndUpdate( employeeId , {  employeeName, dob,department,description  });
+        // Get existing employee data (to keep old image if no new one uploaded)
+        const existingEmployee = await employeeModal.findById(employeeId);
+        if (!existingEmployee) {
+            return next({ status: 404, message: "Employee not found" });
+        }
 
-        if (!query) {
-            return next({ status: 400, message: "Something went wrong" });
+        let updatedFields = {
+            employeename: employeeName,
+            dob,
+            department,
+            description,
+            salary,
+        };
+
+        // If a new photo is uploaded
+        if (req.file) {
+            const cloudinaryResult = await cloudinary.uploader.upload(
+                req.file.path,
+                { folder: 'ems/employee' }
+            );
+
+            // Delete local file
+            fs.unlink(req.file.path, (err) => {
+                if (err) {
+                    console.log("Error deleting local file:", err.message);
+                }
+            });
+
+            // Set new photo URL
+            updatedFields.profileimage = cloudinaryResult.secure_url;
+        }
+
+        // Update employee
+        const updatedEmployee = await employeeModal.findByIdAndUpdate(
+            employeeId,
+            updatedFields,
+            { new: true }
+        );
+
+        if (!updatedEmployee) {
+            return next({ status: 400, message: "Something went wrong while updating" });
         }
 
         res.status(200).json({
-            message: 'employee Updated Successfully'
-        })
+            message: 'Employee updated successfully'
+        });
+
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
         return next({ status: 500, message: error.message });
     }
-}
+};
+
 const deleteemployee = async (req, res, next) => {
     // console.log(req.body)
     try {
@@ -154,7 +229,7 @@ const deleteemployee = async (req, res, next) => {
 const employeelist = async (req, res, next) => {
     try {
         const query = await employeeModal.find().populate('department', 'department');
-        const departmentlist  = await departmentModal.find().select('department');
+        const departmentlist = await departmentModal.find().select('department');
         // console.log(query)
 
         res.status(200).json({
@@ -169,15 +244,15 @@ const employeelist = async (req, res, next) => {
 }
 const firstfetch = async (req, res, next) => {
     try {
-        const query = await employeeModal.find().populate('department', 'department');
-        const departmentlist  = await departmentModal.find().select('department');
-        const attendance  = await attendanceModal.find()
-        .populate('employeeId','employeename')
-        .populate('departmentId','department');
+        const query = await employeeModal.find().populate('department', 'department').sort({employeename:1});
+        const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
+        const attendance = await attendanceModal.find()
+            .populate('employeeId', 'employeename profileimage')
+            .populate('departmentId', 'department').sort({date:-1});
         // console.log(query)
 
         res.status(200).json({
-            user:req.user,
+            user: req.user,
             employee: query,
             departmentlist,
             attendance
@@ -190,6 +265,7 @@ const firstfetch = async (req, res, next) => {
 }
 
 
-module.exports = { addDepartment, firstfetch,departmentlist, updatedepartment ,deletedepartment,employeelist,addemployee,
-    updateemployee,deleteemployee
+module.exports = {
+    addDepartment, firstfetch, departmentlist, updatedepartment, deletedepartment, employeelist, addemployee,
+    updateemployee, deleteemployee
 };

@@ -33,6 +33,9 @@ const userSlice = createSlice({
             state.employee = null;
             state.salary = null;
         },
+        updateAttendance(state, action) {
+            state.attandence = action.payload;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -49,5 +52,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout } = userSlice.actions;
+export const { userlogout,updateAttendance } = userSlice.actions;
 export default userSlice.reducer;

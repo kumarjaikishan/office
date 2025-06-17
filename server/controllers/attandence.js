@@ -2,6 +2,7 @@
 const Attendance = require('../models/attandence');
 const Leave = require('../models/leave');
 const User = require('../models/user');
+const { sendToClients } = require('../utils/sse');
 
 
 const webattandence = async (req, res, next) => {
@@ -109,13 +110,22 @@ const checkin = async (req, res, next) => {
     });
 
     await attendance.save();
+
+    // Send live update to all clients
+    sendToClients({
+      type: 'attendance_update',
+      payload: {
+        action: 'checkin',
+        data: attendance
+      }
+    });
+
     return res.status(200).json({ message: 'Punch-in recorded', attendance });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
-
 
 
 const checkout = async (req, res, next) => {
@@ -155,6 +165,15 @@ const checkout = async (req, res, next) => {
     record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
 
     await record.save();
+
+    // Send live update to all clients
+    sendToClients({
+      type: 'attendance_update',
+      payload: {
+        action: 'checkOut',
+        data: record
+      }
+    });
 
     return res.status(200).json({ message: 'Punch-out recorded', record });
   } catch (error) {

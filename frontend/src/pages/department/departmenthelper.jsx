@@ -168,7 +168,7 @@ export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => 
                 </div>)
             }
         })
-        console.log(res.data.list)
+        // console.log(res.data.list)
         setdepartmentlist(data);
 
     } catch (error) {

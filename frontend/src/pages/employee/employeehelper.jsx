@@ -3,15 +3,14 @@ import { toast } from "react-toastify";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { IoEyeOutline } from "react-icons/io5";
+import { Avatar, Box, Typography } from "@mui/material";
+import { FaRegUser } from "react-icons/fa";
 
 export const columns = [
     {
         name: "S.no",
-        selector: (row) => row.sno
-    },
-    {
-        name: "Image",
-        selector: (row) => row.photo
+        selector: (row) => row.sno,
+        width:'50px'
     },
     {
         name: "Name",
@@ -27,44 +26,36 @@ export const columns = [
     },
     {
         name: "Action",
-        selector: (row) => row.action
+        selector: (row) => row.action,
+         width:'150px'
     }
 ]
-export const addemployee = async ({inp,setisload,setInp,setopenmodal,init}) => {
-    console.log(inp);
-    const { employeeName, dob ,department,description,salary} = inp;
 
-    if (!department || !employeeName || !dob) {
-        alert('Please fill all fields');
-        return;
-    }
 
+export const addemployee = async ({ formData, setisload, setInp, setopenmodal, init, resetPhoto }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
     try {
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}addemployee`,
-            {
-               employeeName, dob ,department,description,salary
-            },
+            formData,
             {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
                 }
             }
         );
 
-        console.log('Query:', res);
         toast.success(res.data.message, { autoClose: 1200 });
         setInp(init);
+        resetPhoto();
         setopenmodal(false);
     } catch (error) {
         console.log(error);
         if (error.response) {
             toast.warn(error.response.data.message, { autoClose: 1200 });
-        } else if (error.request) {
-            console.error('No response from server:', error.request);
         } else {
             console.error('Error:', error.message);
         }
@@ -72,14 +63,9 @@ export const addemployee = async ({inp,setisload,setInp,setopenmodal,init}) => {
         setisload(false);
     }
 };
-export const employeeupdate = async ({inp,setisload,setInp,setopenmodal,init}) => {
 
-    const {employeeId, employeeName, dob,department,description } = inp;
 
-    if (!department || !employeeId ) {
-        alert('All fileds are Required');
-        return;
-    }
+export const employeeupdate = async ({ formData, inp, setisload, setInp, setopenmodal, init }) => {
 
     const token = localStorage.getItem('emstoken');
     setisload(true);
@@ -87,9 +73,7 @@ export const employeeupdate = async ({inp,setisload,setInp,setopenmodal,init}) =
     try {
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}updateemployee`,
-            {
-              employeeId, employeeName, dob,department,description
-            },
+            formData,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -114,7 +98,7 @@ export const employeeupdate = async ({inp,setisload,setInp,setopenmodal,init}) =
         setisload(false);
     }
 };
-export const employeedelette = async ({employeeId,setisload}) => {
+export const employeedelette = async ({ employeeId, setisload }) => {
 
     if (!employeeId) {
         alert('All fileds are Required');
@@ -128,7 +112,7 @@ export const employeedelette = async ({employeeId,setisload}) => {
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}deleteemployee`,
             {
-               employeeId
+                employeeId
             },
             {
                 headers: {
@@ -153,7 +137,7 @@ export const employeedelette = async ({employeeId,setisload}) => {
     }
 };
 
-export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,setdepartmentlist }) => {
+export const employeefetche = async ({ setisload, setemployeelist, deletee, edite, setdepartmentlist }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -173,8 +157,15 @@ export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,
             return {
                 id: emp._id,
                 sno: sno++,
-                photo: emp.profileimage,
-                name: emp.employeename,
+                rawname:emp.employeename,
+                name: (<div className="flex items-center gap-3 ">
+                    <Avatar src={emp.profileimage} alt={emp.employeename}>
+                        {!emp.profileimage && <FaRegUser />}
+                    </Avatar>
+                    <Box>
+                        <Typography variant="body2">{emp.employeename}</Typography>
+                    </Box>
+                </div>),
                 dob: emp.dob,
                 department: emp.department,
                 action: (<div className="action flex gap-2.5">
@@ -184,17 +175,17 @@ export const employeefetche = async ({ setisload, setemployeelist,deletee,edite,
                 </div>)
             }
         })
-        // console.log(res.data.list)
+        // console.log(res.data)
         setemployeelist(data);
         setdepartmentlist(res.data.departmentlist)
 
-        let departmentwise={};
-        res.data.list.map((val)=>{
-            const depName =val.department.department;
-            if(departmentwise.hasOwnProperty(depName)){
-                 departmentwise[depName].push(val);
-            }else{
-                departmentwise[depName]=[val];
+        let departmentwise = {};
+        res.data.list.map((val) => {
+            const depName = val.department.department;
+            if (departmentwise.hasOwnProperty(depName)) {
+                departmentwise[depName].push(val);
+            } else {
+                departmentwise[depName] = [val];
             }
         })
         // console.log("depart list wise:",departmentwise)
