@@ -111,9 +111,9 @@ const HolidayForm = () => {
                       {...props}
                       sx={{
                         ...(isWeeklyOff && {
-                          backgroundColor: '#e0e0e0',
+                          backgroundColor: 'gray',
                           borderRadius: '50%',
-                          color: 'red',
+                          color: 'white',
                         }),
                         ...(matched && {
                           backgroundColor: '#ffeb3b',
@@ -141,12 +141,14 @@ const HolidayForm = () => {
 
           <DatePicker
             label="From Date"
+            format='dd/MM/yyyy'
             value={fromDate}
             onChange={(newValue) => setFromDate(newValue)}
             slotProps={{ textField: { fullWidth: true } }}
           />
 
           <DatePicker
+             format='dd/MM/yyyy'
             label="To Date"
             value={toDate}
             onChange={(newValue) => setToDate(newValue)}
