@@ -20,16 +20,10 @@ const HolidayForm = () => {
   const [toDate, setToDate] = useState(null);
   const [holidays, setHolidays] = useState([]);
   const [dfsd, sdff] = useState([])
-  const weeklyOffs = [1]; // Sunday and Monday
-
 
   // Example dates to highlight manually
   const impordate = ['06/15/2025', '06/10/2025'];
-  // const highlightedDates = dfsd.map(dateStr => new Date(dateStr.date));
-  const highlightedDates = dfsd.map(dateObj => ({
-    date: dayjs(dateObj.date).toDate(), // Convert to Date object
-    name: dateObj.name
-  }));
+  const highlightedDates = dfsd.map(dateStr => new Date(dateStr));
 
 
   useEffect(() => {
@@ -38,23 +32,26 @@ const HolidayForm = () => {
         const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}getholidays`);
         const holidaysData = res.data.holidays;
 
-        const dateObjects = [];
+        // Collect all individual dates between fromDate and toDate (inclusive)
+        const allHolidayDates = [];
 
         holidaysData.forEach(holiday => {
           let current = dayjs(holiday.fromDate);
           const end = holiday.toDate ? dayjs(holiday.toDate) : current;
 
+          // Loop from fromDate to toDate
           while (current.isSameOrBefore(end, 'day')) {
-            dateObjects.push({
-              date: current.format('MM/DD/YYYY'),
-              name: holiday.name,
-            });
+            allHolidayDates.push(current.format('MM/DD/YYYY'));
             current = current.add(1, 'day');
           }
         });
-        console.log(dateObjects)
+        sdff(allHolidayDates)
+        console.log("Expanded holiday dates:", allHolidayDates); // ["06/19/2025", "06/20/2025", ...]
+
+        // Optional: Save full holidays for display and the date list for highlighting
         setHolidays(holidaysData);
-        sdff(dateObjects);
+        // You can also store allHolidayDates in another state if needed
+        // setHolidayDates(allHolidayDates);
       } catch (err) {
         console.error("Error fetching holidays:", err);
       }
@@ -89,33 +86,25 @@ const HolidayForm = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box className="flex flex-col md:flex-row gap-4 p-4">
-        <Box className="bg-white shadow rounded p-1 w-full max-w-md">
+        <Box className="bg-white shadow rounded p-4 w-full max-w-md">
           <StaticDatePicker
             displayStaticWrapperAs="desktop"
             value={null}
             onChange={() => { }}
             slots={{
               day: (props) => {
-                const date = props.day;
-                const matched = highlightedDates.find(d =>
-                  date.toDateString() === d.date.toDateString()
+                const isHighlighted = highlightedDates.some(date =>
+                  props.day.getDate() === date.getDate() &&
+                  props.day.getMonth() === date.getMonth() &&
+                  props.day.getFullYear() === date.getFullYear()
                 );
 
-                const isWeeklyOff = weeklyOffs.includes(date.getDay());
-
-                const tooltipText = matched ? matched.name : (isWeeklyOff ? 'Weekly Off' : '');
-
                 return (
-                  <Tooltip title={tooltipText}>
+                  <Tooltip title={isHighlighted ? 'Holiday' : ''}>
                     <PickersDay
                       {...props}
                       sx={{
-                        ...(isWeeklyOff && {
-                          backgroundColor: '#e0e0e0',
-                          borderRadius: '50%',
-                          color: 'red',
-                        }),
-                        ...(matched && {
+                        ...(isHighlighted && {
                           backgroundColor: '#ffeb3b',
                           borderRadius: '50%',
                           color: 'black',
@@ -124,9 +113,7 @@ const HolidayForm = () => {
                     />
                   </Tooltip>
                 );
-              }
-
-
+              },
             }}
           />
         </Box>

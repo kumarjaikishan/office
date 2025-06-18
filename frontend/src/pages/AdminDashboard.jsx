@@ -149,7 +149,7 @@ const Main = () => {
         <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
 
-      <div className='w-full flex-col flex gap-5 shadow-xl  bg-white p-2 rounded'>
+      <div className='w-full flex-col flex gap-5 shadow  bg-white p-2 rounded'>
         <FormControl sx={{ width: '160px' }} required size="small">
           <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
           <Select
@@ -184,7 +184,7 @@ const Main = () => {
             const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);
             {/* console.log(todaypresente) */ }
             return (
-              <Tooltip placement="top" title={<div className='flex flex-col '>
+              <Tooltip key={emp._id} placement="top" title={<div className='flex flex-col '>
                 <span> In &nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : '-:-'}</span>
                 <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>
               </div>}>
@@ -194,7 +194,7 @@ const Main = () => {
                       {!emp.profileimage && <FaRegUser />}
                     </Avatar>
                   </span>
-                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700'):'text-gray-500'} text-[14px] transition-all duration-300`}>
+                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700') : 'text-gray-500'} text-[14px] transition-all duration-300`}>
                     {emp.employeename}
                   </p>
                 </div>
@@ -217,7 +217,7 @@ const Main = () => {
 
       <div className="leaveDetail">
         <h3>Leave Details</h3>
-       <DashboardCard todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
+        <DashboardCard todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
     </div>
   )
