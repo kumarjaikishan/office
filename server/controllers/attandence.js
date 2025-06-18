@@ -222,5 +222,20 @@ const allleave = async (req, res, next) => {
   res.json(data);
 };
 
+const employeeAttandence = async (req, res, next) => {
+  const employeeId = req.query.employeeId;
+  console.log(employeeId)
+  if (!employeeId) return res.status(400).json({ message: 'Employee Id is needed' });
+  try {
+    const result = await Attendance.find({ employeeId });
 
-module.exports = { checkout, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
+    return res.status(200).json({ attandence: result });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+
+}
+
+
+module.exports = { checkout, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };

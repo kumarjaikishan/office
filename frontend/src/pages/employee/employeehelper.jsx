@@ -4,6 +4,7 @@ import { MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { IoEyeOutline } from "react-icons/io5";
 import { Avatar, Box, Typography } from "@mui/material";
+import { HiOutlineDocumentReport } from "react-icons/hi";
 import { FaRegUser } from "react-icons/fa";
 
 export const columns = [
@@ -137,7 +138,7 @@ export const employeedelette = async ({ employeeId, setisload }) => {
     }
 };
 
-export const employeefetche = async ({ setisload, setemployeelist, deletee, edite, setdepartmentlist }) => {
+export const employeefetche = async ({navigate, setisload, setemployeelist, deletee, edite, setdepartmentlist }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -170,6 +171,7 @@ export const employeefetche = async ({ setisload, setemployeelist, deletee, edit
                 department: emp.department,
                 action: (<div className="action flex gap-2.5">
                     <span className="eye edit text-[18px] text-green-500 cursor-pointer" ><IoEyeOutline /></span>
+                    <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={()=> navigate(`/admin-dashboard/performance/${emp._id}`) } ><HiOutlineDocumentReport /></span>
                     <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
                     <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
                 </div>)

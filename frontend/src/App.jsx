@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FirstFetch } from '../store/userSlice';
 import { useEffect } from 'react';
 import Logout from './pages/logout';
+import AttenPerformance from './pages/attandence/AttenPerformance';
+import HolidayForm from './pages/holidays/Holiday';
 
 
 function App() {
@@ -62,6 +64,8 @@ function App() {
           <Route path="department" element={<Department />} />
           <Route path="salary" element={<Salary />} />
           <Route path="attandence" element={<Attandence />} />
+          <Route path="holiday" element={<HolidayForm />} />
+          <Route path="performance/:employeeId" element={<AttenPerformance />} />
         </Route>
 
         <Route

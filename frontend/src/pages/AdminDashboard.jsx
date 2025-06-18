@@ -10,7 +10,7 @@ import { FaBuilding, FaRegUser, FaTachometerAlt, FaUsers } from 'react-icons/fa'
 import './admindashboard.css'
 import dayjs from 'dayjs';
 import { updateAttendance } from '../../store/userSlice';
-import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Typography } from '@mui/material';
+import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Tooltip, Typography } from '@mui/material';
 import { CiFilter } from 'react-icons/ci';
 
 
@@ -18,7 +18,8 @@ const Main = () => {
 
   const { attandence, employee, department } = useSelector((state) => state.user);
   const { islogin, isadmin } = useSelector((state) => state.auth);
-  const [currentpresent, setcurrentpresent] = useState([])
+  const [currentpresent, setcurrentpresent] = useState([]);
+  const [todaypresent, settodaypresent] = useState([])
   let navigate = useNavigate();
   const dispatch = useDispatch();
   const attandenceRef = useRef(attandence);
@@ -40,8 +41,12 @@ const Main = () => {
     let currentPresent = attandence.filter((val) => {
       return dayjs(val.date).isSame(dayjs(), 'day') && !val.punchOut
     })
-    // console.log(currentPresent)
-    setcurrentpresent(currentPresent)
+    let todaypresent = attandence.filter((val) => {
+      return dayjs(val.date).isSame(dayjs(), 'day')
+    })
+    // console.log("today present",currentPresent)
+    setcurrentpresent(currentPresent);
+    settodaypresent(todaypresent)
   }, [attandence])
 
   useEffect(() => {
@@ -68,7 +73,23 @@ const Main = () => {
             if (data.payload.action === 'checkin') {
               let updated = [...attandenceRef.current, datae];
               // console.log("checkIn sse merger:",updated);
-               toast.success(`${datae.employeeId.employeename} has Punched In at ${dayjs(datae.punchIn).format('hh:mm A')}`, { autoClose: 8200 });
+              // toast.success(`${datae.employeeId.employeename} has Punched In at ${dayjs(datae.punchIn).format('hh:mm A')}`, { autoClose: false });
+
+              toast.success(
+                <div className='flex items-center gap-2 pr-1'>
+                  <Avatar src={datae.employeeId.profileimage} alt={datae.employeeId.employeename}>
+                    {!datae.employeeId.profileimage && <FaRegUser />}
+                  </Avatar>
+                  <span className='text-[14px] '>
+                    {datae.employeeId.employeename} has Punched In at{' '}
+                    {dayjs(datae.punchIn).format('hh:mm A')}
+                  </span>
+                </div>,
+                {
+                  autoClose: false
+                }
+              );
+
               dispatch(updateAttendance(updated));
             }
 
@@ -77,8 +98,23 @@ const Main = () => {
                 (e) => e._id !== datae._id
               );
               let newlist = [...filterout, datae];
-               toast.success(`${datae.employeeId.employeename} has Punched Out at ${dayjs(datae.punchOut).format('hh:mm A')}`, { autoClose: 8200 });
-             dispatch(updateAttendance(newlist));
+              // toast.success(`${datae.employeeId.employeename} has Punched Out at ${dayjs(datae.punchOut).format('hh:mm A')}`, { autoClose: false });
+              toast.success(
+                <div className='flex items-center gap-2 pr-1'>
+                  <Avatar src={datae.employeeId.profileimage} alt={datae.employeeId.employeename}>
+                    {!datae.employeeId.profileimage && <FaRegUser />}
+                  </Avatar>
+                  <span className='text-[14px] '>
+                    {datae.employeeId.employeename} has Punched Out at{' '}
+                    {dayjs(datae.punchIn).format('hh:mm A')}
+                  </span>
+                </div>,
+                {
+                  autoClose: false
+                }
+              );
+
+              dispatch(updateAttendance(newlist));
             }
           }
         } catch (err) {
@@ -110,13 +146,9 @@ const Main = () => {
     <div className='adminDashboard'>
       <div className="overview">
         <h3>Dashboar overview</h3>
-        <div className="car flex justify-between gap-6" >
-          <DashboardCard logo={<FiUsers />} head="Total Employees" number="5" color="voilet" />
-          <DashboardCard logo={<FiClock />} head="Present Today" number={attandence.length} color="green" />
-          <DashboardCard logo={<SlBag />} head="On Leave" number="3" color="amber" />
-          <DashboardCard logo={<FaBuilding />} head="In Office" number={currentpresent.length} color="teal" />
-        </div>
+        <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
+
       <div className='w-full flex-col flex gap-5 shadow-xl  bg-white p-2 rounded'>
         <FormControl sx={{ width: '160px' }} required size="small">
           <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
@@ -148,30 +180,44 @@ const Main = () => {
         <div className='flex justify-start gap-4'>
           {(depfilter !== 'all' ? employee.filter(e => e.department?._id == depfilter) : employee)?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
-            {/* console.log(employee) */ }
+            {/* console.log('today present ', todaypresent) */ }
+            const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);
+            {/* console.log(todaypresente) */ }
             return (
-              <div key={emp._id} className='flex flex-col items-center'>
-                <span className={`${isPresent ? 'border-green-500' : 'border-gray-300'} p-[2px] border-2 rounded-full`}>
-                  <Avatar src={emp.profileimage} alt={emp.employeename}>
-                    {!emp.profileimage && <FaRegUser />}
-                  </Avatar>
-                </span>
-                <p className={`${isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-gray-500'} text-[14px] transition-all duration-300`}>
-                  {emp.employeename}
-                </p>
-              </div>
+              <Tooltip placement="top" title={<div className='flex flex-col '>
+                <span> In &nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : '-:-'}</span>
+                <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>
+              </div>}>
+                <div key={emp._id} className='flex flex-col items-center'>
+                  <span className={`${todaypresente ? (isPresent ? 'border-green-500' : 'border-amber-400') : 'border-gray-300'} p-[2px] border-2 rounded-full`}>
+                    <Avatar src={emp.profileimage} alt={emp.employeename}>
+                      {!emp.profileimage && <FaRegUser />}
+                    </Avatar>
+                  </span>
+                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700'):'text-gray-500'} text-[14px] transition-all duration-300`}>
+                    {emp.employeename}
+                  </p>
+                </div>
+              </Tooltip>
             );
           })}
         </div>
+        <div className='flex gap-5'>
+          <span className='flex items-center gap-1 text-green-500'>
+            <span className='block w-[15px] rounded-3xl h-[15px] bg-green-500 '></span> In Premise
+          </span>
+          <span className='flex items-center gap-1 text-amber-700'>
+            <span className='block w-[15px] rounded-3xl h-[15px] bg-amber-500 '></span> Present
+          </span>
+          <span className='flex items-center gap-1 text-gray-500'>
+            <span className='block w-[15px] rounded-3xl h-[15px] bg-gray-500  '></span> Absent
+          </span>
+        </div>
       </div>
+
       <div className="leaveDetail">
         <h3>Leave Details</h3>
-        <div className="cards">
-          <DashboardCard logo={<FaUsers />} head="Leave Applied" number="5" color="teal" />
-          <DashboardCard logo={<FaTachometerAlt />} head="Leave Approved" number="3" color="amber" />
-          <DashboardCard logo={<FaBuilding />} head="Leace Pending" number="1" color="teal" />
-          <DashboardCard logo={<FaBuilding />} head="Leave Rejected" number="2" color="amber" />
-        </div>
+       <DashboardCard todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
     </div>
   )

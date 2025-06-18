@@ -14,9 +14,11 @@ import { IoSearch } from "react-icons/io5";
 import InputAdornment from '@mui/material/InputAdornment';
 import { GoPlus } from "react-icons/go";
 import { BsUpload } from "react-icons/bs";
+import { HiOutlineDocumentReport } from "react-icons/hi";
 import { GrPowerReset } from "react-icons/gr";
 import { FiDownload } from "react-icons/fi";
 import { CiFilter } from "react-icons/ci";
+import { useNavigate } from "react-router-dom";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -30,7 +32,7 @@ const Employe = () => {
     searchText: '',
     department: 'all'
   });
-
+    let navigate = useNavigate();
 
   const init = {
     employeeId: '',
@@ -43,7 +45,7 @@ const Employe = () => {
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    employeefetche({ setisload, setemployeelist, edite, deletee, setdepartmentlist });
+    employeefetche({navigate, setisload, setemployeelist, edite, deletee, setdepartmentlist });
   }, []);
 
   useEffect(() => {

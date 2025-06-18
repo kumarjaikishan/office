@@ -10,6 +10,10 @@ const employeeSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    weeklyOff: {
+        type: [String],
+        default: ['Sunday']
+    },
     profileimage: {
         type: String,
     },
@@ -31,7 +35,7 @@ const employeeSchema = new mongoose.Schema({
     },
     department: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'department', 
+        ref: 'department',
         required: true
     },
     description: {

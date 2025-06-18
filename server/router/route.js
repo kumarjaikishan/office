@@ -5,6 +5,7 @@ const users = require('../controllers/user');
 const admin = require('../controllers/admin');
 const salary = require('../controllers/salary');
 const attendance = require('../controllers/attandence');
+const holiday = require('../controllers/holiday');
 const authmiddlewre = require('../middleware/auth_middleware');
 const adminmiddleware = require('../middleware/isadmin_middleware');
 const upload = require('../middleware/multer_middleware')
@@ -38,6 +39,10 @@ router.route('/allAttandence').get(authmiddlewre,attendance.allAttandence);
 router.route('/webattandence').post(authmiddlewre,attendance.webattandence); 
 router.route('/checkout').post(authmiddlewre,attendance.checkout); 
 router.route('/checkin').post(authmiddlewre,attendance.checkin); 
+router.route('/employeeAttandence').get(attendance.employeeAttandence);
+
+router.route('/addholiday').post(holiday.addholiday); 
+router.route('/getholidays').get(holiday.getholidays); 
 
 
 module.exports = router;
