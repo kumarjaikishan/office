@@ -1,8 +1,10 @@
 const departmentModal = require('../models/department');
 const employeeModal = require('../models/employee');
+const usermodal = require('../models/user');
 const attendanceModal = require('../models/attandence');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
+const { default: mongoose } = require('mongoose');
 
 
 cloudinary.config({
@@ -99,45 +101,53 @@ const addemployee = async (req, res, next) => {
             message: 'No file uploaded.'
         });
     }
+    const { employeeName, email, username, password, department, dob = '' } = req.body;
 
-    const { employeeName, dob, department, description, salary } = req.body;
-
-    if (!department) {
+    if (!employeeName || !email || !password || !department) {
         return next({ status: 400, message: "all fields are required" });
     }
+    const role = 'employee';
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-        await cloudinary.uploader.upload(req.file.path, { folder: 'ems/employee' }, async (error, result) => {
-            // console.log(error, result);
-            if (error) {
-                return res.status(500).json({
-                    message: error
-                });
+
+        const existingUser = await usermodal.findOne({ email }).session(session);
+        if (existingUser) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(409).json({ message: 'Email already in use.' });
+        }
+
+        let createUser = new usermodal({ name: employeeName, email, role, password });
+        let resulten = await createUser.save({ session });
+
+        // Step 2: Upload profile image to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'ems/employee'
+        });
+
+        const query = new employeeModal({ userid: resulten._id, employeename: employeeName, profileimage: uploadResult.secure_url, username, department, dob });
+        const resulte = await query.save({ session });
+
+        // Step 4: Commit transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        fs.unlink(req.file.path, (err => {
+            if (err) {
+                console.log(err);
             }
+        }));
 
-            const imageurl = result.secure_url;
-            // console.log("photo upload ho gaya", imageurl);
-
-            fs.unlink(req.file.path, (err => {
-                if (err) {
-                    console.log(err);
-                    return res.status(500).json("error occured while deleting file");
-                }
-                //   getFilesInDirectory(); 
-                // }
-            }));
-
-            const query = new employeeModal({ employeename: employeeName,profileimage:imageurl, dob, salary, department, description });
-            const resulte = await query.save();
-            if (!resulte) {
-                return next({ status: 400, message: "Something went wrong" });
-            }
-
-            res.status(200).json({
-                message: 'employee Created Successfully'
-            })
+        res.status(200).json({
+            message: 'employee Created Successfully'
         })
+
     } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
         console.log(error.message)
         return next({ status: 500, message: error.message });
     }
@@ -244,11 +254,11 @@ const employeelist = async (req, res, next) => {
 }
 const firstfetch = async (req, res, next) => {
     try {
-        const query = await employeeModal.find().populate('department', 'department').sort({employeename:1});
+        const query = await employeeModal.find().populate('department', 'department').sort({ employeename: 1 });
         const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
         const attendance = await attendanceModal.find()
             .populate('employeeId', 'employeename profileimage')
-            .populate('departmentId', 'department').sort({date:-1});
+            .populate('departmentId', 'department').sort({ date: -1 });
         // console.log(query)
 
         res.status(200).json({

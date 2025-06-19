@@ -125,8 +125,6 @@ const HolidayForm = () => {
                   </Tooltip>
                 );
               }
-
-
             }}
           />
         </Box>

@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 import Logout from './pages/logout';
 import AttenPerformance from './pages/attandence/AttenPerformance';
 import HolidayForm from './pages/holidays/Holiday';
+import Leave from './pages/leave/Leave';
 
 
 function App() {
@@ -65,7 +66,8 @@ function App() {
           <Route path="salary" element={<Salary />} />
           <Route path="attandence" element={<Attandence />} />
           <Route path="holiday" element={<HolidayForm />} />
-          <Route path="performance/:employeeId" element={<AttenPerformance />} />
+          <Route path="leave" element={<Leave />} />
+          <Route path="performance/:userid" element={<AttenPerformance />} />
         </Route>
 
         <Route

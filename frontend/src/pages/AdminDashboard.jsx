@@ -75,14 +75,14 @@ const Main = () => {
               // console.log("checkIn sse merger:",updated);
               // toast.success(`${datae.employeeId.employeename} has Punched In at ${dayjs(datae.punchIn).format('hh:mm A')}`, { autoClose: false });
 
-              toast.success(
+              toast(
                 <div className='flex items-center gap-2 pr-1'>
                   <Avatar src={datae.employeeId.profileimage} alt={datae.employeeId.employeename}>
                     {!datae.employeeId.profileimage && <FaRegUser />}
                   </Avatar>
                   <span className='text-[14px] '>
-                    {datae.employeeId.employeename} has Punched In at{' '}
-                    {dayjs(datae.punchIn).format('hh:mm A')}
+                    <span className='text-green-700 capitalize font-semibold'> {datae.employeeId.employeename}</span> has Punched In at{' '}
+                    <span className='text-green-700 '> {dayjs(datae.punchIn).format('hh:mm A')}</span>
                   </span>
                 </div>,
                 {
@@ -99,14 +99,14 @@ const Main = () => {
               );
               let newlist = [...filterout, datae];
               // toast.success(`${datae.employeeId.employeename} has Punched Out at ${dayjs(datae.punchOut).format('hh:mm A')}`, { autoClose: false });
-              toast.success(
+              toast(
                 <div className='flex items-center gap-2 pr-1'>
                   <Avatar src={datae.employeeId.profileimage} alt={datae.employeeId.employeename}>
                     {!datae.employeeId.profileimage && <FaRegUser />}
                   </Avatar>
                   <span className='text-[14px] '>
-                    {datae.employeeId.employeename} has Punched Out at{' '}
-                    {dayjs(datae.punchIn).format('hh:mm A')}
+                    <span className='text-amber-700 capitalize font-semibold '> {datae.employeeId.employeename}</span> has Punched Out at{' '}
+                    <span className='text-amber-700 '> {dayjs(datae.punchOut).format('hh:mm A')}</span>
                   </span>
                 </div>,
                 {
@@ -194,7 +194,7 @@ const Main = () => {
                       {!emp.profileimage && <FaRegUser />}
                     </Avatar>
                   </span>
-                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700') : 'text-gray-500'} text-[14px] transition-all duration-300`}>
+                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700') : 'text-gray-500'} text-[14px] transition-all duration-300 capitalize `}>
                     {emp.employeename}
                   </p>
                 </div>

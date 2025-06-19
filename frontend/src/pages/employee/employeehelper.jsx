@@ -171,7 +171,7 @@ export const employeefetche = async ({navigate, setisload, setemployeelist, dele
                 department: emp.department,
                 action: (<div className="action flex gap-2.5">
                     <span className="eye edit text-[18px] text-green-500 cursor-pointer" ><IoEyeOutline /></span>
-                    <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={()=> navigate(`/admin-dashboard/performance/${emp._id}`) } ><HiOutlineDocumentReport /></span>
+                    <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={()=> navigate(`/admin-dashboard/performance/${emp.userid}`) } ><HiOutlineDocumentReport /></span>
                     <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
                     <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
                 </div>)

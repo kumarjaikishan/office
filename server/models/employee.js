@@ -6,8 +6,18 @@ const employeeSchema = new mongoose.Schema({
     employeeId: {
         type: String,
     },
+    userid: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
     employeename: {
         type: String,
+        required: true
+    },
+    department: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'department',
         required: true
     },
     weeklyOff: {
@@ -15,6 +25,9 @@ const employeeSchema = new mongoose.Schema({
         default: ['Sunday']
     },
     profileimage: {
+        type: String,
+    },
+    email: {
         type: String,
     },
     gender: {
@@ -31,12 +44,6 @@ const employeeSchema = new mongoose.Schema({
     },
     dob: {
         type: String,
-        required: true
-    },
-    department: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'department',
-        required: true
     },
     description: {
         type: String

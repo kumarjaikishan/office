@@ -94,6 +94,11 @@ const menu = [
             icon: <FaRegBuilding />
         },
         {
+            menu: "Leave",
+            link: '/admin-dashboard/leave',
+            icon: <FaRegBuilding />
+        },
+        {
             menu: "Attandence",
             link: '/admin-dashboard/attandence',
             icon: <TbReportAnalytics />

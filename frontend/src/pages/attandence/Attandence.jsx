@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 import DataTable from "react-data-table-component";
-import { columns, customStyles } from "./attandencehelper";
+import { columns, customStyles, deleteAttandence } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -37,6 +37,7 @@ const Attandence = () => {
   const [filterattandence, setfilterattandence] = useState([]);
   const [isPunchIn, setisPunchIn] = useState(true);
   const [selectedRows, setselectedRows] = useState([]);
+  const { deletearray, setdeletearray } = useState([]);
 
 
   const init = {
@@ -108,8 +109,11 @@ const Attandence = () => {
           dayjs(val.date).isSame(dayjs(inp.date), 'day')
         );
       });
+
       if (punchedIn) {
         setinp({ ...inp, punchIn: dayjs(punchedIn.punchIn), status: punchedIn.status })
+      } else {
+        setinp({ ...inp, punchIn: null, status: '' })
       }
     } else {
       //  setinp({...inp,punchIn: null })
@@ -130,10 +134,13 @@ const Attandence = () => {
     // console.log(attandence)
     if (!attandence) return;
     const data = attandence.map((emp) => {
+      let absent = emp.status == 'absent';
+      let leave = emp.status == 'leave';
       return {
+        attenid: emp._id,
         departmentId: emp.departmentId._id,
         employeeId: emp.employeeId._id,
-        status: emp.status,
+        status: <span className={`${absent ? 'bg-red-100 text-red-800': leave ? 'bg-violet-100 text-violet-800':'bg-green-100 text-green-800'} px-2 py-1 rounded `}>{emp.status}</span> ,
         rawname: emp.employeeId.employeename,
         name: (<div className="flex items-center gap-3 ">
           <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
@@ -144,7 +151,7 @@ const Attandence = () => {
           </Box>
         </div>),
         date: dayjs(emp.date).format('DD MMM, YYYY'),
-        punchIn: <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchIn).format('hh:mm A')}
+        punchIn: emp.punchIn && <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchIn).format('hh:mm A')}
           {dayjs(emp.punchIn).isBefore(dayjs(emp.punchIn).startOf('day').add(9, 'hour').add(50, 'minute')) && (
             <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Early</span>
           )}
@@ -176,8 +183,30 @@ const Attandence = () => {
   const edite = () => {
 
   }
-  const deletee = () => {
-
+  const deletee = (attanId) => {
+    swal({
+      title: "Are you sure you want to Delete this record?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((proceed) => {
+      if (proceed) {
+        deleteAttandence({ attandanceId: [attanId], setisload })
+      }
+    });
+  }
+  const multidelete = () => {
+    let multideletearray = selectedRows.map(id => id.attenid);
+    swal({
+      title: `Are you sure you want to Delete these ${multideletearray.length} record?`,
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((proceed) => {
+      if (proceed) {
+        deleteAttandence({ attandanceId: multideletearray, setisload })
+      }
+    });
   }
 
   const submitHandle = async (e) => {
@@ -206,7 +235,7 @@ const Attandence = () => {
           </div>
 
           <div className="flex gap-2">
-            {selectedRows.length > 0 && <Button variant='contained' color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
+            {selectedRows.length > 0 && <Button variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
             <Button variant='outlined' startIcon={<FiDownload />} >Export</Button>
           </div>
         </div>
@@ -298,7 +327,7 @@ const Attandence = () => {
           }
         </div>
       </div>
-      <div>
+      <div className="capitalize">
         <DataTable
           columns={columns}
           data={isFilterActive ? filterattandence : attandencelist}

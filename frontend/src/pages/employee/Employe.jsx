@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeefetche, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import { Button, OutlinedInput } from '@mui/material';
+import { Box, Button, OutlinedInput } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../components/custommodal/Modalbox';
@@ -32,20 +32,20 @@ const Employe = () => {
     searchText: '',
     department: 'all'
   });
-    let navigate = useNavigate();
+  let navigate = useNavigate();
 
   const init = {
     employeeId: '',
-    employeeName: "",
-    dob: "",
-    salary: "",
     department: "",
-    description: ''
+    employeeName: "",
+    email: "",
+    username: '',
+    password: '',
   };
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    employeefetche({navigate, setisload, setemployeelist, edite, deletee, setdepartmentlist });
+    employeefetche({ navigate, setisload, setemployeelist, edite, deletee, setdepartmentlist });
   }, []);
 
   useEffect(() => {
@@ -239,8 +239,7 @@ const Employe = () => {
         <div className="membermodal">
           <form onSubmit={adddepartcall}>
             <h2>{isupdate ? "Update Employee" : "Add Employee"}</h2>
-            <span className="modalcontent">
-              <TextField fullWidth required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
+            <span className="modalcontent ">
               <FormControl fullWidth required size="small">
                 <InputLabel>Department</InputLabel>
                 <Select
@@ -253,9 +252,14 @@ const Employe = () => {
                   ))}
                 </Select>
               </FormControl>
-              <TextField fullWidth required value={inp.dob} onChange={(e) => handleChange(e, 'dob')} label="D.O.B" size="small" />
-              <TextField fullWidth required value={inp.salary} onChange={(e) => handleChange(e, 'salary')} label="Salary" size="small" />
-              <TextField fullWidth multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} label="Description" size="small" />
+              <Box sx={{ width: '100%', gap: 2 }}>
+                <TextField fullWidth required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
+                <TextField fullWidth required value={inp.email} onChange={(e) => handleChange(e, 'email')} label="email" size="small" />
+              </Box>
+              <Box sx={{ width: '100%', gap: 2 }}>
+                <TextField fullWidth required value={inp.username} onChange={(e) => handleChange(e, 'username')} label="username" size="small" />
+                <TextField fullWidth value={inp.password} onChange={(e) => handleChange(e, 'password')} label="password" size="small" />
+              </Box>
 
               <div className="mt-1 gap-2 flex items-center">
                 {!photoPreview && <div className="chooseFile w-[250px] h-[90px] rounded flex flex-col justify-center

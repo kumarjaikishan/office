@@ -7,10 +7,10 @@ const DashboardCard = ({employee, todaypresent,currentpresent }) => {
         <div className="car flex justify-between gap-6" >
             <div className="relative px-4 py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">
                 {/* Left color strip */}
-                <div className={`absolute left-0 top-0 h-full w-1 bg-teal-600 rounded-l`} />
+                <div className={`absolute left-0 top-0 h-full w-1 bg-slate-600 rounded-l`} />
 
                 <div className="flex items-center gap-3 pl-2">
-                    <span className={`p-2 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center`}>
+                    <span className={`p-2 bg-slate-100 text-slate-700 rounded-full flex items-center justify-center`}>
                        <FiUsers />
                     </span>
                     <div className="text-gray-600 font-bold text-[16px]">Total Employee</div>

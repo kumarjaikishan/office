@@ -1,5 +1,6 @@
 // server/routes/attendance.js
 const Attendance = require('../models/attandence');
+const employee = require('../models/employee');
 const Leave = require('../models/leave');
 const User = require('../models/user');
 const { sendToClients } = require('../utils/sse');
@@ -80,6 +81,27 @@ const webattandence = async (req, res, next) => {
 };
 
 
+const deleteattandence = async (req, res, next) => {
+  try {
+    const { attandanceId } = req.body;
+
+    if (!Array.isArray(attandanceId) || attandanceId.length === 0) {
+      return res.status(400).json({ message: 'Invalid or empty attandanceId array' });
+    }
+
+    const result = await Attendance.deleteMany({ _id: { $in: attandanceId } });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'No records found to delete' });
+    }
+
+    return res.status(200).json({ message: `${result.deletedCount} Record(s) deleted successfully` });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 const checkin = async (req, res, next) => {
   try {
     const { employeeId, departmentId, date, punchIn, status } = req.body;
@@ -97,19 +119,17 @@ const checkin = async (req, res, next) => {
       return res.status(400).json({ message: 'Already checked in' });
     }
 
-    // Validate punchIn timestamp
-    const punchInTime = new Date(punchIn);
-    if (isNaN(punchInTime)) {
-      return res.status(400).json({ message: 'Invalid punchIn time' });
+    const attendanceData = { employeeId, departmentId, date: dateObj, status };
+
+    if (punchIn) {
+      const punchInTime = new Date(punchIn);
+      if (isNaN(punchInTime)) {
+        return res.status(400).json({ message: 'Invalid punchIn time' });
+      }
+      attendanceData.punchIn = punchIn;
     }
 
-    const attendance = new Attendance({
-      employeeId,
-      departmentId,
-      date: dateObj,
-      punchIn: punchInTime,
-      status, // Optional: depends if you want to record "present"/"late"/etc.
-    });
+    const attendance = new Attendance(attendanceData);
 
     await attendance.save();
 
@@ -223,13 +243,15 @@ const allleave = async (req, res, next) => {
 };
 
 const employeeAttandence = async (req, res, next) => {
-  const employeeId = req.query.employeeId;
-  console.log(employeeId)
-  if (!employeeId) return res.status(400).json({ message: 'Employee Id is needed' });
+  const userid = req.query.userid;
+  // console.log(employeeId)
+  if (!userid) return res.status(400).json({ message: 'Employee Id is needed' });
   try {
-    const result = await Attendance.find({ employeeId });
+    const user = await User.findOne({ _id: userid });
+    const employeedetail = await employee.findOne({ userid });
+    const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: 1 });
 
-    return res.status(200).json({ attandence: result });
+    return res.status(200).json({ user, employee: employeedetail, attandence });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error', error });
@@ -238,4 +260,4 @@ const employeeAttandence = async (req, res, next) => {
 }
 
 
-module.exports = { checkout, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
+module.exports = { checkout, deleteattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };

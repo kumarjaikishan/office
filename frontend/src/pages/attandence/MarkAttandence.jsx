@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Modalbox from '../../components/custommodal/Modalbox'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -25,12 +25,6 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
         // console.log("department:", department)
     }, [department]);
 
-    const minutesinhours = (minutes) => {
-        let hour = Math.floor(minutes / 60);
-        let minute = minutes % 60;
-        const formatted = `${hour}h ${minute}m`;
-        return formatted;
-    }
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
@@ -172,8 +166,9 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         });
                                     }}
                                 >
-                                    <MenuItem value={true}>Present</MenuItem>
-                                    <MenuItem value={false}>Absent</MenuItem>
+                                    <MenuItem value={'present'}>Present</MenuItem>
+                                    <MenuItem value={'absent'}>Absent</MenuItem>
+                                    <MenuItem value={'half day'}>Half Day</MenuItem>
                                 </Select>
                             </FormControl>}
                         </Box>
