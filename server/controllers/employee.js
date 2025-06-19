@@ -4,13 +4,41 @@ const Leave = require('../models/leave');
 
 
 const addleave = async (req, res, next) => {
-  console.log(req.body)
-  const {type,fromDate,toDate,reason}= req.body
-  console.log(req.user.id)
+  // console.log(req.body)
+  let { type, fromDate, toDate, reason } = req.body
+  if(!toDate) {
+    toDate = fromDate;
+  }
+   if(!fromDate || !reason) return res.status(400).json({ message: 'fields are required' });
   try {
-     const leave = new Leave({ employeeId:req.user.id, fromDate,toDate, reason });
-      await leave.save();
-      return res.json({ message: 'Record Added Successfully' });
+   const whichemployee = await employee.findOne({userid:req.user.id})
+  //  console.log(which)
+  //  return res.json({ message: 'Record Added Successfully' });
+
+    const leave = new Leave({ employeeId: whichemployee._id,type, fromDate, toDate, reason });
+    await leave.save();
+    return res.json({ message: 'Record Added Successfully' });
+
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+const fetchleave = async (req, res, next) => {
+
+  try {
+    // const leave = await Leave.find().populate({
+    //   path:'employeeId'
+    // });
+    const leave = await Leave.find().populate({
+      path:'employeeId',
+      select:'employeename userid profileimage',
+      populate:{
+        path:'userid',
+        select:'name email'
+      }
+    });
+    return res.json({ leave });
 
   } catch (error) {
     console.error("Attendance error:", error);
@@ -21,4 +49,4 @@ const addleave = async (req, res, next) => {
 
 
 
-module.exports = { addleave};
+module.exports = { addleave, fetchleave };

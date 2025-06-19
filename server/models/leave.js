@@ -6,7 +6,7 @@ const leaveSchema = new mongoose.Schema({
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
   reason: { type: String },
-  status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' }
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
 });
 
 module.exports = mongoose.model('Leave', leaveSchema);

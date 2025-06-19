@@ -16,6 +16,7 @@ import Logout from './pages/logout';
 import AttenPerformance from './pages/attandence/AttenPerformance';
 import HolidayForm from './pages/holidays/Holiday';
 import Leave from './pages/leave/Leave';
+import Adminleave from './pages/leave/Adminleave';
 
 
 function App() {
@@ -67,6 +68,7 @@ function App() {
           <Route path="attandence" element={<Attandence />} />
           <Route path="holiday" element={<HolidayForm />} />
           <Route path="leave" element={<Leave />} />
+          <Route path="adminleave" element={<Adminleave />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />
         </Route>
 

@@ -99,6 +99,11 @@ const menu = [
             icon: <FaRegBuilding />
         },
         {
+            menu: "Admin Leave",
+            link: '/admin-dashboard/adminleave',
+            icon: <FaRegBuilding />
+        },
+        {
             menu: "Attandence",
             link: '/admin-dashboard/attandence',
             icon: <TbReportAnalytics />

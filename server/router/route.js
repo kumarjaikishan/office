@@ -47,6 +47,7 @@ router.route('/addholiday').post(holiday.addholiday);
 router.route('/getholidays').get(holiday.getholidays); 
 
 router.route('/addleave').post(authmiddlewre,employee.addleave); 
+router.route('/fetchleave').get(authmiddlewre,employee.fetchleave); 
 
 
 module.exports = router;
