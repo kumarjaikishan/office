@@ -5,6 +5,8 @@ import dayjs from 'dayjs';
 import { Box, Tooltip } from '@mui/material';
 import { LocalizationProvider, PickersDay, StaticDatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import EmployeeProfileCard from '../../components/performanceCard';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const AttenPerformance = () => {
     const { userid } = useParams();
@@ -12,6 +14,8 @@ const AttenPerformance = () => {
     const [employee, setemployee] = useState({});
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedYear, setSelectedYear] = useState(dayjs())
+    const [selectedMonth, setSelectedMonth] = useState()
     const weeklyOffs = [1];
     const [hell, sethell] = useState({
         present: [],
@@ -65,7 +69,7 @@ const AttenPerformance = () => {
                             break;
                     }
                 });
-                console.log(presentDates)
+                console.log(presentDates, absentDates, leaveDates)
 
                 sethell({
                     present: presentDates,
@@ -89,38 +93,47 @@ const AttenPerformance = () => {
         <div className="p-4">
             {loading && <p>Loading performance data...</p>}
             {/* {error && <p className="text-red-500">Error: {error.message}</p>} */}
+
+            <div className='p-2 rounded shadow bg-white '>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <div className='flex gap-3 '>
+                    <DatePicker
+                        label="Select Year"
+                        views={['year']}
+                        value={selectedYear}
+                        onChange={(newValue) => setSelectedYear(newValue)}
+                        renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                    <DatePicker
+                        label="Select Month"
+                        views={['month']}
+                        value={selectedMonth}
+                        onChange={(newValue) => setSelectedMonth(newValue)}
+                        renderInput={(params) => <TextField {...params} fullWidth />}
+                    />
+                    </div>
+                </LocalizationProvider>
+            </div>
             {attandence && (
                 <div>
-                    <h2 className="text-xl font-semibold mb-2">Performance for Employee: {user.name}</h2>
-                    {/* Replace with real data structure */}
-                    <div>
-                        total days {dayjs().diff(attandence[0]?.date, 'day')}
-                    </div>
-                    <div>
-                        present {(attandence.filter(e => e.status == 'present')).length}
-                    </div>
-                    <div>
-                        Leave {(attandence.filter(e => e.status == 'leave')).length}
-                    </div>
-                    <div>
-                        Absent {(attandence.filter(e => e.status == 'absent')).length}
-                    </div>
+                    <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <Box className="bg-white shadow rounded p-1 w-full max-w-md">
                             <StaticDatePicker
                                 displayStaticWrapperAs="desktop"
-                                value={null}
-                                onChange={() => { }}
+                                value={dayjs()}
+                                // onChange={() => { }}
                                 slots={{
                                     day: (props) => {
                                         const date = props.day;
 
-
                                         const isPresent = hell.present.some(d => dayjs(d).isSame(date, 'day'));
+                                        const isleave = hell.leave.some(d => dayjs(d).isSame(date, 'day'));
                                         const isabsent = hell.absent.some(d => dayjs(d).isSame(date, 'day'));
                                         const isWeeklyOff = weeklyOffs.includes(date.getDay());
 
-                                        const tooltipText = isPresent ? "Present" : (isWeeklyOff ? 'Weekly Off' : (isabsent ? 'absent' : ''));
+                                        const tooltipText = (isPresent && "Present") || (isleave && "Leave") ||
+                                            (isWeeklyOff && "Weekly Off") || (isabsent && "Absent") || "";
 
                                         return (
                                             <Tooltip title={tooltipText}>
@@ -142,6 +155,11 @@ const AttenPerformance = () => {
                                                             borderRadius: '50%',
                                                             color: 'white',
                                                         }),
+                                                        ...(isleave && {
+                                                            backgroundColor: 'violet',
+                                                            borderRadius: '50%',
+                                                            color: 'white',
+                                                        }),
                                                     }}
                                                 />
                                             </Tooltip>
@@ -151,7 +169,8 @@ const AttenPerformance = () => {
                             />
                         </Box>
                     </LocalizationProvider>
-                    <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(attandence, null, 2)}</pre>
+
+                    {/* <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(attandence, null, 2)}</pre> */}
                 </div>
             )}
         </div>

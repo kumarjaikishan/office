@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
-  departmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'department', required: true },
   date: { type: Date, required: true },
   punchIn: { type: Date },
   punchOut: { type: Date },
@@ -15,6 +14,7 @@ const attendanceSchema = new mongoose.Schema({
     required: true
   },
   leave: { type: mongoose.Schema.Types.ObjectId, ref: 'Leave' },
+  source: { type: String, enum: ['leaveApproval', 'manual', 'device'], default: 'manual' }
 });
 
 module.exports = mongoose.model('Attendance', attendanceSchema);

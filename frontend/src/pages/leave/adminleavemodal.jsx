@@ -2,11 +2,31 @@ import React from 'react'
 import Modalbox from '../../components/custommodal/Modalbox';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { IoIosSend } from 'react-icons/io';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, setInp, init }) => {
-    const adddepartcall = (e) => {
+    const adddepartcall = async (e) => {
         e.preventDefault();
-console.log(inp)
+        console.log(inp);
+
+        const token = localStorage.getItem('emstoken');
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}leavehandle`, {
+                ...inp
+            },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            toast.success(res.data.message, { autoClose: 2000 })
+        } catch (err) {
+            console.error(err);
+            alert("Error saving holiday");
+        }
     }
 
     return (
@@ -36,8 +56,8 @@ console.log(inp)
                                 onChange={(e) => handleChange(e, 'status')}
                             >
                                 <MenuItem value={'pending'}>Pending</MenuItem>
-                                <MenuItem value={'approve'}>Approve</MenuItem>
-                                <MenuItem value={'reject'}>Reject</MenuItem>
+                                <MenuItem value={'approved'}>Approve</MenuItem>
+                                <MenuItem value={'rejected'}>Reject</MenuItem>
 
                             </Select>
                         </FormControl>

@@ -38,6 +38,7 @@ const Main = () => {
     console.log("employee", employee)
     // console.log("currentPresent", currentpresent)
     console.log("department", department)
+    if(!attandence) return;
     let currentPresent = attandence.filter((val) => {
       return dayjs(val.date).isSame(dayjs(), 'day') && !val.punchOut
     })

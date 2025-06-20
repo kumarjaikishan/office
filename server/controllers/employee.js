@@ -1,6 +1,7 @@
 
 const employee = require('../models/employee');
 const Leave = require('../models/leave');
+const notificationmodal = require('../models/notification')
 
 
 const addleave = async (req, res, next) => {
@@ -45,8 +46,19 @@ const fetchleave = async (req, res, next) => {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+const employeefetch = async (req, res, next) => {
+
+  try {
+    const notification = await notificationmodal.find({userId :req.user.id}).sort({createdAt:-1})
+    return res.status(200).json({ notification });
+
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 
 
 
-module.exports = { addleave, fetchleave };
+module.exports = { employeefetch,addleave, fetchleave };

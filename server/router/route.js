@@ -27,6 +27,7 @@ router.route('/adddepartment').post(authmiddlewre,adminmiddleware,admin.addDepar
 router.route('/updatedepartment').post(authmiddlewre,adminmiddleware,admin.updatedepartment); 
 router.route('/deletedepartment').post(authmiddlewre,adminmiddleware,admin.deletedepartment); 
 router.route('/firstfetch').get(authmiddlewre,adminmiddleware,admin.firstfetch); 
+router.route('/leavehandle').post(authmiddlewre,adminmiddleware,admin.leavehandle); 
 
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 
@@ -48,6 +49,7 @@ router.route('/getholidays').get(holiday.getholidays);
 
 router.route('/addleave').post(authmiddlewre,employee.addleave); 
 router.route('/fetchleave').get(authmiddlewre,employee.fetchleave); 
+router.route('/employeefetch').get(authmiddlewre,employee.employeefetch); 
 
 
 module.exports = router;

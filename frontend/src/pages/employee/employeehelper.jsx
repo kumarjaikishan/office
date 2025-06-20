@@ -18,8 +18,8 @@ export const columns = [
         selector: (row) => row.name
     },
     {
-        name: "DOB",
-        selector: (row) => row.dob
+        name: "Email",
+        selector: (row) => row.email
     },
     {
         name: "Department",
@@ -152,7 +152,7 @@ export const employeefetche = async ({navigate, setisload, setemployeelist, dele
             }
         );
 
-        // console.log('employee fetch Query:', res);
+        console.log('employee fetch Query:', res.data);
         let sno = 1;
         const data = await res.data.list.map((emp) => {
             return {
@@ -167,11 +167,11 @@ export const employeefetche = async ({navigate, setisload, setemployeelist, dele
                         <Typography variant="body2">{emp.employeename}</Typography>
                     </Box>
                 </div>),
-                dob: emp.dob,
+                email: emp.userid.email,
                 department: emp.department,
                 action: (<div className="action flex gap-2.5">
                     <span className="eye edit text-[18px] text-green-500 cursor-pointer" ><IoEyeOutline /></span>
-                    <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={()=> navigate(`/admin-dashboard/performance/${emp.userid}`) } ><HiOutlineDocumentReport /></span>
+                    <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={()=> navigate(`/admin-dashboard/performance/${emp.userid._id}`) } ><HiOutlineDocumentReport /></span>
                     <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
                     <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
                 </div>)

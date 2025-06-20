@@ -38,6 +38,7 @@ const Login = () => {
                 dispatch(setadmin(true));
                 return navigate('/admin-dashboard');
             }
+            //  dispatch(setadmin(false));
             return navigate('/employe-dashboard');
 
         } catch (error) {

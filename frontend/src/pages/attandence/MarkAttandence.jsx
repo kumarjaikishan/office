@@ -80,7 +80,6 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 setinp({
                                     ...inp,
                                     employeeId: newValue._id,
-                                    departmentId: newValue.department._id
                                 })
                             }}
                             renderOption={(props, option) => {

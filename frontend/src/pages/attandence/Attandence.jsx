@@ -42,7 +42,6 @@ const Attandence = () => {
 
   const init = {
     employeeId: '',
-    departmentId: '',
     date: dayjs(),
     punchIn: null,
     punchOut: null,
@@ -138,7 +137,6 @@ const Attandence = () => {
       let leave = emp.status == 'leave';
       return {
         attenid: emp._id,
-        departmentId: emp.departmentId._id,
         employeeId: emp.employeeId._id,
         status: <span className={`${absent ? 'bg-red-100 text-red-800': leave ? 'bg-violet-100 text-violet-800':'bg-green-100 text-green-800'} px-2 py-1 rounded `}>{emp.status}</span> ,
         rawname: emp.employeeId.employeename,

@@ -104,7 +104,7 @@ const deleteattandence = async (req, res, next) => {
 
 const checkin = async (req, res, next) => {
   try {
-    const { employeeId, departmentId, date, punchIn, status } = req.body;
+    const { employeeId, date, punchIn, status } = req.body;
     console.log(req.body)
 
     // Normalize date (strip time part)
@@ -119,7 +119,7 @@ const checkin = async (req, res, next) => {
       return res.status(400).json({ message: 'Already checked in' });
     }
 
-    const attendanceData = { employeeId, departmentId, date: dateObj, status };
+    const attendanceData = { employeeId, date: dateObj, status };
 
     if (punchIn) {
       const punchInTime = new Date(punchIn);
@@ -134,8 +134,7 @@ const checkin = async (req, res, next) => {
     await attendance.save();
 
     const updatedRecord = await Attendance.findById(attendance._id)
-      .populate('employeeId', 'employeename profileimage')
-      .populate('departmentId', 'department');
+      .populate('employeeId', 'employeename profileimage');
 
     // Send live update to all clients
     sendToClients({

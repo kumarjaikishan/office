@@ -1,38 +1,64 @@
-import { Button } from '@mui/material'
+import { Avatar, Button } from '@mui/material'
 import { setloader, setlogin, setlogout } from '../../store/authSlice';
 // import './navbar.css'
 import { useSelector, useDispatch } from 'react-redux';
 import { CiBullhorn } from "react-icons/ci";
-import { FaUser } from "react-icons/fa";
+import { Popover, Typography, List, ListItem, ListItemText, Badge } from '@mui/material';
+import { FaRegUser, FaUser } from "react-icons/fa";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { NotificationIcon } from './popover';
+import { NotificationIcon1 } from './muipopover';
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const [notification, setnotification] = useState([]);
+  const { isadmin, islogin } = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.user);
+  console.log(isadmin, islogin, user)
 
-  const logout = () => {
-    dispatch(setlogout({
-      login: false,
-      user: {}
-    }));
-  }
+  useEffect(() => {
+    const hey = async () => {
+      const token = localStorage.getItem('emstoken');
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}employeefetch`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        // console.log(res.data)
+        setnotification(res.data.notification);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    hey();
+  }, [])
 
   return (
     <div className='navbar w-full bg-white flex items-center justify-between px-4 py-2'>
       <p>page { }</p>
 
-      <div className='flex  gap-6 items-center px-2 text-grey'>
+      <div className='flex  gap-4 items-center px-2 text-grey'>
         <span className='bg-amber-200 w-7 h-7 rounded-full flex items-center justify-center relative cursor-pointer'>
           <CiBullhorn />
           <span className='absolute -top-2 -right-2 bg-purple-800 text-white
-        rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold'>
-            1</span>
+              rounded-full w-4 h-4 flex items-center justify-center text-[10px]  font-bold'
+          >
+            1
+          </span>
         </span>
+        <NotificationIcon notifications={notification} />
+        {/* <NotificationIcon1 notifications={notification} /> */}
         <div className='flex flex-col items-end px-1'>
-          <span className='text-xs  font-medium leading-4'>jaikishan kumar</span>
-          <p className='text-[10px] text-gray-500 text-right'>admin</p>
+          <span className='text-xs  font-medium leading-4 capitalize'>{user?.profile?.name}</span>
+          <p className='text-[10px] text-gray-500 text-right capitalize'>{user?.profile?.role}</p>
         </div>
-        <span className='w-[36px] h-[36px] flex items-center justify-center'>
-          <FaUser className=' flex justify-center text-2xl' />
-        </span>
+        <Avatar src={user?.profile?.profilepic} alt={user?.profile?.name}>
+          {!user?.profile?.profilepic && <FaRegUser />}
+        </Avatar>
       </div>
     </div>
   )

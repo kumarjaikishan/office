@@ -12,6 +12,7 @@ const Adminleave = () => {
     const [openmodal, setopenmodal] = useState(false);
     const [isload, setisload] = useState(false);
     const init = {
+        leaveid: '',
         department: '',
         employeename: '',
         from: '',
@@ -51,6 +52,11 @@ const Adminleave = () => {
                         to: dayjs(leave.toDate).format('DD MMM, YYYY'),
                         reason: leave.reason,
                         status: leave.status,
+                        status: <span className={`${leave.status == 'approved' ? 'bg-green-100 text-green-800' : 
+                        (leave.status == 'rejected' ? "bg-red-100 text-red-800" :
+                         "bg-amber-100 text-amber-800") } px-3 py-1 rounded capitalize`}>
+                            {leave.status}
+                        </span>,
                         action: (<div className="flex gap-2">
                             <span className="edit" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>
                             <span className="delete" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>
@@ -66,8 +72,8 @@ const Adminleave = () => {
         firstfetch();
     }, [])
 
-     const handleChange=(e,field)=>{
-         setInp({...inp,[field]:e.target.value})
+    const handleChange = (e, field) => {
+        setInp({ ...inp, [field]: e.target.value })
     }
 
     const deletee = () => {
@@ -76,12 +82,13 @@ const Adminleave = () => {
     const edite = (data) => {
         console.log(data)
         setInp({
+            leaveid: data._id,
             department: data.employeeId.userid.email,
             employeename: data.employeeId.employeename,
-            from:dayjs(data.fromDate).format('DD MMM, YYYY'),
+            from: dayjs(data.fromDate).format('DD MMM, YYYY'),
             to: dayjs(data.toDate).format('DD MMM, YYYY'),
             reason: data.reason,
-            status: data.status
+            status: data.status,
         })
         setopenmodal(true);
     }
@@ -129,7 +136,7 @@ export const columns = [
     {
         name: "Status",
         selector: (row) => row.status,
-        width: '80px'
+        width: '120px',
     },
     {
         name: "Action",

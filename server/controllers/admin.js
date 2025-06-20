@@ -1,6 +1,8 @@
 const departmentModal = require('../models/department');
 const employeeModal = require('../models/employee');
 const usermodal = require('../models/user');
+const leavemodal = require('../models/leave')
+const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
@@ -238,7 +240,9 @@ const deleteemployee = async (req, res, next) => {
 }
 const employeelist = async (req, res, next) => {
     try {
-        const query = await employeeModal.find().populate('department', 'department');
+        const query = await employeeModal.find()
+            .populate('department', 'department')
+            .populate('userid', 'email');
         const departmentlist = await departmentModal.find().select('department');
         // console.log(query)
 
@@ -257,8 +261,7 @@ const firstfetch = async (req, res, next) => {
         const query = await employeeModal.find().populate('department', 'department').sort({ employeename: 1 });
         const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
         const attendance = await attendanceModal.find()
-            .populate('employeeId', 'employeename profileimage')
-            .populate('departmentId', 'department').sort({ date: -1 });
+            .populate('employeeId', 'employeename profileimage');
         // console.log(query)
 
         res.status(200).json({
@@ -274,8 +277,81 @@ const firstfetch = async (req, res, next) => {
     }
 }
 
+const leavehandle = async (req, res, next) => {
+    // console.log(req.body)
+    let { leaveid, status } = req.body;
+
+    if (!leaveid || !status) return next({ status: 400, message: "Leave id and status is required" });
+
+    try {
+        const query = await leavemodal.findByIdAndUpdate(leaveid, { status }).populate('employeeId', 'userid');
+
+        const userId = query.employeeId.userid;
+
+
+        if (!query) return next({ status: 404, message: "Leave not found" });
+
+        let message = '';
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+
+        const fromFormatted = new Date(query.fromDate).toLocaleDateString('en-GB', options); // "21 Jun, 2025"
+        const toFormatted = new Date(query.toDate).toLocaleDateString('en-GB', options);
+        const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+        message = `Your leave request from ${fromFormatted} to ${toFormatted} has been ${formattedStatus}.`;
+
+        if (message && userId) {
+            await notificationmodal.create({ userId, message });
+        }
+
+        if (status == 'approved') {
+            const fromDate = new Date(query.fromDate);
+            const toDate = new Date(query.toDate);
+            fromDate.setHours(0, 0, 0, 0);
+            toDate.setHours(0, 0, 0, 0);
+
+            const employeeId = query.employeeId._id;
+
+            // Iterate from fromDate to toDate
+            for (let date = new Date(fromDate); date <= toDate; date.setDate(date.getDate() + 1)) {
+                // Clone date to avoid reference issue
+                const currentDate = new Date(date);
+                currentDate.setHours(0, 0, 0, 0);
+
+                // Check if attendance already exists
+                const existing = await attendanceModal.findOne({ employeeId, date: currentDate });
+                if (existing) {
+                    if (existing.status === 'absent') {
+                        // Update status from 'absent' to 'leave'
+                        existing.status = 'leave';
+                        existing.source = 'leaveApproval';
+                        await existing.save();
+                    }
+                    // If status is already 'leave' or 'present', skip
+                } else {
+                    // Insert new leave attendance
+                    const attendanceData = {
+                        employeeId,
+                        date: currentDate,
+                        status: 'leave',
+                        leave:leaveid ,
+                        source: 'leaveApproval'
+                    };
+                    await attendanceModal.create(attendanceData);
+                }
+            }
+        }
+
+        return res.status(200).json({
+            message: 'Updated Successfully'
+        })
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
+
 
 module.exports = {
-    addDepartment, firstfetch, departmentlist, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, firstfetch, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };
