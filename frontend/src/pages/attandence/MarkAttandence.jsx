@@ -54,7 +54,6 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 slotProps={{
                                     textField: {
                                         size: 'small',
-
                                     },
                                 }}
                                 onChange={(newValue) => {

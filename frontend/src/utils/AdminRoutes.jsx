@@ -7,11 +7,12 @@ import Navbar from '../components/Navbar';
 
 const AdminRoutes = () => {
   const {isadmin,islogin} = useSelector((state) => state.auth);
-  const admin = islogin && isadmin;
+   const user = useSelector((state) => state.user);
+  const admin = islogin && user.profile.role==='admin';
   // const admin = true;
 
   useEffect(() => {
-    console.log(isadmin,islogin)
+    // console.log(isadmin,islogin)
     if (!admin) {
       toast.warn('Access denied. Admin authorization is required.', { autoClose: 1900 });
     }

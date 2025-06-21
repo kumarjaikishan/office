@@ -20,6 +20,13 @@ body {
     min-height: 100vh;
 }
 
+.attandencecard{
+    @apply w-full flex justify-center items-center gap-5 relative before:absolute before:top-1/2 before:-left-1/2 before:w-1/2 before:h-0.5 before:bg-gray-400 before:content-[''];
+}
+
+.MuiChartsLegend-root.MuiChartsLegend-vertical.css-1yf54bd-MuiChartsLegend-root{
+    display: none !important;
+}
 .material {
     width: calc(100% - var(--sidebarwidth));
     width: 100%;

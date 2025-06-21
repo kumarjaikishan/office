@@ -2,11 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Box, Tooltip } from '@mui/material';
-import { LocalizationProvider, PickersDay, StaticDatePicker } from '@mui/x-date-pickers';
+import {
+    Box,
+    Tooltip,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@mui/material';
+import {
+    LocalizationProvider,
+    PickersDay,
+    StaticDatePicker,
+} from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import EmployeeProfileCard from '../../components/performanceCard';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const AttenPerformance = () => {
     const { userid } = useParams();
@@ -14,70 +24,49 @@ const AttenPerformance = () => {
     const [employee, setemployee] = useState({});
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedYear, setSelectedYear] = useState(dayjs())
-    const [selectedMonth, setSelectedMonth] = useState()
-    const weeklyOffs = [1];
+
+    const [selectedYear, setSelectedYear] = useState(dayjs().year());
+    const [selectedMonth, setSelectedMonth] = useState('all'); // null = all months
+
+    const weeklyOffs = [1]; // Monday off
+
     const [hell, sethell] = useState({
         present: [],
         absent: [],
         holiday: [],
         leave: [],
-    })
+    });
+
+    const currentYear = dayjs().year();
+    const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear + 1 - i);
+
+    const monthOptions = [
+        ...Array.from({ length: 12 }, (_, i) => ({
+            label: dayjs().month(i).format('MMMM'),
+            value: i,
+        })),
+    ];
 
     useEffect(() => {
         if (!userid) return;
-        console.log(userid)
+
         const fetchPerformanceData = async () => {
-            const token = localStorage.getItem('emstoken')
+            const token = localStorage.getItem('emstoken');
             try {
                 setLoading(true);
-                const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}employeeAttandence`,
+                const res = await axios.get(
+                    `${import.meta.env.VITE_API_ADDRESS}employeeAttandence`,
                     {
-                        params: { userid }
-                    },
-                    {
+                        params: { userid },
                         headers: {
-                            Authorization: `Bearer ${token}`
-                        }
+                            Authorization: `Bearer ${token}`,
+                        },
                     }
                 );
-                console.log(res.data)
-                setemployee(res.data.employee)
-                setuser(res.data.user)
-                setattandence(res.data.attandence)
-
-                const presentDates = [];
-                const absentDates = [];
-                const leaveDates = [];
-                const holidayDates = [];
-
-                res.data.attandence.forEach(element => {
-                    switch (element.status) {
-                        case 'present':
-                            presentDates.push(dayjs(element.date).toDate());
-                            break;
-                        case 'absent':
-                            absentDates.push(dayjs(element.date).toDate());
-                            break;
-                        case 'leave':
-                            leaveDates.push(dayjs(element.date).toDate());
-                            break;
-                        case 'holiday':
-                            holidayDates.push(dayjs(element.date).toDate());
-                            break;
-                        default:
-                            break;
-                    }
-                });
-                console.log(presentDates, absentDates, leaveDates)
-
-                sethell({
-                    present: presentDates,
-                    absent: absentDates,
-                    leave: leaveDates,
-                    holiday: holidayDates
-                });
-
+                console.log(res.data.attandence)
+                setemployee(res.data.employee);
+                setuser(res.data.user);
+                setattandence(res.data.attandence);
             } catch (err) {
                 console.error('Failed to fetch performance data:', err);
             } finally {
@@ -88,52 +77,133 @@ const AttenPerformance = () => {
         fetchPerformanceData();
     }, [userid]);
 
+    useEffect(() => {
+        if (!attandence.length) return;
+
+        const filtered = attandence.filter((entry) => {
+            const entryDate = dayjs(entry.date);
+            const matchesYear = entryDate.year() === selectedYear;
+            const matchesMonth =
+                selectedMonth === 'all' || entryDate.month() === selectedMonth;
+            return matchesYear && matchesMonth;
+        });
+
+        const presentDates = [];
+        const absentDates = [];
+        const leaveDates = [];
+        const holidayDates = [];
+
+        filtered.forEach((element) => {
+            const date = dayjs(element.date).toDate();
+            switch (element.status) {
+                case 'present':
+                    presentDates.push(date);
+                    break;
+                case 'absent':
+                    absentDates.push(date);
+                    break;
+                case 'leave':
+                    leaveDates.push(date);
+                    break;
+                case 'holiday':
+                    holidayDates.push(date);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        sethell({
+            present: presentDates,
+            absent: absentDates,
+            leave: leaveDates,
+            holiday: holidayDates,
+        });
+    }, [attandence, selectedYear, selectedMonth]);
 
     return (
         <div className="p-4">
             {loading && <p>Loading performance data...</p>}
-            {/* {error && <p className="text-red-500">Error: {error.message}</p>} */}
 
-            <div className='p-2 rounded shadow bg-white '>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <div className='flex gap-3 '>
-                    <DatePicker
-                        label="Select Year"
-                        views={['year']}
-                        value={selectedYear}
-                        onChange={(newValue) => setSelectedYear(newValue)}
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                    />
-                    <DatePicker
-                        label="Select Month"
-                        views={['month']}
-                        value={selectedMonth}
-                        onChange={(newValue) => setSelectedMonth(newValue)}
-                        renderInput={(params) => <TextField {...params} fullWidth />}
-                    />
-                    </div>
-                </LocalizationProvider>
+            <div className="p-2 rounded shadow bg-white mb-4">
+                <div className="flex gap-3">
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <InputLabel id="year-select-label">Year</InputLabel>
+                        <Select
+                            labelId="year-select-label"
+                            value={selectedYear}
+                            label="Year"
+                            onChange={(e) => {
+                                setSelectedYear(e.target.value);
+                                setSelectedMonth(null);
+                            }}
+                        >
+                            {yearOptions.map((year) => (
+                                <MenuItem key={year} value={year}>
+                                    {year}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel id="month-select-label">Month</InputLabel>
+                        <Select
+                            labelId="month-select-label"
+                            value={selectedMonth}
+                            label="Month"
+                            onChange={(e) =>
+                                setSelectedMonth(
+                                    e.target.value === '' ? null : e.target.value
+                                )
+                            }
+                        >
+                            <MenuItem value="all">All</MenuItem>
+                            {monthOptions.map((month) => (
+                                <MenuItem key={month.label} value={month.value ?? ''}>
+                                    {month.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </div>
             </div>
+
             {attandence && (
-                <div>
-                    <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
+                <>
+                    <EmployeeProfileCard
+                        employee={employee}
+                        user={user}
+                        attandence={attandence}
+                        hell={hell}
+                    />
+
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <Box className="bg-white shadow rounded p-1 w-full max-w-md">
+                        <Box className="bg-white shadow rounded p-1 w-full max-w-md mx-auto">
                             <StaticDatePicker
                                 displayStaticWrapperAs="desktop"
                                 value={dayjs()}
-                                // onChange={() => { }}
                                 slots={{
                                     day: (props) => {
                                         const date = props.day;
 
-                                        const isPresent = hell.present.some(d => dayjs(d).isSame(date, 'day'));
-                                        const isleave = hell.leave.some(d => dayjs(d).isSame(date, 'day'));
-                                        const isabsent = hell.absent.some(d => dayjs(d).isSame(date, 'day'));
+                                        const isPresent = hell.present.some((d) =>
+                                            dayjs(d).isSame(date, 'day')
+                                        );
+                                        const isLeave = hell.leave.some((d) =>
+                                            dayjs(d).isSame(date, 'day')
+                                        );
+                                        const isAbsent = hell.absent.some((d) =>
+                                            dayjs(d).isSame(date, 'day')
+                                        );
                                         const isWeeklyOff = weeklyOffs.includes(date.getDay());
 
-                                        const tooltipText = (isPresent && "Present") || (isleave && "Leave") ||
-                                            (isWeeklyOff && "Weekly Off") || (isabsent && "Absent") || "";
+                                        const tooltipText =
+                                            (isPresent && 'Present') ||
+                                            (isLeave && 'Leave') ||
+                                            (isWeeklyOff && 'Weekly Off') ||
+                                            (isAbsent && 'Absent') ||
+                                            '';
 
                                         return (
                                             <Tooltip title={tooltipText}>
@@ -150,12 +220,12 @@ const AttenPerformance = () => {
                                                             borderRadius: '50%',
                                                             color: 'white',
                                                         }),
-                                                        ...(isabsent && {
+                                                        ...(isAbsent && {
                                                             backgroundColor: 'red',
                                                             borderRadius: '50%',
                                                             color: 'white',
                                                         }),
-                                                        ...(isleave && {
+                                                        ...(isLeave && {
                                                             backgroundColor: 'violet',
                                                             borderRadius: '50%',
                                                             color: 'white',
@@ -164,14 +234,12 @@ const AttenPerformance = () => {
                                                 />
                                             </Tooltip>
                                         );
-                                    }
+                                    },
                                 }}
                             />
                         </Box>
                     </LocalizationProvider>
-
-                    {/* <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(attandence, null, 2)}</pre> */}
-                </div>
+                </>
             )}
         </div>
     );

@@ -47,6 +47,7 @@ const userSlice = createSlice({
                 state.department = action.payload.departmentlist;
                 state.employee = action.payload.employee;
                 state.attandence = action.payload.attendance;
+                state.setting = action.payload.companySetting;
                 state.status = 'succeeded';
             })
             .addCase(FirstFetch.pending, (state) => {

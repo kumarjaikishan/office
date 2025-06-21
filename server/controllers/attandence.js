@@ -105,7 +105,7 @@ const deleteattandence = async (req, res, next) => {
 const checkin = async (req, res, next) => {
   try {
     const { employeeId, date, punchIn, status } = req.body;
-    console.log(req.body)
+    // console.log(req.body)
 
     // Normalize date (strip time part)
     const dateObj = new Date(date);
@@ -193,7 +193,6 @@ const checkout = async (req, res, next) => {
 
     const updatedRecord = await Attendance.findById(record._id)
       .populate('employeeId', 'employeename profileimage')
-      .populate('departmentId', 'department');
 
     // Send live update to all clients
     sendToClients({

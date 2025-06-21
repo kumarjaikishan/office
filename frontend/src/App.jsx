@@ -17,6 +17,7 @@ import AttenPerformance from './pages/attandence/AttenPerformance';
 import HolidayForm from './pages/holidays/Holiday';
 import Leave from './pages/leave/Leave';
 import Adminleave from './pages/leave/Adminleave';
+import CompanySettingForm from './pages/settingPage';
 
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
   const { islogin } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    console.log("login check",islogin)
+    // console.log("login check",islogin)
     if (islogin) {
       dispatch(FirstFetch());
     }
@@ -69,6 +70,7 @@ function App() {
           <Route path="holiday" element={<HolidayForm />} />
           <Route path="leave" element={<Leave />} />
           <Route path="adminleave" element={<Adminleave />} />
+          <Route path="setting" element={<CompanySettingForm />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />
         </Route>
 

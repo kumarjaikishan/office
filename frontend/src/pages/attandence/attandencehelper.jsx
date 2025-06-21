@@ -2,13 +2,6 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 
-const handleCheckIn = async () => {
-  await axios.post('/api/attendance/checkin', { employeeId });
-};
-
-const handleCheckOut = async () => {
-  await axios.post('/api/attendance/checkout', { employeeId });
-};
 
 export const submitAttandence = async ({ isPunchIn, inp, setisload }) => {
   // console.log(inp)

@@ -32,7 +32,7 @@ const Attandence = () => {
   const [isload, setisload] = useState(false);
   const [openmodal, setopenmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
-  const { attandence, department } = useSelector((state) => state.user);
+  const { attandence, department, setting } = useSelector((state) => state.user);
   const [attandencelist, setattandencelist] = useState([]);
   const [filterattandence, setfilterattandence] = useState([]);
   const [isPunchIn, setisPunchIn] = useState(true);
@@ -80,13 +80,23 @@ const Attandence = () => {
   useEffect(() => {
     if (!attandencelist) return;
 
+    const today = dayjs(); // today's date without time
+
     const fil = attandencelist.filter((val) => {
+      const recordDate = dayjs(val.date, "DD MMM, YYYY");
+
+      // Exclude future dates
+      if (recordDate.isAfter(today, 'day')) return false;
+
       const matchDate =
-        !filtere.date || dayjs(val.date, "DD MMM, YYYY").isSame(filtere.date, 'day');
+        !filtere.date || recordDate.isSame(filtere.date, 'day');
+
       const matchDept =
         filtere.departmente === 'all' || val.departmentId === filtere.departmente;
+
       const matchStatus =
         filtere.status === '' || val.status === filtere.status;
+
       const matchEmployee =
         filtere.employee.trim() === '' ||
         val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
@@ -96,7 +106,6 @@ const Attandence = () => {
 
     setfilterattandence(fil);
   }, [filtere, attandencelist]);
-
 
 
   useEffect(() => {
@@ -132,48 +141,95 @@ const Attandence = () => {
     // console.log(department)
     // console.log(attandence)
     if (!attandence) return;
-    const data = attandence.map((emp) => {
-      let absent = emp.status == 'absent';
-      let leave = emp.status == 'leave';
-      return {
-        attenid: emp._id,
-        employeeId: emp.employeeId._id,
-        status: <span className={`${absent ? 'bg-red-100 text-red-800': leave ? 'bg-violet-100 text-violet-800':'bg-green-100 text-green-800'} px-2 py-1 rounded `}>{emp.status}</span> ,
-        rawname: emp.employeeId.employeename,
-        name: (<div className="flex items-center gap-3 ">
-          <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
-            {!emp.employeeId.profileimage && <FaRegUser />}
-          </Avatar>
-          <Box>
-            <Typography variant="body2">{emp.employeeId.employeename}</Typography>
-          </Box>
-        </div>),
-        date: dayjs(emp.date).format('DD MMM, YYYY'),
-        punchIn: emp.punchIn && <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchIn).format('hh:mm A')}
-          {dayjs(emp.punchIn).isBefore(dayjs(emp.punchIn).startOf('day').add(9, 'hour').add(50, 'minute')) && (
-            <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Early</span>
-          )}
-          {dayjs(emp.punchIn).isAfter(dayjs(emp.punchIn).startOf('day').add(10, 'hour').add(30, 'minute')) && (
-            <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Late</span>
-          )}
-        </span>,
-        punchOut: emp.punchOut && <span className="flex items-center gap-1"><IoMdTime className="text-[16px] text-blue-700" /> {dayjs(emp.punchOut).format('hh:mm A')}
-          {dayjs(emp.punchOut).isBefore(dayjs(emp.punchOut).startOf('day').add(17, 'hour').add(30, 'minute')) && (
-            <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Early</span>
-          )}
-          {dayjs(emp.punchOut).isAfter(dayjs(emp.punchOut).startOf('day').add(18, 'hour').add(15, 'minute')) && (
-            <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Overtime</span>
-          )}
-        </span>,
-        workingHours: emp.workingMinutes && <span>{minutesinhours(emp.workingMinutes)}
-          {emp.workingMinutes < 300 && <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Short</span>}
-        </span>,
-        action: (<div className="action flex gap-2.5">
-          <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
-          <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
-        </div>)
-      }
-    })
+    const today = dayjs().startOf('day');
+
+    const data = attandence
+      .filter(emp => !dayjs(emp.date).isAfter(today, 'day'))
+      .map((emp) => {
+        let absent = emp.status == 'absent';
+        let leave = emp.status == 'leave';
+
+        return {
+          attenid: emp._id,
+          employeeId: emp.employeeId._id,
+          status: (
+            <span className={`${absent ? 'bg-red-100 text-red-800' : leave ? 'bg-violet-100 text-violet-800' : 'bg-green-100 text-green-800'} px-2 py-1 rounded`}>
+              {emp.status}
+            </span>
+          ),
+          rawname: emp.employeeId.employeename,
+          name: (
+            <div className="flex items-center gap-3">
+              <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
+                {!emp.employeeId.profileimage && <FaRegUser />}
+              </Avatar>
+              <Box>
+                <Typography variant="body2">{emp.employeeId.employeename}</Typography>
+              </Box>
+            </div>
+          ),
+          date: dayjs(emp.date).format('DD MMM, YYYY'),
+          punchIn: emp.punchIn && (() => {
+            const [earlyHour, earlyMinute] = setting.attendanceRules.considerEarlyEntryBefore.split(':').map(Number);
+            const [lateHour, lateMinute] = setting.attendanceRules.considerLateEntryAfter.split(':').map(Number);
+
+            const earlyThreshold = dayjs(emp.punchIn).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
+            const lateThreshold = dayjs(emp.punchIn).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
+
+            return (
+              <span className="flex items-center gap-1">
+                <IoMdTime className="text-[16px] text-blue-700" />
+                {dayjs(emp.punchIn).format('hh:mm A')}
+                {dayjs(emp.punchIn).isBefore(earlyThreshold) && (
+                  <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Early</span>
+                )}
+                {dayjs(emp.punchIn).isAfter(lateThreshold) && (
+                  <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Late</span>
+                )}
+              </span>
+            );
+          })(),
+          punchOut: emp.punchOut && (() => {
+            const [earlyHour, earlyMinute] = setting.attendanceRules.considerEarlyExitBefore.split(':').map(Number);
+            const [lateHour, lateMinute] = setting.attendanceRules.considerLateExitAfter.split(':').map(Number);
+
+            const earlyExitThreshold = dayjs(emp.punchOut).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
+            const lateExitThreshold = dayjs(emp.punchOut).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
+
+            return (
+              <span className="flex items-center gap-1">
+                <IoMdTime className="text-[16px] text-blue-700" />
+                {dayjs(emp.punchOut).format('hh:mm A')}
+                {dayjs(emp.punchOut).isBefore(earlyExitThreshold) && (
+                  <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Early</span>
+                )}
+                {dayjs(emp.punchOut).isAfter(lateExitThreshold) && (
+                  <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Late</span>
+                )}
+              </span>
+            );
+          })(),
+          workingHours: emp.workingMinutes && (
+            <span>
+              {minutesinhours(emp.workingMinutes)}
+              {emp.workingMinutes < setting.workingMinutes.shortDayThreshold && (
+                <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short</span>
+              )}
+              {emp.workingMinutes > setting.workingMinutes.overtimeAfterMinutes && (
+                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime</span>
+              )}
+            </span>
+          ),
+
+          action: (
+            <div className="action flex gap-2.5">
+              <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
+              <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
+            </div>
+          )
+        }
+
+      })
     // console.log(res.data.list)
     setattandencelist(data);
   }, [attandence]);

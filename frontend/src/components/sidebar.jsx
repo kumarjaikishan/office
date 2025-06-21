@@ -71,70 +71,72 @@ const Sidebar = () => {
     )
 }
 const menu = [
-    {
-        title: 'Menu',
-        items: [{
-            menu: "Dashboard",
-            link: '/admin-dashboard',
-            icon: <VscDashboard />
-        },
-        {
-            menu: "Empoloyes",
-            link: '/admin-dashboard/employe',
-            icon: <GoPeople />
-        },
-        {
-            menu: "Department",
-            link: '/admin-dashboard/department',
-            icon: <FaRegBuilding />
-        },
-        {
-            menu: "Holiday",
-            link: '/admin-dashboard/holiday',
-            icon: <FaRegBuilding />
-        },
-        {
-            menu: "Leave",
-            link: '/admin-dashboard/leave',
-            icon: <FaRegBuilding />
-        },
-        {
-            menu: "Admin Leave",
-            link: '/admin-dashboard/adminleave',
-            icon: <FaRegBuilding />
-        },
-        {
-            menu: "Attandence",
-            link: '/admin-dashboard/attandence',
-            icon: <TbReportAnalytics />
-        },
-        {
-            menu: "Salary",
-            link: '/admin-dashboard/salary',
-            icon: <GiTakeMyMoney />
-        }
-        ]
-    },
-    {
-        title: 'Others',
-        items: [{
-            menu: "Profile",
-            link: '/profile',
-            icon: <GiPlagueDoctorProfile />
-        },
-        {
-            menu: "Setting",
-            link: '/settings',
-            icon: <GoGear />
-        },
-        {
-            menu: "Logout",
-            isLogout: true,
-            icon: <CgLogOut />
-        },
-        ]
+  {
+    title: 'Menu',
+    items: [
+      {
+        menu: "Dashboard",
+        link: '/admin-dashboard',
+        icon: <VscDashboard />
+      },
+      {
+        menu: "Employees",
+        link: '/admin-dashboard/employe',
+        icon: <GoPeople />
+      },
+      {
+        menu: "Department",
+        link: '/admin-dashboard/department',
+        icon: <FaRegBuilding />
+      },
+      {
+        menu: "Holiday",
+        link: '/admin-dashboard/holiday',
+        icon: <FaUsers /> // Replaced with a general people icon
+      },
+      {
+        menu: "Leave",
+        link: '/admin-dashboard/leave',
+        icon: <GiPlagueDoctorProfile /> // Represents leave/status/individual
+      },
+      {
+        menu: "Admin Leave",
+        link: '/admin-dashboard/adminleave',
+        icon: <GiPlagueDoctorProfile /> // Also acceptable here
+      },
+      {
+        menu: "Attendance",
+        link: '/admin-dashboard/attandence',
+        icon: <TbReportAnalytics />
+      },
+      {
+        menu: "Salary",
+        link: '/admin-dashboard/salary',
+        icon: <GiTakeMyMoney />
+      }
+    ]
+  },
+  {
+    title: 'Others',
+    items: [
+      {
+        menu: "Profile",
+        link: '/profile',
+        icon: <GiPlagueDoctorProfile />
+      },
+      {
+        menu: "Setting",
+        link: '/admin-dashboard/setting',
+        icon: <GoGear />
+      },
+      {
+        menu: "Logout",
+        isLogout: true,
+        icon: <CgLogOut />
+      }
+    ]
+  }
+];
 
-    }
-]
 
 export default Sidebar

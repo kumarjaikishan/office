@@ -51,7 +51,6 @@ const Adminleave = () => {
                         from: dayjs(leave.fromDate).format('DD MMM, YYYY'),
                         to: dayjs(leave.toDate).format('DD MMM, YYYY'),
                         reason: leave.reason,
-                        status: leave.status,
                         status: <span className={`${leave.status == 'approved' ? 'bg-green-100 text-green-800' : 
                         (leave.status == 'rejected' ? "bg-red-100 text-red-800" :
                          "bg-amber-100 text-amber-800") } px-3 py-1 rounded capitalize`}>

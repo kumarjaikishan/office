@@ -4,6 +4,7 @@ const usermodal = require('../models/user');
 const leavemodal = require('../models/leave')
 const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
+const comanysettingModal = require('../models/comanysetting')
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const { default: mongoose } = require('mongoose');
@@ -261,14 +262,15 @@ const firstfetch = async (req, res, next) => {
         const query = await employeeModal.find().populate('department', 'department').sort({ employeename: 1 });
         const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
         const attendance = await attendanceModal.find()
-            .populate('employeeId', 'employeename profileimage');
-        // console.log(query)
+            .populate('employeeId', 'employeename profileimage').sort({ date: -1 });
+       const companySetting = await comanysettingModal.findOne();
 
         res.status(200).json({
             user: req.user,
             employee: query,
             departmentlist,
-            attendance
+            attendance,
+            companySetting
         })
 
     } catch (error) {
@@ -276,6 +278,43 @@ const firstfetch = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+const setsetting = async (req, res, next) => {
+    console.log(req.body)
+    const settingsData = req.body;
+    // return  res.status(200).json({ message:'ok thik hai' })
+    try {
+        const updatedSetting = await comanysettingModal.findOneAndUpdate(
+            {},                     // match all (singleton)
+            settingsData,           // new data
+            {
+                new: true,            // return updated doc
+                upsert: true,         // create if not exists
+                setDefaultsOnInsert: true
+            }
+        );
+
+        return res.status(200).json({message:"updated", updatedSetting});
+
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
+const getsetting = async (req, res, next) => {
+    try {
+        const companySetting = await comanysettingModal.findOne();
+
+        if (!companySetting) {
+            return res.status(404).json({ message: 'Company settings not found' });
+        }
+
+        return res.status(200).json(companySetting);
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: 'Internal Server Error' });
+    }
+};
 
 const leavehandle = async (req, res, next) => {
     // console.log(req.body)
@@ -333,7 +372,7 @@ const leavehandle = async (req, res, next) => {
                         employeeId,
                         date: currentDate,
                         status: 'leave',
-                        leave:leaveid ,
+                        leave: leaveid,
                         source: 'leaveApproval'
                     };
                     await attendanceModal.create(attendanceData);
@@ -352,6 +391,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, firstfetch, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, firstfetch, setsetting,getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

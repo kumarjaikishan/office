@@ -15,7 +15,7 @@ const Navbar = () => {
   const [notification, setnotification] = useState([]);
   const { isadmin, islogin } = useSelector((state) => state.auth);
   const user = useSelector((state) => state.user);
-  console.log(isadmin, islogin, user)
+  // console.log(isadmin, islogin, user)
 
   useEffect(() => {
     const hey = async () => {
