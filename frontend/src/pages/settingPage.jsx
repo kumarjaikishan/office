@@ -149,7 +149,7 @@ const CompanySettingForm = () => {
                     onChange={e => handleChange('workingMinutes', 'halfDay', Number(e.target.value))}
                 />
 
-                <TextField label="Short Day Threshold" fullWidth type="number"
+                <TextField label="Short Day Threshold (min)" fullWidth type="number"
                     value={settings.workingMinutes.shortDayThreshold}
                     onChange={e => handleChange('workingMinutes', 'shortDayThreshold', Number(e.target.value))}
                 />

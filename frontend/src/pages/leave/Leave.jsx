@@ -41,22 +41,11 @@ const Leave = () => {
         <>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
-
-                    <FormControl sx={{ width: '160px' }} size="small">
-                        <InputLabel>Department</InputLabel>
+                    <FormControl  size="small">
+                        <InputLabel>Type</InputLabel>
                         <Select
                             label="Department"
                             value={inp.type}
-                            input={
-                                <OutlinedInput
-                                    startAdornment={
-                                        <InputAdornment position="start">
-                                            <CiFilter fontSize="small" />
-                                        </InputAdornment>
-                                    }
-                                    label="Department"
-                                />
-                            }
                             onChange={(e) => changehandle(e.target.value, "type")}
                         >
                             <MenuItem selected value="formal">Formal</MenuItem>

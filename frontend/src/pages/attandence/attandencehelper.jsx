@@ -101,7 +101,7 @@ export const columns = [
   },
   {
     name: "Punch In",
-    selector: (row) => row.punchIn
+    selector: (row) => row.punchIn || '- : -'
   },
   {
     name: "Punch Out",
@@ -109,13 +109,13 @@ export const columns = [
   },
   {
     name: "Status",
-    selector: (row) => row.status || '-',
+    selector: (row) => row.stat || '-',
     width: '130px'
   },
   {
     name: "Working Hours",
     selector: (row) => row.workingHours || '-',
-    width: '130px'
+    // width: '130px'
   },
   {
     name: "Action",

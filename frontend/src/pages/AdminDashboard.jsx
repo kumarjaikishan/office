@@ -204,13 +204,13 @@ const Main = () => {
           })}
         </div>
         <div className='flex gap-5'>
-          <span className='flex items-center gap-1 text-green-500'>
+          <span className='flex items-center gap-1 text-green-500 text-[13px] '>
             <span className='block w-[15px] rounded-3xl h-[15px] bg-green-500 '></span> In Premise
           </span>
-          <span className='flex items-center gap-1 text-amber-700'>
+          <span className='flex items-center gap-1 text-amber-700 text-[13px]'>
             <span className='block w-[15px] rounded-3xl h-[15px] bg-amber-500 '></span> Present
           </span>
-          <span className='flex items-center gap-1 text-gray-500'>
+          <span className='flex items-center gap-1 text-gray-500 text-[13px]'>
             <span className='block w-[15px] rounded-3xl h-[15px] bg-gray-500  '></span> Absent
           </span>
         </div>

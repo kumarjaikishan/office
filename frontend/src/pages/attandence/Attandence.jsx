@@ -53,12 +53,12 @@ const Attandence = () => {
     date: null,
     departmente: 'all',
     employee: '',
-    status: ''
+    status: 'all'
   })
 
   const isFilterActive = (
     filtere.departmente !== 'all' ||
-    filtere.status !== '' ||
+    filtere.status !== 'all' ||
     filtere.employee.trim() !== '' ||
     filtere.date !== null
   );
@@ -78,6 +78,7 @@ const Attandence = () => {
   }, [inp.punchIn, inp.punchOut]);
 
   useEffect(() => {
+    console.log(attandencelist)
     if (!attandencelist) return;
 
     const today = dayjs(); // today's date without time
@@ -95,7 +96,7 @@ const Attandence = () => {
         filtere.departmente === 'all' || val.departmentId === filtere.departmente;
 
       const matchStatus =
-        filtere.status === '' || val.status === filtere.status;
+        filtere.status === 'all' || val.status === filtere.status;
 
       const matchEmployee =
         filtere.employee.trim() === '' ||
@@ -152,7 +153,8 @@ const Attandence = () => {
         return {
           attenid: emp._id,
           employeeId: emp.employeeId._id,
-          status: (
+          status:emp.status,
+          stat: (
             <span className={`${absent ? 'bg-red-100 text-red-800' : leave ? 'bg-violet-100 text-violet-800' : 'bg-green-100 text-green-800'} px-2 py-1 rounded`}>
               {emp.status}
             </span>
@@ -372,9 +374,13 @@ const Attandence = () => {
                       label="Status"
                     />
                   }
-                  onChange={(e) => console.log(e)}
+                  onChange={(e) =>  setfiltere({ ...filtere, status: e.target.value })}
                 >
-                  <MenuItem value={""}>Sales</MenuItem>
+                  <MenuItem value={"all"}>All</MenuItem>
+                  <MenuItem value={"present"}>Present</MenuItem>
+                  <MenuItem value={"absent"}>Absent</MenuItem>
+                  <MenuItem value={"leave"}>Leave</MenuItem>
+                  <MenuItem value={"half day"}>Half Day</MenuItem>
                 </Select>
               </FormControl>
             </div>

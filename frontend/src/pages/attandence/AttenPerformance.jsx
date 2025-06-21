@@ -2,14 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import {
-    Box,
-    Tooltip,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-} from '@mui/material';
+import { Box, Tooltip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import {
     LocalizationProvider,
     PickersDay,
@@ -17,6 +10,7 @@ import {
 } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import EmployeeProfileCard from '../../components/performanceCard';
+import { useSelector } from 'react-redux';
 
 const AttenPerformance = () => {
     const { userid } = useParams();
@@ -24,6 +18,7 @@ const AttenPerformance = () => {
     const [employee, setemployee] = useState({});
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { setting } = useSelector((state) => state.user);
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
     const [selectedMonth, setSelectedMonth] = useState('all'); // null = all months
@@ -36,6 +31,9 @@ const AttenPerformance = () => {
         holiday: [],
         leave: [],
     });
+    useEffect(() => {
+        console.log(setting)
+    }, [])
 
     const currentYear = dayjs().year();
     const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear + 1 - i);
@@ -48,6 +46,7 @@ const AttenPerformance = () => {
     ];
 
     useEffect(() => {
+
         if (!userid) return;
 
         const fetchPerformanceData = async () => {

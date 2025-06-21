@@ -18,6 +18,7 @@ import HolidayForm from './pages/holidays/Holiday';
 import Leave from './pages/leave/Leave';
 import Adminleave from './pages/leave/Adminleave';
 import CompanySettingForm from './pages/settingPage';
+import Profile from './pages/profile/profile';
 
 
 function App() {
@@ -68,7 +69,6 @@ function App() {
           <Route path="salary" element={<Salary />} />
           <Route path="attandence" element={<Attandence />} />
           <Route path="holiday" element={<HolidayForm />} />
-          <Route path="leave" element={<Leave />} />
           <Route path="adminleave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />
@@ -79,7 +79,10 @@ function App() {
           element={<PrivateRoute />}
         >
           <Route path="" element={<EmployeeDashboard />} />
+          <Route path="leave" element={<Leave />} />
         </Route>
+          <Route path="profile" element={<Profile />} />
+
       </Routes>
     </>
   )
