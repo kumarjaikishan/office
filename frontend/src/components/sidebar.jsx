@@ -124,6 +124,12 @@ const menu = [
         roles: ['admin']
       },
       {
+        menu: "Attendance",
+        link: '/admin-dashboard/attandence',
+        icon: <TbReportAnalytics />,
+        roles: ['employee']
+      },
+      {
         menu: "Salary",
         link: '/admin-dashboard/salary',
         icon: <GiTakeMyMoney />,

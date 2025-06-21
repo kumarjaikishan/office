@@ -6,6 +6,7 @@ import DataTable from 'react-data-table-component';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import Adminleavemodal from './adminleavemodal';
+import { customStyles } from '../attandence/attandencehelper';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
@@ -51,9 +52,9 @@ const Adminleave = () => {
                         from: dayjs(leave.fromDate).format('DD MMM, YYYY'),
                         to: dayjs(leave.toDate).format('DD MMM, YYYY'),
                         reason: leave.reason,
-                        status: <span className={`${leave.status == 'approved' ? 'bg-green-100 text-green-800' : 
-                        (leave.status == 'rejected' ? "bg-red-100 text-red-800" :
-                         "bg-amber-100 text-amber-800") } px-3 py-1 rounded capitalize`}>
+                        status: <span className={`${leave.status == 'approved' ? 'bg-green-100 text-green-800' :
+                            (leave.status == 'rejected' ? "bg-red-100 text-red-800" :
+                                "bg-amber-100 text-amber-800")} px-3 py-1 rounded capitalize`}>
                             {leave.status}
                         </span>,
                         action: (<div className="flex gap-2">
@@ -95,6 +96,7 @@ const Adminleave = () => {
         <>
             <div>Admin leave page</div>
             <DataTable
+                customStyles={customStyles}
                 columns={columns}
                 data={leavelist}
                 pagination

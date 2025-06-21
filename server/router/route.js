@@ -50,6 +50,7 @@ router.route('/addholiday').post(holiday.addholiday);
 router.route('/getholidays').get(holiday.getholidays); 
 
 router.route('/addleave').post(authmiddlewre,employee.addleave); 
+router.route('/getleave').get(authmiddlewre,employee.getleave); 
 router.route('/fetchleave').get(authmiddlewre,employee.fetchleave); 
 router.route('/employeefetch').get(authmiddlewre,employee.employeefetch); 
 

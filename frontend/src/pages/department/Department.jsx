@@ -7,6 +7,7 @@ import Modalbox from '../../components/custommodal/Modalbox';
 import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
 import { adddepartment, columns, delette, fetche, update } from './departmenthelper';
+import { customStyles } from '../attandence/attandencehelper';
 
 const Department = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -76,6 +77,7 @@ const Department = () => {
       </div>
       <div className="list">
         <DataTable
+         customStyles={customStyles}
           columns={columns}
           data={departmentlist}
           pagination

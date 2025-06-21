@@ -53,36 +53,36 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
             <div className="flex flex-col gap-4 w-[550px]">
                 <div className="attandencecard ">
                     <div className="flex w-full items-center justify-between bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full px-4 py-2 shadow">
-                        <span className="font-medium">👤 Name</span>
-                        <span className="font-bold">{user.name}</span>
+                        <span className="font-medium">👤 Early Arrival</span>
+                        <span className="font-bold">{hell?.earlyarrival?.length || 0}</span>
                     </div>
 
                     <div className="flex w-full items-center justify-between bg-gradient-to-r from-yellow-300 to-yellow-400 text-black rounded-full px-4 py-2 shadow">
-                        <span className="font-medium">🆔 Employe id</span>
-                        <span className="font-bold">1001</span>
+                        <span className="font-medium">🆔 Late Leave</span>
+                        <span className="font-bold">{hell?.lateleave?.length || 0}</span>
                     </div>
                 </div>
 
                 <div className="attandencecard ml-8">
                     <div className="flex w-full items-center justify-between bg-gradient-to-r from-orange-300 to-orange-500 text-black rounded-full px-4 py-2 shadow">
                         <span className="font-medium">✉️ Late Arriaval</span>
-                        <span className="text-sm ">{''}</span>
+                        <span className="text-bold ">{hell?.latearrival?.length || 0}</span>
                     </div>
 
                     <div className="flex w-full items-center justify-between bg-gradient-to-r from-orange-300 to-orange-500 text-black rounded-full px-4 py-2 shadow">
                         <span className="font-medium">👥 Early leave</span>
-                        <span className="font-bold">{user?.desgination}</span>
+                        <span className="font-bold">{hell?.earlyLeave?.length || 0}</span>
                     </div>
                 </div>
 
                 <div className="attandencecard ml-16">
                     <div className="flex w-full items-center justify-between bg-gradient-to-r from-pink-400 to-pink-600 text-white rounded-full px-4 py-2 shadow">
                         <span className="font-medium">📱 Overtime</span>
-                        <span className="font-bold">{user?.phone}</span>
+                        <span className="font-bold">{hell?.overtime?.length || 0}</span>
                     </div>
                     <div className="flex w-full items-center justify-between bg-gradient-to-r from-orange-400 to-purple-600 text-white rounded-full px-4 py-2 shadow">
                         <span className="font-medium">📊 short Attandence</span>
-                        <span className="font-bold">{perc.present}%</span>
+                        <span className="font-bold">{hell?.short?.length || 0}</span>
                     </div>
                 </div>
                 <div className="attandencecard ml-8">
@@ -113,3 +113,5 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
 };
 
 export default EmployeeProfileCard;
+
+ 
