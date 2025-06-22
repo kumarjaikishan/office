@@ -1,5 +1,5 @@
 import { CiFilter } from "react-icons/ci";
-import { Avatar, Box, Button, OutlinedInput, TextField, Typography } from '@mui/material';
+import { Avatar, Box, Button, IconButton, OutlinedInput, TextField, Typography } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -8,7 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import DataTable from "react-data-table-component";
 import { columns, customStyles, deleteAttandence } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { MdOutlineModeEdit } from "react-icons/md";
+import { MdClear, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { IoEyeOutline, IoSearch } from "react-icons/io5";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -78,7 +78,7 @@ const Attandence = () => {
   }, [inp.punchIn, inp.punchOut]);
 
   useEffect(() => {
-    console.log(attandencelist)
+    // console.log(attandencelist)
     if (!attandencelist) return;
 
     const today = dayjs(); // today's date without time
@@ -153,7 +153,7 @@ const Attandence = () => {
         return {
           attenid: emp._id,
           employeeId: emp.employeeId._id,
-          status:emp.status,
+          status: emp.status,
           stat: (
             <span className={`${absent ? 'bg-red-100 text-red-800' : leave ? 'bg-violet-100 text-violet-800' : 'bg-green-100 text-green-800'} px-2 py-1 rounded`}>
               {emp.status}
@@ -301,7 +301,8 @@ const Attandence = () => {
               <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
               <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
-            <div className="flex items-center gap-4 ">
+            <div className="flex items-center gap-4 flex-wrap">
+            <CiFilter size={24} color="teal"/>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   value={filtere.date}
@@ -316,7 +317,7 @@ const Attandence = () => {
                   }} label="Select date" />
               </LocalizationProvider>
 
-              <FormControl sx={{ width: '160px' }} required size="small">
+              <FormControl sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
                 <Select
                   labelId="demo-simple-select-helper-label"
@@ -345,18 +346,7 @@ const Attandence = () => {
                 </Select>
               </FormControl>
 
-              <TextField
-                size='small'
-                sx={{ width: '160px' }}
-                value={filtere.employee}
-                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start"><IoSearch /></InputAdornment>,
-                }}
-                label="Search Employee"
-              />
-
-              <FormControl sx={{ width: '160px' }} required size="small">
+              <FormControl sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
                 <Select
                   labelId="demo-simple-select-helper-label"
@@ -374,7 +364,7 @@ const Attandence = () => {
                       label="Status"
                     />
                   }
-                  onChange={(e) =>  setfiltere({ ...filtere, status: e.target.value })}
+                  onChange={(e) => setfiltere({ ...filtere, status: e.target.value })}
                 >
                   <MenuItem value={"all"}>All</MenuItem>
                   <MenuItem value={"present"}>Present</MenuItem>
@@ -383,6 +373,25 @@ const Attandence = () => {
                   <MenuItem value={"half day"}>Half Day</MenuItem>
                 </Select>
               </FormControl>
+              <TextField
+                size='small'
+                sx={{ width: '160px' }}
+                value={filtere.employee}
+                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><IoSearch /></InputAdornment>,
+                  endAdornment: filtere.employee && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setfiltere({ ...filtere, employee: "" })}  edge="end"  size="small"
+                      >
+                        <MdClear />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                label="Search Employee"
+              />
             </div>
           }
         </div>

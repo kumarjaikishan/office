@@ -11,6 +11,7 @@ import axios from 'axios';
 import { isWithinInterval, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { useSelector } from 'react-redux';
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {
@@ -19,9 +20,12 @@ const HolidayForm = () => {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [holidays, setHolidays] = useState([]);
+  const { setting } = useSelector((state) => state.user);
   const [dfsd, sdff] = useState([])
-  const weeklyOffs = [1]; // Sunday and Monday
-
+  const [weeklyOffs, setweeklyOffs] = useState([1])
+  useEffect(() => {
+    setweeklyOffs(setting?.weeklyOffs || [1])
+  }, [setting])
 
   // Example dates to highlight manually
   const impordate = ['06/15/2025', '06/10/2025'];
@@ -101,7 +105,7 @@ const HolidayForm = () => {
                   date.toDateString() === d.date.toDateString()
                 );
 
-                const isWeeklyOff = weeklyOffs.includes(date.getDay());
+                const isWeeklyOff = weeklyOffs?.includes(date.getDay());
 
                 const tooltipText = matched ? matched.name : (isWeeklyOff ? 'Weekly Off' : '');
 
@@ -146,7 +150,7 @@ const HolidayForm = () => {
           />
 
           <DatePicker
-             format='dd/MM/yyyy'
+            format='dd/MM/yyyy'
             label="To Date"
             value={toDate}
             onChange={(newValue) => setToDate(newValue)}

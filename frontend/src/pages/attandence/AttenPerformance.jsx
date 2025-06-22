@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Box, Tooltip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Tooltip, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
 import { BiMessageRoundedError } from 'react-icons/bi';
 import DataTable from 'react-data-table-component';
 import { useSelector } from 'react-redux';
 import EmployeeProfileCard from '../../components/performanceCard';
 import { customStyles } from './attandencehelper';
+import { RxReset } from "react-icons/rx";
 import { IoMdTime } from 'react-icons/io';
 
 const AttenPerformance = () => {
@@ -23,6 +24,9 @@ const AttenPerformance = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
     const [timeFilter, setTimeFilter] = useState('all');
+    const [fromDate, setFromDate] = useState(null);
+    const [toDate, setToDate] = useState(null);
+
 
     const [hell, sethell] = useState({
         present: [],
@@ -120,32 +124,52 @@ const AttenPerformance = () => {
     }, [attandence, selectedYear, selectedMonth, setting]);
 
     const filteredData = attandence.filter((entry) => {
-        const date = dayjs(entry.date).toDate();
+        const date = dayjs(entry.date).startOf('day');
+
+        // Date Range Filter
+        if (fromDate && date.isBefore(dayjs(fromDate))) return false;
+        if (toDate && date.isAfter(dayjs(toDate))) return false;
+
+        // Status Filter
         if (statusFilter !== 'all' && entry.status !== statusFilter) return false;
 
+        // Type Filter
         if (typeFilter !== 'all') {
             const isInType =
-                (typeFilter === 'earlyLeave' && hell.earlyLeave.some(d => dayjs(d).isSame(date, 'day')))
-                || (typeFilter === 'lateleave' && hell.lateleave.some(d => dayjs(d).isSame(date, 'day')))
-                || (typeFilter === 'earlyarrival' && hell.earlyarrival.some(d => dayjs(d).isSame(date, 'day')))
-                || (typeFilter === 'latearrival' && hell.latearrival.some(d => dayjs(d).isSame(date, 'day')));
+                (typeFilter === 'earlyLeave' && hell.earlyLeave.some(d => dayjs(d).isSame(date, 'day'))) ||
+                (typeFilter === 'lateleave' && hell.lateleave.some(d => dayjs(d).isSame(date, 'day'))) ||
+                (typeFilter === 'earlyarrival' && hell.earlyarrival.some(d => dayjs(d).isSame(date, 'day'))) ||
+                (typeFilter === 'latearrival' && hell.latearrival.some(d => dayjs(d).isSame(date, 'day')));
             if (!isInType) return false;
         }
 
+        // Time Filter
         if (timeFilter !== 'all') {
             const isInTime =
-                (timeFilter === 'short' && hell.short.some(d => dayjs(d).isSame(date, 'day')))
-                || (timeFilter === 'overtime' && hell.overtime.some(d => dayjs(d).isSame(date, 'day')));
+                (timeFilter === 'short' && hell.short.some(d => dayjs(d).isSame(date, 'day'))) ||
+                (timeFilter === 'overtime' && hell.overtime.some(d => dayjs(d).isSame(date, 'day')));
             if (!isInTime) return false;
         }
+
         return true;
     });
+    const resetFilters = () => {
+        setSelectedYear(dayjs().year());
+        setSelectedMonth('all');
+        setStatusFilter('all');
+        setTypeFilter('all');
+        setTimeFilter('all');
+        setFromDate(null);
+        setToDate(null);
+    };
+
+
 
     return (
-        <div className="p-4">
+        <div className="p-4 capitalize bg-gray-200">
             {loading && <p>Loading performance data...</p>}
 
-            <div className="p-2 flex gap-3 rounded shadow bg-white mb-4">
+            <div className="p-3 flex gap-3 rounded shadow bg-white mb-4">
                 <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel>Year</InputLabel>
                     <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
@@ -166,7 +190,7 @@ const AttenPerformance = () => {
                 <>
                     <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
 
-                    <div className="p-2 flex gap-3 rounded shadow bg-white mb-4">
+                    <div className="p-4 flex gap-3 rounded shadow bg-white my-4">
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Type</InputLabel>
                             <Select value={typeFilter} label="Type" onChange={(e) => setTypeFilter(e.target.value)}>
@@ -197,6 +221,36 @@ const AttenPerformance = () => {
                                 <MenuItem value='short'>Short Time</MenuItem>
                             </Select>
                         </FormControl>
+                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                            <TextField
+                                label="From Date"
+                                type="date"
+                                size="small"
+                                InputLabelProps={{ shrink: true }}
+                                value={fromDate || ''}
+                                onChange={(e) => setFromDate(e.target.value)}
+                            />
+                        </FormControl>
+
+                        <FormControl size="small" sx={{ minWidth: 150 }}>
+                            <TextField
+                                label="To Date"
+                                type="date"
+                                size="small"
+                                InputLabelProps={{ shrink: true }}
+                                value={toDate || ''}
+                                onChange={(e) => setToDate(e.target.value)}
+                            />
+                        </FormControl>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={resetFilters}
+                            sx={{ alignSelf: 'flex-end', minWidth: 100 }}
+                            startIcon={<RxReset />}
+                        >
+                            Reset
+                        </Button>
                     </div>
 
                     <DataTable
@@ -229,6 +283,7 @@ const columns = (setting) => [
     {
         name: "Date",
         selector: (row) => dayjs(row.date).format('DD MMM, YYYY'),
+        sortable: true,
         width: '120px',
     },
     {
@@ -321,5 +376,5 @@ const columns = (setting) => [
             );
         },
     },
-    
+
 ];

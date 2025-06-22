@@ -97,6 +97,7 @@ export const columns = [
   {
     name: "Date",
     selector: (row) => row.date,
+    sortable: true,
     width: '110px'
   },
   {

@@ -11,23 +11,55 @@
     --sidebarwidth: 160px;
     --navbarheight: 60px;
     --sidenav: rgb(255, 255, 255);
-    --maincolor:teal;
-    --fontcolor:grey;
-    --shortsidebar:60px;
+    --maincolor: teal;
+    --fontcolor: grey;
+    --shortsidebar: 60px;
 }
+
+/* Global scrollbar styling for body */
+*::-webkit-scrollbar {
+  width: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #888; /* or any color */
+  border-radius: 6px;
+}
+
+*::-webkit-scrollbar-button {
+  display: none; /* hides top/bottom arrows */
+}
+
 
 body {
     width: 100%;
     min-height: 100vh;
 }
 
-.attandencecard{
-    @apply w-full flex justify-center items-center gap-5 relative before:absolute before:top-1/2 before:-left-1/2 before:w-1/2 before:h-0.5 before:bg-gray-400 before:content-[''];
+.attandencecard {
+    @apply w-full flex justify-center items-center gap-5 relative before:absolute before:top-1/2 before:-left-[50px] before:w-[50px] before:h-0.5 before:bg-gray-400 before:content-[''];
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -50px;
+        width: 20px;
+        height: 20px;
+        /* background: red; */
+        border-radius: 50%;
+        transform: translateY(-50%);
+    }
 }
 
-.MuiChartsLegend-root.MuiChartsLegend-vertical.css-1yf54bd-MuiChartsLegend-root{
+.MuiChartsLegend-root.MuiChartsLegend-vertical.css-1yf54bd-MuiChartsLegend-root {
     display: none !important;
 }
+
 .material {
     width: calc(100% - var(--sidebarwidth));
     width: 100%;
@@ -37,10 +69,13 @@ body {
     padding-top: var(--navbarheight);
     background: rgb(240, 242, 246);
 }
+
 .membermodal {
     width: 600px;
     height: max-content;
+    max-height: 90vh;
     overflow: hidden;
+    overflow-y: auto;
     border-radius: 10px 10px 5px 5px;
     background: teal;
 

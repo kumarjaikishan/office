@@ -19,6 +19,7 @@ import Leave from './pages/leave/Leave';
 import Adminleave from './pages/leave/Adminleave';
 import CompanySettingForm from './pages/settingPage';
 import Profile from './pages/profile/profile';
+import EmployeeProfile from './pages/profile/profile';
 
 
 function App() {
@@ -81,7 +82,8 @@ function App() {
           <Route path="" element={<EmployeeDashboard />} />
           <Route path="leave" element={<Leave />} />
         </Route>
-          <Route path="profile" element={<Profile />} />
+          {/* <Route path="profile" element={<Profile />} /> */}
+          <Route path="profile" element={<EmployeeProfile />} />
 
       </Routes>
     </>

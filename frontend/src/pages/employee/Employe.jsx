@@ -19,15 +19,18 @@ import { GrPowerReset } from "react-icons/gr";
 import { FiDownload } from "react-icons/fi";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
+import EmployeeProfile from "../profile/profile";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
   const [isload, setisload] = useState(false);
   const [employeelist, setemployeelist] = useState([]);
   const [departmentlist, setdepartmentlist] = useState([]);
+  const [openviewmodal, setopenviewmodal] = useState(false);
   const [isupdate, setisupdate] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [employeePhoto, setEmployeePhoto] = useState(null);
+  const [viewEmployee, setviewEmployee] = useState(null);
   const [filters, setFilters] = useState({
     searchText: '',
     department: 'all'
@@ -45,7 +48,7 @@ const Employe = () => {
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    employeefetche({ navigate, setisload, setemployeelist, edite, deletee, setdepartmentlist });
+    employeefetche({ navigate,setviewEmployee, setopenviewmodal, setisload, setemployeelist, edite, deletee, setdepartmentlist });
   }, []);
 
   useEffect(() => {
@@ -288,6 +291,14 @@ const Employe = () => {
               </div>
             </span>
           </form>
+        </div>
+      </Modalbox>
+
+      <Modalbox open={openviewmodal} onClose={() => {
+        setopenviewmodal(false);
+      }}>
+        <div className="membermodal" >
+          <EmployeeProfile viewEmployee={viewEmployee} />
         </div>
       </Modalbox>
     </div>

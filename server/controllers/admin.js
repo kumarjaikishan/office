@@ -157,8 +157,9 @@ const addemployee = async (req, res, next) => {
 }
 
 const updateemployee = async (req, res, next) => {
+    console.log(req.body);
     try {
-        const { employeeId, employeeName, dob, department, description, salary } = req.body;
+        const { employeeId, employeeName, dob, department, description } = req.body;
 
         if (!employeeId || !department) {
             return next({ status: 400, message: "All fields are required" });
@@ -175,7 +176,6 @@ const updateemployee = async (req, res, next) => {
             dob,
             department,
             description,
-            salary,
         };
 
         // If a new photo is uploaded
@@ -263,7 +263,7 @@ const firstfetch = async (req, res, next) => {
         const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
         const attendance = await attendanceModal.find()
             .populate('employeeId', 'employeename profileimage').sort({ date: -1 });
-       const companySetting = await comanysettingModal.findOne();
+        const companySetting = await comanysettingModal.findOne();
 
         res.status(200).json({
             user: req.user,
@@ -293,7 +293,7 @@ const setsetting = async (req, res, next) => {
             }
         );
 
-        return res.status(200).json({message:"updated", updatedSetting});
+        return res.status(200).json({ message: "updated", updatedSetting });
 
     } catch (error) {
         console.log(error.message)
@@ -309,6 +309,24 @@ const getsetting = async (req, res, next) => {
         }
 
         return res.status(200).json(companySetting);
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: 'Internal Server Error' });
+    }
+};
+const getemployee = async (req, res, next) => {
+    // console.log(req.query)
+    const { empid } = req.query;
+    try {
+        const employe = await employeeModal.findById(empid)
+        .populate('userid','-password')
+        .populate('department');
+
+        setTimeout(() => {
+            
+            return res.status(200).json(employe);
+        }, 3000);
 
     } catch (error) {
         console.error(error.message);
@@ -391,6 +409,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, firstfetch, setsetting,getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, firstfetch, getemployee, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

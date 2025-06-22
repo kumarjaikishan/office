@@ -30,6 +30,7 @@ router.route('/firstfetch').get(authmiddlewre,adminmiddleware,admin.firstfetch);
 router.route('/leavehandle').post(authmiddlewre,adminmiddleware,admin.leavehandle); 
 router.route('/setsetting').post(authmiddlewre,adminmiddleware,admin.setsetting); 
 router.route('/getsetting').get(authmiddlewre,adminmiddleware,admin.getsetting); 
+router.route('/getemployee').get(authmiddlewre,adminmiddleware,admin.getemployee); 
 
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 

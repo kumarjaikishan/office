@@ -138,7 +138,7 @@ export const employeedelette = async ({ employeeId, setisload }) => {
     }
 };
 
-export const employeefetche = async ({navigate, setisload, setemployeelist, deletee, edite, setdepartmentlist }) => {
+export const employeefetche = async ({navigate,setopenviewmodal,setviewEmployee, setisload, setemployeelist, deletee, edite, setdepartmentlist }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -170,7 +170,7 @@ export const employeefetche = async ({navigate, setisload, setemployeelist, dele
                 email: emp.userid.email,
                 department: emp.department,
                 action: (<div className="action flex gap-2.5">
-                    <span className="eye edit text-[18px] text-green-500 cursor-pointer" ><IoEyeOutline /></span>
+                    <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={()=>{setviewEmployee(emp._id); setopenviewmodal(true)}} ><IoEyeOutline /></span>
                     <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={()=> navigate(`/admin-dashboard/performance/${emp.userid._id}`) } ><HiOutlineDocumentReport /></span>
                     <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
                     <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
