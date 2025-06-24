@@ -16,24 +16,28 @@
     --shortsidebar: 60px;
 }
 
-/* Global scrollbar styling for body */
 *::-webkit-scrollbar {
-  width: 3px;
+    width: 3px;
 }
 
 *::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #888; /* or any color */
-  border-radius: 6px;
+    background-color: #888;
+    border-radius: 6px;
 }
 
 *::-webkit-scrollbar-button {
-  display: none; /* hides top/bottom arrows */
+    display: none;
 }
 
+.neu {
+    background: #e0e4e7;
+    box-shadow: 5px 5px 13px #b8c7dd,
+        -5px -5px 5px #ffffff;
+}
 
 body {
     width: 100%;
@@ -54,6 +58,10 @@ body {
         border-radius: 50%;
         transform: translateY(-50%);
     }
+}
+.attandencecarde {
+    @apply w-full flex justify-center items-center gap-5 relative;
+
 }
 
 .MuiChartsLegend-root.MuiChartsLegend-vertical.css-1yf54bd-MuiChartsLegend-root {
