@@ -8,6 +8,7 @@ const comanysettingModal = require('../models/comanysetting')
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const { default: mongoose } = require('mongoose');
+const company = require('../models/company');
 
 
 cloudinary.config({
@@ -260,6 +261,7 @@ const employeelist = async (req, res, next) => {
 const firstfetch = async (req, res, next) => {
     try {
         const query = await employeeModal.find().populate('department', 'department').sort({ employeename: 1 });
+        const companye = await company.findOne();
         const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
         const attendance = await attendanceModal.find()
             .populate('employeeId', 'employeename profileimage').sort({ date: -1 });
@@ -270,6 +272,7 @@ const firstfetch = async (req, res, next) => {
             employee: query,
             departmentlist,
             attendance,
+            company:companye,
             companySetting
         })
 
@@ -300,6 +303,29 @@ const setsetting = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+const addcompany = async (req, res, next) => {
+    const { name, industry } = req.body;
+
+    try {
+        // Check if a company already exists for this admin
+        const existingCompany = await company.findOne({ adminId: req.user.id });
+
+        if (existingCompany) {
+            return res.status(400).json({ message: "Company already created" });
+        }
+
+        // Create a new company
+        const newCompany = new company({ name, industry, adminId: req.user.id });
+        await newCompany.save();
+
+        return res.status(200).json({ message: "Created new company", company: newCompany });
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: error.message });
+    }
+};
+
 const getsetting = async (req, res, next) => {
     try {
         const companySetting = await comanysettingModal.findOne();
@@ -320,11 +346,11 @@ const getemployee = async (req, res, next) => {
     const { empid } = req.query;
     try {
         const employe = await employeeModal.findById(empid)
-        .populate('userid','-password')
-        .populate('department');
+            .populate('userid', '-password')
+            .populate('department');
 
         setTimeout(() => {
-            
+
             return res.status(200).json(employe);
         }, 3000);
 
@@ -409,6 +435,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, firstfetch, getemployee, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

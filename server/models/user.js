@@ -15,14 +15,22 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-         required: true,
+        required: true,
     },
     role: {
         type: String,
-        enum: ['admin',"employee"],
+        enum: ['admin', 'manager', 'employee'],
         required: true,
     },
-    profileImage : {
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company'
+    },
+    branchId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Branch'
+    },
+    profileImage: {
         type: String,
     }
 }, { timestamps: true })
@@ -70,5 +78,5 @@ userSchema.methods.checkpassword = async function (pass) {
     }
 };
 
-const user = mongoose.model("user",userSchema );
+const user = mongoose.model("user", userSchema);
 module.exports = user;

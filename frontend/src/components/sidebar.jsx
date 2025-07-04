@@ -88,6 +88,12 @@ const menu = [
         roles: ['admin']
       },
       {
+        menu: "Organization",
+        link: '/admin-dashboard/organization',
+        icon: <GoPeople />,
+        roles: ['admin']
+      },
+      {
         menu: "Employees",
         link: '/admin-dashboard/employe',
         icon: <GoPeople />,

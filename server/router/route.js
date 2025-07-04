@@ -29,6 +29,7 @@ router.route('/deletedepartment').post(authmiddlewre,adminmiddleware,admin.delet
 router.route('/firstfetch').get(authmiddlewre,adminmiddleware,admin.firstfetch); 
 router.route('/leavehandle').post(authmiddlewre,adminmiddleware,admin.leavehandle); 
 router.route('/setsetting').post(authmiddlewre,adminmiddleware,admin.setsetting); 
+router.route('/addcompany').post(authmiddlewre,adminmiddleware,admin.addcompany); 
 router.route('/getsetting').get(authmiddlewre,adminmiddleware,admin.getsetting); 
 router.route('/getemployee').get(authmiddlewre,adminmiddleware,admin.getemployee); 
 

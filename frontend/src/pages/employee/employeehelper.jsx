@@ -67,7 +67,6 @@ export const addemployee = async ({ formData, setisload, setInp, setopenmodal, i
 
 
 export const employeeupdate = async ({ formData, inp, setisload, setInp, setopenmodal, init }) => {
-
     const token = localStorage.getItem('emstoken');
     setisload(true);
 

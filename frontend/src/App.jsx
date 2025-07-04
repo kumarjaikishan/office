@@ -20,6 +20,7 @@ import Adminleave from './pages/leave/Adminleave';
 import CompanySettingForm from './pages/settingPage';
 import Profile from './pages/profile/profile';
 import EmployeeProfile from './pages/profile/profile';
+import OrganizationSettings from './pages/organization/organization';
 
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
         >
           <Route index element={<AdminDashboard />} />
           <Route path="employe" element={<Employe />} />
+          <Route path="organization" element={<OrganizationSettings />} />
           <Route path="department" element={<Department />} />
           <Route path="salary" element={<Salary />} />
           <Route path="attandence" element={<Attandence />} />

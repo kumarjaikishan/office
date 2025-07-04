@@ -52,7 +52,7 @@ const Employe = () => {
   }, []);
 
   useEffect(() => {
-    console.log(employeelist)
+    // console.log(employeelist)
   }, [employeelist])
   useEffect(() => {
     // console.log(departmentlist)

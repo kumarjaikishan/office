@@ -20,6 +20,7 @@ const userSlice = createSlice({
         profile: null,
         department: null,
         employee: null,
+        company:null,
         attandence: null,
         salary: null,
         setting: null,
@@ -47,6 +48,7 @@ const userSlice = createSlice({
                 state.department = action.payload.departmentlist;
                 state.employee = action.payload.employee;
                 state.attandence = action.payload.attendance;
+                state.company = action.payload.company;
                 state.setting = action.payload.companySetting;
                 state.status = 'succeeded';
             })
