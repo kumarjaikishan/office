@@ -167,6 +167,7 @@ export const employeefetche = async ({navigate,setopenviewmodal,setviewEmployee,
                     </Box>
                 </div>),
                 email: emp.userid.email,
+                branch: emp.branchId,
                 department: emp.department,
                 action: (<div className="action flex gap-2.5">
                     <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={()=>{setviewEmployee(emp._id); setopenviewmodal(true)}} ><IoEyeOutline /></span>

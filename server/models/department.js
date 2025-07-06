@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
 const departmentSchema = new mongoose.Schema({
+    branchId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Branch',
+        required: true
+    },
     department: {
         type: String,
         required: true,
-        unique:true
+        unique: true
     },
     description: {
         type: String
@@ -12,5 +17,5 @@ const departmentSchema = new mongoose.Schema({
 }, { timestamps: true })
 
 
-const department = mongoose.model("department",departmentSchema );
+const department = mongoose.model("department", departmentSchema);
 module.exports = department;

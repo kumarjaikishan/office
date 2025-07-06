@@ -20,6 +20,7 @@ import { FiDownload } from "react-icons/fi";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "../profile/profile";
+import { useSelector } from "react-redux";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -31,14 +32,17 @@ const Employe = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
+  const { department, branch } = useSelector(e => e.user)
   const [filters, setFilters] = useState({
     searchText: '',
+    branch: 'all',
     department: 'all'
   });
   let navigate = useNavigate();
 
   const init = {
     employeeId: '',
+    branchId: '',
     department: "",
     employeeName: "",
     email: "",
@@ -48,15 +52,13 @@ const Employe = () => {
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    employeefetche({ navigate,setviewEmployee, setopenviewmodal, setisload, setemployeelist, edite, deletee, setdepartmentlist });
+    employeefetche({ navigate, setviewEmployee, setopenviewmodal, setisload, setemployeelist, edite, deletee, setdepartmentlist });
   }, []);
 
   useEffect(() => {
-    // console.log(employeelist)
-  }, [employeelist])
-  useEffect(() => {
     // console.log(departmentlist)
-  }, [departmentlist])
+    // console.log(employeelist)
+  }, [departmentlist,employeelist])
 
   const handleChange = (e, name) => {
     setInp({
@@ -162,9 +164,11 @@ const Employe = () => {
   const filteredEmployees = employeelist.filter(emp => {
     const name = emp.rawname?.toLowerCase() || '';
     const deptId = emp.department?._id || '';
+    const branchId = emp.department?._id || '';
 
     const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
     const deptMatch = filters.department === 'all' || deptId === filters.department;
+    const branchMatch = filters.department === 'all' || deptId === filters.department;
 
     return nameMatch && deptMatch;
   });
@@ -187,6 +191,29 @@ const Employe = () => {
             label="Search Employee"
           />
 
+          <FormControl sx={{ width: '160px' }} size="small">
+            <InputLabel>Branch</InputLabel>
+            <Select
+              label="Department"
+              value={filters.branch}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Branch"
+                />
+              }
+              onChange={(e) => handleFilterChange('branch', e.target.value)}
+            >
+              <MenuItem selected value="all">All</MenuItem>
+              {branch.map((list) => (
+                <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <FormControl sx={{ width: '160px' }} size="small">
             <InputLabel>Department</InputLabel>
             <Select
@@ -244,13 +271,25 @@ const Employe = () => {
             <h2>{isupdate ? "Update Employee" : "Add Employee"}</h2>
             <span className="modalcontent ">
               <FormControl fullWidth required size="small">
+                <InputLabel>Branch</InputLabel>
+                <Select
+                  value={inp.branchId}
+                  label="branch"
+                  onChange={(e) => handleChange(e, 'branchId')}
+                >
+                  {branch.map((list) => (
+                    <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl disabled={!inp.branchId} fullWidth required size="small">
                 <InputLabel>Department</InputLabel>
                 <Select
                   value={inp.department}
                   label="Department"
                   onChange={(e) => handleChange(e, 'department')}
                 >
-                  {departmentlist.map((list) => (
+                  {department.filter(e => e.branchId._id == inp.branchId).map((list) => (
                     <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
                   ))}
                 </Select>

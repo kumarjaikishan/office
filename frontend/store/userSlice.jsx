@@ -21,9 +21,9 @@ const userSlice = createSlice({
         department: null,
         employee: null,
         company:null,
+        branch:null,
         attandence: null,
         salary: null,
-        setting: null,
         status: 'idle',
     },
     reducers: {
@@ -44,12 +44,12 @@ const userSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(FirstFetch.fulfilled, (state, action) => {
-                state.profile = action.payload.user;
-                state.department = action.payload.departmentlist;
-                state.employee = action.payload.employee;
-                state.attandence = action.payload.attendance;
-                state.company = action.payload.company;
-                state.setting = action.payload.companySetting;
+                state.profile = action.payload?.user;
+                state.department = action.payload?.departmentlist;
+                state.employee = action.payload?.employee;
+                state.attandence = action.payload?.attendance;
+                state.company = action.payload?.company;
+                state.branch = action.payload?.branch;
                 state.status = 'succeeded';
             })
             .addCase(FirstFetch.pending, (state) => {

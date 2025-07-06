@@ -6,43 +6,27 @@ import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const Addbranch = ({employee}) => {
+const Addbranch = ({setopenviewmodal, employee, company, editbranch, editbranchdata }) => {
   const [branch, setBranch] = useState({
+    id: '',
     name: '',
     location: '',
     companyId: '',
     managerIds: [],
   });
 
-  const [companies, setCompanies] = useState([]);
   const [users, setUsers] = useState([]);
 
   const token = localStorage.getItem('emstoken');
 
   // Fetch companies and users
   useEffect(() => {
+    // console.log(company)
     setUsers(employee)
-    const fetchData = async () => {
-      try {
-        const [compRes, userRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_ADDRESS}companies`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${import.meta.env.VITE_API_ADDRESS}users`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+    setBranch({ ...branch, companyId: company._id })
+    if (editbranch) setBranch(editbranchdata)
 
-        setCompanies(compRes.data || []);
-        setUsers(userRes.data || []);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load data");
-      }
-    };
-
-    fetchData();
-  }, [token]);
+  }, [company, employee, editbranch]);
 
   // Form field handler
   const handleChange = (field, value) => {
@@ -52,10 +36,24 @@ const Addbranch = ({employee}) => {
   // Submit handler
   const handleSubmit = async () => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}branch`, branch, {
+      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}addBranch`, branch, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Branch added successfully");
+      setopenviewmodal(false)
+      setBranch({ name: '', location: '', companyId: '', managerIds: [] });
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Error adding branch");
+    }
+  };
+  const edite = async () => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}editBranch`, branch, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success(res.data.message);
+       setopenviewmodal(false)
       setBranch({ name: '', location: '', companyId: '', managerIds: [] });
     } catch (err) {
       console.error(err);
@@ -67,24 +65,24 @@ const Addbranch = ({employee}) => {
     <Box sx={{ maxWidth: 700, mx: 'auto', p: 4, bgcolor: 'white', borderRadius: 2, boxShadow: 2 }}>
       <Typography variant="h5" gutterBottom>Add New Branch</Typography>
       <Grid container spacing={2}>
-        
-          <TextField
-            label="Branch Name"
-            fullWidth
-            value={branch.name}
-            onChange={e => handleChange('name', e.target.value)}
-            required
-            helperText="Enter the official branch name"
-          />
-      
-          <TextField
-            label="Location"
-            fullWidth
-            value={branch.location}
-            onChange={e => handleChange('location', e.target.value)}
-            helperText="City, State or Address"
-          />
-      
+
+        <TextField
+          label="Branch Name"
+          fullWidth
+          value={branch.name}
+          onChange={e => handleChange('name', e.target.value)}
+          required
+          helperText="Enter the official branch name"
+        />
+
+        <TextField
+          label="Location"
+          fullWidth
+          value={branch.location}
+          onChange={e => handleChange('location', e.target.value)}
+          helperText="City, State or Address"
+        />
+
         {/* <Grid item xs={12}>
           <FormControl fullWidth required>
             <InputLabel>Company</InputLabel>
@@ -99,32 +97,36 @@ const Addbranch = ({employee}) => {
             </Select>
           </FormControl>
         </Grid> */}
-      
-          <FormControl fullWidth>
-            <InputLabel>Managers</InputLabel>
-            <Select
-              multiple
-              value={branch.managerIds}
-              onChange={e => handleChange('managerIds', e.target.value)}
-              input={<OutlinedInput label="Managers" />}
-              renderValue={(selected) =>
-                selected.map(id => users.find(user => user._id === id)?.employeename).join(', ')
-              }
-            >
-              {users.map(user => (
-                <MenuItem key={user._id} value={user._id}>
-                  <Checkbox checked={branch.managerIds.includes(user._id)} />
-                  <ListItemText primary={user.employeename} />
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+
+        <FormControl fullWidth>
+          <InputLabel>Managers</InputLabel>
+          <Select
+            multiple
+            value={branch.managerIds}
+            onChange={e => handleChange('managerIds', e.target.value)}
+            input={<OutlinedInput label="Managers" />}
+            renderValue={(selected) =>
+              selected.map(id => users.find(user => user._id === id)?.employeename).join(', ')
+            }
+          >
+            {users.map(user => (
+              <MenuItem key={user._id} value={user._id}>
+                <Checkbox checked={branch.managerIds.includes(user._id)} />
+                <ListItemText primary={user.employeename} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Grid>
 
       <Box sx={{ mt: 3, textAlign: 'right' }}>
-        <Button variant="contained" onClick={handleSubmit}>
-          Add Branch
-        </Button>
+        {editbranch ? <Button variant="contained" onClick={edite}>
+          Edit
+        </Button> :
+          <Button variant="contained" onClick={handleSubmit}>
+            Add Branch
+          </Button>}
+
       </Box>
     </Box>
   );

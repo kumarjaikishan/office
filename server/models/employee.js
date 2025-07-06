@@ -8,6 +8,11 @@ const employeeSchema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
+    branchId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Branch',
+        required: true
+    },
     department: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'department',

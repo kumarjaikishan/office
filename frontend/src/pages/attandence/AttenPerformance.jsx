@@ -17,7 +17,8 @@ const AttenPerformance = () => {
     const [employee, setemployee] = useState({});
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { setting } = useSelector((state) => state.user);
+    const { company } = useSelector((state) => state.user);
+    const [setting,setsetting]= useState(null)
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
     const [selectedMonth, setSelectedMonth] = useState('all');
@@ -48,6 +49,11 @@ const AttenPerformance = () => {
         value: i,
     }));
 
+    useEffect(() => {
+        if (!company) return;
+        setsetting(company)
+       
+    }, [company]);
     useEffect(() => {
         if (!userid) return;
         const fetchPerformanceData = async () => {
@@ -291,8 +297,8 @@ const columns = (setting) => [
         selector: (row) => row.punchIn,
         cell: (emp) => {
             if (!emp.punchIn) return '-';
-            const [earlyHour, earlyMinute] = setting.attendanceRules.considerEarlyEntryBefore.split(':').map(Number);
-            const [lateHour, lateMinute] = setting.attendanceRules.considerLateEntryAfter.split(':').map(Number);
+            const [earlyHour, earlyMinute] = setting?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
+            const [lateHour, lateMinute] = setting?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);
 
             const earlyThreshold = dayjs(emp.punchIn).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
             const lateThreshold = dayjs(emp.punchIn).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
@@ -316,8 +322,8 @@ const columns = (setting) => [
         selector: (row) => row.punchOut,
         cell: (emp) => {
             if (!emp.punchOut) return '-';
-            const [earlyHour, earlyMinute] = setting.attendanceRules.considerEarlyExitBefore.split(':').map(Number);
-            const [lateHour, lateMinute] = setting.attendanceRules.considerLateExitAfter.split(':').map(Number);
+            const [earlyHour, earlyMinute] = setting?.attendanceRules?.considerEarlyExitBefore.split(':').map(Number);
+            const [lateHour, lateMinute] = setting?.attendanceRules?.considerLateExitAfter.split(':').map(Number);
 
             const earlyExitThreshold = dayjs(emp.punchOut).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
             const lateExitThreshold = dayjs(emp.punchOut).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
@@ -366,10 +372,10 @@ const columns = (setting) => [
             return (
                 <span>
                     {minutesinhours(wm)}
-                    {wm < setting.workingMinutes.shortDayThreshold && (
+                    {wm < setting?.workingMinutes?.shortDayThreshold && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-amber-100 text-amber-800 text-xs">Short</span>
                     )}
-                    {wm > setting.workingMinutes.overtimeAfterMinutes && (
+                    {wm > setting?.workingMinutes?.overtimeAfterMinutes && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-green-100 text-green-800 text-xs">Overtime</span>
                     )}
                 </span>

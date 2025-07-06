@@ -118,7 +118,7 @@ const menu = [
         roles: ['employee']
       },
       {
-        menu: "Admin Leave",
+        menu: "Leave Request",
         link: '/admin-dashboard/adminleave',
         icon: <GiPlagueDoctorProfile />,
         roles: ['admin']
@@ -135,12 +135,12 @@ const menu = [
         icon: <TbReportAnalytics />,
         roles: ['employee']
       },
-      {
-        menu: "Salary",
-        link: '/admin-dashboard/salary',
-        icon: <GiTakeMyMoney />,
-        roles: ['admin']
-      }
+      // {
+      //   menu: "Salary",
+      //   link: '/admin-dashboard/salary',
+      //   icon: <GiTakeMyMoney />,
+      //   roles: ['admin']
+      // }
     ]
   },
   {

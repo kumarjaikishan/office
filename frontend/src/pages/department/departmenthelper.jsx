@@ -9,6 +9,10 @@ export const columns = [
         selector: (row) => row.sno
     },
     {
+        name: "Branch",
+        selector: (row) => row.branch
+    },
+    {
         name: "Department",
         selector: (row) => row.dep_name
     },
@@ -19,7 +23,7 @@ export const columns = [
 ]
 export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) => {
     console.log(inp);
-    const { department, description } = inp;
+    const {branchId, department, description } = inp;
 
     if (!department) {
         alert('Please fill in both fields');
@@ -33,7 +37,7 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) =>
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}adddepartment`,
             {
-                department,
+                department,branchId,
                 description
             },
             {
@@ -161,6 +165,8 @@ export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => 
             return {
                 id: dep._id,
                 sno: sno++,
+                branchid:dep.branchId._id ,
+                branch:dep.branchId.name ,
                 dep_name: dep.department,
                 action: (<div className="action">
                     <span className="edit" title="Edit" onClick={() => edite(dep)}><MdOutlineModeEdit /></span>

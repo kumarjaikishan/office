@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, TextField, Button, Typography, MenuItem,
-    Grid, FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText
+    Grid, FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText,
+    Avatar
 } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -23,7 +24,9 @@ const weekdays = [
 
 export default function OrganizationSettings() {
     const [openSection, setOpenSection] = useState(null);
+    const [editbranch,seteditbranch]= useState(false);
     const [openviewmodal, setopenviewmodal] = useState(false);
+    const [editbranchdata, seteditbranchdata] = useState(null);
     const [companyinp, setcompany] = useState({
         name: '',
         industry: '',
@@ -43,40 +46,19 @@ export default function OrganizationSettings() {
             considerLateExitAfter: '18:30'
         }
     })
-    const isexist = false;
 
-    const { employee, company } = useSelector((state) => state.user);
+    const { employee, company, branch } = useSelector((state) => state.user);
 
     const toggleSection = (section) => {
         setOpenSection((prev) => (prev === section ? null : section));
     };
 
     useEffect(() => {
-        console.log(company)
+        // console.log(company)
         if (company) {
             setcompany(company)
         }
-        const token = localStorage.getItem('emstoken');
-        axios.get(`${import.meta.env.VITE_API_ADDRESS}getsetting`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then(res => {
-                const data = res.data || {};
-                setcompany(prev => ({
-                    ...prev,
-                    ...data,
-                    officeTime: { ...prev.officeTime, ...(data.officeTime || {}) },
-                    gracePeriod: { ...prev.gracePeriod, ...(data.gracePeriod || {}) },
-                    workingMinutes: { ...prev.workingMinutes, ...(data.workingMinutes || {}) },
-                    attendanceRules: { ...prev.attendanceRules, ...(data.attendanceRules || {}) },
-                }));
-            })
-            .catch(() => {
-                console.warn("Failed to load settings.");
-            });
-    }, []);
+    }, [company]);
 
     const handleChange = (section, field, value) => {
         setcompany(prev => ({
@@ -89,10 +71,11 @@ export default function OrganizationSettings() {
     };
 
     const handleSubmit = async () => {
+        // return console.log(companyinp)
         try {
             const token = localStorage.getItem('emstoken');
             const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}updateCompany`,
-                { ...settings },
+                { ...companyinp },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -112,6 +95,16 @@ export default function OrganizationSettings() {
             }
         }
     };
+    const setemployee = () => {
+
+    }
+    const handleEditBranch=(id)=>{
+        console.log(id)
+        seteditbranch(true);
+        const dffg = {...id,managerIds:id.managerIds.map((id)=> id._id)};
+        seteditbranchdata(dffg);
+        setopenviewmodal(true);
+    }
 
     return (
         <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md space-y-6">
@@ -124,26 +117,75 @@ export default function OrganizationSettings() {
                     Company Info
                 </button>
                 {openSection === 'company' && (
-                    <div className="p-4  rounded bg-blue-50 border-blue-300  border-2 border-dashed mt-2 space-y-4">
-                        <div>
-                            <label className="block">Company Name</label>
-                            <input type="text" onChange={(e) => setcompany({ ...companyinp, name: e.target.value })} value={companyinp.name} className="w-full border rounded px-3 py-2" />
-                        </div>
-                        <div>
-                            <label className="block">Industry</label>
-                            <input type="text" onChange={(e) => setcompany({ ...companyinp, industry: e.target.value })} value={companyinp.industry} className="w-full border rounded px-3 py-2" />
-                        </div>
-                        {company ? <>
-                            <div>
-                                <label className="block">Logo (URL or Upload)</label>
-                                <input type="text" className="w-full border rounded px-3 py-2" />
+                    <div className="p-4 rounded  flex border-blue-300 border-2 border-dashed mt-2 space-y-4">
+                        <div className='relative flex items-center mx-auto'>
+                            <div className="relative w-30 h-30 mx-auto ">
+                                <img
+                                    src={companyinp.logo || 'https://via.placeholder.com/100'} // fallback logo
+                                    alt="Company Logo"
+                                    className="w-full h-full object-cover rounded-full border-2 border-dashed border-blue-300"
+                                />
+                                {/* Hidden file input */}
+                                <input
+                                    type="file"
+                                    id="logo-upload"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setcompany({ ...companyinp, logo: reader.result }); // base64 image
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+                                {/* Edit Icon Overlay */}
+                                <label htmlFor="logo-upload" className="absolute w-8 h-8 text-center bottom-0 right-0 bg-white border border-gray-300 rounded-full p-1 cursor-pointer shadow-md">
+                                    ✎
+                                </label>
                             </div>
-                            <button onClick={() => handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded">Save Changes</button>
-                        </> :
-                            <button onClick={() => addCompany({ companyinp })} className="bg-green-500 text-white px-3 py-1 rounded">+ Create Company</button>
-                        }
+                        </div>
+
+                        {/* Company Name */}
+                        <div className='w-[70%] flex flex-col gap-3'>
+                            <div>
+                                <label className="block">Company Name</label>
+                                <input
+                                    type="text"
+                                    onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
+                                    value={companyinp.name}
+                                    className="w-full border rounded px-3 py-2"
+                                />
+                            </div>
+
+                            {/* Industry */}
+                            <div>
+                                <label className="block">Industry</label>
+                                <input
+                                    type="text"
+                                    onChange={(e) => setcompany({ ...companyinp, industry: e.target.value })}
+                                    value={companyinp.industry}
+                                    className="w-full border rounded px-3 py-2"
+                                />
+                            </div>
+
+                            {/* Save/Create Button */}
+                            {company ? (
+                                <button onClick={handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded">
+                                    Save Changes
+                                </button>
+                            ) : (
+                                <button onClick={() => addCompany({ companyinp })} className="bg-green-500 text-white px-3 py-1 rounded">
+                                    + Create Company
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
+
             </div>
 
             {/* Branches */}
@@ -155,7 +197,7 @@ export default function OrganizationSettings() {
                     Branches
                 </button>
                 {openSection === 'branches' && (
-                    <div className="p-4 rounded bg-green-50 border-green-300 border-2 border-dashed mt-2 space-y-4">
+                    <div className="p-4 rounded  border-green-300 border-2 border-dashed mt-2 space-y-4">
                         <div className="flex justify-between items-center">
                             <h3 className="text-md font-medium">Branch List</h3>
                             <button
@@ -176,19 +218,43 @@ export default function OrganizationSettings() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td className="p-2 border">Head Office</td>
-                                    <td className="p-2 border">Delhi, India</td>
-                                    <td className="p-2 border">Ravi Kumar</td>
-                                    <td className="p-2 border">
-                                        <button
-                                            onClick={() => handleEditBranch('branchIdOrDataHere')}
-                                            className="bg-blue-500 text-white px-3 py-1 rounded"
-                                        >
-                                            Edit
-                                        </button>
-                                    </td>
-                                </tr>
+                                {branch &&
+                                    branch.map((bran, ind) => {
+                                        return (
+                                            <tr key={ind}>
+                                                <td className="p-2 border">{bran.name}</td>
+                                                <td className="p-2 border">{bran.location}</td>
+
+                                                <td className="p-2 border capitalize">
+                                                    <div className="flex flex-col gap-2">
+                                                        {bran.managerIds.map((manager, idx) => (
+                                                            <div
+                                                                key={idx}
+                                                                className="flex items-center gap-2 cursor-pointer"
+                                                                onClick={() => setemployee(manager.userid)}
+                                                            >
+                                                                 <Avatar src={manager?.profileimage} alt={manager.userid.name}>
+                                                                         {!manager?.profileimage && <FaRegUser />}
+                                                                       </Avatar>
+                                                                <span>{manager.userid.name}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </td>
+
+                                                <td className="p-2 border">
+                                                    <button
+                                                        onClick={() => handleEditBranch(bran)}
+                                                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                }
+                                {!branch && <div>No branch Found</div>}
                             </tbody>
                         </table>
                     </div>
@@ -198,9 +264,11 @@ export default function OrganizationSettings() {
 
             <Modalbox open={openviewmodal} onClose={() => {
                 setopenviewmodal(false);
+                seteditbranchdata(null);
+                seteditbranch(false)
             }}>
                 <div className="membermodal" >
-                    <Addbranch employee={employee} />
+                    <Addbranch setopenviewmodal={setopenviewmodal} editbranchdata={editbranchdata} editbranch={editbranch} company={company} employee={employee} />
                 </div>
             </Modalbox>
 
@@ -212,8 +280,8 @@ export default function OrganizationSettings() {
                 >
                     Attendance Rules
                 </button>
-                {openSection === 'attendance' && (
-                    <Box className="bg-yellow-50 border-yellow-300  border-2 border-dashed rounded mt-2 p-4 grid grid-cols-3 gap-4">
+                {(openSection === 'attendance' && company) && (
+                    <Box className=" border-yellow-300  border-2 border-dashed rounded mt-2 p-4 grid grid-cols-3 gap-4">
                         {/* <Grid container spacing={2}> */}
 
                         <TextField

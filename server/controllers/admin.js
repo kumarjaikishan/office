@@ -9,6 +9,7 @@ const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const { default: mongoose } = require('mongoose');
 const company = require('../models/company');
+const branch = require('../models/branch');
 
 
 cloudinary.config({
@@ -20,12 +21,12 @@ cloudinary.config({
 const addDepartment = async (req, res, next) => {
     // console.log(req.body)
     try {
-        const { department, description } = req.body;
+        const { branchId,department, description } = req.body;
         if (!department) {
             return next({ status: 400, message: "all fields are required" });
         }
 
-        const query = new departmentModal({ department, description });
+        const query = new departmentModal({branchId, department, description });
         const result = await query.save();
         if (!result) {
             return next({ status: 400, message: "Something went wrong" });
@@ -86,7 +87,7 @@ const deletedepartment = async (req, res, next) => {
 }
 const departmentlist = async (req, res, next) => {
     try {
-        const query = await departmentModal.find();
+        const query = await departmentModal.find().populate('branchId','name');
 
         res.status(200).json({
             list: query
@@ -105,7 +106,7 @@ const addemployee = async (req, res, next) => {
             message: 'No file uploaded.'
         });
     }
-    const { employeeName, email, username, password, department, dob = '' } = req.body;
+    const { employeeName, email,branchId, username, password, department, dob = '' } = req.body;
 
     if (!employeeName || !email || !password || !department) {
         return next({ status: 400, message: "all fields are required" });
@@ -132,7 +133,7 @@ const addemployee = async (req, res, next) => {
             folder: 'ems/employee'
         });
 
-        const query = new employeeModal({ userid: resulten._id, employeename: employeeName, profileimage: uploadResult.secure_url, username, department, dob });
+        const query = new employeeModal({ userid: resulten._id,branchId, employeename: employeeName, profileimage: uploadResult.secure_url, username, department, dob });
         const resulte = await query.save({ session });
 
         // Step 4: Commit transaction
@@ -259,21 +260,29 @@ const employeelist = async (req, res, next) => {
     }
 }
 const firstfetch = async (req, res, next) => {
+    // console.log("first fetch", req.user)
     try {
         const query = await employeeModal.find().populate('department', 'department').sort({ employeename: 1 });
-        const companye = await company.findOne();
-        const departmentlist = await departmentModal.find().select('department').sort({ department: 1 });
+        const companye = await company.findOne({ adminId: req.user.id });
+        const branche = await branch.find({ companyId: companye._id }).populate({
+            path: 'managerIds',
+            select: 'userid profileimage',
+            populate: ({
+                path: 'userid',
+                select: 'name',
+            })
+        });
+        const departmentlist = await departmentModal.find().populate('branchId','name').select('department branchId').sort({ department: 1 });
         const attendance = await attendanceModal.find()
             .populate('employeeId', 'employeename profileimage').sort({ date: -1 });
-        const companySetting = await comanysettingModal.findOne();
-
+      
         res.status(200).json({
             user: req.user,
             employee: query,
             departmentlist,
             attendance,
-            company:companye,
-            companySetting
+            company: companye,
+            branch: branche,
         })
 
     } catch (error) {
@@ -319,6 +328,50 @@ const addcompany = async (req, res, next) => {
         await newCompany.save();
 
         return res.status(200).json({ message: "Created new company", company: newCompany });
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: error.message });
+    }
+};
+const updateCompany = async (req, res, next) => {
+   const { _id, ...updateFields } = req.body;
+//    console.log(req.body)
+
+    try {
+        // Check if a company already exists for this admin
+        const update = await company.findByIdAndUpdate(_id ,{ ...updateFields });
+
+
+        return res.status(200).json({ message: "Updated" });
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: error.message });
+    }
+};
+const editBranch = async (req, res, next) => {
+    const {_id, name, location, companyId, managerIds } = req.body;
+
+    try {
+        const editbranch = await branch.findByIdAndUpdate( _id,{ name, location, companyId, managerIds });
+     
+
+        return res.status(200).json({ message: "Branch Edited"});
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: error.message });
+    }
+};
+const  addBranch = async (req, res, next) => {
+    const { name, location, companyId, managerIds } = req.body;
+
+    try {
+        const newBranch = new branch({ name, location, companyId, managerIds });
+        await newBranch.save();
+
+        return res.status(200).json({ message: "Branch created", Branch: newBranch });
 
     } catch (error) {
         console.error(error.message);
@@ -435,6 +488,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch,updateCompany, editBranch,firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };
