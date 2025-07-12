@@ -21,7 +21,22 @@ const employeeSchema = new mongoose.Schema({
     designation: {
         type: String,
     },
+    phone: {
+        type: Number,
+    },
     employeeNumber: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
+    gender: {
+        type: String,
+    },
+    bloodgroup: {
+        type: String,
+    },
+    dob: {
         type: String,
     },
     achievements: [
@@ -45,20 +60,8 @@ const employeeSchema = new mongoose.Schema({
     profileimage: {
         type: String,
     },
-    address: {
-        type: String,
-    },
-    phone: {
-        type: Number,
-    },
     Emergencyphone: {
         type: Number,
-    },
-    gender: {
-        type: String,
-    },
-    bloodgroup: {
-        type: String,
     },
     maritalStatus: {
         type: String,
@@ -66,12 +69,7 @@ const employeeSchema = new mongoose.Schema({
     salary: {
         type: Number,
     },
-    dob: {
-        type: String,
-    },
-    description: {
-        type: String
-    }
+   
 }, { timestamps: true })
 
 

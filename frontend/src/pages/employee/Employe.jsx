@@ -58,12 +58,51 @@ const Employe = () => {
     email: "",
     username: '',
     password: 'employee@123',
+    designation: '',
+    phone: '',
+    address: '',
+    gender: 'male',
+    bloodGroup: '',
+    dob: '',
+    Emergencyphone: '',
+    skills: [],
+    maritalStatus: true,
+    salary: 0,
+    achievements: [
+      { title: '', description: '', date: '' },
+    ],
+    education: [
+      { degree: '', institution: '', date: '' },
+    ],
   };
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
     setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
   }, [filters.branch]);
+
+  const handleNestedChange = (e, type, index, field) => {
+    const updated = [...inp[type]];
+    updated[index][field] = e.target.value;
+    setInp(prev => ({ ...prev, [type]: updated }));
+  };
+
+  const addItem = (type) => {
+    const emptyItem = type === 'achievements'
+      ? { title: '', description: '', date: '' }
+      : { degree: '', institution: '', date: '' };
+
+    setInp(prev => ({
+      ...prev,
+      [type]: [...prev[type], emptyItem],
+    }));
+  };
+
+  const removeItem = (type, index) => {
+    const updated = inp[type].filter((_, i) => i !== index);
+    setInp(prev => ({ ...prev, [type]: updated }));
+  };
+
 
   useEffect(() => {
     // console.log(departmentlist)
@@ -135,6 +174,8 @@ const Employe = () => {
       formData.append(key, inp[key]);
     });
     if (employeePhoto) formData.append('photo', employeePhoto);
+
+    return console.log(inp)
 
     await addemployee({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
   };
@@ -350,7 +391,10 @@ const Employe = () => {
                 <TextField fullWidth value={inp.password} onChange={(e) => handleChange(e, 'password')} label="password" size="small" />
               </Box>
               <Box sx={{ width: '100%', gap: 2 }}>
-                <TextField fullWidth value={inp.username} onChange={(e) => handleChange(e, 'username')} label="Designation" size="small" />
+                <TextField fullWidth value={inp.designation} onChange={(e) => handleChange(e, 'designation')} label="Designation" size="small" />
+              </Box>
+              <Box sx={{ width: '100%', gap: 2 }}>
+                <TextField fullWidth value={inp.salary} onChange={(e) => handleChange(e, 'salary')} label="salary" size="small" />
               </Box>
 
               <div className="mt-1 gap-2 flex items-center">
@@ -366,7 +410,7 @@ const Employe = () => {
 
               <Accordion sx={{ width: '100%' }} className="flex flex-col">
                 <AccordionSummary expandIcon={<MdExpandMore />}>
-                  <Typography variant="subtitle1">Personal Details</Typography>
+                  <Typography variant="subtitle1">Personal Details (optional)</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{
@@ -375,33 +419,114 @@ const Employe = () => {
                     gap: 2,
                   }}>
                     <TextField fullWidth value={inp.phone} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
+                    <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergencyphone" size="small" />
                     <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
-                    <TextField fullWidth value={inp.gender} onChange={(e) => handleChange(e, 'gender')} label="Gender" size="small" />
                     <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
                     <TextField fullWidth value={inp.dob} onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
+                    <FormControl size="small">
+                      <InputLabel>maritalStatus</InputLabel>
+                      <Select
+                        label="maritalStatus"
+                        value={inp.maritalStatus}
+                        onChange={(e) => handleChange(e,'maritalStatus')}
+                      >
+                        <MenuItem selected value={true}>Married</MenuItem>
+                        <MenuItem selected value={false}>Unmarried</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <FormControl size="small">
+                      <InputLabel>Gender</InputLabel>
+                      <Select
+                        label="Gender"
+                        value={inp.gender}
+                        onChange={(e) => handleChange(e,'gender')}
+                      >
+                        <MenuItem selected value='male'>Male</MenuItem>
+                        <MenuItem selected value='female'>female</MenuItem>
+                      </Select>
+                    </FormControl>
                   </Box>
                 </AccordionDetails>
               </Accordion>
 
               <Accordion sx={{ width: '100%' }} className="flex flex-col">
                 <AccordionSummary expandIcon={<MdExpandMore />}>
-                  <Typography variant="subtitle1">Document & Skills</Typography>
+                  <Typography variant="subtitle1">Document & Skills (optional)</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
-                  <Box sx={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 2,
-                  }}>
-                    <TextField fullWidth value={inp.degree} onChange={(e) => handleChange(e, 'degree')} label="Degree" size="small" />
-                    <TextField fullWidth value={inp.skills} onChange={(e) => handleChange(e, 'skills')} label="Skills" size="small" />
-                    <TextField fullWidth value={inp.certifications} onChange={(e) => handleChange(e, 'certifications')} label="Certifications" size="small" />
-                    <TextField fullWidth value={inp.experience} onChange={(e) => handleChange(e, 'experience')} label="Experience" size="small" />
+
+                <AccordionDetails sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {/* Skills and Degree */}
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 2,
+                    }}
+                  >
+                    <TextField fullWidth value={inp.skills} onChange={(e) => handleChange(e, 'skills')}
+                      helperText="Use commas to separate multiple skills"
+                      label="Skills" size="small" />
                   </Box>
+
+                  {/* Achievements Section */}
+                  <Typography fontWeight="bold">Achievements</Typography>
+                  {inp.achievements.map((ach, idx) => (
+                    <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 2, alignItems: 'center' }}>
+                      <TextField
+                        label="Title"
+                        size="small"
+                        value={ach.title}
+                        onChange={(e) => handleNestedChange(e, 'achievements', idx, 'title')}
+                      />
+                      <TextField
+                        label="Description"
+                        size="small"
+                        value={ach.description}
+                        onChange={(e) => handleNestedChange(e, 'achievements', idx, 'description')}
+                      />
+                      <TextField
+                        type="date"
+                        size="small"
+                        label="Date"
+                        InputLabelProps={{ shrink: true }}
+                        value={ach.date}
+                        onChange={(e) => handleNestedChange(e, 'achievements', idx, 'date')}
+                      />
+                      <Button color="error" onClick={() => removeItem('achievements', idx)}>Remove</Button>
+                    </Box>
+                  ))}
+                  <Button onClick={() => addItem('achievements')} variant="outlined">Add Achievement</Button>
+
+                  {/* Education Section */}
+                  <Typography fontWeight="bold">Education</Typography>
+                  {inp.education.map((edu, idx) => (
+                    <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 2, alignItems: 'center' }}>
+                      <TextField
+                        label="Degree"
+                        size="small"
+                        value={edu.degree}
+                        onChange={(e) => handleNestedChange(e, 'education', idx, 'degree')}
+                      />
+                      <TextField
+                        label="Institution"
+                        size="small"
+                        value={edu.institution}
+                        onChange={(e) => handleNestedChange(e, 'education', idx, 'institution')}
+                      />
+                      <TextField
+                        type="date"
+                        size="small"
+                        label="Date"
+                        InputLabelProps={{ shrink: true }}
+                        value={edu.date}
+                        onChange={(e) => handleNestedChange(e, 'education', idx, 'date')}
+                      />
+                      <Button color="error" onClick={() => removeItem('education', idx)}>Remove</Button>
+                    </Box>
+                  ))}
+                  <Button onClick={() => addItem('education')} variant="outlined">Add Education</Button>
                 </AccordionDetails>
               </Accordion>
-
-
 
               <div className="mt-2">
                 {!isupdate ? (
