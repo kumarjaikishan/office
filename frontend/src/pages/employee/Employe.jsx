@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "../profile/profile";
 import { useSelector } from "react-redux";
 import { MdOutlineModeEdit } from "react-icons/md";
+import { MdDeleteOutline } from "react-icons/md";
 import { MdExpandMore } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 
@@ -69,10 +70,10 @@ const Employe = () => {
     maritalStatus: true,
     salary: 0,
     achievements: [
-      { title: '', description: '', date: '' },
+
     ],
     education: [
-      { degree: '', institution: '', date: '' },
+
     ],
   };
   const [inp, setInp] = useState(init);
@@ -175,7 +176,7 @@ const Employe = () => {
     });
     if (employeePhoto) formData.append('photo', employeePhoto);
 
-    return console.log(inp)
+    // return console.log(inp)
 
     await addemployee({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
   };
@@ -196,18 +197,29 @@ const Employe = () => {
   };
 
   const edite = (employee) => {
-    // console.log(employee)
+    console.log(employee)
     setisupdate(true);
     setInp({
       employeeId: employee._id,
       branchId: employee.branchId,
       department: employee.department._id,
-      employeeName: employee.userid.name,
-      email: employee.userid.email,
-      username: employee.userid.name,
-      dob: employee.dob,
-      salary: employee.salary,
-      description: employee.description
+      employeeName: employee?.userid?.name,
+      email: employee?.userid?.email,
+      username: employee?.userid?.name,
+      dob: employee?.dob,
+      salary: employee?.salary,
+
+      // password: 'employee@123',
+      designation: employee?.designation,
+      phone: employee?.phone,
+      address: employee?.address || '',
+      gender: employee?.gender  || 'male',
+      bloodGroup: employee?.bloodGroup,
+      Emergencyphone: employee?.Emergencyphone,
+      skills: employee?.skills,
+      maritalStatus: employee?.maritalStatus || true,
+      achievements: employee?.achievements,
+      education: employee?.education,
     });
     if (employee.profileimage) {
       setPhotoPreview(employee.profileimage);
@@ -422,13 +434,13 @@ const Employe = () => {
                     <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergencyphone" size="small" />
                     <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
                     <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
-                    <TextField fullWidth value={inp.dob} onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
+                    <TextField fullWidth value={inp.dob} type="date" onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
                     <FormControl size="small">
                       <InputLabel>maritalStatus</InputLabel>
                       <Select
                         label="maritalStatus"
                         value={inp.maritalStatus}
-                        onChange={(e) => handleChange(e,'maritalStatus')}
+                        onChange={(e) => handleChange(e, 'maritalStatus')}
                       >
                         <MenuItem selected value={true}>Married</MenuItem>
                         <MenuItem selected value={false}>Unmarried</MenuItem>
@@ -439,7 +451,7 @@ const Employe = () => {
                       <Select
                         label="Gender"
                         value={inp.gender}
-                        onChange={(e) => handleChange(e,'gender')}
+                        onChange={(e) => handleChange(e, 'gender')}
                       >
                         <MenuItem selected value='male'>Male</MenuItem>
                         <MenuItem selected value='female'>female</MenuItem>
@@ -463,14 +475,17 @@ const Employe = () => {
                       gap: 2,
                     }}
                   >
-                    <TextField fullWidth value={inp.skills} onChange={(e) => handleChange(e, 'skills')}
+                    {/* <TextField fullWidth value={inp.skills} onChange={(e) => {
+                       let prev = inp.skills;
+                       prev
+                    }}
                       helperText="Use commas to separate multiple skills"
-                      label="Skills" size="small" />
+                      label="Skills" size="small" /> */}
                   </Box>
 
                   {/* Achievements Section */}
                   <Typography fontWeight="bold">Achievements</Typography>
-                  {inp.achievements.map((ach, idx) => (
+                  {inp?.achievements?.map((ach, idx) => (
                     <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 2, alignItems: 'center' }}>
                       <TextField
                         label="Title"
@@ -492,14 +507,15 @@ const Employe = () => {
                         value={ach.date}
                         onChange={(e) => handleNestedChange(e, 'achievements', idx, 'date')}
                       />
-                      <Button color="error" onClick={() => removeItem('achievements', idx)}>Remove</Button>
+                      {/* <Button color="error" onClick={() => removeItem('achievements', idx)}>Remove</Button> */}
+                      <MdDeleteOutline size={24} title="Delete this" onClick={() => removeItem('achievements', idx)} />
                     </Box>
                   ))}
                   <Button onClick={() => addItem('achievements')} variant="outlined">Add Achievement</Button>
 
                   {/* Education Section */}
                   <Typography fontWeight="bold">Education</Typography>
-                  {inp.education.map((edu, idx) => (
+                  {inp?.education?.map((edu, idx) => (
                     <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 2, alignItems: 'center' }}>
                       <TextField
                         label="Degree"
@@ -521,7 +537,8 @@ const Employe = () => {
                         value={edu.date}
                         onChange={(e) => handleNestedChange(e, 'education', idx, 'date')}
                       />
-                      <Button color="error" onClick={() => removeItem('education', idx)}>Remove</Button>
+                      {/* <Button color="error" onClick={() => removeItem('education', idx)}>Remove</Button> */}
+                      <MdDeleteOutline size={24} title="Delete this" onClick={() => removeItem('education', idx)} />
                     </Box>
                   ))}
                   <Button onClick={() => addItem('education')} variant="outlined">Add Education</Button>

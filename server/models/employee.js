@@ -22,7 +22,7 @@ const employeeSchema = new mongoose.Schema({
         type: String,
     },
     phone: {
-        type: Number,
+        type: String,
     },
     employeeNumber: {
         type: String,
@@ -33,7 +33,7 @@ const employeeSchema = new mongoose.Schema({
     gender: {
         type: String,
     },
-    bloodgroup: {
+    bloodGroup: {
         type: String,
     },
     dob: {
@@ -61,13 +61,13 @@ const employeeSchema = new mongoose.Schema({
         type: String,
     },
     Emergencyphone: {
-        type: Number,
+        type: String,
     },
     maritalStatus: {
         type: String,
     },
     salary: {
-        type: Number,
+        type: String,
     },
    
 }, { timestamps: true })
