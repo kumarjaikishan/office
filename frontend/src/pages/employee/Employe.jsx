@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeefetche, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import { Box, Button, OutlinedInput } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, OutlinedInput, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../components/custommodal/Modalbox';
@@ -10,7 +10,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import { IoSearch } from "react-icons/io5";
+import { IoEyeOutline, IoSearch } from "react-icons/io5";
 import InputAdornment from '@mui/material/InputAdornment';
 import { GoPlus } from "react-icons/go";
 import { BsUpload } from "react-icons/bs";
@@ -21,6 +21,9 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "../profile/profile";
 import { useSelector } from "react-redux";
+import { MdOutlineModeEdit } from "react-icons/md";
+import { MdExpandMore } from "react-icons/md";
+import { AiOutlineDelete } from "react-icons/ai";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -32,12 +35,19 @@ const Employe = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
-  const { department, branch } = useSelector(e => e.user)
+  const { department, branch, employee } = useSelector(e => e.user)
   const [filters, setFilters] = useState({
     searchText: '',
     branch: 'all',
     department: 'all'
   });
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      department: 'all'
+    }));
+  }, [filters.branch]);
   let navigate = useNavigate();
 
   const init = {
@@ -47,18 +57,49 @@ const Employe = () => {
     employeeName: "",
     email: "",
     username: '',
-    password: '',
+    password: 'employee@123',
   };
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    employeefetche({ navigate, setviewEmployee, setopenviewmodal, setisload, setemployeelist, edite, deletee, setdepartmentlist });
-  }, []);
+    setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
+  }, [filters.branch]);
 
   useEffect(() => {
     // console.log(departmentlist)
-    // console.log(employeelist)
-  }, [departmentlist,employeelist])
+    // console.log(employee)
+    if (employee.length < 1) return;
+
+    let sno = 1;
+    const data = employee.map((emp) => {
+      return {
+        id: emp._id,
+        sno: sno++,
+        rawname: emp.userid.name,
+        name: (<div className="flex items-center gap-3 ">
+          <Avatar src={emp.profileimage} alt={emp.employeename}>
+            {!emp.profileimage && <FaRegUser />}
+          </Avatar>
+          <Box>
+            <Typography variant="body2">{emp.userid.name}</Typography>
+          </Box>
+        </div>),
+        email: emp.userid.email,
+        branch: emp.branchId,
+        department: emp.department.department,
+        departmentid: emp.department._id,
+        action: (<div className="action flex gap-2.5">
+          <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={() => { setviewEmployee(emp._id); setopenviewmodal(true) }} ><IoEyeOutline /></span>
+          <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={() => navigate(`/admin-dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
+          <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
+          <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
+        </div>)
+      }
+    })
+    // console.log("bffdg",data)
+    setemployeelist(data);
+
+  }, [employee])
 
   const handleChange = (e, name) => {
     setInp({
@@ -114,13 +155,17 @@ const Employe = () => {
   };
 
   const edite = (employee) => {
+    // console.log(employee)
     setisupdate(true);
     setInp({
       employeeId: employee._id,
-      employeeName: employee.employeename,
+      branchId: employee.branchId,
+      department: employee.department._id,
+      employeeName: employee.userid.name,
+      email: employee.userid.email,
+      username: employee.userid.name,
       dob: employee.dob,
       salary: employee.salary,
-      department: employee.department._id,
       description: employee.description
     });
     if (employee.profileimage) {
@@ -163,14 +208,14 @@ const Employe = () => {
 
   const filteredEmployees = employeelist.filter(emp => {
     const name = emp.rawname?.toLowerCase() || '';
-    const deptId = emp.department?._id || '';
-    const branchId = emp.department?._id || '';
+    const deptId = emp.departmentid || '';
+    const branchId = emp.branch || '';
 
     const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
     const deptMatch = filters.department === 'all' || deptId === filters.department;
-    const branchMatch = filters.department === 'all' || deptId === filters.department;
+    const branchMatch = filters.branch === 'all' || branchId === filters.branch;
 
-    return nameMatch && deptMatch;
+    return nameMatch && deptMatch && branchMatch;
   });
 
 
@@ -196,6 +241,7 @@ const Employe = () => {
             <Select
               label="Department"
               value={filters.branch}
+
               input={
                 <OutlinedInput
                   startAdornment={
@@ -218,6 +264,7 @@ const Employe = () => {
             <InputLabel>Department</InputLabel>
             <Select
               label="Department"
+              disabled={filters.branch == 'all'}
               value={filters.department}
               input={
                 <OutlinedInput
@@ -238,12 +285,12 @@ const Employe = () => {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ width: '160px' }} size="small">
+          {/* <FormControl sx={{ width: '160px' }} size="small">
             <InputLabel>Status</InputLabel>
             <Select label="Status" value="">
               <MenuItem value="">Active</MenuItem>
             </Select>
-          </FormControl>
+          </FormControl> */}
         </div>
         <div className="flex gap-1">
           <Button variant='outlined' startIcon={<FiDownload />}>Export</Button>
@@ -302,6 +349,9 @@ const Employe = () => {
                 <TextField fullWidth required value={inp.username} onChange={(e) => handleChange(e, 'username')} label="username" size="small" />
                 <TextField fullWidth value={inp.password} onChange={(e) => handleChange(e, 'password')} label="password" size="small" />
               </Box>
+              <Box sx={{ width: '100%', gap: 2 }}>
+                <TextField fullWidth value={inp.username} onChange={(e) => handleChange(e, 'username')} label="Designation" size="small" />
+              </Box>
 
               <div className="mt-1 gap-2 flex items-center">
                 {!photoPreview && <div className="chooseFile w-[250px] h-[90px] rounded flex flex-col justify-center
@@ -313,6 +363,45 @@ const Employe = () => {
                 {photoPreview && <img src={photoPreview} alt="Preview" className="mt-2" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />}
                 {photoPreview && <Button color="warning" onClick={resetPhoto} startIcon={<GrPowerReset />} size="small" sx={{ height: '30px' }} variant="outlined">Reset</Button>}
               </div>
+
+              <Accordion sx={{ width: '100%' }} className="flex flex-col">
+                <AccordionSummary expandIcon={<MdExpandMore />}>
+                  <Typography variant="subtitle1">Personal Details</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 2,
+                  }}>
+                    <TextField fullWidth value={inp.phone} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
+                    <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
+                    <TextField fullWidth value={inp.gender} onChange={(e) => handleChange(e, 'gender')} label="Gender" size="small" />
+                    <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
+                    <TextField fullWidth value={inp.dob} onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion sx={{ width: '100%' }} className="flex flex-col">
+                <AccordionSummary expandIcon={<MdExpandMore />}>
+                  <Typography variant="subtitle1">Document & Skills</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: 2,
+                  }}>
+                    <TextField fullWidth value={inp.degree} onChange={(e) => handleChange(e, 'degree')} label="Degree" size="small" />
+                    <TextField fullWidth value={inp.skills} onChange={(e) => handleChange(e, 'skills')} label="Skills" size="small" />
+                    <TextField fullWidth value={inp.certifications} onChange={(e) => handleChange(e, 'certifications')} label="Certifications" size="small" />
+                    <TextField fullWidth value={inp.experience} onChange={(e) => handleChange(e, 'experience')} label="Experience" size="small" />
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+
+
 
               <div className="mt-2">
                 {!isupdate ? (

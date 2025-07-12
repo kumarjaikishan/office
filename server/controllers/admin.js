@@ -262,7 +262,7 @@ const employeelist = async (req, res, next) => {
 const firstfetch = async (req, res, next) => {
     // console.log("first fetch", req.user)
     try {
-        const query = await employeeModal.find().populate('department', 'department').sort({ employeename: 1 });
+        const employee = await employeeModal.find().populate('department', 'department').populate('userid').sort({ employeename: 1 });
         const companye = await company.findOne({ adminId: req.user.id });
         const branche = await branch.find({ companyId: companye._id }).populate({
             path: 'managerIds',
@@ -274,11 +274,18 @@ const firstfetch = async (req, res, next) => {
         });
         const departmentlist = await departmentModal.find().populate('branchId','name').select('department branchId').sort({ department: 1 });
         const attendance = await attendanceModal.find()
-            .populate('employeeId', 'employeename profileimage').sort({ date: -1 });
+            .populate({
+                path:'employeeId',
+                select:'employeename userid profileimage branchId department',
+                populate:{
+                    path:'userid',
+                    select:'name'
+                },
+            }).sort({ date: -1 });
       
         res.status(200).json({
             user: req.user,
-            employee: query,
+           employee,
             departmentlist,
             attendance,
             company: companye,

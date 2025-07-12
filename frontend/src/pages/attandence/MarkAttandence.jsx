@@ -22,7 +22,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
     const { department, employee } = useSelector((state) => state.user);
 
     useEffect(() => {
-        // console.log("department:", department)
+        console.log("employee:", employee)
     }, [department]);
 
 
@@ -73,7 +73,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                             fullWidth
                             value={employee?.find(emp => emp._id === inp.employeeId) || null}
                             options={employee || []}
-                            getOptionLabel={(option) => option.employeename} // still needed for filtering
+                            getOptionLabel={(option) => option.userid.name} // still needed for filtering
                             onChange={(event, newValue) => {
                                 // console.log(newValue)
                                 setinp({
@@ -91,11 +91,11 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                                         {...rest} // spread the rest
                                     >
-                                        <Avatar src={option.image} alt={option.employeename}>
-                                            {!option.image && <FaRegUser />}
+                                        <Avatar src={option.profileimage} alt={option.userid.name}>
+                                            {!option.profileimage && <FaRegUser />}
                                         </Avatar>
                                         <Box>
-                                            <Typography variant="body2">{option.employeename}</Typography>
+                                            <Typography variant="body2">{option.userid.name}</Typography>
                                             <Typography variant="caption" color="text.secondary">
                                                 DOB: {option.dob}
                                             </Typography>
@@ -147,28 +147,28 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         }} sx={{ width: '100%' }} label="Punch Out" />
                                 </LocalizationProvider>
                             }
-                            {isPunchIn && 
-                            <FormControl sx={{ width: '100%' }} size="small">
-                                <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-helper-label"
-                                    id="demo-simple-select-helper"
-                                    value={inp.status}
-                                    name="status"
-                                    label="Status"
-                                    required
-                                    onChange={(e) => {
-                                        setinp({
-                                            ...inp,
-                                            status: e.target.value
-                                        });
-                                    }}
-                                >
-                                    <MenuItem value={'present'}>Present</MenuItem>
-                                    <MenuItem value={'absent'}>Absent</MenuItem>
-                                    <MenuItem value={'half day'}>Half Day</MenuItem>
-                                </Select>
-                            </FormControl>}
+                            {isPunchIn &&
+                                <FormControl sx={{ width: '100%' }} size="small">
+                                    <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-helper-label"
+                                        id="demo-simple-select-helper"
+                                        value={inp.status}
+                                        name="status"
+                                        label="Status"
+                                        required
+                                        onChange={(e) => {
+                                            setinp({
+                                                ...inp,
+                                                status: e.target.value
+                                            });
+                                        }}
+                                    >
+                                        <MenuItem value={'present'}>Present</MenuItem>
+                                        <MenuItem value={'absent'}>Absent</MenuItem>
+                                        <MenuItem value={'half day'}>Half Day</MenuItem>
+                                    </Select>
+                                </FormControl>}
                         </Box>
 
                         <div className='w-full flex gap-2'>

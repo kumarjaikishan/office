@@ -16,29 +16,48 @@ import { CiFilter } from 'react-icons/ci';
 
 const Main = () => {
 
-  const { attandence, employee, department } = useSelector((state) => state.user);
+  const { attandence, employee, branch, department } = useSelector((state) => state.user);
   const { islogin, isadmin } = useSelector((state) => state.auth);
   const [currentpresent, setcurrentpresent] = useState([]);
   const [todaypresent, settodaypresent] = useState([])
   let navigate = useNavigate();
   const dispatch = useDispatch();
   const attandenceRef = useRef(attandence);
-  const [depfilter, setdepfilter] = useState('all')
+  const [branc, setbranc] = useState('all');
+  const [depfilter, setdepfilter] = useState('all');
+  const [employeelist, setemployeelist] = useState([])
 
   useEffect(() => {
     !islogin && navigate('/login');
   }, [])
 
   useEffect(() => {
+    if (!employee || employee.length === 0) return;
+
+    const filtered = employee.filter(dep => {
+      const matchBranch =
+        branc === 'all' || dep.branchId === branc;
+      const matchdepart =
+        depfilter === 'all' || dep.department._id === depfilter;
+      return matchBranch && matchdepart;
+    });
+
+    setemployeelist(filtered);
+  }, [branc, depfilter]);
+
+  useEffect(() => {
+    setdepfilter('all')
+  }, [branc]);
+  useEffect(() => {
     attandenceRef.current = attandence;
   }, [attandence]);
 
   useEffect(() => {
-    console.log("attandence", attandence)
-    console.log("employee", employee)
+    // console.log("attandence", attandence)
+    // console.log("employee", employee)
     // console.log("currentPresent", currentpresent)
-    console.log("department", department)
-    if(!attandence) return;
+    // console.log("department", department)
+    if (!attandence) return;
     let currentPresent = attandence.filter((val) => {
       return dayjs(val.date).isSame(dayjs(), 'day') && !val.punchOut
     })
@@ -82,7 +101,7 @@ const Main = () => {
                     {!datae.employeeId.profileimage && <FaRegUser />}
                   </Avatar>
                   <span className='text-[14px] '>
-                    <span className='text-green-700 capitalize font-semibold'> {datae.employeeId.employeename}</span> has Punched In at{' '}
+                    <span className='text-green-700 capitalize font-semibold'> {datae.employeeId.userid.name}</span> has Punched In at{' '}
                     <span className='text-green-700 '> {dayjs(datae.punchIn).format('hh:mm A')}</span>
                   </span>
                 </div>,
@@ -106,7 +125,7 @@ const Main = () => {
                     {!datae.employeeId.profileimage && <FaRegUser />}
                   </Avatar>
                   <span className='text-[14px] '>
-                    <span className='text-amber-700 capitalize font-semibold '> {datae.employeeId.employeename}</span> has Punched Out at{' '}
+                    <span className='text-amber-700 capitalize font-semibold '> {datae.employeeId.userid.name}</span> has Punched Out at{' '}
                     <span className='text-amber-700 '> {dayjs(datae.punchOut).format('hh:mm A')}</span>
                   </span>
                 </div>,
@@ -151,35 +170,56 @@ const Main = () => {
       </div>
 
       <div className='w-full flex-col flex gap-5 shadow  bg-white p-2 rounded'>
-        <FormControl sx={{ width: '160px' }} required size="small">
-          <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
-          <Select
-            labelId="demo-simple-select-helper-label"
-            id="demo-simple-select-helper"
-            value={depfilter}
-            name="Department"
-            label="Department"
-            input={
-              <OutlinedInput
-                startAdornment={
-                  <InputAdornment position="start">
-                    <CiFilter fontSize="small" />
-                  </InputAdornment>
-                }
-                label="Department"
-              />
-            }
-            onChange={(e) => setdepfilter(e.target.value)}
-          >
-            <MenuItem selected value={'all'}>All</MenuItem>
-            {department?.map((val) => {
-              return <MenuItem key={val._id} value={val._id}>{val.department}</MenuItem>
-            })}
+        <div className='flex gap-3'>
+          <FormControl sx={{ width: '160px' }} required size="small">
+            <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
+            <Select
+              value={branc}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="branch"
+                />
+              }
+              onChange={(e) => setbranc(e.target.value)}
+            >
+              <MenuItem selected value={'all'}>All</MenuItem>
+              {branch.map((list) => (
+                <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ width: '160px' }} required size="small">
+            <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
+            <Select
+              disabled={branc == 'all'}
+              value={depfilter}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Department"
+                />
+              }
+              onChange={(e) => setdepfilter(e.target.value)}
+            >
+              <MenuItem selected value={'all'}>All</MenuItem>
+              {department?.filter(e => e.branchId._id == branc)?.map((val) => {
+                return <MenuItem key={val._id} value={val._id}>{val.department}</MenuItem>
+              })}
 
-          </Select>
-        </FormControl>
+            </Select>
+          </FormControl>
+        </div>
         <div className='flex justify-start gap-4'>
-          {(depfilter !== 'all' ? employee.filter(e => e.department?._id == depfilter) : employee)?.map((emp) => {
+          {employeelist?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
             {/* console.log('today present ', todaypresent) */ }
             const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);

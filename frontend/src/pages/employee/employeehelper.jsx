@@ -23,7 +23,7 @@ export const columns = [
     },
     {
         name: "Department",
-        selector: (row) => row.department.department
+        selector: (row) => row.department
     },
     {
         name: "Action",
@@ -151,7 +151,7 @@ export const employeefetche = async ({navigate,setopenviewmodal,setviewEmployee,
             }
         );
 
-        console.log('employee fetch Query:', res.data);
+        // console.log('employee fetch Query:', res.data);
         let sno = 1;
         const data = await res.data.list.map((emp) => {
             return {

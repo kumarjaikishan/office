@@ -32,7 +32,7 @@ const Attandence = () => {
   const [isload, setisload] = useState(false);
   const [openmodal, setopenmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
-  const { attandence, department, company } = useSelector((state) => state.user);
+  const { branch, attandence, department, company } = useSelector((state) => state.user);
   const [attandencelist, setattandencelist] = useState([]);
   const [filterattandence, setfilterattandence] = useState([]);
   const [isPunchIn, setisPunchIn] = useState(true);
@@ -50,12 +50,18 @@ const Attandence = () => {
 
   const [filtere, setfiltere] = useState({
     date: null,
+    branch: 'all',
     departmente: 'all',
     employee: '',
     status: 'all'
   })
 
+  useEffect(() => {
+    // setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
+  }, [filtere.branch]);
+
   const isFilterActive = (
+    filtere.branch !== 'all' ||
     filtere.departmente !== 'all' ||
     filtere.status !== 'all' ||
     filtere.employee.trim() !== '' ||
@@ -77,7 +83,7 @@ const Attandence = () => {
   }, [inp.punchIn, inp.punchOut]);
 
   useEffect(() => {
-    // console.log(attandencelist)
+    console.log(attandencelist)
     if (!attandencelist) return;
 
     const today = dayjs(); // today's date without time
@@ -91,6 +97,9 @@ const Attandence = () => {
       const matchDate =
         !filtere.date || recordDate.isSame(filtere.date, 'day');
 
+      const matchbranch =
+        filtere.branch === 'all' || val.branchid === filtere.branch;
+
       const matchDept =
         filtere.departmente === 'all' || val.departmentId === filtere.departmente;
 
@@ -101,7 +110,7 @@ const Attandence = () => {
         filtere.employee.trim() === '' ||
         val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
 
-      return matchDate && matchDept && matchStatus && matchEmployee;
+      return matchDate && matchbranch && matchDept && matchStatus && matchEmployee;
     });
 
     setfilterattandence(fil);
@@ -138,6 +147,14 @@ const Attandence = () => {
   }
 
   useEffect(() => {
+  setfiltere((prev) => ({
+    ...prev,
+    departmente: 'all'
+  }));
+}, [filtere.branch]);
+
+
+  useEffect(() => {
     // console.log(department)
     // console.log(attandence)
     if (!attandence) return;
@@ -151,6 +168,8 @@ const Attandence = () => {
 
         return {
           attenid: emp._id,
+          departmentId: emp.employeeId.department,
+          branchid: emp.employeeId.branchId,
           employeeId: emp.employeeId._id,
           status: emp.status,
           stat: (
@@ -158,14 +177,14 @@ const Attandence = () => {
               {emp.status}
             </span>
           ),
-          rawname: emp.employeeId.employeename,
+          rawname: emp.employeeId.userid.name,
           name: (
             <div className="flex items-center gap-3">
               <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
                 {!emp.employeeId.profileimage && <FaRegUser />}
               </Avatar>
               <Box>
-                <Typography variant="body2">{emp.employeeId.employeename}</Typography>
+                <Typography variant="body2">{emp.employeeId.userid.name}</Typography>
               </Box>
             </div>
           ),
@@ -301,7 +320,7 @@ const Attandence = () => {
               <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
             <div className="flex items-center gap-4 flex-wrap">
-            <CiFilter size={24} color="teal"/>
+              <CiFilter size={24} color="teal" />
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   value={filtere.date}
@@ -317,13 +336,34 @@ const Attandence = () => {
               </LocalizationProvider>
 
               <FormControl sx={{ width: '160px' }} size="small">
+                <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
+                <Select
+                  value={filtere.branch}
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <CiFilter fontSize="small" />
+                        </InputAdornment>
+                      }
+                      label="Branch"
+                    />
+                  }
+                  onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
+                // onChange={(e) => handleChange(e, 'department')}
+                >
+                  <MenuItem selected value={'all'}>All</MenuItem>
+                  {branch?.map((val) => {
+                    return <MenuItem key={val._id} value={val._id}>{val.name}</MenuItem>
+                  })}
+
+                </Select>
+              </FormControl>
+              <FormControl sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
                 <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
                   value={filtere.departmente}
-                  name="Department"
-                  label="Department"
+                  disabled={filtere.branch == 'all'}
                   input={
                     <OutlinedInput
                       startAdornment={
@@ -338,7 +378,7 @@ const Attandence = () => {
                 // onChange={(e) => handleChange(e, 'department')}
                 >
                   <MenuItem selected value={'all'}>All</MenuItem>
-                  {department?.map((val) => {
+                  {department?.filter(e => e.branchId._id == filtere.branch).map((val) => {
                     return <MenuItem key={val._id} value={val._id}>{val.department}</MenuItem>
                   })}
 
@@ -348,11 +388,7 @@ const Attandence = () => {
               <FormControl sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
                 <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
                   value={filtere.status}
-                  name="Department"
-                  label="status"
                   input={
                     <OutlinedInput
                       startAdornment={
@@ -382,7 +418,7 @@ const Attandence = () => {
                   endAdornment: filtere.employee && (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={() => setfiltere({ ...filtere, employee: "" })}  edge="end"  size="small"
+                        onClick={() => setfiltere({ ...filtere, employee: "" })} edge="end" size="small"
                       >
                         <MdClear />
                       </IconButton>
@@ -415,7 +451,7 @@ const Attandence = () => {
         setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
       <BulkMark isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={bullmodal} inp={inp} setinp={setinp}
-        setopenmodal={bullmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
+        setopenmodal={setbullmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
     </div>
   )

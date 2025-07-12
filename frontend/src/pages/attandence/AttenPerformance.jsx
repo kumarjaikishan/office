@@ -18,7 +18,7 @@ const AttenPerformance = () => {
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
     const { company } = useSelector((state) => state.user);
-    const [setting,setsetting]= useState(null)
+    const [setting, setsetting] = useState(null)
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
     const [selectedMonth, setSelectedMonth] = useState('all');
@@ -40,6 +40,9 @@ const AttenPerformance = () => {
         earlyarrival: [],
         earlyLeave: [],
         lateleave: [],
+        shorttimemin: 0,
+        overtimemin: 0,
+
     });
 
     const currentYear = dayjs().year();
@@ -52,7 +55,7 @@ const AttenPerformance = () => {
     useEffect(() => {
         if (!company) return;
         setsetting(company)
-       
+
     }, [company]);
     useEffect(() => {
         if (!userid) return;
@@ -78,6 +81,7 @@ const AttenPerformance = () => {
 
     useEffect(() => {
         if (!attandence.length || !setting) return;
+
         const filtered = attandence.filter(entry => {
             const entryDate = dayjs(entry.date);
             return entryDate.year() === selectedYear && (selectedMonth === 'all' || entryDate.month() === selectedMonth);
@@ -85,6 +89,9 @@ const AttenPerformance = () => {
 
         const presentDates = [], absentDates = [], leaveDates = [], holidayDates = [],
             shortDates = [], overtime = [], latearrival = [], earlyarrival = [], earlyLeave = [], lateleave = [];
+
+        let shorttimemin = 0;
+        let overtimemin = 0;
 
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
@@ -106,6 +113,17 @@ const AttenPerformance = () => {
             const isshort = workingMinutes < setting.workingMinutes.shortDayThreshold;
             const isOvertime = workingMinutes >= setting.workingMinutes.overtimeAfterMinutes;
 
+            if (isshort) {
+                shortDates.push(date);
+                shorttimemin += setting.workingMinutes.shortDayThreshold - workingMinutes;
+            }
+
+            if (isOvertime) {
+                overtime.push(date);
+                overtimemin += workingMinutes - setting.workingMinutes.overtimeAfterMinutes;
+            }
+
+            // Early / Late arrival thresholds
             const [earlyArrHour, earlyArrMinute] = setting.attendanceRules.considerEarlyEntryBefore.split(':').map(Number);
             const [lateArrHour, lateArrMinute] = setting.attendanceRules.considerLateEntryAfter.split(':').map(Number);
             const earlyArrivalThreshold = dayjs(punchIn).startOf('day').add(earlyArrHour, 'hour').add(earlyArrMinute, 'minute');
@@ -114,6 +132,7 @@ const AttenPerformance = () => {
             if (dayjs(punchIn).isBefore(earlyArrivalThreshold)) earlyarrival.push(date);
             if (dayjs(punchIn).isAfter(lateArrivalThreshold)) latearrival.push(date);
 
+            // Early / Late leave thresholds
             const [earlyLeaveHour, earlyLeaveMinute] = setting.attendanceRules.considerEarlyExitBefore.split(':').map(Number);
             const [lateLeaveHour, lateLeaveMinute] = setting.attendanceRules.considerLateExitAfter.split(':').map(Number);
             const earlyLeaveThreshold = dayjs(punchOut).startOf('day').add(earlyLeaveHour, 'hour').add(earlyLeaveMinute, 'minute');
@@ -121,13 +140,24 @@ const AttenPerformance = () => {
 
             if (dayjs(punchOut).isBefore(earlyLeaveThreshold)) earlyLeave.push(date);
             if (dayjs(punchOut).isAfter(lateLeaveThreshold)) lateleave.push(date);
-
-            if (isshort) shortDates.push(date);
-            if (isOvertime) overtime.push(date);
         });
 
-        sethell({ present: presentDates, absent: absentDates, leave: leaveDates, holiday: holidayDates, short: shortDates, overtime, latearrival, earlyarrival, earlyLeave, lateleave });
+        sethell({
+            present: presentDates,
+            absent: absentDates,
+            leave: leaveDates,
+            holiday: holidayDates,
+            short: shortDates,
+            overtime,
+            shorttimemin,
+            overtimemin,
+            latearrival,
+            earlyarrival,
+            earlyLeave,
+            lateleave,
+        });
     }, [attandence, selectedYear, selectedMonth, setting]);
+
 
     const filteredData = attandence.filter((entry) => {
         const date = dayjs(entry.date).startOf('day');

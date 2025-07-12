@@ -113,8 +113,6 @@ const checkin = async (req, res, next) => {
 
     // Check for existing check-in
     const existing = await Attendance.findOne({ employeeId, date: dateObj })
-      .populate('employeeId', 'employeename profileimage')
-      .populate('departmentId', 'department');
     if (existing) {
       return res.status(400).json({ message: 'Already checked in' });
     }
@@ -134,7 +132,14 @@ const checkin = async (req, res, next) => {
     await attendance.save();
 
     const updatedRecord = await Attendance.findById(attendance._id)
-      .populate('employeeId', 'employeename profileimage');
+      .populate({
+        path: 'employeeId',
+        select: ' userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name'
+        }
+      });
 
     // Send live update to all clients
     sendToClients({
@@ -192,7 +197,14 @@ const checkout = async (req, res, next) => {
     await record.save();
 
     const updatedRecord = await Attendance.findById(record._id)
-      .populate('employeeId', 'employeename profileimage')
+      .populate({
+        path: 'employeeId',
+        select: ' userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name'
+        }
+      });
 
     // Send live update to all clients
     sendToClients({

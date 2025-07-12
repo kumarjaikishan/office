@@ -7,6 +7,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import Adminleavemodal from './adminleavemodal';
 import { customStyles } from '../attandence/attandencehelper';
+import { FaRegUser } from 'react-icons/fa';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
@@ -41,8 +42,8 @@ const Adminleave = () => {
                         id: leave._id,
                         sno: sno++,
                         name: (<div className="flex items-center gap-3 ">
-                            <Avatar src={leave.employeeId.profileimage} alt={leave.employeeId.employeename}>
-                                {!leave.employeeId.profileimage && <FaRegUser />}
+                            <Avatar src={leave?.employeeId?.profileimage} alt={leave?.employeeId?.employeename}>
+                                {!leave.employeeId?.profileimage && <FaRegUser />}
                             </Avatar>
                             <Box>
                                 <Typography variant="body2">{leave.employeeId?.employeename}</Typography>
@@ -66,7 +67,6 @@ const Adminleave = () => {
                 setleavelist(data);
             } catch (err) {
                 console.error(err);
-                alert("Error saving holiday");
             }
         }
         firstfetch();

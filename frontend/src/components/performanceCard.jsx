@@ -15,8 +15,8 @@ import {
 
 const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
     useEffect(() => {
-        // console.log(user)
-    }, [])
+        console.log(attandence)
+    }, [attandence])
 
     const total = hell.present.length + hell.absent.length + hell.leave.length;
 
@@ -69,7 +69,7 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                     </div>
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800"><FaCheckCircle /> Present</span>
-                        <span className="font-bold text-gray-600">{hell?.present?.length} Days {perc.present ? `(${perc.present} %)` : ''}</span>
+                        <span className="font-bold text-gray-600">{hell?.present?.length} Days {perc.present ? `(${perc.present}%)` : ''}</span>
                     </div>
                 </div>
 
@@ -88,11 +88,12 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                 <div className="attandencecarde md:ml-12">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800"><FaMobileAlt /> Overtime</span>
-                        <span className="font-bold text-gray-600">{hell?.overtime?.length || 0}</span>
+                        <span className="font-bold text-gray-600">{hell?.overtime?.length || 0} {hell?.overtimemin > 0 && `(${hell?.overtimemin} min)`}</span>
                     </div>
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Attendance</span>
-                        <span className="font-bold text-gray-600">{hell?.short?.length || 0}</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Time</span>
+                        {/* <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Attendance</span> */}
+                        <span className="font-bold text-gray-600">{hell?.short?.length || 0} {hell?.shorttimemin > 0 && `(${hell?.shorttimemin} min)`}</span>
                     </div>
                 </div>
 

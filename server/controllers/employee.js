@@ -43,12 +43,13 @@ const fetchleave = async (req, res, next) => {
     // });
     const leave = await Leave.find().populate({
       path: 'employeeId',
-      select: 'employeename userid profileimage',
+      select: 'userid profileimage',
       populate: {
         path: 'userid',
         select: 'name email'
       }
     });
+    console.log(leave)
     return res.json({ leave });
 
   } catch (error) {
