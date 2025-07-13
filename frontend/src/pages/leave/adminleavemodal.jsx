@@ -21,7 +21,8 @@ const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, s
                     }
                 }
             );
-
+setopenmodal(false);
+setInp(init);
             toast.success(res.data.message, { autoClose: 2000 })
         } catch (err) {
             console.error(err);

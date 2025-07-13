@@ -86,7 +86,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
 
             <div className="mt-3 justify-start flex flex-wrap text-sm text-gray-600 space-y-1">
               <div className="flex w-1/2 items-center gap-2"><FaEnvelope className="text-gray-500" /> {employee?.userid?.email}</div>
-              <div className="flex w-1/2 items-center gap-2"><FaPhone className="text-gray-500" /> {employee?.userid?.phone || 'N/A'}</div>
+              <div className="flex w-1/2 items-center gap-2"><FaPhone className="text-gray-500" /> {employee?.phone || 'N/A'}</div>
               <div className="flex w-1/2 items-center gap-2"><FaCalendarAlt className="text-gray-500" /> {dayjs(employee?.userid?.createdAt).format('DD MMM, YYYY')}</div>
               <div className="flex w-1/2 items-center gap-2"><FaIdCard className="text-gray-500" /> ID: emp0002</div>
             </div>
@@ -126,7 +126,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
                 <BsDropletFill className="mt-1 text-gray-500" />
                 <div>
                   <div className="font-semibold">Blood Group</div>
-                  <div>{employee?.bloodgroup || 'N/A'}</div>
+                  <div>{employee?.bloodGroup || 'N/A'}</div>
                 </div>
               </div>
             </div>}
@@ -159,27 +159,27 @@ const EmployeeProfile = ({ viewEmployee }) => {
             <div className="mt-2 p-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-sm text-gray-700">
               <div className='rounded shadow-2xl bg-white p-4 flex flex-col gap-1'>
                 <h3 className='font-bold'>Education</h3>
-                <div className='relative my-1 pl-2 rounded overflow-hidden'>
-                  <p className='text-gray-700 font-semibold'>Bachelor of Science in Computer Sciense</p>
-                  <p className='text-gray-700'>Stanford University</p>
-                  <p className='text-gray-500 text-[10px]'>2025</p>
-                  <span className='absolute w-0.5 h-full bg-amber-800 top-0 left-0' ></span>
-                </div>
-                <div className='relative my-1 pl-2 rounded overflow-hidden'>
-                  <p className='text-gray-700 font-semibold'>Bachelor of Science in Computer Sciense</p>
-                  <p className='text-gray-700'>Stanford University</p>
-                  <p className='text-gray-500 text-[10px]'>2025</p>
-                  <span className='absolute w-0.5 h-full bg-amber-800 top-0 left-0' ></span>
-                </div>
+                {employee.education.length > 0 ? employee.education.map((edu) => {
+                  return <div className='relative my-1 pl-2 rounded overflow-hidden'>
+                    <p className='text-gray-700 font-semibold'>{edu.degree}</p>
+                    <p className='text-gray-700'>{edu.institution}</p>
+                    <p className='text-gray-500 text-[10px]'>{edu.date}</p>
+                    <span className='absolute w-0.5 h-full bg-amber-800 top-0 left-0' ></span>
+                  </div>
+                }):  <div>No Data found</div> }
               </div>
               <div className='rounded shadow-2xl bg-white p-4 flex flex-col gap-1'>
                 <h3 className='font-bold'>Achievement</h3>
-                <div className='relative my-1 pl-2 rounded'>
-                  <p className='text-gray-700 font-semibold'>Employee of the Month</p>
-                  <p className='text-gray-700'>Recognized for outstanding performance and dedication</p>
-                  <p className='text-gray-500 text-[10px]'>March 2025</p>
-                  <span className='absolute top-1 -left-3' > <LiaMedalSolid size={18} color='orange' /> </span>
-                </div>
+                {employee.achievements.length > 0 ? employee.achievements.map((ach) => {
+                  return <div className='relative my-1 pl-5 rounded overflow-hidden'>
+                    <p className='text-gray-700 font-semibold'>{ach.title}</p>
+                    <p className='text-gray-700'>{ach.description}</p>
+                    <p className='text-gray-500 text-[10px]'>{ach.date}</p>
+                    <span className='absolute top-1 -left-0' > <LiaMedalSolid size={18} color='orange' /> </span>
+                   <span className='absolute w-0.5 h-full bg-blue-500 top-0 right-0' ></span>
+                   </div>
+                }): <div>No Achievement found</div> }
+
               </div>
             </div>}
         </div>

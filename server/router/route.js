@@ -35,6 +35,7 @@ router.route('/addBranch').post(authmiddlewre,adminmiddleware,admin.addBranch);
 router.route('/editBranch').post(authmiddlewre,adminmiddleware,admin.editBranch); 
 router.route('/getsetting').get(authmiddlewre,adminmiddleware,admin.getsetting); 
 router.route('/getemployee').get(authmiddlewre,adminmiddleware,admin.getemployee); 
+router.route('/updatepassword').post(authmiddlewre,adminmiddleware,admin.updatepassword); 
 
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 

@@ -43,14 +43,14 @@ const employeeSchema = new mongoose.Schema({
         {
             title: { type: String, required: true },
             description: { type: String },
-            date: { type: Date, required: true },
+            date: { type: String, required: true },
         }
     ],
     education: [
         {
             degree: { type: String, required: true },
             institution: { type: String, required: true }, // renamed "from" to "institution"
-            date: { type: Date } // more descriptive than just "date"
+            date: { type: String } // more descriptive than just "date"
         }
     ],
     weeklyOff: {

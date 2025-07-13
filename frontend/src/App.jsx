@@ -25,11 +25,12 @@ import OrganizationSettings from './pages/organization/organization';
 
 function App() {
   const dispatch = useDispatch();
-  const { islogin } = useSelector((state) => state.auth);
+  const { islogin ,isadmin} = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
     // console.log("login check",islogin)
-    if (islogin) {
+    if (islogin && user?.profile?.role=='admin') {
       dispatch(FirstFetch());
     }
   }, [islogin, dispatch]);

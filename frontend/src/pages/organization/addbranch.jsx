@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box, Button, TextField, Typography, MenuItem,
-  FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText, Grid
+  FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText, Grid,
+  Avatar
 } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FaRegUser } from 'react-icons/fa';
 
-const Addbranch = ({setopenviewmodal, employee, company, editbranch, editbranchdata }) => {
+const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranchdata }) => {
   const [branch, setBranch] = useState({
     id: '',
     name: '',
@@ -21,7 +23,7 @@ const Addbranch = ({setopenviewmodal, employee, company, editbranch, editbranchd
 
   // Fetch companies and users
   useEffect(() => {
-    // console.log(company)
+    console.log(employee)
     setUsers(employee)
     setBranch({ ...branch, companyId: company._id })
     if (editbranch) setBranch(editbranchdata)
@@ -53,7 +55,7 @@ const Addbranch = ({setopenviewmodal, employee, company, editbranch, editbranchd
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(res.data.message);
-       setopenviewmodal(false)
+      setopenviewmodal(false)
       setBranch({ name: '', location: '', companyId: '', managerIds: [] });
     } catch (err) {
       console.error(err);
@@ -63,7 +65,7 @@ const Addbranch = ({setopenviewmodal, employee, company, editbranch, editbranchd
 
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto', p: 4, bgcolor: 'white', borderRadius: 2, boxShadow: 2 }}>
-      <Typography variant="h5" gutterBottom>Add New Branch</Typography>
+      <Typography variant="h5" gutterBottom>{editbranch ? 'Edit Branch' : 'Add New Branch'} </Typography>
       <Grid container spacing={2}>
 
         <TextField
@@ -106,13 +108,16 @@ const Addbranch = ({setopenviewmodal, employee, company, editbranch, editbranchd
             onChange={e => handleChange('managerIds', e.target.value)}
             input={<OutlinedInput label="Managers" />}
             renderValue={(selected) =>
-              selected.map(id => users.find(user => user._id === id)?.employeename).join(', ')
+              selected.map(id => users.find(user => user._id === id)?.userid.name).join(', ')
             }
           >
             {users.map(user => (
               <MenuItem key={user._id} value={user._id}>
                 <Checkbox checked={branch.managerIds.includes(user._id)} />
-                <ListItemText primary={user.employeename} />
+                <Avatar src={user.profileimage} alt={user.userid.name}>
+                  {!user.profileimage && <FaRegUser />}
+                </Avatar>
+                <ListItemText className='ml-2 capitalize' primary={user.userid.name} />
               </MenuItem>
             ))}
           </Select>

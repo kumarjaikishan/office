@@ -35,7 +35,7 @@ const Adminleave = () => {
                         }
                     }
                 );
-                console.log(res.data.leave)
+                // console.log(res.data.leave)
                 let sno = 1;
                 const data = await res.data.leave.map((leave) => {
                     return {

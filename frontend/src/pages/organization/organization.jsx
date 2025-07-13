@@ -10,6 +10,8 @@ import Modalbox from '../../components/custommodal/Modalbox';
 import Addbranch from './addbranch';
 import { useSelector } from 'react-redux';
 import { addCompany } from './helper';
+import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import Department from '../department/Department';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -24,7 +26,7 @@ const weekdays = [
 
 export default function OrganizationSettings() {
     const [openSection, setOpenSection] = useState(null);
-    const [editbranch,seteditbranch]= useState(false);
+    const [editbranch, seteditbranch] = useState(false);
     const [openviewmodal, setopenviewmodal] = useState(false);
     const [editbranchdata, seteditbranchdata] = useState(null);
     const [companyinp, setcompany] = useState({
@@ -98,34 +100,39 @@ export default function OrganizationSettings() {
     const setemployee = () => {
 
     }
-    const handleEditBranch=(id)=>{
+    const handleEditBranch = (id) => {
         console.log(id)
         seteditbranch(true);
-        const dffg = {...id,managerIds:id.managerIds.map((id)=> id._id)};
+        const dffg = { ...id, managerIds: id.managerIds.map((id) => id._id) };
         seteditbranchdata(dffg);
         setopenviewmodal(true);
     }
 
     return (
-        <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md space-y-6">
+        <div className="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md space-y-6">
             {/* Company Info */}
             <div>
-                <button
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-blue-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('company')}
-                    className="w-full text-left font-semibold text-lg bg-blue-100 px-4 py-2 rounded-md"
                 >
-                    Company Info
-                </button>
+                    <span className="font-semibold text-lg text-left">Company Info</span>
+                    {openSection === 'company' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+
                 {openSection === 'company' && (
-                    <div className="p-4 rounded  flex border-blue-300 border-2 border-dashed mt-2 space-y-4">
-                        <div className='relative flex items-center mx-auto'>
-                            <div className="relative w-30 h-30 mx-auto ">
+                    <div className="p-4 rounded flex border-blue-300 border-2 border-dashed mt-2 space-y-4">
+                        <div className="relative flex items-center mx-auto">
+                            <div className="relative w-30 h-30 mx-auto">
                                 <img
-                                    src={companyinp.logo || 'https://via.placeholder.com/100'} // fallback logo
+                                    src={companyinp.logo || 'https://via.placeholder.com/100'}
                                     alt="Company Logo"
                                     className="w-full h-full object-cover rounded-full border-2 border-dashed border-blue-300"
                                 />
-                                {/* Hidden file input */}
                                 <input
                                     type="file"
                                     id="logo-upload"
@@ -135,22 +142,23 @@ export default function OrganizationSettings() {
                                         if (file) {
                                             const reader = new FileReader();
                                             reader.onloadend = () => {
-                                                setcompany({ ...companyinp, logo: reader.result }); // base64 image
+                                                setcompany({ ...companyinp, logo: reader.result });
                                             };
                                             reader.readAsDataURL(file);
                                         }
                                     }}
                                     className="hidden"
                                 />
-                                {/* Edit Icon Overlay */}
-                                <label htmlFor="logo-upload" className="absolute w-8 h-8 text-center bottom-0 right-0 bg-white border border-gray-300 rounded-full p-1 cursor-pointer shadow-md">
+                                <label
+                                    htmlFor="logo-upload"
+                                    className="absolute w-8 h-8 text-center bottom-0 right-0 bg-white border border-gray-300 rounded-full p-1 cursor-pointer shadow-md"
+                                >
                                     ✎
                                 </label>
                             </div>
                         </div>
 
-                        {/* Company Name */}
-                        <div className='w-[70%] flex flex-col gap-3'>
+                        <div className="w-[70%] flex flex-col gap-3">
                             <div>
                                 <label className="block">Company Name</label>
                                 <input
@@ -161,7 +169,6 @@ export default function OrganizationSettings() {
                                 />
                             </div>
 
-                            {/* Industry */}
                             <div>
                                 <label className="block">Industry</label>
                                 <input
@@ -172,7 +179,6 @@ export default function OrganizationSettings() {
                                 />
                             </div>
 
-                            {/* Save/Create Button */}
                             {company ? (
                                 <button onClick={handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded">
                                     Save Changes
@@ -185,17 +191,21 @@ export default function OrganizationSettings() {
                         </div>
                     </div>
                 )}
-
             </div>
 
-            {/* Branches */}
+
             <div>
-                <button
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-green-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('branches')}
-                    className="w-full text-left font-semibold text-lg bg-green-100 px-4 py-2 rounded-md"
                 >
-                    Branches
-                </button>
+                    <span className="font-semibold text-lg text-left">Branches</span>
+                    {openSection === 'branches' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
                 {openSection === 'branches' && (
                     <div className="p-4 rounded  border-green-300 border-2 border-dashed mt-2 space-y-4">
                         <div className="flex justify-between items-center">
@@ -233,9 +243,9 @@ export default function OrganizationSettings() {
                                                                 className="flex items-center gap-2 cursor-pointer"
                                                                 onClick={() => setemployee(manager.userid)}
                                                             >
-                                                                 <Avatar src={manager?.profileimage} alt={manager.userid.name}>
-                                                                         {!manager?.profileimage && <FaRegUser />}
-                                                                       </Avatar>
+                                                                <Avatar src={manager?.profileimage} alt={manager.userid.name}>
+                                                                    {!manager?.profileimage && <FaRegUser />}
+                                                                </Avatar>
                                                                 <span>{manager.userid.name}</span>
                                                             </div>
                                                         ))}
@@ -262,152 +272,166 @@ export default function OrganizationSettings() {
 
             </div>
 
-            <Modalbox open={openviewmodal} onClose={() => {
-                setopenviewmodal(false);
-                seteditbranchdata(null);
-                seteditbranch(false)
-            }}>
-                <div className="membermodal" >
-                    <Addbranch setopenviewmodal={setopenviewmodal} editbranchdata={editbranchdata} editbranch={editbranch} company={company} employee={employee} />
-                </div>
-            </Modalbox>
-
-            {/* Attendance Rules (Advanced Form) */}
             <div>
-                <button
-                    onClick={() => toggleSection('attendance')}
-                    className="w-full text-left font-semibold text-lg bg-yellow-100 px-4 py-2 rounded-md"
+               
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
+                    onClick={() => toggleSection('department')}
                 >
-                    Attendance Rules
-                </button>
+                    <span className="font-semibold text-lg text-left">Department</span>
+                    {openSection === 'department' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+                {openSection === 'department' && (
+                    <div className="p-1 rounded  border-teal-300 border-2 border-dashed mt-2 space-y-4">
+                        <Department />
+                    </div>
+                )}
+
+            </div>
+
+            <div>
+                   <div
+                    className="flex justify-between items-center cursor-pointer bg-yellow-100 px-4 py-2 rounded-md"
+                    onClick={() => toggleSection('attendance')}
+                >
+                    <span className="font-semibold text-lg text-left"> Attendance Rules</span>
+                    {openSection === 'attendance' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
                 {(openSection === 'attendance' && company) && (
-                    <Box className=" border-yellow-300  border-2 border-dashed rounded mt-2 p-4 grid grid-cols-3 gap-4">
-                        {/* <Grid container spacing={2}> */}
+                    <Box className=" border-yellow-300  border-2 border-dashed rounded mt-1 p-2 ">
 
-                        <TextField
-                            label="Office Time In"
-                            fullWidth
-                            type="time"
-                            value={companyinp.officeTime.in}
-                            onChange={e => handleChange('officeTime', 'in', e.target.value)}
-                            helperText="Time when office hours begin"
-                        />
+                        <Box className="mt-1 p-2 grid grid-cols-3 gap-5">
+                            <TextField
+                                label="Office Time In"
+                                fullWidth
+                                type="time"
+                                value={companyinp.officeTime.in}
+                                onChange={e => handleChange('officeTime', 'in', e.target.value)}
+                                helperText="Time when office hours begin"
+                            />
 
-                        <TextField
-                            label="Office Time Out"
-                            fullWidth
-                            type="time"
-                            value={companyinp.officeTime.out}
-                            onChange={e => handleChange('officeTime', 'out', e.target.value)}
-                            helperText="Time when office hours end"
-                        />
+                            <TextField
+                                label="Office Time Out"
+                                fullWidth
+                                type="time"
+                                value={companyinp.officeTime.out}
+                                onChange={e => handleChange('officeTime', 'out', e.target.value)}
+                                helperText="Time when office hours end"
+                            />
 
-                        <TextField
-                            label="Break Minutes"
-                            fullWidth
-                            type="number"
-                            value={companyinp.officeTime.breakMinutes}
-                            onChange={e => handleChange('officeTime', 'breakMinutes', Number(e.target.value))}
-                            helperText="Total break time allowed during the day"
-                        />
+                            <TextField
+                                label="Break Minutes"
+                                fullWidth
+                                type="number"
+                                value={companyinp.officeTime.breakMinutes}
+                                onChange={e => handleChange('officeTime', 'breakMinutes', Number(e.target.value))}
+                                helperText="Total break time allowed during the day"
+                            />
 
-                        <TextField
-                            label="Late Entry Grace (min)"
-                            fullWidth
-                            type="number"
-                            value={companyinp.gracePeriod.lateEntryMinutes}
-                            onChange={e => handleChange('gracePeriod', 'lateEntryMinutes', Number(e.target.value))}
-                            helperText="Allowed delay after office start time"
-                        />
+                            <TextField
+                                label="Late Entry Grace (min)"
+                                fullWidth
+                                type="number"
+                                value={companyinp.gracePeriod.lateEntryMinutes}
+                                onChange={e => handleChange('gracePeriod', 'lateEntryMinutes', Number(e.target.value))}
+                                helperText="Allowed delay after office start time"
+                            />
 
-                        <TextField
-                            label="Early Exit Grace (min)"
-                            fullWidth
-                            type="number"
-                            value={companyinp.gracePeriod.earlyExitMinutes}
-                            onChange={e => handleChange('gracePeriod', 'earlyExitMinutes', Number(e.target.value))}
-                            helperText="Allowed early leave before office end time"
-                        />
+                            <TextField
+                                label="Early Exit Grace (min)"
+                                fullWidth
+                                type="number"
+                                value={companyinp.gracePeriod.earlyExitMinutes}
+                                onChange={e => handleChange('gracePeriod', 'earlyExitMinutes', Number(e.target.value))}
+                                helperText="Allowed early leave before office end time"
+                            />
 
-                        <TextField
-                            label="Full Day Minutes"
-                            fullWidth
-                            type="number"
-                            value={companyinp.workingMinutes.fullDay}
-                            onChange={e => handleChange('workingMinutes', 'fullDay', Number(e.target.value))}
-                            helperText="Total working minutes required for a full day"
-                        />
+                            <TextField
+                                label="Full Day Minutes"
+                                fullWidth
+                                type="number"
+                                value={companyinp.workingMinutes.fullDay}
+                                onChange={e => handleChange('workingMinutes', 'fullDay', Number(e.target.value))}
+                                helperText="Total working minutes required for a full day"
+                            />
 
-                        <TextField
-                            label="Half Day Minutes"
-                            fullWidth
-                            type="number"
-                            value={companyinp.workingMinutes.halfDay}
-                            onChange={e => handleChange('workingMinutes', 'halfDay', Number(e.target.value))}
-                            helperText="Minimum minutes required for marking a half-day"
-                        />
+                            <TextField
+                                label="Half Day Minutes"
+                                fullWidth
+                                type="number"
+                                value={companyinp.workingMinutes.halfDay}
+                                onChange={e => handleChange('workingMinutes', 'halfDay', Number(e.target.value))}
+                                helperText="Minimum minutes required for marking a half-day"
+                            />
 
-                        <TextField
-                            label="Short Day Threshold (min)"
-                            fullWidth
-                            type="number"
-                            value={companyinp.workingMinutes.shortDayThreshold}
-                            onChange={e => handleChange('workingMinutes', 'shortDayThreshold', Number(e.target.value))}
-                            helperText="Below this time is considered a short day"
-                        />
+                            <TextField
+                                label="Short Day Threshold (min)"
+                                fullWidth
+                                type="number"
+                                value={companyinp.workingMinutes.shortDayThreshold}
+                                onChange={e => handleChange('workingMinutes', 'shortDayThreshold', Number(e.target.value))}
+                                helperText="Below this time is considered a short day"
+                            />
 
-                        <TextField
-                            label="Overtime After Minutes"
-                            fullWidth
-                            type="number"
-                            value={companyinp.workingMinutes.overtimeAfterMinutes}
-                            onChange={e => handleChange('workingMinutes', 'overtimeAfterMinutes', Number(e.target.value))}
-                            helperText="Time after which overtime calculation begins"
-                        />
+                            <TextField
+                                label="Overtime After Minutes"
+                                fullWidth
+                                type="number"
+                                value={companyinp.workingMinutes.overtimeAfterMinutes}
+                                onChange={e => handleChange('workingMinutes', 'overtimeAfterMinutes', Number(e.target.value))}
+                                helperText="Time after which overtime calculation begins"
+                            />
 
-                        <FormControl fullWidth>
-                            <InputLabel>Weekly Offs</InputLabel>
-                            <Select
-                                multiple
-                                value={companyinp.weeklyOffs}
-                                onChange={e => setcompany({ ...companyinp, weeklyOffs: e.target.value })}
-                                input={<OutlinedInput label="Weekly Offs" />}
-                                renderValue={(selected) =>
-                                    selected.map(v => weekdays.find(w => w.value === v)?.label).join(', ')
-                                }
-                            >
-                                {weekdays.map(day => (
-                                    <MenuItem key={day.value} value={day.value}>
-                                        <Checkbox checked={companyinp.weeklyOffs.includes(day.value)} />
-                                        <ListItemText primary={day.label} />
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                            <FormControl fullWidth>
+                                <InputLabel>Weekly Offs</InputLabel>
+                                <Select
+                                    multiple
+                                    value={companyinp.weeklyOffs}
+                                    onChange={e => setcompany({ ...companyinp, weeklyOffs: e.target.value })}
+                                    input={<OutlinedInput label="Weekly Offs" />}
+                                    renderValue={(selected) =>
+                                        selected.map(v => weekdays.find(w => w.value === v)?.label).join(', ')
+                                    }
+                                >
+                                    {weekdays.map(day => (
+                                        <MenuItem key={day.value} value={day.value}>
+                                            <Checkbox checked={companyinp.weeklyOffs.includes(day.value)} />
+                                            <ListItemText primary={day.label} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
 
-                        {Object.entries(companyinp.attendanceRules).map(([key, value]) => {
-                            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                            const helperMap = {
-                                considerEarlyEntryBefore: 'Considered early if punched before this time',
-                                considerLateEntryAfter: 'Considered late if punched after this time',
-                                considerEarlyExitBefore: 'Considered early exit if leaving before this time',
-                                considerLateExitAfter: 'Considered late exit if leaving after this time',
-                            };
+                            {Object.entries(companyinp.attendanceRules).map(([key, value]) => {
+                                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                                const helperMap = {
+                                    considerEarlyEntryBefore: 'Considered early if punched before this time',
+                                    considerLateEntryAfter: 'Considered late if punched after this time',
+                                    considerEarlyExitBefore: 'Considered early exit if leaving before this time',
+                                    considerLateExitAfter: 'Considered late exit if leaving after this time',
+                                };
 
-                            return (
-                                <TextField
-                                    key={key}
-                                    fullWidth
-                                    label={label}
-                                    type="time"
-                                    value={value}
-                                    onChange={e => handleChange('attendanceRules', key, e.target.value)}
-                                    helperText={helperMap[key]}
-                                />
-                            );
-                        })}
-
-                        {/* </Grid> */}
+                                return (
+                                    <TextField
+                                        key={key}
+                                        fullWidth
+                                        label={label}
+                                        type="time"
+                                        value={value}
+                                        onChange={e => handleChange('attendanceRules', key, e.target.value)}
+                                        helperText={helperMap[key]}
+                                    />
+                                );
+                            })}
+                        </Box>
 
                         <Box sx={{ mt: 4, textAlign: 'right' }}>
                             <Button variant="contained" onClick={handleSubmit}>
@@ -417,6 +441,16 @@ export default function OrganizationSettings() {
                     </Box>
                 )}
             </div>
+
+            <Modalbox open={openviewmodal} onClose={() => {
+                setopenviewmodal(false);
+                seteditbranchdata(null);
+                seteditbranch(false)
+            }}>
+                <div className="membermodal" >
+                    <Addbranch setopenviewmodal={setopenviewmodal} editbranchdata={editbranchdata} editbranch={editbranch} company={company} employee={employee} />
+                </div>
+            </Modalbox>
         </div>
     );
 }

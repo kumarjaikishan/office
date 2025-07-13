@@ -164,10 +164,10 @@ const addemployee = async (req, res, next) => {
 }
 
 const updateemployee = async (req, res, next) => {
-    // console.log(req.body);
+    console.log(req.body);
     try {
-        const { employeeId, employeeName, branchId, department, email, username, password, designation,
-            phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary=0, achievements,
+        const { employeeId, employeeName, branchId, department, email, username, designation,
+            phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary = 0, achievements,
             education } = req.body;
 
         if (!employeeId || !department || !branchId) {
@@ -179,11 +179,33 @@ const updateemployee = async (req, res, next) => {
         if (!existingEmployee) {
             return next({ status: 404, message: "Employee not found" });
         }
+        // Define fields to update dynamically
+        const possibleEmployeeFields = [
+            'dob', 'designation', 'phone', 'address', 'gender', 'bloodGroup',
+            'Emergencyphone', 'skills', 'department', 'maritalStatus', 'salary',
+            'achievements', 'education'
+        ];
 
-        let updatedFields = {
-            dob, designation,phone, address, gender, bloodGroup, Emergencyphone, skills,
-            department, maritalStatus, salary , achievements, education,
-        };
+        let updatedFields = {};
+
+        possibleEmployeeFields.forEach(field => {
+            let value = req.body[field];
+
+            // Convert invalid values to empty string
+            if (value === undefined || value === null || value === '' || value === 'undefined' || value === 'null') {
+                updatedFields[field] = '';
+            } else if (field === 'achievements' || field === 'education') {
+                try {
+                    updatedFields[field] = JSON.parse(value);
+                } catch (err) {
+                    console.log(`Error parsing ${field}:`, err.message);
+                    updatedFields[field] = []; // fallback to empty array
+                }
+            } else {
+                updatedFields[field] = value;
+            }
+        });
+
 
         let userupdatedFields = {
             name: employeeName, email, branchId, department,
@@ -426,8 +448,29 @@ const getemployee = async (req, res, next) => {
         setTimeout(() => {
 
             return res.status(200).json(employe);
-        }, 3000);
+        }, 1000);
 
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: 'Internal Server Error' });
+    }
+};
+const updatepassword = async (req, res, next) => {
+    console.log(req.body)
+    const { userid, pass } = req.body.pass;
+
+    if (!userid || !pass) {
+        return next({ status: 400, message: "User ID and password are required" });
+    }
+    try {
+        const user = await usermodal.findById(userid);
+        if (!user) {
+            return next({ status: 404, message: "User not found" });
+        }
+        user.password = pass;
+        await user.save()
+
+        return res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
         console.error(error.message);
         return next({ status: 500, message: 'Internal Server Error' });
@@ -509,6 +552,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

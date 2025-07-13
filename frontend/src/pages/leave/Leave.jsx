@@ -41,10 +41,10 @@ const Leave = () => {
                 setleaverequest(res.data);
             } catch (err) {
                 console.error(err);
-            } finally{
+            } finally {
                 setopenmodal(false)
-                 setLoading(false)
-                 setinp(init);
+                setLoading(false)
+                setinp(init);
             }
         }
         fetche()
@@ -67,6 +67,8 @@ const Leave = () => {
                 }
             );
 
+            setopenmodal(false)
+            setinp(init)
             toast.success(res.data.message, { autoClose: 2000 })
         } catch (err) {
             console.error(err);
@@ -84,7 +86,7 @@ const Leave = () => {
                 </div>
             </div>
             <DataTable
-             customStyles={customStyles}
+                customStyles={customStyles}
                 columns={columns}
                 data={leaverequest}
                 pagination
@@ -140,12 +142,12 @@ const Leave = () => {
                                     fullWidth
                                 />
                                 <div className='flex w-full justify-end gap-3'>
-                                <Button onClick={()=>  { setopenmodal(false); setinp(init)}} variant="outlined" >
-                                   Cancel
-                                </Button>
-                                <Button  type="submit" variant="contained" disabled={loading}>
-                                    {loading ? 'Submitting...' : 'Apply'}
-                                </Button>
+                                    <Button onClick={() => { setopenmodal(false); setinp(init) }} variant="outlined" >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" variant="contained" disabled={loading}>
+                                        {loading ? 'Submitting...' : 'Apply'}
+                                    </Button>
                                 </div>
                             </LocalizationProvider>
                         </span>
@@ -182,16 +184,16 @@ export const columns = [
     {
         name: "Status",
         selector: (row) => <span
-  className={`
+            className={`
     px-2 py-1 capitalize rounded-l relative overflow-hidden
     before:absolute before:content-[''] before:w-[2px] before:h-full before:left-0
     ${row.status === 'approved' && 'text-green-700 bg-green-100 before:bg-green-800'}
     ${row.status === 'pending' && 'text-yellow-700 bg-yellow-100 before:bg-yellow-600'}
     ${row.status === 'rejected' && 'text-red-700 bg-red-100 before:bg-red-800'}
   `}
->
-  {row.status}
-</span>
+        >
+            {row.status}
+        </span>
 
     },
     // {

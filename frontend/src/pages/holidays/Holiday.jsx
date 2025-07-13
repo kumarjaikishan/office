@@ -12,6 +12,8 @@ import { isWithinInterval, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'react-redux';
+import { customStyles } from '../attandence/attandencehelper';
+import DataTable from 'react-data-table-component';
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {
@@ -21,7 +23,7 @@ const HolidayForm = () => {
   const [toDate, setToDate] = useState(null);
   const [holidays, setHolidays] = useState([]);
   const { setting } = useSelector((state) => state.user);
-  const [dfsd, sdff] = useState([])
+  const [holidaylist, setholidaylist] = useState([])
   const [weeklyOffs, setweeklyOffs] = useState([1])
   useEffect(() => {
     setweeklyOffs(setting?.weeklyOffs || [1])
@@ -30,7 +32,7 @@ const HolidayForm = () => {
   // Example dates to highlight manually
   const impordate = ['06/15/2025', '06/10/2025'];
   // const highlightedDates = dfsd.map(dateStr => new Date(dateStr.date));
-  const highlightedDates = dfsd.map(dateObj => ({
+  const highlightedDates = holidaylist.map(dateObj => ({
     date: dayjs(dateObj.date).toDate(), // Convert to Date object
     name: dateObj.name
   }));
@@ -58,7 +60,7 @@ const HolidayForm = () => {
         });
         console.log(dateObjects)
         setHolidays(holidaysData);
-        sdff(dateObjects);
+        setholidaylist(dateObjects);
       } catch (err) {
         console.error("Error fetching holidays:", err);
       }
@@ -169,8 +171,43 @@ const HolidayForm = () => {
           </Button>
         </Box>
       </Box>
+      <div>
+        {/* <DataTable
+                  // columns={columns}
+                  data={holidaylist}
+                  pagination
+                  selectableRows
+                  customStyles={customStyles}
+                  highlightOnHover
+                /> */}
+      </div>
     </LocalizationProvider>
   );
 };
 
 export default HolidayForm;
+
+const columns = [
+  {
+    name: "S.no",
+    selector: (row) => row.sno,
+    width: '50px'
+  },
+  {
+    name: "Name",
+    selector: (row) => row.name
+  },
+  {
+    name: "Email",
+    selector: (row) => row.email
+  },
+  {
+    name: "Department",
+    selector: (row) => row.department
+  },
+  {
+    name: "Action",
+    selector: (row) => row.action,
+    width: '160px'
+  }
+]

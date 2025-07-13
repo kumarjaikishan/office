@@ -99,12 +99,12 @@ const menu = [
         icon: <GoPeople />,
         roles: ['admin']
       },
-      {
-        menu: "Department",
-        link: '/admin-dashboard/department',
-        icon: <FaRegBuilding />,
-        roles: ['admin']
-      },
+      // {
+      //   menu: "Department",
+      //   link: '/admin-dashboard/department',
+      //   icon: <FaRegBuilding />,
+      //   roles: ['admin']
+      // },
       {
         menu: "Holiday",
         link: '/admin-dashboard/holiday',

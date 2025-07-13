@@ -17,6 +17,7 @@ import { BsUpload } from "react-icons/bs";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { GrPowerReset } from "react-icons/gr";
 import { FiDownload } from "react-icons/fi";
+import { TbPasswordUser } from "react-icons/tb";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "../profile/profile";
@@ -25,6 +26,8 @@ import { MdOutlineModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { MdExpandMore } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -32,11 +35,16 @@ const Employe = () => {
   const [employeelist, setemployeelist] = useState([]);
   const [departmentlist, setdepartmentlist] = useState([]);
   const [openviewmodal, setopenviewmodal] = useState(false);
+  const [passmodal, setpassmodal] = useState(false);
   const [isupdate, setisupdate] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
-  const { department, branch, employee } = useSelector(e => e.user)
+  const { department, branch, employee } = useSelector(e => e.user);
+  const [pass, setpass] = useState({
+    userid: '',
+    pass: ''
+  })
   const [filters, setFilters] = useState({
     searchText: '',
     branch: 'all',
@@ -58,7 +66,6 @@ const Employe = () => {
     employeeName: "",
     email: "",
     username: '',
-    password: 'employee@123',
     designation: '',
     phone: '',
     address: '',
@@ -130,6 +137,7 @@ const Employe = () => {
         departmentid: emp.department._id,
         action: (<div className="action flex gap-2.5">
           <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={() => { setviewEmployee(emp._id); setopenviewmodal(true) }} ><IoEyeOutline /></span>
+          <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={() => { setpass({ ...pass, userid: emp.userid._id }); setpassmodal(true) }} ><TbPasswordUser /> </span>
           <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={() => navigate(`/admin-dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
           <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
           <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
@@ -182,10 +190,19 @@ const Employe = () => {
   };
 
   const updatee = async () => {
+    console.log(inp)
     const formData = new FormData();
     Object.keys(inp).forEach(key => {
-      formData.append(key, inp[key]);
+      const value = inp[key];
+
+      // Handle complex types
+      if (Array.isArray(value) || typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
     });
+
     if (employeePhoto) formData.append('photo', employeePhoto);
 
     await employeeupdate({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
@@ -195,6 +212,41 @@ const Employe = () => {
     setPhotoPreview(null);
     setEmployeePhoto(null);
   };
+
+  const updatePassword = async (e) => {
+    e.preventDefault();
+    // return console.log(pass)
+    try {
+      const token = localStorage.getItem('emstoken');
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_ADDRESS}updatepassword`,
+        {
+          pass
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setpass({
+        userid: '',
+        pass: ''
+      })
+      passmodal(false);
+      console.log('Query:', res);
+      toast.success(res.data.message, { autoClose: 1200 });
+    } catch (error) {
+      console.log(error);
+      if (error.response) {
+        toast.warn(error.response.data.message, { autoClose: 1200 });
+      } else if (error.request) {
+        console.error('No response from server:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
+    }
+  }
 
   const edite = (employee) => {
     console.log(employee)
@@ -209,11 +261,12 @@ const Employe = () => {
       dob: employee?.dob,
       salary: employee?.salary,
 
-      // password: 'employee@123',
+      password: 'employee@123',
+
       designation: employee?.designation,
       phone: employee?.phone,
       address: employee?.address || '',
-      gender: employee?.gender  || 'male',
+      gender: employee?.gender || 'male',
       bloodGroup: employee?.bloodGroup,
       Emergencyphone: employee?.Emergencyphone,
       skills: employee?.skills,
@@ -569,6 +622,19 @@ const Employe = () => {
       }}>
         <div className="membermodal" >
           <EmployeeProfile viewEmployee={viewEmployee} />
+        </div>
+      </Modalbox>
+      <Modalbox open={passmodal} onClose={() => {
+        setpassmodal(false);
+      }}>
+        <div className="membermodal" >
+          <form onSubmit={updatePassword}>
+            <h2>Reset Passowrd</h2>
+            <span className="modalcontent ">
+              <TextField fullWidth required value={pass.pass} onChange={(e) => setpass({ ...pass, pass: e.target.value })} label="Passowrd" size="small" />
+              <Button variant="contained" sx={{ mr: 2 }} type="submit" >Reset Password</Button>
+            </span>
+          </form>
         </div>
       </Modalbox>
     </div>

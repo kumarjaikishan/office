@@ -103,7 +103,7 @@ const Department = () => {
 
   return (
     <div className='department'>
-      <h2>Manage Departments</h2>
+      {/* <h2>Manage Departments</h2> */}
       <div className='head'>
         <div className='flex gap-2'>
           <FormControl  size="small">
