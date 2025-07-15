@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
 import {
     FaCalendarAlt,
@@ -15,7 +15,7 @@ import {
 
 const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
     useEffect(() => {
-        console.log(attandence)
+        // console.log(attandence)
     }, [attandence])
 
     const total = hell.present.length + hell.absent.length + hell.leave.length;

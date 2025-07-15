@@ -52,8 +52,9 @@ router.route('/checkin').post(authmiddlewre,attendance.checkin);
 router.route('/employeeAttandence').get(attendance.employeeAttandence);
 router.route('/deleteattandence').post(attendance.deleteattandence);
 
-router.route('/addholiday').post(holiday.addholiday); 
-router.route('/getholidays').get(holiday.getholidays); 
+router.route('/addholiday').post(authmiddlewre,holiday.addholiday); 
+router.route('/updateholiday').post(authmiddlewre,holiday.updateholiday); 
+router.route('/getholidays').get(authmiddlewre,holiday.getholidays); 
 
 router.route('/addleave').post(authmiddlewre,employee.addleave); 
 router.route('/getleave').get(authmiddlewre,employee.getleave); 

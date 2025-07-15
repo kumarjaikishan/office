@@ -17,8 +17,9 @@ const AttenPerformance = () => {
     const [employee, setemployee] = useState({});
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { company } = useSelector((state) => state.user);
+    const { company, holidays } = useSelector((state) => state.user);
     const [setting, setsetting] = useState(null)
+    const [holidaydate, setholidaydate] = useState([]);
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
     const [selectedMonth, setSelectedMonth] = useState('all');
@@ -55,8 +56,31 @@ const AttenPerformance = () => {
     useEffect(() => {
         if (!company) return;
         setsetting(company)
-
     }, [company]);
+
+    useEffect(() => {
+        if (!holidays) return;
+        console.log(holidays)
+
+        const dateObjects = [];
+        holidays.forEach(holiday => {
+            let current = dayjs(holiday.fromDate);
+            const end = holiday.toDate ? dayjs(holiday.toDate) : current;
+
+            while (current.isSameOrBefore(end, 'day')) {
+                // dateObjects.push({
+                //     date: current.format('MM/DD/YYYY'),
+                //     name: holiday.name,
+                // });
+                dateObjects.push(current.format('DD/MM/YYYY'));
+                current = current.add(1, 'day');
+            }
+        });
+        console.log(dateObjects)
+        setholidaydate(dateObjects);
+
+    }, [holidays]);
+
     useEffect(() => {
         if (!userid) return;
         const fetchPerformanceData = async () => {
@@ -95,6 +119,17 @@ const AttenPerformance = () => {
 
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
+            let fdfgfd = dayjs(element.date).format('DD/MM/YYYY');
+            console.log(fdfgfd);
+            const isHoliday = holidaydate.includes(fdfgfd);
+            const isWeeklyOff = dayjs(element.date).startOf('day').day() === 0;
+
+            if (isHoliday) {
+                console.log("holiday", fdfgfd)
+            }
+            if (isWeeklyOff) {
+                console.log("weekly", fdfgfd)
+            }
             const status = element.status;
 
             switch (status) {
@@ -110,18 +145,25 @@ const AttenPerformance = () => {
             const { punchIn, punchOut, workingMinutes } = element;
             if (!punchIn || !punchOut || typeof workingMinutes !== 'number') return;
 
-            const isshort = workingMinutes < setting.workingMinutes.shortDayThreshold;
-            const isOvertime = workingMinutes >= setting.workingMinutes.overtimeAfterMinutes;
-
-            if (isshort) {
-                shortDates.push(date);
-                shorttimemin += setting.workingMinutes.shortDayThreshold - workingMinutes;
-            }
-
-            if (isOvertime) {
+            if (isHoliday || isWeeklyOff) {
                 overtime.push(date);
-                overtimemin += workingMinutes - setting.workingMinutes.overtimeAfterMinutes;
+                overtimemin += workingMinutes;
+            } else {
+                const isshort = workingMinutes < setting.workingMinutes.shortDayThreshold;
+                const isOvertime = workingMinutes >= setting.workingMinutes.overtimeAfterMinutes;
+
+                if (isshort) {
+                    shortDates.push(date);
+                    shorttimemin += setting.workingMinutes.shortDayThreshold - workingMinutes;
+                }
+
+                if (isOvertime) {
+                    overtime.push(date);
+                    overtimemin += workingMinutes - setting.workingMinutes.overtimeAfterMinutes;
+                }
             }
+
+
 
             // Early / Late arrival thresholds
             const [earlyArrHour, earlyArrMinute] = setting.attendanceRules.considerEarlyEntryBefore.split(':').map(Number);

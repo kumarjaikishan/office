@@ -2,6 +2,7 @@ const departmentModal = require('../models/department');
 const employeeModal = require('../models/employee');
 const usermodal = require('../models/user');
 const leavemodal = require('../models/leave')
+const holidaymodal = require('../models/holiday')
 const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
 const comanysettingModal = require('../models/comanysetting')
@@ -300,6 +301,7 @@ const firstfetch = async (req, res, next) => {
     try {
         const employee = await employeeModal.find().populate('department', 'department').populate('userid').sort({ employeename: 1 });
         const companye = await company.findOne({ adminId: req.user.id });
+        const holidays = await holidaymodal.find({ userid: req.user.id });
         const branche = await branch.find({ companyId: companye._id }).populate({
             path: 'managerIds',
             select: 'userid profileimage',
@@ -309,7 +311,7 @@ const firstfetch = async (req, res, next) => {
             })
         });
         const departmentlist = await departmentModal.find().populate('branchId', 'name').select('department branchId').sort({ department: 1 });
-        const attendance = await attendanceModal.find()
+        const attendance = await attendanceModal.find().sort({ date: -1 })
             .populate({
                 path: 'employeeId',
                 select: 'employeename userid profileimage branchId department',
@@ -317,13 +319,14 @@ const firstfetch = async (req, res, next) => {
                     path: 'userid',
                     select: 'name'
                 },
-            }).sort({ date: -1 });
+            });
 
         res.status(200).json({
             user: req.user,
             employee,
             departmentlist,
             attendance,
+            holidays,
             company: companye,
             branch: branche,
         })

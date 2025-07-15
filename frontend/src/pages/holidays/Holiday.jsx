@@ -14,6 +14,9 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'react-redux';
 import { customStyles } from '../attandence/attandencehelper';
 import DataTable from 'react-data-table-component';
+import { MdOutlineModeEdit } from 'react-icons/md';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { toast } from 'react-toastify';
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {
@@ -21,27 +24,79 @@ const HolidayForm = () => {
   const [type, setType] = useState('Public');
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
+  const [description, setdescription] = useState('');
+  const [holidayId, setholidayId] = useState(null);
   const [holidays, setHolidays] = useState([]);
-  const { setting } = useSelector((state) => state.user);
+  const [isupdate, setisupdate] = useState(false)
+  const { company } = useSelector((state) => state.user);
   const [holidaylist, setholidaylist] = useState([])
   const [weeklyOffs, setweeklyOffs] = useState([1])
-  useEffect(() => {
-    setweeklyOffs(setting?.weeklyOffs || [1])
-  }, [setting])
 
-  // Example dates to highlight manually
+  useEffect(() => {
+    setweeklyOffs(company?.weeklyOffs || [1]);
+    // console.log(company)
+  }, [company])
+
   const impordate = ['06/15/2025', '06/10/2025'];
-  // const highlightedDates = dfsd.map(dateStr => new Date(dateStr.date));
   const highlightedDates = holidaylist.map(dateObj => ({
     date: dayjs(dateObj.date).toDate(), // Convert to Date object
     name: dateObj.name
   }));
 
+  const edite = async (holi) => {
+    console.log(holi)
+    setisupdate(true);
+
+    setholidayId(holi._id)
+    setName(holi.name);
+    setFromDate(dayjs(holi.fromDate).toDate());
+    setToDate(dayjs(holi.toDate).toDate());
+    setType('Public');
+    setdescription(holi?.description)
+  }
+
+  const updateholiday = async () => {
+    try {
+      const token = localStorage.getItem('emstoken');
+      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}updateholiday`, {
+        holidayId, name, fromDate, toDate, type,description
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+
+      toast.success(res.data.message ,{autoClose:1200});
+      setName('');
+      setFromDate(null);
+      setToDate(null);
+      setType('Public');
+      setdescription('')
+      setisupdate(false);
+    } catch (err) {
+      console.error(err);
+      alert("Error saving holiday");
+      // toast.warn(res.data.message ,{autoClose:1200});
+    }
+  }
+
+  const deletee = () => {
+
+  }
 
   useEffect(() => {
     const fetchHolidays = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}getholidays`);
+        const token = localStorage.getItem('emstoken');
+        const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}getholidays`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        );
         const holidaysData = res.data.holidays;
 
         const dateObjects = [];
@@ -58,9 +113,28 @@ const HolidayForm = () => {
             current = current.add(1, 'day');
           }
         });
-        console.log(dateObjects)
-        setHolidays(holidaysData);
+        // console.log(dateObjects)
+        console.log(holidaysData)
         setholidaylist(dateObjects);
+
+        // setHolidays(holidaysData);
+        let sno = 1;
+
+        const data = holidaysData.map((holi) => {
+          return {
+            sno: sno++,
+            name: holi.name,
+            From: dayjs(holi.fromDate).format("DD MMM, YYYY"),
+            till: dayjs(holi.toDate).format("DD MMM, YYYY"),
+            type: holi.type,
+            description: holi?.description,
+            action: (<div className="action flex gap-2.5">
+              <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(holi)}><MdOutlineModeEdit /></span>
+              <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(holi._id)}><AiOutlineDelete /></span>
+            </div>)
+          }
+        })
+        setHolidays(data);
       } catch (err) {
         console.error("Error fetching holidays:", err);
       }
@@ -71,19 +145,24 @@ const HolidayForm = () => {
 
 
   const handleSubmit = async () => {
+    // return console.log(fromDate)
     try {
+      const token = localStorage.getItem('emstoken');
       const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}addholiday`, {
-        name,
-        fromDate,
-        toDate,
-        type,
-      });
+        name, fromDate, toDate, type,description
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
 
       alert(res.data.message || "Holiday saved");
       setName('');
       setFromDate(null);
       setToDate(null);
       setType('Public');
+      setdescription('');
       setHolidays([...holidays, res.data.newHoliday]); // Make sure your API returns newHoliday
     } catch (err) {
       console.error(err);
@@ -137,6 +216,7 @@ const HolidayForm = () => {
 
         <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
           <TextField
+            size='small'
             label="Holiday Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -145,6 +225,7 @@ const HolidayForm = () => {
 
           <DatePicker
             label="From Date"
+            size='small'
             format='dd/MM/yyyy'
             value={fromDate}
             onChange={(newValue) => setFromDate(newValue)}
@@ -154,6 +235,7 @@ const HolidayForm = () => {
           <DatePicker
             format='dd/MM/yyyy'
             label="To Date"
+            size='small'
             value={toDate}
             onChange={(newValue) => setToDate(newValue)}
             slotProps={{ textField: { fullWidth: true } }}
@@ -161,25 +243,37 @@ const HolidayForm = () => {
 
           <TextField
             label="Type"
+            size='small'
             value={type}
             onChange={(e) => setType(e.target.value)}
             fullWidth
           />
+          <TextField
+            label="Description"
+            multiline
+            rows={2}
+            value={description}
+            onChange={(e) => setdescription(e.target.value)}
+            fullWidth
+          />
+          {isupdate ? <Button variant="contained" onClick={updateholiday}>
+            Edit Holiday
+          </Button> :
+            <Button variant="contained" onClick={handleSubmit}>
+              Add Holiday
+            </Button>}
 
-          <Button variant="contained" onClick={handleSubmit}>
-            Add Holiday
-          </Button>
         </Box>
       </Box>
       <div>
-        {/* <DataTable
-                  // columns={columns}
-                  data={holidaylist}
-                  pagination
-                  selectableRows
-                  customStyles={customStyles}
-                  highlightOnHover
-                /> */}
+        <DataTable
+          columns={columns}
+          data={holidays}
+          pagination
+          selectableRows
+          customStyles={customStyles}
+          highlightOnHover
+        />
       </div>
     </LocalizationProvider>
   );
@@ -198,12 +292,20 @@ const columns = [
     selector: (row) => row.name
   },
   {
-    name: "Email",
-    selector: (row) => row.email
+    name: "From",
+    selector: (row) => row.From
   },
   {
-    name: "Department",
-    selector: (row) => row.department
+    name: "Till",
+    selector: (row) => row.till
+  },
+  {
+    name: "Type",
+    selector: (row) => row.type
+  },
+  {
+    name: "Description",
+    selector: (row) => row.description
   },
   {
     name: "Action",

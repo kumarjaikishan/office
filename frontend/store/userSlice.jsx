@@ -21,6 +21,7 @@ const userSlice = createSlice({
         department: null,
         employee: null,
         company:null,
+        holidays:null,
         branch:null,
         attandence: null,
         salary: null,
@@ -50,6 +51,7 @@ const userSlice = createSlice({
                 state.attandence = action.payload?.attendance;
                 state.company = action.payload?.company;
                 state.branch = action.payload?.branch;
+                state.holidays = action.payload?.holidays;
                 state.status = 'succeeded';
             })
             .addCase(FirstFetch.pending, (state) => {
