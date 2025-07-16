@@ -142,15 +142,16 @@ const addemployee = async (req, res, next) => {
         });
         const resulte = await query.save({ session });
 
+        resulten.employeeId = resulte._id;
+        await resulten.save({ session })
+
         // Step 4: Commit transaction
         await session.commitTransaction();
         session.endSession();
 
-        fs.unlink(req.file.path, (err => {
-            if (err) {
-                console.log(err);
-            }
-        }));
+        fs.unlink(req.file.path, (err) => {
+            if (err) console.error('Failed to delete local file:', err);
+        });
 
         res.status(200).json({
             message: 'employee Created Successfully'

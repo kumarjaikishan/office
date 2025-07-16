@@ -110,7 +110,7 @@ const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, seto
                                             checked={checkedemployee.includes(val._id)}
                                             onChange={handleCheckbox}
                                         />
-                                        <span>{val.employeename}</span>
+                                        <span>{val.userid.name}</span>
                                     </div>
                                 })}
                             </div>

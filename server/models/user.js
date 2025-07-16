@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'manager', 'employee'],
         required: true,
     },
+    employeeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'employee'
+    },
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company'

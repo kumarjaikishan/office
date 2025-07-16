@@ -49,7 +49,8 @@ const Attandence = () => {
   const [inp, setinp] = useState(init);
 
   const [filtere, setfiltere] = useState({
-    date: null,
+    // date: null,
+    date: '',
     branch: 'all',
     departmente: 'all',
     employee: '',
@@ -321,7 +322,7 @@ const Attandence = () => {
             </div> :
             <div className="flex items-center gap-4 flex-wrap">
               <CiFilter size={24} color="teal" />
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
+              {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   value={filtere.date}
                   format="DD-MM-YYYY"
@@ -333,7 +334,18 @@ const Attandence = () => {
                       size: 'small',
                     },
                   }} label="Select date" />
-              </LocalizationProvider>
+              </LocalizationProvider> */}
+
+              <TextField
+                size='small'
+                type="date"
+                sx={{ width: '160px' }}
+                value={filtere.date}
+                onChange={(e) => {
+                    setfiltere({ ...filtere, date: e.target.value })
+                  }}
+                label="Select Date"
+              />
 
               <FormControl sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>

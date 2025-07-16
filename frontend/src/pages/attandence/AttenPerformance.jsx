@@ -30,7 +30,6 @@ const AttenPerformance = () => {
     const [fromDate, setFromDate] = useState(null);
     const [toDate, setToDate] = useState(null);
 
-
     const [hell, sethell] = useState({
         present: [],
         absent: [],
@@ -72,10 +71,9 @@ const AttenPerformance = () => {
                 dateObjects.push(current.format('DD/MM/YYYY'));
                 current = current.add(1, 'day');
             }
-        });
-        // console.log(dateObjects)
-        setholidaydate(dateObjects);
 
+        });
+        setholidaydate(dateObjects);
     }, [holidays]);
 
 
@@ -120,8 +118,16 @@ const AttenPerformance = () => {
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
             let fdfgfd = dayjs(element.date).format('DD/MM/YYYY');
-            // console.log(fdfgfd);
+            const fdfgfdd = dayjs(element.date, 'DD/MM/YYYY');
+
             const isHoliday = holidaydate.includes(fdfgfd);
+            // const isHoliday = holidays?.filter((hey) => {
+            //     const from = dayjs(hey.fromDate, 'DD/MM/YYYY');
+            //     const to = dayjs(hey.toDate, 'DD/MM/YYYY');
+
+            //     return fdfgfdd.isSameOrAfter(from) && fdfgfdd.isSameOrBefore(to);
+            // });
+
             const isWeeklyOff = dayjs(element.date).startOf('day').day() === 0;
             const isleave = element.status == 'leave'
             const isabsent = element.status == 'absent'

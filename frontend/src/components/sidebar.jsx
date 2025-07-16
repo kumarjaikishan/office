@@ -17,7 +17,6 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { islogin } = useSelector((state) => state.auth);
   const user = useSelector((state) => state.user);
-  const admin = islogin && user.profile.role === 'admin';
   const role = user.profile.role;
 
   const handleLogout = () => {
@@ -37,7 +36,7 @@ const Sidebar = () => {
     <div className=' w-full h-full px-1 md:px-2 '>
       <div className="logo h-[60px]  flex items-center gap-4">
         <span className='text-3xl'> <SiAudiotechnica /></span>
-        <span className='hidden lg:block'>company name</span>
+        <span className='hidden lg:block capitalize'>{user.company.name}</span>
       </div>
       {menu.map((item) => {
          const filteredItems = item.items.filter(item => item.roles.includes(role));

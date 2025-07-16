@@ -13,14 +13,19 @@ import { LiaMedalSolid } from "react-icons/lia";
 import { FaIdCard } from "react-icons/fa";
 import { MdCurrencyRupee } from "react-icons/md";
 import { GoGear } from "react-icons/go";
+import { useSelector } from 'react-redux';
 
 const EmployeeProfile = ({ viewEmployee }) => {
   const [isload, setisload] = useState(false);
   const [employee, setemployee] = useState(null);
   const [submenu, setsubmenu] = useState(1);
+  const { profile } = useSelector((state) => state.user);
 
   useEffect(() => {
     console.log(viewEmployee);
+    if (!viewEmployee) {
+console.log(profile)
+    }
     const first = async () => {
       const token = localStorage.getItem('emstoken');
       setisload(true);
@@ -105,7 +110,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
                 <FaBirthdayCake className="mt-1 text-gray-500" />
                 <div>
                   <div className="font-semibold">Date of Birth</div>
-                  <div>{employee?.dob || 'N/A'}</div>
+                  <div>{employee?.dob ? dayjs(employee?.dob).format('DD MMM,YYYY') : 'N/A'}</div>
                 </div>
               </div>
               <div className="flex items-start gap-2">
@@ -157,7 +162,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             </div>}
           {submenu == 3 &&
             <div className="mt-2 p-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-sm text-gray-700">
-              <div className='rounded shadow-2xl bg-white p-4 flex flex-col gap-1'>
+              <div className='rounded border border-gray-300 bg-white p-4 flex flex-col gap-1'>
                 <h3 className='font-bold'>Education</h3>
                 {employee.education.length > 0 ? employee.education.map((edu) => {
                   return <div className='relative my-1 pl-2 rounded overflow-hidden'>
@@ -166,9 +171,9 @@ const EmployeeProfile = ({ viewEmployee }) => {
                     <p className='text-gray-500 text-[10px]'>{edu.date}</p>
                     <span className='absolute w-0.5 h-full bg-amber-800 top-0 left-0' ></span>
                   </div>
-                }):  <div>No Data found</div> }
+                }) : <div>No Data found</div>}
               </div>
-              <div className='rounded shadow-2xl bg-white p-4 flex flex-col gap-1'>
+              <div className='rounded border border-gray-300 bg-white p-4 flex flex-col gap-1'>
                 <h3 className='font-bold'>Achievement</h3>
                 {employee.achievements.length > 0 ? employee.achievements.map((ach) => {
                   return <div className='relative my-1 pl-5 rounded overflow-hidden'>
@@ -176,9 +181,9 @@ const EmployeeProfile = ({ viewEmployee }) => {
                     <p className='text-gray-700'>{ach.description}</p>
                     <p className='text-gray-500 text-[10px]'>{ach.date}</p>
                     <span className='absolute top-1 -left-0' > <LiaMedalSolid size={18} color='orange' /> </span>
-                   <span className='absolute w-0.5 h-full bg-blue-500 top-0 right-0' ></span>
-                   </div>
-                }): <div>No Achievement found</div> }
+                    <span className='absolute w-0.5 h-full bg-blue-500 top-0 right-0' ></span>
+                  </div>
+                }) : <div>No Achievement found</div>}
 
               </div>
             </div>}
