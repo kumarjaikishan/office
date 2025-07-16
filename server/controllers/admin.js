@@ -102,17 +102,12 @@ const departmentlist = async (req, res, next) => {
 
 
 const addemployee = async (req, res, next) => {
-    if (!req.file) {
-        return res.status(400).json({
-            message: 'No file uploaded.'
-        });
-    }
-    const { employeeName, branchId, department, email, username, password, designation,
-        phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary, achievements,
-        education } = req.body;
+    // console.log(req.body)
 
-    if (!employeeName || !email || !password || !department) {
-        return next({ status: 400, message: "all fields are required" });
+    const { employeeName, branchId, department, email, username, password, designation, salary } = req.body;
+
+    if (!employeeName || !email || !password || !department || !designation || !salary || !username || !branchId) {
+       return res.status(400).json({ message: "All fields are required" });
     }
     const role = 'employee';
 
@@ -130,29 +125,34 @@ const addemployee = async (req, res, next) => {
 
         let createUser = new usermodal({ name: employeeName, email, role, password });
         let resulten = await createUser.save({ session });
+        // console.log("createUser",createUser)
+        // console.log("usersave",resulten)
 
         // Step 2: Upload profile image to Cloudinary
-        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'ems/employee'
-        });
+        let uploadResult = null;
+        if (req.file) {
+             uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'ems/employee'
+            });
+
+            if (uploadResult) {
+                fs.unlink(req.file.path, (err) => {
+                    if (err) console.error('Failed to delete local file:', err);
+                });
+            }
+        }
 
         const query = new employeeModal({
-            userid: resulten._id, designation, branchId, profileimage: uploadResult.secure_url, username, department,
-            phone, address, gender, bloodGroup, dob, Emergencyphone, skills, maritalStatus, salary, achievements, education
+            userid: resulten._id, designation, salary, branchId, profileimage: uploadResult?.secure_url, username, department,
         });
         const resulte = await query.save({ session });
 
-        resulten.employeeId = resulte._id;
-        await resulten.save({ session })
-
+        await usermodal.findByIdAndUpdate(resulten._id,{employeeId:resulte._id}).session(session)
+        
         // Step 4: Commit transaction
         await session.commitTransaction();
         session.endSession();
-
-        fs.unlink(req.file.path, (err) => {
-            if (err) console.error('Failed to delete local file:', err);
-        });
-
+        
         res.status(200).json({
             message: 'employee Created Successfully'
         })
@@ -161,7 +161,9 @@ const addemployee = async (req, res, next) => {
         await session.abortTransaction();
         session.endSession();
         console.log(error.message)
-        return next({ status: 500, message: error.message });
+        return res.status(500).json({
+            message: 'serer error'
+        })
     }
 }
 
