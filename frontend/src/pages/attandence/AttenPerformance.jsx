@@ -20,6 +20,7 @@ const AttenPerformance = () => {
     const { company, holidays } = useSelector((state) => state.user);
     const [setting, setsetting] = useState(null)
     const [holidaydate, setholidaydate] = useState([]);
+    const [withremarks, setwithremarks] = useState([]);
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
     const [selectedMonth, setSelectedMonth] = useState('all');
@@ -68,18 +69,15 @@ const AttenPerformance = () => {
             const end = holiday.toDate ? dayjs(holiday.toDate) : current;
 
             while (current.isSameOrBefore(end, 'day')) {
-                // dateObjects.push({
-                //     date: current.format('MM/DD/YYYY'),
-                //     name: holiday.name,
-                // });
                 dateObjects.push(current.format('DD/MM/YYYY'));
                 current = current.add(1, 'day');
             }
         });
-        console.log(dateObjects)
+        // console.log(dateObjects)
         setholidaydate(dateObjects);
 
     }, [holidays]);
+
 
     useEffect(() => {
         if (!userid) return;
@@ -117,18 +115,29 @@ const AttenPerformance = () => {
         let shorttimemin = 0;
         let overtimemin = 0;
 
+        let finaliiy = [];
+
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
             let fdfgfd = dayjs(element.date).format('DD/MM/YYYY');
-            console.log(fdfgfd);
+            // console.log(fdfgfd);
             const isHoliday = holidaydate.includes(fdfgfd);
             const isWeeklyOff = dayjs(element.date).startOf('day').day() === 0;
+            const isleave = element.status == 'leave'
+            const isabsent = element.status == 'absent'
 
-            if (isHoliday) {
-                console.log("holiday", fdfgfd)
-            }
-            if (isWeeklyOff) {
-                console.log("weekly", fdfgfd)
+            if (isHoliday && !isleave && !isabsent) {
+                finaliiy.push({
+                    ...element,
+                    remarks: 'worked on holiday'
+                })
+            } else if (isWeeklyOff && !isleave && !isabsent) {
+                finaliiy.push({
+                    ...element,
+                    remarks: 'worked on weekly off'
+                })
+            } else {
+                finaliiy.push(element);
             }
             const status = element.status;
 
@@ -183,7 +192,7 @@ const AttenPerformance = () => {
             if (dayjs(punchOut).isBefore(earlyLeaveThreshold)) earlyLeave.push(date);
             if (dayjs(punchOut).isAfter(lateLeaveThreshold)) lateleave.push(date);
         });
-
+        setwithremarks(finaliiy)
         sethell({
             present: presentDates,
             absent: absentDates,
@@ -201,7 +210,7 @@ const AttenPerformance = () => {
     }, [attandence, selectedYear, selectedMonth, setting]);
 
 
-    const filteredData = attandence.filter((entry) => {
+    const filteredData = withremarks.filter((entry) => {
         const date = dayjs(entry.date).startOf('day');
 
         // Date Range Filter
@@ -231,6 +240,7 @@ const AttenPerformance = () => {
 
         return true;
     });
+
     const resetFilters = () => {
         setSelectedYear(dayjs().year());
         setSelectedMonth('all');
@@ -336,6 +346,7 @@ const AttenPerformance = () => {
                         data={filteredData}
                         pagination
                         customStyles={customStyles}
+                        conditionalRowStyles={conditionalRowStyles}
                         highlightOnHover
                         noDataComponent={
                             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
@@ -356,6 +367,16 @@ const minutesinhours = (mins) => {
     const m = mins % 60;
     return `${h}h ${m}m`;
 };
+
+const conditionalRowStyles = [
+    {
+        when: row => row.remarks,
+        style: {
+            backgroundColor: 'rgba(21, 233, 233, 0.2)',
+        },
+    },
+];
+
 
 const columns = (setting) => [
     {
@@ -379,10 +400,11 @@ const columns = (setting) => [
                 <span className="flex items-center gap-1">
                     <IoMdTime className="text-[16px] text-blue-700" />
                     {dayjs(emp.punchIn).format('hh:mm A')}
-                    {dayjs(emp.punchIn).isBefore(earlyThreshold) && (
+
+                    {(!emp.remarks && dayjs(emp.punchIn).isBefore(earlyThreshold)) && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-sky-100 text-sky-800 text-xs">Early</span>
                     )}
-                    {dayjs(emp.punchIn).isAfter(lateThreshold) && (
+                    {(!emp.remarks && dayjs(emp.punchIn).isAfter(lateThreshold)) && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-amber-100 text-amber-800 text-xs">Late</span>
                     )}
                 </span>
@@ -404,10 +426,10 @@ const columns = (setting) => [
                 <span className="flex items-center gap-1">
                     <IoMdTime className="text-[16px] text-blue-700" />
                     {dayjs(emp.punchOut).format('hh:mm A')}
-                    {dayjs(emp.punchOut).isBefore(earlyExitThreshold) && (
+                    {!emp.remarks && dayjs(emp.punchOut).isBefore(earlyExitThreshold) && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-amber-100 text-amber-800 text-xs">Early</span>
                     )}
-                    {dayjs(emp.punchOut).isAfter(lateExitThreshold) && (
+                    {!emp.remarks && dayjs(emp.punchOut).isAfter(lateExitThreshold) && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-sky-100 text-sky-800 text-xs">Late</span>
                     )}
                 </span>
@@ -444,15 +466,20 @@ const columns = (setting) => [
             return (
                 <span>
                     {minutesinhours(wm)}
-                    {wm < setting?.workingMinutes?.shortDayThreshold && (
+                    {!emp.remarks && wm < setting?.workingMinutes?.shortDayThreshold && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-amber-100 text-amber-800 text-xs">Short</span>
                     )}
-                    {wm > setting?.workingMinutes?.overtimeAfterMinutes && (
+                    {!emp.remarks && wm > setting?.workingMinutes?.overtimeAfterMinutes && (
                         <span className="px-2 py-0.5 ml-2 rounded bg-green-100 text-green-800 text-xs">Overtime</span>
                     )}
                 </span>
             );
         },
+    },
+    {
+        name: "Remarks",
+        selector: (emp) => emp.remarks && `${emp.workingMinutes} minutes  ${emp.remarks}`,
+
     },
 
 ];

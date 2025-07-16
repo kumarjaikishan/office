@@ -59,7 +59,7 @@ const HolidayForm = () => {
     try {
       const token = localStorage.getItem('emstoken');
       const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}updateholiday`, {
-        holidayId, name, fromDate, toDate, type,description
+        holidayId, name, fromDate, toDate, type, description
       },
         {
           headers: {
@@ -67,7 +67,7 @@ const HolidayForm = () => {
           }
         });
 
-      toast.success(res.data.message ,{autoClose:1200});
+      toast.success(res.data.message, { autoClose: 1200 });
       setName('');
       setFromDate(null);
       setToDate(null);
@@ -149,7 +149,7 @@ const HolidayForm = () => {
     try {
       const token = localStorage.getItem('emstoken');
       const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}addholiday`, {
-        name, fromDate, toDate, type,description
+        name, fromDate, toDate, type, description
       },
         {
           headers: {
@@ -169,6 +169,14 @@ const HolidayForm = () => {
       alert("Error saving holiday");
     }
   };
+  const cancele = () => {
+    setisupdate(false);
+    setName('');
+    setFromDate(null);
+    setToDate(null);
+    setType('Public');
+    setdescription('');
+  }
 
 
   return (
@@ -196,14 +204,22 @@ const HolidayForm = () => {
                       {...props}
                       sx={{
                         ...(isWeeklyOff && {
-                          backgroundColor: 'gray',
+                          backgroundColor: 'teal',
                           borderRadius: '50%',
                           color: 'white',
+                          '&:hover': {
+                            backgroundColor: 'darkcyan', // darker teal on hover
+                            color: 'white',
+                          },
                         }),
                         ...(matched && {
                           backgroundColor: '#ffeb3b',
                           borderRadius: '50%',
                           color: 'black',
+                          '&:hover': {
+                            backgroundColor: '#ffeb3b', // darker teal on hover
+                            color: 'black',
+                          },
                         }),
                       }}
                     />
@@ -256,9 +272,14 @@ const HolidayForm = () => {
             onChange={(e) => setdescription(e.target.value)}
             fullWidth
           />
-          {isupdate ? <Button variant="contained" onClick={updateholiday}>
-            Edit Holiday
-          </Button> :
+          {isupdate ? <div className='flex justify-end gap-2'>
+            <Button variant="outlined" onClick={cancele}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={updateholiday}>
+              Edit Holiday
+            </Button>
+          </div> :
             <Button variant="contained" onClick={handleSubmit}>
               Add Holiday
             </Button>}
