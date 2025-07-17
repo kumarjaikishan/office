@@ -28,6 +28,7 @@ import { MdExpandMore } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { FaRegUser } from "react-icons/fa";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);

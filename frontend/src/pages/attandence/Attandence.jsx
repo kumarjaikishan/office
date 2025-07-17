@@ -345,6 +345,7 @@ const Attandence = () => {
                     setfiltere({ ...filtere, date: e.target.value })
                   }}
                 label="Select Date"
+                 InputLabelProps={{ shrink: true }}
               />
 
               <FormControl sx={{ width: '160px' }} size="small">

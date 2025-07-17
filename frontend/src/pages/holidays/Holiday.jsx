@@ -286,7 +286,8 @@ const HolidayForm = () => {
 
         </Box>
       </Box>
-      <div>
+      <div className='p-4'>
+       <h2>Holiday List</h2>
         <DataTable
           columns={columns}
           data={holidays}

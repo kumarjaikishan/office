@@ -43,7 +43,7 @@ const AttenPerformance = () => {
         lateleave: [],
         shorttimemin: 0,
         overtimemin: 0,
-
+        overtimesalary:0
     });
 
     const currentYear = dayjs().year();
@@ -56,6 +56,8 @@ const AttenPerformance = () => {
     useEffect(() => {
         if (!company) return;
         setsetting(company)
+        // console.log("employee", employee)
+        console.log("company", company)
     }, [company]);
 
     useEffect(() => {
@@ -121,13 +123,7 @@ const AttenPerformance = () => {
             const fdfgfdd = dayjs(element.date, 'DD/MM/YYYY');
 
             const isHoliday = holidaydate.includes(fdfgfd);
-            // const isHoliday = holidays?.filter((hey) => {
-            //     const from = dayjs(hey.fromDate, 'DD/MM/YYYY');
-            //     const to = dayjs(hey.toDate, 'DD/MM/YYYY');
-
-            //     return fdfgfdd.isSameOrAfter(from) && fdfgfdd.isSameOrBefore(to);
-            // });
-
+          
             const isWeeklyOff = dayjs(element.date).startOf('day').day() === 0;
             const isleave = element.status == 'leave'
             const isabsent = element.status == 'absent'
@@ -205,13 +201,10 @@ const AttenPerformance = () => {
             leave: leaveDates,
             holiday: holidayDates,
             short: shortDates,
-            overtime,
-            shorttimemin,
-            overtimemin,
-            latearrival,
-            earlyarrival,
-            earlyLeave,
-            lateleave,
+            overtime, shorttimemin, overtimemin, latearrival,
+            earlyarrival, earlyLeave, lateleave,
+            overtimesalary:Math.floor((overtimemin-shorttimemin) * (employee.salary/30/company.workingMinutes.fullDay).toFixed(2))
+            // overtimesalary: (employee.salary/30/company.workingMinutes.fullDay).toFixed(2)
         });
     }, [attandence, selectedYear, selectedMonth, setting]);
 

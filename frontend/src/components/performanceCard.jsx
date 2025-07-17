@@ -12,6 +12,7 @@ import {
     FaUserClock,
     FaIdCard,
 } from "react-icons/fa";
+import { Tooltip } from "@mui/material";
 
 const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
     useEffect(() => {
@@ -86,10 +87,16 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                 </div>
 
                 <div className="attandencecarde md:ml-12">
-                    <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaMobileAlt /> Overtime</span>
-                        <span className="font-bold text-gray-600">{hell?.overtime?.length || 0} {hell?.overtimemin > 0 && `(${hell?.overtimemin} min)`}</span>
-                    </div>
+                    <Tooltip placement="top" enterDelay={800} title={<div className='flex flex-col '>
+                        <span> Basic salary &nbsp;&nbsp;&nbsp;&nbsp; :- {employee?.salary} ₹</span>
+                        <span>Net Overtime  &nbsp;&nbsp; :- {hell?.overtimemin - hell?.shorttimemin} min</span>
+                        <span> Payment  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :- {hell.overtimesalary} ₹</span>
+                    </div>}>
+                        <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
+                            <span className="font-medium flex items-center gap-2 text-gray-800"><FaMobileAlt /> Overtime</span>
+                            <span className="font-bold text-gray-600">{hell?.overtime?.length || 0} {hell?.overtimemin > 0 && `(${hell?.overtimemin} min)`}</span>
+                        </div>
+                    </Tooltip>
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Time</span>
                         {/* <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Attendance</span> */}
