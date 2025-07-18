@@ -36,6 +36,10 @@ const HolidayForm = () => {
     setweeklyOffs(company?.weeklyOffs || [1]);
     // console.log(company)
   }, [company])
+  useEffect(() => {
+    setToDate(fromDate);
+    // console.log(company)
+  }, [fromDate])
 
   const impordate = ['06/15/2025', '06/10/2025'];
   const highlightedDates = holidaylist.map(dateObj => ({
@@ -81,8 +85,24 @@ const HolidayForm = () => {
     }
   }
 
-  const deletee = () => {
+  const deletee = async (id) => {
+    try {
+      const token = localStorage.getItem('emstoken');
+      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}deleteholiday`, {
+        id
+      },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
 
+      toast.success(res.data.message, { autoClose: 1200 });
+    } catch (err) {
+      console.error(err);
+      alert("Error saving holiday");
+      // toast.warn(res.data.message ,{autoClose:1200});
+    }
   }
 
   useEffect(() => {
@@ -143,7 +163,6 @@ const HolidayForm = () => {
     fetchHolidays();
   }, []);
 
-
   const handleSubmit = async () => {
     // return console.log(fromDate)
     try {
@@ -157,16 +176,16 @@ const HolidayForm = () => {
           }
         });
 
-      alert(res.data.message || "Holiday saved");
+      toast.success(res.data.message, { autoClose: 1200 });
       setName('');
       setFromDate(null);
       setToDate(null);
       setType('Public');
       setdescription('');
-      setHolidays([...holidays, res.data.newHoliday]); // Make sure your API returns newHoliday
+      // setHolidays([...holidays, res.data.newHoliday]); // Make sure your API returns newHoliday
     } catch (err) {
       console.error(err);
-      alert("Error saving holiday");
+      toast.warning("Error saving holiday", { autoClose: 1200 });
     }
   };
   const cancele = () => {
@@ -287,7 +306,7 @@ const HolidayForm = () => {
         </Box>
       </Box>
       <div className='p-4'>
-       <h2>Holiday List</h2>
+        <h2>Holiday List</h2>
         <DataTable
           columns={columns}
           data={holidays}

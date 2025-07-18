@@ -25,18 +25,22 @@ import { useSelector } from "react-redux";
 import { IoMdTime } from "react-icons/io";
 import BulkMark from "./BulkMark";
 import { FaRegUser } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import MarkAttandenceedit from "./MarkAttandenceedit";
 
 const Attandence = () => {
   const [markattandence, setmarkattandence] = useState(false);
   const [isUpdate, setisUpdate] = useState(false);
   const [isload, setisload] = useState(false);
   const [openmodal, setopenmodal] = useState(false);
+  const [atteneditmodal, setatteneditmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
   const { branch, attandence, department, company } = useSelector((state) => state.user);
   const [attandencelist, setattandencelist] = useState([]);
   const [filterattandence, setfilterattandence] = useState([]);
   const [isPunchIn, setisPunchIn] = useState(true);
   const [selectedRows, setselectedRows] = useState([]);
+  const dispatch = useDispatch();
 
 
   const init = {
@@ -46,7 +50,26 @@ const Attandence = () => {
     punchOut: null,
     status: '',
   }
+
+  const init2 = {
+    id: '',
+    employeeName: '',
+    date: dayjs(),
+    punchIn: null,
+    punchOut: null,
+    status: '',
+  }
   const [inp, setinp] = useState(init);
+
+  useEffect(() => {
+    setfiltere((prev) => ({
+      ...prev,
+      departmente: 'all'
+    }));
+    inp.punchIn !== null && setinp({ ...inp, status: 'present' })
+  }, [inp.punchIn]);
+
+  const [editinp, seteditinp] = useState(init2)
 
   const [filtere, setfiltere] = useState({
     // date: null,
@@ -84,7 +107,7 @@ const Attandence = () => {
   }, [inp.punchIn, inp.punchOut]);
 
   useEffect(() => {
-    console.log(attandencelist)
+    // console.log(attandencelist)
     if (!attandencelist) return;
 
     const today = dayjs(); // today's date without time
@@ -148,11 +171,12 @@ const Attandence = () => {
   }
 
   useEffect(() => {
-  setfiltere((prev) => ({
-    ...prev,
-    departmente: 'all'
-  }));
-}, [filtere.branch]);
+    setfiltere((prev) => ({
+      ...prev,
+      departmente: 'all'
+    }));
+  }, [filtere.branch]);
+
 
 
   useEffect(() => {
@@ -255,9 +279,20 @@ const Attandence = () => {
     setattandencelist(data);
   }, [attandence]);
 
-  const edite = () => {
+  const edite = (atten) => {
+    console.log(atten)
+    seteditinp({
+      id: atten._id,
+      employeeName: atten?.employeeId?.userid?.name || "",
+      date: dayjs(atten.date).format('DD MMM, YYYY'),
+      punchIn: atten.punchIn ? dayjs(atten.punchIn) : null,
+      punchOut: atten.punchOut ? dayjs(atten.punchOut) : null,
+      status: atten.status || ""
+    });
 
+    setatteneditmodal(true)
   }
+
   const deletee = (attanId) => {
     swal({
       title: "Are you sure you want to Delete this record?",
@@ -286,7 +321,7 @@ const Attandence = () => {
 
   const submitHandle = async (e) => {
     e.preventDefault();
-    const res = await submitAttandence({ isPunchIn, inp, setisload });
+    const res = await submitAttandence({ isPunchIn, inp, setisload, dispatch });
     console.log(res)
     if (res) {
       setopenmodal(false);
@@ -342,10 +377,10 @@ const Attandence = () => {
                 sx={{ width: '160px' }}
                 value={filtere.date}
                 onChange={(e) => {
-                    setfiltere({ ...filtere, date: e.target.value })
-                  }}
+                  setfiltere({ ...filtere, date: e.target.value })
+                }}
                 label="Select Date"
-                 InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true }}
               />
 
               <FormControl sx={{ width: '160px' }} size="small">
@@ -462,6 +497,9 @@ const Attandence = () => {
       </div>
       <MarkAttandence isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
         setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
+      />
+      <MarkAttandenceedit dispatch={dispatch} setisload={setisload} submitHandle={submitHandle} init={init2} openmodal={atteneditmodal} inp={editinp} setinp={seteditinp}
+        setopenmodal={setatteneditmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
       <BulkMark isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={bullmodal} inp={inp} setinp={setinp}
         setopenmodal={setbullmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}

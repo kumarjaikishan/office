@@ -17,7 +17,7 @@ const DashboardCard = ({employee, todaypresent,currentpresent }) => {
                 </div>
 
                 <div className="details px-2">
-                    <p className="text-[28px] text-slate-800 font-bold mt-2">{employee?.length}</p>
+                    <p className="text-[28px] text-slate-800 font-bold mt-2">{employee?.length || 0}</p>
                 </div>
             </div>
             <div className="relative px-4 py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">
@@ -47,7 +47,7 @@ const DashboardCard = ({employee, todaypresent,currentpresent }) => {
                 </div>
 
                 <div className="details px-2">
-                    <p className="text-[28px] text-slate-800 font-bold mt-2">{3}</p>
+                    <p className="text-[28px] text-slate-800 font-bold mt-2">{0}</p>
                 </div>
             </div>
             <div className="relative px-4 py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">

@@ -66,7 +66,7 @@ export const addemployee = async ({ formData, setisload, setInp, setopenmodal, i
 };
 
 
-export const employeeupdate = async ({ formData, inp, setisload, setInp, setopenmodal, init }) => {
+export const employeeupdate = async ({ formData, inp,setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -83,6 +83,7 @@ export const employeeupdate = async ({ formData, inp, setisload, setInp, setopen
 
         console.log('Query:', res);
         toast.success(res.data.message, { autoClose: 1200 });
+        setEmployeePhoto(null)
         setInp(init);
         setopenmodal(false);
     } catch (error) {

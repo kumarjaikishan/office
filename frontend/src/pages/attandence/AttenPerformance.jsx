@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { Box, Tooltip, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
+import { Box, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
 import { BiMessageRoundedError } from 'react-icons/bi';
 import DataTable from 'react-data-table-component';
 import { useSelector } from 'react-redux';
@@ -23,7 +23,7 @@ const AttenPerformance = () => {
     const [withremarks, setwithremarks] = useState([]);
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
-    const [selectedMonth, setSelectedMonth] = useState('all');
+    const [selectedMonth, setSelectedMonth] = useState(dayjs().month());
     const [statusFilter, setStatusFilter] = useState('all');
     const [typeFilter, setTypeFilter] = useState('all');
     const [timeFilter, setTimeFilter] = useState('all');
@@ -43,7 +43,7 @@ const AttenPerformance = () => {
         lateleave: [],
         shorttimemin: 0,
         overtimemin: 0,
-        overtimesalary:0
+        overtimesalary: 0
     });
 
     const currentYear = dayjs().year();
@@ -57,7 +57,8 @@ const AttenPerformance = () => {
         if (!company) return;
         setsetting(company)
         // console.log("employee", employee)
-        console.log("company", company)
+        // console.log("company", company);
+        // console.log(dayjs().month())
     }, [company]);
 
     useEffect(() => {
@@ -92,6 +93,7 @@ const AttenPerformance = () => {
                 setemployee(res.data.employee);
                 setuser(res.data.user);
                 setattandence(res.data.attandence);
+                // console.log(res.data.attandence)
             } catch (err) {
                 console.error('Failed to fetch performance data:', err);
             } finally {
@@ -116,6 +118,7 @@ const AttenPerformance = () => {
         let overtimemin = 0;
 
         let finaliiy = [];
+        // console.log(filtered)
 
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
@@ -123,8 +126,10 @@ const AttenPerformance = () => {
             const fdfgfdd = dayjs(element.date, 'DD/MM/YYYY');
 
             const isHoliday = holidaydate.includes(fdfgfd);
-          
-            const isWeeklyOff = dayjs(element.date).startOf('day').day() === 0;
+
+            // const isWeeklyOff = dayjs(element.date).startOf('day').day() === company.weeklyOffs;
+            const day = dayjs(element.date).startOf('day').day(); // 0 = Sunday, 1 = Monday, etc.
+            const isWeeklyOff = company.weeklyOffs.includes(day);
             const isleave = element.status == 'leave'
             const isabsent = element.status == 'absent'
 
@@ -174,8 +179,6 @@ const AttenPerformance = () => {
                 }
             }
 
-
-
             // Early / Late arrival thresholds
             const [earlyArrHour, earlyArrMinute] = setting.attendanceRules.considerEarlyEntryBefore.split(':').map(Number);
             const [lateArrHour, lateArrMinute] = setting.attendanceRules.considerLateEntryAfter.split(':').map(Number);
@@ -195,6 +198,7 @@ const AttenPerformance = () => {
             if (dayjs(punchOut).isAfter(lateLeaveThreshold)) lateleave.push(date);
         });
         setwithremarks(finaliiy)
+        // console.log(finaliiy)
         sethell({
             present: presentDates,
             absent: absentDates,
@@ -203,7 +207,7 @@ const AttenPerformance = () => {
             short: shortDates,
             overtime, shorttimemin, overtimemin, latearrival,
             earlyarrival, earlyLeave, lateleave,
-            overtimesalary:Math.floor((overtimemin-shorttimemin) * (employee.salary/30/company.workingMinutes.fullDay).toFixed(2))
+            overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 30 / company.workingMinutes.fullDay).toFixed(2))
             // overtimesalary: (employee.salary/30/company.workingMinutes.fullDay).toFixed(2)
         });
     }, [attandence, selectedYear, selectedMonth, setting]);

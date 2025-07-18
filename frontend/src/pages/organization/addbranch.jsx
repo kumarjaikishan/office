@@ -111,7 +111,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
               selected.map(id => users.find(user => user._id === id)?.userid.name).join(', ')
             }
           >
-            {users.map(user => (
+            {users?.map(user => (
               <MenuItem key={user._id} value={user._id}>
                 <Checkbox checked={branch.managerIds.includes(user._id)} />
                 <Avatar src={user.profileimage} alt={user.userid.name}>

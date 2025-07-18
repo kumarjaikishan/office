@@ -168,7 +168,7 @@ const addemployee = async (req, res, next) => {
 }
 
 const updateemployee = async (req, res, next) => {
-    console.log(req.body);
+    // console.log(req.body);
     try {
         const { employeeId, employeeName, branchId, department, email, username, designation,
             phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary = 0, achievements,
@@ -322,6 +322,9 @@ const firstfetch = async (req, res, next) => {
                     path: 'userid',
                     select: 'name'
                 },
+            }).populate({
+                path: 'leave',
+                select: 'reason',
             });
 
         res.status(200).json({

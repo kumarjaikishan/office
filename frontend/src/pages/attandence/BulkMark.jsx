@@ -102,7 +102,7 @@ const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, seto
                                 </span>
                             </div>
                             <div className='flex max-h-[200px] pt-1 pl-1 flex-col border border-gray-400 w-full rounded' >
-                                {employee.map((val) => {
+                                {employee?.map((val) => {
                                     return <div className='m-0 p-0 gap-1 flex items-center'>
                                         <input
                                             type="checkbox"

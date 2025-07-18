@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaRegBuilding, FaTachometerAlt, FaUsers } from 'react-icons/fa'
+import { FaCalendarCheck, FaMailBulk, FaRegBuilding, FaRegCalendarAlt, FaSitemap, FaTachometerAlt, FaUmbrellaBeach, FaUserCircle, FaUsers, FaUserTie } from 'react-icons/fa'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { SiAudiotechnica } from "react-icons/si";
 import { GoPeople } from "react-icons/go";
@@ -11,6 +11,7 @@ import { CgLogOut } from "react-icons/cg";
 import { TbReportAnalytics } from "react-icons/tb";
 import swal from 'sweetalert';
 import { useSelector } from 'react-redux';
+import { FiSettings } from 'react-icons/fi';
 
 
 const Sidebar = () => {
@@ -36,7 +37,7 @@ const Sidebar = () => {
     <div className=' w-full h-full px-1 md:px-2 '>
       <div className="logo h-[60px]  flex items-center gap-4">
         <span className='text-3xl'> <SiAudiotechnica /></span>
-        <span className='hidden lg:block capitalize'>{user.company.name}</span>
+        <span className='hidden lg:block capitalize'>{user?.company?.name || 'company Name'}</span>
       </div>
       {menu.map((item) => {
          const filteredItems = item.items.filter(item => item.roles.includes(role));
@@ -89,13 +90,13 @@ const menu = [
       {
         menu: "Organization",
         link: '/admin-dashboard/organization',
-        icon: <GoPeople />,
+        icon: <FaSitemap />,
         roles: ['admin']
       },
       {
         menu: "Employees",
         link: '/admin-dashboard/employe',
-        icon: <GoPeople />,
+        icon: <FaUserTie />,
         roles: ['admin']
       },
       // {
@@ -107,19 +108,19 @@ const menu = [
       {
         menu: "Holiday",
         link: '/admin-dashboard/holiday',
-        icon: <FaUsers />,
+        icon: <FaRegCalendarAlt />,
         roles: ['admin']
       },
       {
         menu: "Leave",
         link: '/employe-dashboard/leave',
-        icon: <GiPlagueDoctorProfile />,
+        icon: <FaUmbrellaBeach />,
         roles: ['employee']
       },
       {
         menu: "Leave Request",
         link: '/admin-dashboard/adminleave',
-        icon: <GiPlagueDoctorProfile />,
+        icon: <FaMailBulk />,
         roles: ['admin']
       },
       {
@@ -131,7 +132,7 @@ const menu = [
       {
         menu: "Attendance",
         link: '/admin-dashboard/attandence',
-        icon: <TbReportAnalytics />,
+        icon: <FaCalendarCheck />,
         roles: ['employee']
       },
       // {
@@ -148,13 +149,13 @@ const menu = [
       {
         menu: "Profile",
         link: '/profile',
-        icon: <GiPlagueDoctorProfile />,
+        icon: <FaUserCircle />,
         roles: ['admin', 'employee']
       },
       {
         menu: "Setting",
         link: '/admin-dashboard/setting',
-        icon: <GoGear />,
+        icon: <FiSettings />,
         roles: ['admin']
       },
       {

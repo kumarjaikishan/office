@@ -46,6 +46,7 @@ router.route('/addsalary').post(authmiddlewre,adminmiddleware,salary.addsalary);
 router.route('/salaryfetch').get(authmiddlewre,adminmiddleware,salary.salaryfetch); 
 
 router.route('/allAttandence').get(authmiddlewre,attendance.allAttandence); 
+router.route('/editattandence').post(authmiddlewre,attendance.editattandence); 
 router.route('/webattandence').post(authmiddlewre,attendance.webattandence); 
 router.route('/checkout').post(authmiddlewre,attendance.checkout); 
 router.route('/checkin').post(authmiddlewre,attendance.checkin); 
@@ -53,6 +54,7 @@ router.route('/employeeAttandence').get(attendance.employeeAttandence);
 router.route('/deleteattandence').post(attendance.deleteattandence);
 
 router.route('/addholiday').post(authmiddlewre,holiday.addholiday); 
+router.route('/deleteholiday').post(authmiddlewre,holiday.deleteholiday); 
 router.route('/updateholiday').post(authmiddlewre,holiday.updateholiday); 
 router.route('/getholidays').get(authmiddlewre,holiday.getholidays); 
 

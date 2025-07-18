@@ -230,6 +230,59 @@ const allAttandence = async (req, res, next) => {
   res.json(data);
 };
 
+const editattandence = async (req, res, next) => {
+  try {
+    const { id, punchIn, punchOut, status } = req.body;
+
+    const data = await Attendance.findById(id);
+    if (!data) {
+      return res.status(404).json({ message: "Attendance record not found" });
+    }
+
+    if (punchIn !== "" && punchOut !== "") {
+      const inTime = new Date(punchIn);
+      const outTime = new Date(punchOut);
+
+      const diffMinutes = (outTime - inTime) / (1000 * 60); // Convert ms to minutes
+      data.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+
+      const short = 480 - data.workingMinutes;
+      data.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+    }
+
+    if (punchIn !== "") {
+      const punchInTime = new Date(punchIn);
+      punchInTime.setMilliseconds(0);
+      if (isNaN(punchInTime)) {
+        return res.status(400).json({ message: 'Invalid punchIn time' });
+      }
+      data.punchIn = punchInTime;
+    }
+    if (punchOut !== "") {
+      const punchOutTime = new Date(punchOut);
+      punchOutTime.setMilliseconds(0);
+      if (isNaN(punchOutTime)) {
+        return res.status(400).json({ message: 'Invalid punchOut time' });
+      }
+      data.punchOut = punchOutTime;
+    }
+    if (status !== 'present') {
+      data.punchIn = ''
+      data.punchOut = ''
+    }
+    data.status = status;
+
+    await data.save();
+
+    res.status(200).json({
+      message: 'Edit successfully',
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 
 // Apply for leave
 const leaveapply = async (req, res, next) => {
@@ -259,7 +312,7 @@ const employeeAttandence = async (req, res, next) => {
   try {
     const user = await User.findOne({ _id: userid });
     const employeedetail = await employee.findOne({ userid });
-    const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: 1 });
+    const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: -1 });
 
     return res.status(200).json({ user, employee: employeedetail, attandence });
   } catch (error) {
@@ -270,4 +323,4 @@ const employeeAttandence = async (req, res, next) => {
 }
 
 
-module.exports = { checkout, deleteattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
+module.exports = { checkout, deleteattandence, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };

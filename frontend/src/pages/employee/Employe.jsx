@@ -88,7 +88,7 @@ const Employe = () => {
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
+   department > 0 && setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
   }, [filters.branch]);
 
   const handleNestedChange = (e, type, index, field) => {
@@ -117,10 +117,10 @@ const Employe = () => {
   useEffect(() => {
     // console.log(departmentlist)
     // console.log(employee)
-    if (employee.length < 1) return;
+    if (employee?.length < 1) return;
 
     let sno = 1;
-    const data = employee.map((emp) => {
+    const data = employee?.map((emp) => {
       return {
         id: emp._id,
         sno: sno++,
@@ -214,7 +214,7 @@ const Employe = () => {
 
     if (employeePhoto) formData.append('photo', employeePhoto);
 
-    await employeeupdate({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
+    await employeeupdate({ formData, setisload,setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
   };
 
   const resetPhoto = () => {
@@ -242,7 +242,7 @@ const Employe = () => {
         userid: '',
         pass: ''
       })
-      passmodal(false);
+      setpassmodal(false);
       console.log('Query:', res);
       toast.success(res.data.message, { autoClose: 1200 });
     } catch (error) {
@@ -321,7 +321,7 @@ const Employe = () => {
   };
   const inputref = useRef(null);
 
-  const filteredEmployees = employeelist.filter(emp => {
+  const filteredEmployees = employeelist?.filter(emp => {
     const name = emp.rawname?.toLowerCase() || '';
     const deptId = emp.departmentid || '';
     const branchId = emp.branch || '';
@@ -370,7 +370,7 @@ const Employe = () => {
               onChange={(e) => handleFilterChange('branch', e.target.value)}
             >
               <MenuItem selected value="all">All</MenuItem>
-              {branch.map((list) => (
+              {branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
               ))}
             </Select>
@@ -439,7 +439,7 @@ const Employe = () => {
                   label="branch"
                   onChange={(e) => handleChange(e, 'branchId')}
                 >
-                  {branch.map((list) => (
+                  {branch?.map((list) => (
                     <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
                   ))}
                 </Select>
@@ -451,7 +451,7 @@ const Employe = () => {
                   label="Department"
                   onChange={(e) => handleChange(e, 'department')}
                 >
-                  {department.filter(e => e.branchId._id == inp.branchId).map((list) => (
+                  {department?.filter(e => e.branchId._id == inp.branchId).map((list) => (
                     <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
                   ))}
                 </Select>

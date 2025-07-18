@@ -1,9 +1,11 @@
 import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
+import { FirstFetch } from "../../../store/userSlice";
 
 
-export const submitAttandence = async ({ isPunchIn, inp, setisload }) => {
+
+export const submitAttandence = async ({ isPunchIn, inp, setisload,dispatch }) => {
   // console.log(inp)
   setisload(false);
 
@@ -38,8 +40,9 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload }) => {
       }
     );
 
-    console.log('add attandence Query:', res);
+    // console.log('add attandence Query:', res);
     toast.success(res.data.message, { autoClose: 1800 });
+    dispatch(FirstFetch());
     return true;
   } catch (error) {
     console.log(error);

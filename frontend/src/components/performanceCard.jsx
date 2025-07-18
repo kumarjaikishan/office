@@ -11,6 +11,13 @@ import {
     FaUsers,
     FaUserClock,
     FaIdCard,
+    FaUserSlash,
+    FaClock,
+    FaCompressAlt,
+    FaSignInAlt,
+    FaSignOutAlt,
+    FaArrowCircleLeft,
+    FaArrowCircleRight,
 } from "react-icons/fa";
 import { Tooltip } from "@mui/material";
 
@@ -22,7 +29,7 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
     const total = hell.present.length + hell.absent.length + hell.leave.length;
 
     const perc = {
-        present: total ? Math.floor((hell.present.length / total) * 100) : 0,
+        present: total ? Math.floor((hell.present.length / total) * 100)  : 0,
         absent: total ? Math.floor((hell.absent.length / total) * 100) : 0,
         leave: total ? Math.floor((hell.leave.length / total) * 100) : 0,
     };
@@ -81,24 +88,24 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                     </div>
 
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaTimesCircle /> Absent</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaUserSlash /> Absent</span>
                         <span className="font-bold text-gray-600">{hell?.absent?.length}</span>
                     </div>
                 </div>
 
                 <div className="attandencecarde md:ml-12">
                     <Tooltip placement="top" enterDelay={800} title={<div className='flex flex-col '>
-                        <span> Basic salary &nbsp;&nbsp;&nbsp;&nbsp; :- {employee?.salary} ₹</span>
-                        <span>Net Overtime  &nbsp;&nbsp; :- {hell?.overtimemin - hell?.shorttimemin} min</span>
-                        <span> Payment  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :- {hell.overtimesalary} ₹</span>
+                        <span> Basic salary &nbsp;&nbsp;&nbsp;&nbsp; : {employee?.salary} ₹</span>
+                        <span>Net Overtime  &nbsp;&nbsp; : {hell?.overtimemin - hell?.shorttimemin} min</span>
+                        <span> Payment  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : {hell.overtimesalary} ₹</span>
                     </div>}>
                         <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                            <span className="font-medium flex items-center gap-2 text-gray-800"><FaMobileAlt /> Overtime</span>
+                            <span className="font-medium flex items-center gap-2 text-gray-800"><FaClock /> Overtime</span>
                             <span className="font-bold text-gray-600">{hell?.overtime?.length || 0} {hell?.overtimemin > 0 && `(${hell?.overtimemin} min)`}</span>
                         </div>
                     </Tooltip>
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Time</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaCompressAlt /> Short Time</span>
                         {/* <span className="font-medium flex items-center gap-2 text-gray-800"><FaChartBar /> Short Attendance</span> */}
                         <span className="font-bold text-gray-600">{hell?.short?.length || 0} {hell?.shorttimemin > 0 && `(${hell?.shorttimemin} min)`}</span>
                     </div>
@@ -106,24 +113,24 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
 
                 <div className="attandencecarde md:ml-8">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaEnvelopeOpenText /> Late Arrival</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaSignInAlt /> Late Arrival</span>
                         <span className="font-bold text-gray-600">{hell?.latearrival?.length || 0}</span>
                     </div>
 
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaUsers /> Early Leave</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaSignOutAlt /> Early Leave</span>
                         <span className="font-bold text-gray-600">{hell?.earlyLeave?.length || 0}</span>
                     </div>
                 </div>
 
                 <div className="attandencecarde">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaUserClock /> Early Arrival</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaArrowCircleLeft /> Early Arrival</span>
                         <span className="font-bold text-gray-600">{hell?.earlyarrival?.length || 0}</span>
                     </div>
 
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
-                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaIdCard /> Late Leave</span>
+                        <span className="font-medium flex items-center gap-2 text-gray-800"><FaArrowCircleRight /> Late Leave</span>
                         <span className="font-bold text-gray-600">{hell?.lateleave?.length || 0}</span>
                     </div>
                 </div>

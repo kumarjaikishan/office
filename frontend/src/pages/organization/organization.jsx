@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { addCompany } from './helper';
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import Department from '../department/Department';
+import { FaRegUser } from 'react-icons/fa';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -28,6 +29,7 @@ export default function OrganizationSettings() {
     const [openSection, setOpenSection] = useState(null);
     const [editbranch, seteditbranch] = useState(false);
     const [openviewmodal, setopenviewmodal] = useState(false);
+    const [isload, setisload] = useState(false);
     const [editbranchdata, seteditbranchdata] = useState(null);
     const [companyinp, setcompany] = useState({
         name: '',
@@ -35,17 +37,17 @@ export default function OrganizationSettings() {
         officeTime: { in: '10:00', out: '18:00', breakMinutes: 30 },
         gracePeriod: { lateEntryMinutes: 10, earlyExitMinutes: 10 },
         workingMinutes: {
-            fullDay: 540,
+            fullDay: 480,
             halfDay: 270,
             shortDayThreshold: 360,
-            overtimeAfterMinutes: 540
+            overtimeAfterMinutes: 490
         },
         weeklyOffs: [0],
         attendanceRules: {
-            considerEarlyEntryBefore: '10:00',
-            considerLateEntryAfter: '10:40',
-            considerEarlyExitBefore: '18:00',
-            considerLateExitAfter: '18:30'
+            considerEarlyEntryBefore: '09:50',
+            considerLateEntryAfter: '10:10',
+            considerEarlyExitBefore: '17:50',
+            considerLateExitAfter: '18:15'
         }
     })
 
@@ -75,6 +77,7 @@ export default function OrganizationSettings() {
     const handleSubmit = async () => {
         // return console.log(companyinp)
         try {
+            setisload(true);
             const token = localStorage.getItem('emstoken');
             const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}updateCompany`,
                 { ...companyinp },
@@ -95,6 +98,8 @@ export default function OrganizationSettings() {
             } else {
                 console.error('Error:', error.message);
             }
+        } finally {
+            setisload(false);
         }
     };
     const setemployee = () => {
@@ -155,6 +160,7 @@ export default function OrganizationSettings() {
                                 >
                                     ✎
                                 </label>
+
                             </div>
                         </div>
 
@@ -180,13 +186,14 @@ export default function OrganizationSettings() {
                             </div>
 
                             {company ? (
-                                <button onClick={handleSubmit} className="bg-green-500 text-white px-3 py-1 rounded">
+                                <Button variant="contained" loading={isload} onClick={handleSubmit}>
                                     Save Changes
-                                </button>
+                                </Button>
                             ) : (
-                                <button onClick={() => addCompany({ companyinp })} className="bg-green-500 text-white px-3 py-1 rounded">
+
+                                <Button loading={isload} variant="contained" onClick={() => addCompany({ companyinp,setisload })}>
                                     + Create Company
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -273,7 +280,7 @@ export default function OrganizationSettings() {
             </div>
 
             <div>
-               
+
                 <div
                     className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('department')}
@@ -294,7 +301,7 @@ export default function OrganizationSettings() {
             </div>
 
             <div>
-                   <div
+                <div
                     className="flex justify-between items-center cursor-pointer bg-yellow-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('attendance')}
                 >
@@ -336,7 +343,7 @@ export default function OrganizationSettings() {
                                 helperText="Total break time allowed during the day"
                             />
 
-                            <TextField
+                            {/* <TextField
                                 label="Late Entry Grace (min)"
                                 fullWidth
                                 type="number"
@@ -352,7 +359,7 @@ export default function OrganizationSettings() {
                                 value={companyinp.gracePeriod.earlyExitMinutes}
                                 onChange={e => handleChange('gracePeriod', 'earlyExitMinutes', Number(e.target.value))}
                                 helperText="Allowed early leave before office end time"
-                            />
+                            /> */}
 
                             <TextField
                                 label="Full Day Minutes"

@@ -188,7 +188,7 @@ const Main = () => {
               onChange={(e) => setbranc(e.target.value)}
             >
               <MenuItem selected value={'all'}>All</MenuItem>
-              {branch.map((list) => (
+              {branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
               ))}
             </Select>
@@ -256,10 +256,10 @@ const Main = () => {
         </div>
       </div>
 
-      <div className="leaveDetail">
+      {/* <div className="leaveDetail">
         <h3>Leave Details</h3>
         <DashboardCard todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
-      </div>
+      </div> */}
     </div>
   )
 }

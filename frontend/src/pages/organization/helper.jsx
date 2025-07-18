@@ -1,9 +1,9 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-export const addCompany = async ({ companyinp }) => {
+export const addCompany = async ({ companyinp, setisload }) => {
     const token = localStorage.getItem('emstoken');
-    // setisload(true);
+    setisload(true);
 
     try {
         const res = await axios.post(
@@ -30,6 +30,6 @@ export const addCompany = async ({ companyinp }) => {
             console.error('Error:', error.message);
         }
     } finally {
-        // setisload(false);
+        setisload(false);
     }
 };
