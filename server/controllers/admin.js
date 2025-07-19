@@ -107,7 +107,7 @@ const addemployee = async (req, res, next) => {
     const { employeeName, branchId, department, email, username, password, designation, salary } = req.body;
 
     if (!employeeName || !email || !password || !department || !designation || !salary || !username || !branchId) {
-       return res.status(400).json({ message: "All fields are required" });
+        return res.status(400).json({ message: "All fields are required" });
     }
     const role = 'employee';
 
@@ -131,7 +131,7 @@ const addemployee = async (req, res, next) => {
         // Step 2: Upload profile image to Cloudinary
         let uploadResult = null;
         if (req.file) {
-             uploadResult = await cloudinary.uploader.upload(req.file.path, {
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
                 folder: 'ems/employee'
             });
 
@@ -147,12 +147,12 @@ const addemployee = async (req, res, next) => {
         });
         const resulte = await query.save({ session });
 
-        await usermodal.findByIdAndUpdate(resulten._id,{employeeId:resulte._id}).session(session)
-        
+        await usermodal.findByIdAndUpdate(resulten._id, { employeeId: resulte._id }).session(session)
+
         // Step 4: Commit transaction
         await session.commitTransaction();
         session.endSession();
-        
+
         res.status(200).json({
             message: 'employee Created Successfully'
         })
@@ -259,6 +259,28 @@ const updateemployee = async (req, res, next) => {
     }
 };
 
+const enrollFace = async (req, res, next) => {
+    // console.log(req.body)
+    try {
+        const { employeeId, descriptor } = req.body;
+        if (!employeeId || !descriptor || !Array.isArray(descriptor) || descriptor.length !== 128) {
+            return next({ status: 400, message: "Invalid employeeId or descriptor" });
+        }
+
+        const query = await employeeModal.findByIdAndUpdate(employeeId, { faceDescriptor: descriptor });
+
+        if (!query) {
+            return next({ status: 400, message: "Something went wrong" });
+        }
+
+        res.status(200).json({
+            message: 'employee face  enroll Successfully'
+        })
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
 const deleteemployee = async (req, res, next) => {
     // console.log(req.body)
     try {
@@ -561,6 +583,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

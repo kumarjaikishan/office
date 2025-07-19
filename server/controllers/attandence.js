@@ -157,6 +157,65 @@ const checkin = async (req, res, next) => {
   }
 };
 
+const facecheckin = async (req, res, next) => {
+  try {
+    const { employeeId } = req.body;
+
+    if (!employeeId) {
+      return res.status(400).json({ message: 'Employee ID is required' });
+    }
+
+    // Get today's date (stripped of time)
+    const now = new Date();
+    now.setSeconds(0, 0); // Zero out seconds and milliseconds
+
+    const dateObj = new Date(now);
+    dateObj.setHours(0, 0, 0, 0);
+
+    // Check if already checked in
+    const existing = await Attendance.findOne({ employeeId, date: dateObj });
+    if (existing) {
+      return res.status(400).json({ message: 'Already checked in today' });
+    }
+
+    // Build attendance object
+    const attendanceData = {
+      employeeId,
+      date: dateObj,
+      punchIn: now,
+      status: 'present'
+    };
+
+    const attendance = new Attendance(attendanceData);
+    await attendance.save();
+
+    const updatedRecord = await Attendance.findById(attendance._id)
+      .populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name'
+        }
+      });
+
+    // Notify connected clients (if using sockets or similar)
+    sendToClients({
+      type: 'attendance_update',
+      payload: {
+        action: 'checkin',
+        data: updatedRecord
+      }
+    });
+
+    return res.status(200).json({ message: 'Punch-in recorded', attendance });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+
 
 const checkout = async (req, res, next) => {
   try {
@@ -216,6 +275,69 @@ const checkout = async (req, res, next) => {
     });
 
     return res.status(200).json({ message: 'Punch-out recorded', record });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const facecheckout = async (req, res, next) => {
+  try {
+    const { employeeId } = req.body;
+
+    // Set current time (zero seconds and ms)
+    const now = new Date();
+    now.setSeconds(0, 0);
+
+    // Normalize date to midnight
+    const dateObj = new Date(now);
+    dateObj.setHours(0, 0, 0, 0);
+
+    // Find today's attendance record
+    const record = await Attendance.findOne({ employeeId, date: dateObj });
+
+    if (!record) {
+      return res.status(404).json({ message: 'Check-in not found' });
+    }
+
+    if (record.punchOut) {
+      return res.status(400).json({ message: 'Already checked out' });
+    }
+
+    // Assign punchOut time
+    record.punchOut = now;
+
+    // Calculate working minutes
+    const diffMinutes = (record.punchOut - record.punchIn) / (1000 * 60);
+    record.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+
+    // Calculate short minutes (8 hours = 480 minutes)
+    const short = 480 - record.workingMinutes;
+    record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+
+    await record.save();
+
+    // Populate the saved record
+    const populatedRecord = await Attendance.findById(record._id)
+      .populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name'
+        }
+      });
+
+    // Send live update
+    sendToClients({
+      type: 'attendance_update',
+      payload: {
+        action: 'checkOut',
+        data: populatedRecord
+      }
+    });
+
+    return res.status(200).json({ message: 'Punch-out recorded', record: populatedRecord });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error', error });
@@ -323,4 +445,4 @@ const employeeAttandence = async (req, res, next) => {
 }
 
 
-module.exports = { checkout, deleteattandence, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
+module.exports = { checkout, deleteattandence, facecheckin, facecheckout, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };

@@ -69,7 +69,11 @@ const employeeSchema = new mongoose.Schema({
     salary: {
         type: String,
     },
-   
+    faceDescriptor: {
+        type: [Number], // This will store the 128-length descriptor as an array of numbers
+        default: null
+    },
+
 }, { timestamps: true })
 
 

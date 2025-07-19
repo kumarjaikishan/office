@@ -21,6 +21,8 @@ import CompanySettingForm from './pages/settingPage';
 import Profile from './pages/profile/profile';
 import EmployeeProfile from './pages/profile/profile';
 import OrganizationSettings from './pages/organization/organization';
+import LazyFaceAuth from './pages/facerecoginaion/facerecog';
+import FaceAttendance from './pages/facerecoginaion/faceAtten';
 
 
 function App() {
@@ -75,6 +77,8 @@ function App() {
           <Route path="holiday" element={<HolidayForm />} />
           <Route path="adminleave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
+          <Route path="face" element={<LazyFaceAuth />} />
+          <Route path="faceatten" element={<FaceAttendance />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />
         </Route>
 

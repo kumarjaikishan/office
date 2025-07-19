@@ -40,6 +40,7 @@ router.route('/updatepassword').post(authmiddlewre,adminmiddleware,admin.updatep
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 
 router.route('/updateemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.updateemployee); 
+router.route('/enrollFace').post(authmiddlewre,adminmiddleware,admin.enrollFace); 
 router.route('/deleteemployee').post(authmiddlewre,adminmiddleware,admin.deleteemployee); 
 
 router.route('/addsalary').post(authmiddlewre,adminmiddleware,salary.addsalary); 
@@ -50,6 +51,8 @@ router.route('/editattandence').post(authmiddlewre,attendance.editattandence);
 router.route('/webattandence').post(authmiddlewre,attendance.webattandence); 
 router.route('/checkout').post(authmiddlewre,attendance.checkout); 
 router.route('/checkin').post(authmiddlewre,attendance.checkin); 
+router.route('/facecheckin').post(authmiddlewre,attendance.facecheckin); 
+router.route('/facecheckout').post(authmiddlewre,attendance.facecheckout); 
 router.route('/employeeAttandence').get(attendance.employeeAttandence);
 router.route('/deleteattandence').post(attendance.deleteattandence);
 

@@ -112,6 +112,18 @@ const menu = [
         roles: ['admin']
       },
       {
+        menu: "Face",
+        link: '/admin-dashboard/face',
+        icon: <FaRegCalendarAlt />,
+        roles: ['admin']
+      },
+      {
+        menu: "Face Atte",
+        link: '/admin-dashboard/faceatten',
+        icon: <FaRegCalendarAlt />,
+        roles: ['admin']
+      },
+      {
         menu: "Leave",
         link: '/employe-dashboard/leave',
         icon: <FaUmbrellaBeach />,
