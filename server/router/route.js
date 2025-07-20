@@ -14,7 +14,7 @@ const upload = require('../middleware/multer_middleware')
 
 router.route('/').get(async (req, res) => {
   return res.status(200).json({
-    msg: "Welcome to Battlefiesta Backend"
+    msg: "Welcome to office Backend"
   })
 }); 
 

@@ -3,12 +3,13 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const errorHandle = require('./utils/error_util');
+const route = require('./router/route');
 const { eventsHandler, sendToClients } = require('./utils/sse'); // adjust path if needed
 require('./conn/conn')
 
 app.use(express.json());
 app.use(cors());
-app.use("/api", require('./router/route'));
+app.use("/api", route);
 app.get('/events', eventsHandler);
 
 app.use(errorHandle);
