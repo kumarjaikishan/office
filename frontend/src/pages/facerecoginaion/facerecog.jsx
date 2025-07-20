@@ -183,7 +183,7 @@ const FaceEnrollment = () => {
                 defaultValue=""
             >
                 <option value="" disabled>Select Employee</option>
-                {employeeList.map(emp => (
+                {employeeList?.map(emp => (
                     <option key={emp._id} value={emp._id}>
                         {emp.userid.name} {emp.faceDescriptor !== null ? '✅' : '❌'}
                     </option>
