@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 import DataTable from "react-data-table-component";
-import { columns, customStyles, deleteAttandence } from "./attandencehelper";
+import { columns, customStyles, deleteAttandence,submitAttandence } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MdClear, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -20,7 +20,6 @@ import { BiMessageRoundedError } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import MarkAttandence from "./MarkAttandence";
 import dayjs from "dayjs";
-import { submitAttandence } from "./attandencehelper";
 import { useSelector } from "react-redux";
 import { IoMdTime } from "react-icons/io";
 import BulkMark from "./BulkMark";
@@ -301,7 +300,7 @@ const Attandence = () => {
       dangerMode: true,
     }).then((proceed) => {
       if (proceed) {
-        deleteAttandence({ attandanceId: [attanId], setisload })
+        deleteAttandence({ attandanceId: [attanId], setisload,dispatch })
       }
     });
   }

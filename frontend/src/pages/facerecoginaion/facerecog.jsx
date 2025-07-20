@@ -2,17 +2,20 @@ import React, { useRef, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import swal from 'sweetalert';
 
-const videoWidth = 720;
-const videoHeight = 560;
+const videoWidth = 350;
+const videoHeight = 350;
 
 const FaceEnrollment = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
+    const detectionIntervalRef = useRef(null);
+
     const [selectedEmployee, setSelectedEmployee] = useState(null);
-   
     const [descriptor, setDescriptor] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
+    const [detecting, setDetecting] = useState(false);
 
     const { employee: employeeList } = useSelector((state) => state.user);
 
@@ -25,6 +28,10 @@ const FaceEnrollment = () => {
             document.body.appendChild(script);
         };
         loadFaceAPI();
+
+        return () => {
+            stopCamera(); // Cleanup on unmount
+        };
     }, []);
 
     const loadModels = async () => {
@@ -33,40 +40,105 @@ const FaceEnrollment = () => {
             window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
             window.faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
         ]);
-        // fetchEnrolled();
     };
-
 
     const startCamera = async () => {
         setCameraActive(true);
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-        if (videoRef.current) videoRef.current.srcObject = stream;
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            const defaultCamera = videoDevices[0];
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    deviceId: defaultCamera.deviceId ? { exact: defaultCamera.deviceId } : undefined,
+                    width: videoWidth,
+                    height: videoHeight,
+                }
+            });
+
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+            captureDescriptor();
+        } catch (error) {
+            console.error('Camera access error:', error);
+            toast.error('Unable to access the camera. Please check permissions.');
+            setCameraActive(false);
+        }
     };
 
     const stopCamera = () => {
         setCameraActive(false);
+        setDetecting(false);
+
         if (videoRef.current?.srcObject) {
             videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+            videoRef.current.srcObject = null;
+        }
+
+        if (detectionIntervalRef.current) {
+            clearInterval(detectionIntervalRef.current);
+            detectionIntervalRef.current = null;
         }
     };
 
-    const captureDescriptor = async () => {
-        const result = await window.faceapi
-            .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks()
-            .withFaceDescriptor();
+    const captureDescriptor = () => {
+        if (!videoRef.current) return;
 
-        if (!result) {
-            alert('Face not detected. Try again.');
-            return;
+        setDetecting(true);
+
+        if (detectionIntervalRef.current) {
+            clearInterval(detectionIntervalRef.current);
         }
 
-        setDescriptor(Array.from(result.descriptor));
-        alert('Face captured. Click "Submit Enrollment" to save.');
+        detectionIntervalRef.current = setInterval(async () => {
+            const result = await window.faceapi
+                .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+            if (result) {
+                clearInterval(detectionIntervalRef.current);
+                detectionIntervalRef.current = null;
+                setDescriptor(Array.from(result.descriptor));
+                setDetecting(false);
+                stopCamera();
+                swal({
+                    title: 'Face Captured Successfully',
+                    text: 'Proceed to Face Enrollment?',
+                    icon: 'success',
+                    buttons: {
+                        cancel: {
+                            text: 'Cancel',
+                            value: false,
+                            visible: true,
+                            className: 'bg-gray-300 text-black px-4 py-1 rounded',
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Proceed Now',
+                            value: true,
+                            visible: true,
+                            className: 'bg-teal-500 text-white px-4 py-1 rounded',
+                            closeModal: true,
+                        }
+                    },
+                    dangerMode: false,
+                }).then(async (okay) => {
+                    if (okay) {
+                        handleSubmit();
+                    }
+                });
+                // toast.success('Face captured. Click "Submit Enrollment" to save.');
+            }
+        }, 500);
     };
 
     const handleSubmit = async () => {
-        if (!selectedEmployee || !descriptor) return alert('Missing employee or face data');
+        if (!selectedEmployee || !descriptor) {
+            return toast.warn('Missing employee or face data');
+        }
 
         const token = localStorage.getItem('emstoken');
         try {
@@ -79,7 +151,6 @@ const FaceEnrollment = () => {
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                        // 'Content-Type': 'multipart/form-data'
                     }
                 }
             );
@@ -88,11 +159,11 @@ const FaceEnrollment = () => {
             stopCamera();
             setDescriptor(null);
         } catch (error) {
-            console.log(error);
+            console.error(error);
             if (error.response) {
                 toast.warn(error.response.data.message, { autoClose: 1200 });
             } else {
-                console.error('Error:', error.message);
+                toast.error('An unexpected error occurred.');
             }
         }
     };
@@ -104,19 +175,17 @@ const FaceEnrollment = () => {
             <select
                 className="border p-2 mb-4 w-full"
                 onChange={(e) => {
-                    const emp = employeeList.find((emp) => emp._id === e.target.value);
+                    const emp = employeeList.find(emp => emp._id === e.target.value);
                     setSelectedEmployee(emp);
                     setDescriptor(null);
                     stopCamera();
                 }}
                 defaultValue=""
             >
-                <option value="" disabled>
-                    Select Employee
-                </option>
-                {employeeList.map((emp) => (
+                <option value="" disabled>Select Employee</option>
+                {employeeList.map(emp => (
                     <option key={emp._id} value={emp._id}>
-                        {emp.userid.name} {emp.faceDescriptor !==null ? '✅' : '❌'}
+                        {emp.userid.name} {emp.faceDescriptor !== null ? '✅' : '❌'}
                     </option>
                 ))}
             </select>
@@ -149,23 +218,25 @@ const FaceEnrollment = () => {
                         muted
                         width={videoWidth}
                         height={videoHeight}
-                        className="border my-4"
+                        className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
                     />
                     <div ref={canvasRef}></div>
 
-                    <div className="flex gap-4 mt-2">
+                    <div className="flex gap-4 mt-2 items-center">
                         <button
                             onClick={captureDescriptor}
                             className="bg-yellow-500 text-white px-4 py-1 rounded"
+                            disabled={detecting}
                         >
-                            Capture Face
+                            {detecting ? 'Detecting...' : 'Capture Face'}
                         </button>
-                        <button
+                        {/* <button
                             onClick={handleSubmit}
                             className="bg-green-500 text-white px-4 py-1 rounded"
+                            disabled={!descriptor}
                         >
                             Submit Enrollment
-                        </button>
+                        </button> */}
                         <button
                             onClick={stopCamera}
                             className="bg-red-500 text-white px-4 py-1 rounded"

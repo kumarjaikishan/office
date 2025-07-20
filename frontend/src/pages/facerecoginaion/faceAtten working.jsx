@@ -12,10 +12,6 @@ const videoHeight = 350;
 const FaceAttendance = () => {
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-    const timeoutRef = useRef(null);
-    const detectionLockRef = useRef(false);
-
-
     const detectionIntervalRef = useRef(null);
 
     const [mode, setMode] = useState(null);
@@ -103,7 +99,6 @@ const FaceAttendance = () => {
     const stopCamera = () => {
         if (detectionIntervalRef.current) {
             clearInterval(detectionIntervalRef.current);
-            detectionIntervalRef.current = null;
         }
 
         const videoElement = videoRef.current;
@@ -113,10 +108,8 @@ const FaceAttendance = () => {
             videoElement.srcObject = null;
         }
 
-        detectionLockRef.current = false; // 🔓 Unlock detection for next session
         setCameraActive(false);
     };
-
 
     const startDetectionLoop = () => {
         detectionIntervalRef.current = setInterval(() => {
@@ -126,7 +119,7 @@ const FaceAttendance = () => {
 
     const recognizeAndPunch = async () => {
         try {
-            if (detectionLockRef.current || !videoRef.current) return;
+            if (!videoRef.current) return;
 
             const tinyOptions = new window.faceapi.TinyFaceDetectorOptions({
                 inputSize: 224,
@@ -147,9 +140,6 @@ const FaceAttendance = () => {
                 return;
             }
 
-            // 🔐 Lock further detection
-            detectionLockRef.current = true;
-
             const matchedEmployeeId = idMapRef.current[bestMatch.label];
             if (!matchedEmployeeId) {
                 toast.error('Matched name not linked to an employee ID');
@@ -159,6 +149,7 @@ const FaceAttendance = () => {
 
             const empdetail = employee.find((val) => val._id === matchedEmployeeId);
 
+            // ✔ Safe canvas clearing
             const canvasContainer = canvasRef.current;
             if (canvasContainer) {
                 while (canvasContainer.firstChild) {
@@ -174,6 +165,7 @@ const FaceAttendance = () => {
                 window.faceapi.draw.drawDetections(drawCanvas, resized);
             }
 
+            // API Call
             const token = localStorage.getItem('emstoken');
             const endpoint =
                 modeRef.current === 'punch-in'
@@ -200,14 +192,13 @@ const FaceAttendance = () => {
                 workinghour: res.data.attendance.workingMinutes ?? '-- : --',
             });
 
-            toast.success(res.data.message || `Successfully punched ${modeRef.current === 'punch-in' ? 'in' : 'out'}`);
+            toast.success(res.data.message || `Successfully punched ${mode === 'punch-in' ? 'in' : 'out'}`);
 
             stopCamera();
 
-            timeoutRef.current = setTimeout(() => {
-                // setdetectedemp(null);
-                // timeoutRef.current = null;
-            }, 15000);
+            setTimeout(() => {
+                setdetectedemp(null);
+            }, 9000);
 
         } catch (err) {
             console.error('Recognition error:', err);
@@ -216,22 +207,11 @@ const FaceAttendance = () => {
         }
     };
 
-
     const handleMode = (selectedMode) => {
-        // Clear previous display timeout
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = null;
-        }
-
-        // Clear previous detection result
-        setdetectedemp(null);
-
         setMode(selectedMode);
-        modeRef.current = selectedMode;
+        modeRef.current = selectedMode; // instant update
         startCamera();
     };
-
 
     return (
         <div className="p-6">
@@ -252,8 +232,8 @@ const FaceAttendance = () => {
                     </button>
                 </div>
 
-                {detectedemp && <>
-                    <div className="flex justify-center flex-col md:flex-row items-center w-[450px] md:items-start gap-6 p-4 bg-white shadow-lg rounded-2xl mt-6 max-w-full">
+                {detectedemp && (
+                    <div className="flex flex-col md:flex-row items-center w-[400px] md:items-start gap-6 p-4 bg-white shadow-lg rounded-2xl mt-6 max-w-full">
                         <img
                             src={detectedemp?.profile}
                             alt="Profile"
@@ -266,16 +246,9 @@ const FaceAttendance = () => {
                             <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch In</span><span>{detectedemp.punchIn}</span></div>
                             <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch Out</span><span>{detectedemp.punchOut}</span></div>
                             <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedemp.workinghour}</span></div>
-                         </div>
+                        </div>
                     </div>
-                    <div className="flex flex-col items-center text-center text-lg font-semibold text-gray-700 mb-2">
-                        {detectedemp.punchIn && !detectedemp.punchOut ? (
-                            <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! You have punched in successfully.</p>
-                        ) : detectedemp.punchOut ? (
-                            <p>✅ Great job today, {detectedemp.name}! You’ve successfully punched out.</p>
-                        ) : null}
-                    </div>
-                </>}
+                )}
 
                 {cameraActive && (
                     <div className="relative w-fit text-center">
@@ -285,7 +258,7 @@ const FaceAttendance = () => {
                             muted
                             width={videoWidth}
                             height={videoHeight}
-                            className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
+                           className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
                         />
                         <div ref={canvasRef} className="absolute top-0 left-0" />
                         <button

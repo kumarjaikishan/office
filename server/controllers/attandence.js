@@ -175,7 +175,7 @@ const facecheckin = async (req, res, next) => {
     // Check if already checked in
     const existing = await Attendance.findOne({ employeeId, date: dateObj });
     if (existing) {
-      return res.status(400).json({ message: 'Already checked in today' });
+      return res.status(200).json({ message: 'Already checked in today', attendance:existing });
     }
 
     // Build attendance object
@@ -301,7 +301,7 @@ const facecheckout = async (req, res, next) => {
     }
 
     if (record.punchOut) {
-      return res.status(400).json({ message: 'Already checked out' });
+      return res.status(200).json({ message: 'Already checked out',attendance:record });
     }
 
     // Assign punchOut time
@@ -337,7 +337,7 @@ const facecheckout = async (req, res, next) => {
       }
     });
 
-    return res.status(200).json({ message: 'Punch-out recorded', record: populatedRecord });
+    return res.status(200).json({ message: 'Punch-out recorded', attendance: populatedRecord });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error', error });

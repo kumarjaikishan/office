@@ -58,7 +58,7 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload,dispatch }) =
   }
 }
 
-export const deleteAttandence = async ({ attandanceId, setisload }) => {
+export const deleteAttandence = async ({ attandanceId, setisload,dispatch }) => {
   if (!attandanceId) return toast.warning('Attandance Id is needed');
   const address = `${import.meta.env.VITE_API_ADDRESS}deleteattandence`
 
@@ -76,6 +76,7 @@ export const deleteAttandence = async ({ attandanceId, setisload }) => {
 
     console.log('delete attandence Query:', res);
     toast.success(res.data.message, { autoClose: 1800 });
+     dispatch(FirstFetch());
     return true;
   } catch (error) {
     console.log(error);
