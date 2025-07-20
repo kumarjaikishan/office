@@ -79,6 +79,7 @@ const Main = () => {
     const connectEventSource = () => {
       // eventSource = new EventSource('http://localhost:5000/events');
       eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
+      
 
       eventSource.onopen = () => {
         console.log('✅ SSE connection established successfully');
