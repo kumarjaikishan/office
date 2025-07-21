@@ -41,6 +41,7 @@ router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeeli
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 
 router.route('/updateemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.updateemployee); 
 router.route('/enrollFace').post(authmiddlewre,adminmiddleware,admin.enrollFace); 
+router.route('/deletefaceenroll').post(authmiddlewre,adminmiddleware,admin.deletefaceenroll); 
 router.route('/deleteemployee').post(authmiddlewre,adminmiddleware,admin.deleteemployee); 
 
 router.route('/addsalary').post(authmiddlewre,adminmiddleware,salary.addsalary); 

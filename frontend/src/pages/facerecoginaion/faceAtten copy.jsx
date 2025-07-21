@@ -3,8 +3,6 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
-import { loadFaceModels } from './loadFaceModel';
-
 
 const videoWidth = 350;
 const videoHeight = 350;
@@ -14,15 +12,14 @@ const FaceAttendance = () => {
     const canvasRef = useRef(null);
     const timeoutRef = useRef(null);
     const detectionLockRef = useRef(false);
-
-
     const detectionIntervalRef = useRef(null);
-
-    const [mode, setMode] = useState(null);
     const modeRef = useRef(null);
 
+    const [mode, setMode] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
-    const [detectedemp, setdetectedemp] = useState(null);
+    const [detectedemp, setDetectedEmp] = useState(null);
+    const [availableCameras, setAvailableCameras] = useState([]);
+    const [selectedDeviceId, setSelectedDeviceId] = useState(null);
 
     const { employee } = useSelector((state) => state.user);
 
@@ -30,6 +27,13 @@ const FaceAttendance = () => {
     const matcherRef = useRef(null);
     const idMapRef = useRef({});
     const modelsLoadedRef = useRef(false);
+
+    useEffect(() => {
+        if (cameraActive && selectedDeviceId) {
+            stopCamera();      // Stop current stream
+            startCamera();     // Start with new device
+        }
+    }, [selectedDeviceId]);
 
     useEffect(() => {
         const loadScript = async () => {
@@ -50,7 +54,6 @@ const FaceAttendance = () => {
             window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
             window.faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
         ]);
-
 
         modelsLoadedRef.current = true;
         loadDescriptors();
@@ -77,11 +80,13 @@ const FaceAttendance = () => {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            const defaultCamera = videoDevices[0];
+            setAvailableCameras(videoDevices);
+
+            const deviceIdToUse = selectedDeviceId || videoDevices[0]?.deviceId;
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    deviceId: defaultCamera.deviceId ? { exact: defaultCamera.deviceId } : undefined,
+                    deviceId: deviceIdToUse ? { exact: deviceIdToUse } : undefined,
                     width: videoWidth,
                     height: videoHeight,
                 },
@@ -113,10 +118,9 @@ const FaceAttendance = () => {
             videoElement.srcObject = null;
         }
 
-        detectionLockRef.current = false; // 🔓 Unlock detection for next session
+        detectionLockRef.current = false;
         setCameraActive(false);
     };
-
 
     const startDetectionLoop = () => {
         detectionIntervalRef.current = setInterval(() => {
@@ -124,7 +128,12 @@ const FaceAttendance = () => {
         }, 600);
     };
 
+    // let makecall = true;
     const recognizeAndPunch = async () => {
+        // console.log("aay toh tha call lagane")
+        // if (makecall == false) return;
+        //  console.log("making punch call")
+        // makecall=false;
         try {
             if (detectionLockRef.current || !videoRef.current) return;
 
@@ -147,7 +156,6 @@ const FaceAttendance = () => {
                 return;
             }
 
-            // 🔐 Lock further detection
             detectionLockRef.current = true;
 
             const matchedEmployeeId = idMapRef.current[bestMatch.label];
@@ -189,8 +197,8 @@ const FaceAttendance = () => {
                     },
                 }
             );
-            console.log(res.data)
-            setdetectedemp({
+
+            setDetectedEmp({
                 name: empdetail?.userid.name,
                 profile: empdetail?.profileimage,
                 designation: empdetail.designation,
@@ -201,13 +209,11 @@ const FaceAttendance = () => {
             });
 
             toast.success(res.data.message || `Successfully punched ${modeRef.current === 'punch-in' ? 'in' : 'out'}`);
-
             stopCamera();
-
-            timeoutRef.current = setTimeout(() => {
-                // setdetectedemp(null);
-                // timeoutRef.current = null;
-            }, 15000);
+            setTimeout(() => {
+                makecall = true
+            }, 2000);
+            timeoutRef.current = setTimeout(() => { }, 15000);
 
         } catch (err) {
             console.error('Recognition error:', err);
@@ -216,27 +222,22 @@ const FaceAttendance = () => {
         }
     };
 
-
     const handleMode = (selectedMode) => {
-        // Clear previous display timeout
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
         }
 
-        // Clear previous detection result
-        setdetectedemp(null);
-
+        setDetectedEmp(null);
         setMode(selectedMode);
         modeRef.current = selectedMode;
         startCamera();
     };
 
-
     return (
         <div className="p-6">
             <h2 className="text-xl font-bold mb-4">Face Attendance</h2>
-            <div className=' flex items-center justify-center flex-col p-4'>
+            <div className="flex items-center justify-center flex-col p-4">
                 <div className="flex w-full gap-4 mb-4">
                     <button
                         onClick={() => handleMode('punch-in')}
@@ -252,30 +253,49 @@ const FaceAttendance = () => {
                     </button>
                 </div>
 
-                {detectedemp && <>
-                    <div className="flex justify-center flex-col md:flex-row items-center w-[450px] md:items-start gap-6 p-4 bg-white shadow-lg rounded-2xl mt-6 max-w-full">
-                        <img
-                            src={detectedemp?.profile}
-                            alt="Profile"
-                            className="w-38 h-38 rounded-full object-cover border-2 border-teal-500 border-dashed p-1"
-                        />
-                        <div className="flex flex-col justify-center gap-2 text-sm w-full">
-                            <div className="flex justify-between"><span className="font-semibold text-gray-600">Name</span><span>{detectedemp.name}</span></div>
-                            <div className="flex justify-between"><span className="font-semibold text-gray-600">Designation</span><span>{detectedemp.designation}</span></div>
-                            <div className="flex justify-between"><span className="font-semibold text-gray-600">Department</span><span>{detectedemp.department}</span></div>
-                            <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch In</span><span>{detectedemp.punchIn}</span></div>
-                            <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch Out</span><span>{detectedemp.punchOut}</span></div>
-                            <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedemp.workinghour}</span></div>
-                         </div>
+                {availableCameras.length > 1 && (
+                    <div className="mb-4">
+                        <label className="block text-sm font-semibold mb-1">Select Camera:</label>
+                        <select
+                            value={selectedDeviceId || ''}
+                            onChange={(e) => setSelectedDeviceId(e.target.value)}
+                            className="border rounded px-2 py-1"
+                        >
+                            {availableCameras?.map((device) => (
+                                <option key={device.deviceId} value={device.deviceId}>
+                                    {device.label || `Camera ${device.deviceId}`}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <div className="flex flex-col items-center text-center text-lg font-semibold text-gray-700 mb-2">
-                        {detectedemp.punchIn && !detectedemp.punchOut ? (
-                            <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! You have punched in successfully.</p>
-                        ) : detectedemp.punchOut ? (
-                            <p>✅ Great job today, {detectedemp.name}! You’ve successfully punched out.</p>
-                        ) : null}
-                    </div>
-                </>}
+                )}
+
+                {detectedemp && (
+                    <>
+                        <div className="flex justify-center flex-col md:flex-row items-center w-[450px] md:items-start gap-6 p-4 bg-white shadow-lg rounded-2xl mt-6 max-w-full">
+                            <img
+                                src={detectedemp?.profile}
+                                alt="Profile"
+                                className="w-38 h-38 rounded-full object-cover border-2 border-teal-500 border-dashed p-1"
+                            />
+                            <div className="flex flex-col justify-center gap-2 text-sm w-full">
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Name</span><span>{detectedemp.name}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Designation</span><span>{detectedemp.designation}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Department</span><span>{detectedemp.department}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch In</span><span>{detectedemp.punchIn}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch Out</span><span>{detectedemp.punchOut}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedemp.workinghour}</span></div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center text-center text-lg font-semibold text-gray-700 mb-2">
+                            {detectedemp.punchIn && !detectedemp.punchOut ? (
+                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! You have punched in successfully.</p>
+                            ) : detectedemp.punchOut ? (
+                                <p>✅ Great job today, {detectedemp.name}! You’ve successfully punched out.</p>
+                            ) : null}
+                        </div>
+                    </>
+                )}
 
                 {cameraActive && (
                     <div className="relative w-fit text-center">
@@ -288,9 +308,7 @@ const FaceAttendance = () => {
                             className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
                         />
                         <div ref={canvasRef} className="absolute top-0 left-0" />
-                        <button
-                            className="bg-teal-600 mr-2 text-white px-4 py-1 rounded mt-2"
-                        >
+                        <button className="bg-teal-600 mr-2 text-white px-4 py-1 rounded mt-2">
                             Scanning ...
                         </button>
                         <button

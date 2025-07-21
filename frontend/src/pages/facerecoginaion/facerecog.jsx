@@ -16,8 +16,25 @@ const FaceEnrollment = () => {
     const [descriptor, setDescriptor] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [detecting, setDetecting] = useState(false);
+    
+    // Add state to hold available cameras and selected one
+    const [availableCameras, setAvailableCameras] = useState([]);
+    const [selectedCameraId, setSelectedCameraId] = useState(null);
 
     const { employee: employeeList } = useSelector((state) => state.user);
+    useEffect(() => {
+        const lastUsedCamera = localStorage.getItem('lastUsedCameraId');
+        if (lastUsedCamera) {
+            setSelectedCameraId(lastUsedCamera);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (selectedCameraId) {
+            localStorage.setItem('lastUsedCameraId', selectedCameraId);
+        }
+    }, [selectedCameraId]);
+
 
     useEffect(() => {
         const loadFaceAPI = async () => {
@@ -34,6 +51,7 @@ const FaceEnrollment = () => {
         };
     }, []);
 
+
     const loadModels = async () => {
         await Promise.all([
             window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
@@ -47,11 +65,14 @@ const FaceEnrollment = () => {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            const defaultCamera = videoDevices[0];
+            setAvailableCameras(videoDevices);
+
+            const chosenDevice = videoDevices.find(d => d.deviceId === selectedCameraId) || videoDevices[0];
+            setSelectedCameraId(chosenDevice.deviceId);
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    deviceId: defaultCamera.deviceId ? { exact: defaultCamera.deviceId } : undefined,
+                    deviceId: chosenDevice.deviceId ? { exact: chosenDevice.deviceId } : undefined,
                     width: videoWidth,
                     height: videoHeight,
                 }
@@ -67,6 +88,7 @@ const FaceEnrollment = () => {
             setCameraActive(false);
         }
     };
+
 
     const stopCamera = () => {
         setCameraActive(false);
@@ -84,69 +106,67 @@ const FaceEnrollment = () => {
     };
 
     const captureDescriptor = () => {
-        if (!videoRef.current) return;
+    if (!videoRef.current) return;
 
-        setDetecting(true);
+    setDetecting(true);
 
-        if (detectionIntervalRef.current) {
+    if (detectionIntervalRef.current) {
+        clearInterval(detectionIntervalRef.current);
+    }
+
+    detectionIntervalRef.current = setInterval(async () => {
+        const result = await window.faceapi
+            .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+        if (result) {
             clearInterval(detectionIntervalRef.current);
-        }
+            detectionIntervalRef.current = null;
 
-        detectionIntervalRef.current = setInterval(async () => {
-            const result = await window.faceapi
-                .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
-                .withFaceLandmarks()
-                .withFaceDescriptor();
+            const capturedDescriptor = Array.from(result.descriptor);
+            setDescriptor(capturedDescriptor); // still set for UI/debug, etc.
 
-            if (result) {
-                clearInterval(detectionIntervalRef.current);
-                detectionIntervalRef.current = null;
-                setDescriptor(Array.from(result.descriptor));
-                setDetecting(false);
-                stopCamera();
-                swal({
-                    title: 'Face Captured Successfully',
-                    text: 'Proceed to Face Enrollment?',
-                    icon: 'success',
-                    buttons: {
-                        cancel: {
-                            text: 'Cancel',
-                            value: false,
-                            visible: true,
-                            className: 'bg-gray-300 text-black px-4 py-1 rounded',
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Proceed Now',
-                            value: true,
-                            visible: true,
-                            className: 'bg-teal-500 text-white px-4 py-1 rounded',
-                            closeModal: true,
-                        }
+            setDetecting(false);
+            stopCamera();
+
+            swal({
+                title: 'Face Captured Successfully',
+                text: 'Proceed to Face Enrollment?',
+                icon: 'success',
+                buttons: {
+                    cancel: {
+                        text: 'Cancel',
+                        value: false,
+                        visible: true,
+                        className: 'bg-gray-300 text-black px-4 py-1 rounded',
+                        closeModal: true,
                     },
-                    dangerMode: false,
-                }).then(async (okay) => {
-                    if (okay) {
-                        handleSubmit();
+                    confirm: {
+                        text: 'Proceed Now',
+                        value: true,
+                        visible: true,
+                        className: 'bg-teal-500 text-white px-4 py-1 rounded',
+                        closeModal: true,
                     }
-                });
-                // toast.success('Face captured. Click "Submit Enrollment" to save.');
-            }
-        }, 500);
-    };
-
-    const handleSubmit = async () => {
-        if (!selectedEmployee || !descriptor) {
-            return toast.warn('Missing employee or face data');
+                },
+                dangerMode: false,
+            }).then(async (okay) => {
+                if (okay) {
+                    await handleSubmit(capturedDescriptor); // Pass directly
+                }
+            });
         }
+    }, 500);
+};
 
+    const deletefaceenroll = async () => {
         const token = localStorage.getItem('emstoken');
         try {
             const res = await axios.post(
-                `${import.meta.env.VITE_API_ADDRESS}enrollFace`,
+                `${import.meta.env.VITE_API_ADDRESS}deletefaceenroll`,
                 {
                     employeeId: selectedEmployee._id,
-                    descriptor,
                 },
                 {
                     headers: {
@@ -156,8 +176,7 @@ const FaceEnrollment = () => {
             );
 
             toast.success(res.data.message, { autoClose: 1200 });
-            stopCamera();
-            setDescriptor(null);
+
         } catch (error) {
             console.error(error);
             if (error.response) {
@@ -166,7 +185,42 @@ const FaceEnrollment = () => {
                 toast.error('An unexpected error occurred.');
             }
         }
-    };
+
+    }
+
+    const handleSubmit = async (capturedDescriptor = descriptor) => {
+    if (!selectedEmployee || !capturedDescriptor || capturedDescriptor.length !== 128) {
+        return toast.warn('Invalid face data. Please try capturing again.');
+    }
+
+    const token = localStorage.getItem('emstoken');
+    try {
+        const res = await axios.post(
+            `${import.meta.env.VITE_API_ADDRESS}enrollFace`,
+            {
+                employeeId: selectedEmployee._id,
+                descriptor: capturedDescriptor,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+        );
+
+        toast.success(res.data.message, { autoClose: 1200 });
+        stopCamera();
+        setDescriptor(null);
+    } catch (error) {
+        console.error(error);
+        if (error.response) {
+            toast.warn(error.response.data.message, { autoClose: 1200 });
+        } else {
+            toast.error('An unexpected error occurred.');
+        }
+    }
+};
+
 
     return (
         <div className="p-6">
@@ -177,6 +231,7 @@ const FaceEnrollment = () => {
                 onChange={(e) => {
                     const emp = employeeList.find(emp => emp._id === e.target.value);
                     setSelectedEmployee(emp);
+                    console.log(emp)
                     setDescriptor(null);
                     stopCamera();
                 }}
@@ -197,18 +252,43 @@ const FaceEnrollment = () => {
                         alt="Profile"
                         className="w-24 h-24 object-cover rounded-full mb-2"
                     />
-                    <p className="text-sm">{selectedEmployee.userid.email}</p>
+                    <p className="text-sm">{selectedEmployee?.userid?.email}</p>
 
+                    {!cameraActive && selectedEmployee?.faceDescriptor && (
+                        <button
+                            onClick={deletefaceenroll}
+                            className="bg-red-500 mr-2 text-white px-4 py-1 rounded mt-4"
+                        >
+                            Delete Enroll
+                        </button>
+                    )}
                     {!cameraActive && (
                         <button
                             onClick={startCamera}
                             className="bg-blue-500 text-white px-4 py-1 rounded mt-4"
                         >
-                            Start Enroll
+                            {selectedEmployee?.faceDescriptor ? ' Re-Enroll' : 'Start Enroll'}
                         </button>
                     )}
                 </div>
             )}
+            {availableCameras.length > 1 && (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Choose Camera:</label>
+                    <select
+                        className="border p-2 w-full"
+                        value={selectedCameraId || ''}
+                        onChange={(e) => setSelectedCameraId(e.target.value)}
+                    >
+                        {availableCameras.map((device) => (
+                            <option key={device.deviceId} value={device.deviceId}>
+                                {device.label || `Camera ${device.deviceId.slice(-4)}`}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
 
             {cameraActive && (
                 <div>
@@ -218,7 +298,7 @@ const FaceEnrollment = () => {
                         muted
                         width={videoWidth}
                         height={videoHeight}
-                        className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
+                        className="rounded-full -scale-x-100 border-2 border-teal-500 border-dashed p-1 my-4"
                     />
                     <div ref={canvasRef}></div>
 

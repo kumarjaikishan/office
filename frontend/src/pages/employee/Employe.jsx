@@ -51,6 +51,8 @@ const Employe = () => {
     branch: 'all',
     department: 'all'
   });
+  
+  const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -126,8 +128,8 @@ const Employe = () => {
         sno: sno++,
         rawname: emp.userid.name,
         name: (<div className="flex items-center gap-3 ">
-          <Avatar src={emp.profileimage} alt={emp.employeename}>
-            {!emp.profileimage && <FaRegUser />}
+          <Avatar src={emp.profileimage || employepic} alt={emp.employeename}>
+            {!emp.profileimage && employepic}
           </Avatar>
           <Box>
             <Typography variant="body2">{emp.userid.name}</Typography>

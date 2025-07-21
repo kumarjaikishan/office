@@ -274,7 +274,28 @@ const enrollFace = async (req, res, next) => {
         }
 
         res.status(200).json({
-            message: 'employee face  enroll Successfully'
+            message: 'Face enrolled Successfully'
+        })
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
+const deletefaceenroll = async (req, res, next) => {
+    try {
+        const { employeeId } = req.body;
+        if (!employeeId) {
+            return next({ status: 400, message: "Invalid employeeId" });
+        }
+
+        const query = await employeeModal.findByIdAndUpdate(employeeId, { faceDescriptor: null });
+
+        if (!query) {
+            return next({ status: 400, message: "Something went wrong" });
+        }
+
+        res.status(200).json({
+            message: 'Enrolled face deleted Successfully'
         })
     } catch (error) {
         console.log(error.message)
@@ -583,6 +604,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace,deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };
