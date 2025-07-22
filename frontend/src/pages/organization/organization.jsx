@@ -114,7 +114,7 @@ export default function OrganizationSettings() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md space-y-6">
+        <div className="w-[95%] max-w-6xl mx-auto mt-10 p-1 py-3 md:p-6 bg-white rounded-xl shadow-md space-y-6">
             {/* Company Info */}
             <div>
                 <div
@@ -130,7 +130,7 @@ export default function OrganizationSettings() {
                 </div>
 
                 {openSection === 'company' && (
-                    <div className="p-4 rounded flex border-blue-300 border-2 border-dashed mt-2 space-y-4">
+                    <div className="p-4 rounded flex flex-col md:flex-row items-center border-blue-300 border-2 border-dashed mt-2 space-y-4">
                         <div className="relative flex items-center mx-auto">
                             <div className="relative w-30 h-30 mx-auto">
                                 <img
@@ -164,7 +164,7 @@ export default function OrganizationSettings() {
                             </div>
                         </div>
 
-                        <div className="w-[70%] flex flex-col gap-3">
+                        <div className="w-full md:w-[70%] flex flex-col gap-3">
                             <div>
                                 <label className="block">Company Name</label>
                                 <input
@@ -315,7 +315,7 @@ export default function OrganizationSettings() {
                 {(openSection === 'attendance' && company) && (
                     <Box className=" border-yellow-300  border-2 border-dashed rounded mt-1 p-2 ">
 
-                        <Box className="mt-1 p-2 grid grid-cols-3 gap-5">
+                        <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-3 gap-5">
                             <TextField
                                 label="Office Time In"
                                 fullWidth

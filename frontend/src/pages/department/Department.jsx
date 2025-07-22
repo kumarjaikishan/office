@@ -102,10 +102,10 @@ const Department = () => {
   }
 
   return (
-    <div className='department'>
+    <div className='department pt-3'>
       {/* <h2>Manage Departments</h2> */}
-      <div className='head'>
-        <div className='flex gap-2'>
+      <div className='head flex flex-wrap gap-1'>
+        <div className='flex gap-2 w-full justify-around md:w-auto'>
           <FormControl  size="small">
             <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
             <Select
@@ -134,7 +134,7 @@ const Department = () => {
             onChange={(e) => setfiltere({ ...filtere, department: e.target.value })}
             variant="outlined" label="Search Department" />
         </div>
-        <Button variant='contained' onClick={() => setopenmodal(true)}>Add Department</Button>
+        <Button className='w-full md:w-auto' variant='contained' onClick={() => setopenmodal(true)}>Add Department</Button>
       </div>
       <div className="list">
         <DataTable

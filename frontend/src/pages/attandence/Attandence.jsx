@@ -6,7 +6,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 import DataTable from "react-data-table-component";
-import { columns, customStyles, deleteAttandence,submitAttandence } from "./attandencehelper";
+import { columns, customStyles, deleteAttandence, submitAttandence } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MdClear, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -279,7 +279,7 @@ const Attandence = () => {
   }, [attandence]);
 
   const edite = (atten) => {
-    console.log(atten)
+    // console.log(atten)
     seteditinp({
       id: atten._id,
       employeeName: atten?.employeeId?.userid?.name || "",
@@ -300,7 +300,7 @@ const Attandence = () => {
       dangerMode: true,
     }).then((proceed) => {
       if (proceed) {
-        deleteAttandence({ attandanceId: [attanId], setisload,dispatch })
+        deleteAttandence({ attandanceId: [attanId], setisload, dispatch })
       }
     });
   }
@@ -313,7 +313,7 @@ const Attandence = () => {
       dangerMode: true,
     }).then((proceed) => {
       if (proceed) {
-        deleteAttandence({ attandanceId: multideletearray, setisload })
+        deleteAttandence({ attandanceId: multideletearray, setisload, dispatch })
       }
     });
   }
@@ -321,7 +321,7 @@ const Attandence = () => {
   const submitHandle = async (e) => {
     e.preventDefault();
     const res = await submitAttandence({ isPunchIn, inp, setisload, dispatch });
-    console.log(res)
+    // console.log(res)
     if (res) {
       setopenmodal(false);
       setinp(init);
@@ -329,7 +329,7 @@ const Attandence = () => {
   }
 
   const handleRowSelect = ({ selectedRows }) => {
-    console.log("Selected Rows:", selectedRows);
+    // console.log("Selected Rows:", selectedRows);
     setselectedRows(selectedRows)
   };
 
@@ -337,15 +337,15 @@ const Attandence = () => {
     <div className='p-2.5'>
       <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div>
       <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex p-1 items-center gap-2 rounded bg-teal-600 text-white">
-            <p onClick={() => setmarkattandence(false)} className={`px-2 py-1 rounded cursor-pointer ${!markattandence && `text-teal-700  bg-white`}`}>View Attendance</p>
-            <p onClick={() => setmarkattandence(true)} className={`px-2 py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>
+        <div className="flex justify-between items-center mb-4 flex-wrap">
+          <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-teal-600 text-white">
+            <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-teal-700  bg-white`}`}>View Attendance</p>
+            <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>
           </div>
 
-          <div className="flex gap-2">
-            {selectedRows.length > 0 && <Button variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
-            <Button variant='outlined' startIcon={<FiDownload />} >Export</Button>
+          <div className="flex w-full mt-1 md:mt-0  gap-2">
+            {selectedRows.length > 0 && <Button className="flex-1" variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
+            <Button className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
           </div>
         </div>
         <div className="flex items-center gap-4 ">
@@ -354,23 +354,11 @@ const Attandence = () => {
               <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
               <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
-            <div className="flex items-center gap-4 flex-wrap">
-              <CiFilter size={24} color="teal" />
-              {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={filtere.date}
-                  format="DD-MM-YYYY"
-                  onChange={(newValue) => {
-                    setfiltere({ ...filtere, date: dayjs(newValue) })
-                  }}
-                  slotProps={{
-                    textField: {
-                      size: 'small',
-                    },
-                  }} label="Select date" />
-              </LocalizationProvider> */}
+            <div className="border-1 border-gray-400 rounded py-3 px-1 md:py-0 md:border-0 flex items-center gap-4 flex-wrap">
+              <CiFilter className="hidden md:block" size={24} color="teal" />
 
               <TextField
+              className="flex-1"
                 size='small'
                 type="date"
                 sx={{ width: '160px' }}
@@ -382,7 +370,7 @@ const Attandence = () => {
                 InputLabelProps={{ shrink: true }}
               />
 
-              <FormControl sx={{ width: '160px' }} size="small">
+              <FormControl  sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
                 <Select
                   value={filtere.branch}

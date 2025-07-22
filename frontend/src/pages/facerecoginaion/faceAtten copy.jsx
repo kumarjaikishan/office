@@ -20,6 +20,7 @@ const FaceAttendance = () => {
     const [detectedemp, setDetectedEmp] = useState(null);
     const [availableCameras, setAvailableCameras] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState(null);
+    const [mirror, setmirror] = useState(false);
 
     const { employee } = useSelector((state) => state.user);
 
@@ -28,12 +29,40 @@ const FaceAttendance = () => {
     const idMapRef = useRef({});
     const modelsLoadedRef = useRef(false);
 
+
     useEffect(() => {
         if (cameraActive && selectedDeviceId) {
             stopCamera();      // Stop current stream
             startCamera();     // Start with new device
         }
+
+        let nowcamera = availableCameras.filter(e => e.deviceId == selectedDeviceId)[0]
+        let label = nowcamera?.label.toLowerCase();
+        if (label?.includes('webcam') || label?.includes('front')) {
+            console.log('Front-facing webcam detected:', nowcamera);
+            setmirror(true)
+        }
     }, [selectedDeviceId]);
+
+    useEffect(() => {
+        return () => {
+            stopCamera(); // Only run once on unmount
+        };
+    }, []);
+
+    useEffect(() => {
+        const storedDeviceId = localStorage.getItem('selectedCameraId');
+        if (storedDeviceId) {
+            setSelectedDeviceId(storedDeviceId);
+        }
+        let nowcamera = availableCameras.filter(e => e.deviceId == storedDeviceId)[0]
+        let label = nowcamera?.label.toLowerCase();
+        if (label?.includes('webcam') || label?.includes('front')) {
+            console.log('Front-facing webcam detected:', nowcamera);
+            setmirror(true)
+        }
+    }, []);
+
 
     useEffect(() => {
         const loadScript = async () => {
@@ -62,7 +91,7 @@ const FaceAttendance = () => {
     const loadDescriptors = () => {
         const idMap = {};
         const labeledDescriptors = employee
-            ?.filter(emp => emp.faceDescriptor)
+            ?.filter(emp => emp.faceDescriptor && emp.faceDescriptor.length === 128)
             .map(emp => {
                 const name = emp.userid.name;
                 const descriptorArray = new Float32Array(emp.faceDescriptor);
@@ -71,9 +100,17 @@ const FaceAttendance = () => {
             });
 
         descriptorsRef.current = labeledDescriptors;
-        matcherRef.current = new window.faceapi.FaceMatcher(labeledDescriptors, 0.6);
         idMapRef.current = idMap;
+
+        // 🔐 Don't create matcher if no valid data
+        if (labeledDescriptors.length > 0) {
+            matcherRef.current = new window.faceapi.FaceMatcher(labeledDescriptors, 0.6);
+        } else {
+            matcherRef.current = null;
+            toast.warn('No face data available for comparison. Please enroll first.');
+        }
     };
+
 
     const startCamera = async () => {
         setCameraActive(true);
@@ -128,14 +165,13 @@ const FaceAttendance = () => {
         }, 600);
     };
 
-    // let makecall = true;
     const recognizeAndPunch = async () => {
-        // console.log("aay toh tha call lagane")
-        // if (makecall == false) return;
-        //  console.log("making punch call")
-        // makecall=false;
+        console.log("call lagane aaya")
+        if (detectionLockRef.current || !videoRef.current) return;
+
+        // Set lock immediately to avoid parallel calls
+        detectionLockRef.current = true;
         try {
-            if (detectionLockRef.current || !videoRef.current) return;
 
             const tinyOptions = new window.faceapi.TinyFaceDetectorOptions({
                 inputSize: 224,
@@ -147,9 +183,12 @@ const FaceAttendance = () => {
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
-            if (!detection) return;
+            if (!detection) {
+                detectionLockRef.current = false; // 🟢 Unlock if no face detected
+                return;
+            }
 
-            const bestMatch = matcherRef.current.findBestMatch(detection.descriptor);
+            const bestMatch = matcherRef.current.findBestMatch(detection?.descriptor);
             if (bestMatch.label === 'unknown') {
                 toast.error('Face not recognized');
                 stopCamera();
@@ -187,7 +226,7 @@ const FaceAttendance = () => {
                 modeRef.current === 'punch-in'
                     ? `${import.meta.env.VITE_API_ADDRESS}facecheckin`
                     : `${import.meta.env.VITE_API_ADDRESS}facecheckout`;
-
+            console.log("calling...")
             const res = await axios.post(
                 endpoint,
                 { employeeId: matchedEmployeeId },
@@ -210,9 +249,7 @@ const FaceAttendance = () => {
 
             toast.success(res.data.message || `Successfully punched ${modeRef.current === 'punch-in' ? 'in' : 'out'}`);
             stopCamera();
-            setTimeout(() => {
-                makecall = true
-            }, 2000);
+
             timeoutRef.current = setTimeout(() => { }, 15000);
 
         } catch (err) {
@@ -233,12 +270,13 @@ const FaceAttendance = () => {
         modeRef.current = selectedMode;
         startCamera();
     };
+    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
     return (
-        <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Face Attendance</h2>
-            <div className="flex items-center justify-center flex-col p-4">
-                <div className="flex w-full gap-4 mb-4">
+        <div className="p-2 md:p-6">
+            <h2 className="text-xl font-bold mb-2">Face Attendance</h2>
+            <div className="flex items-center justify-center flex-col p-0">
+                <div className="flex w-full gap-4 mb-2">
                     <button
                         onClick={() => handleMode('punch-in')}
                         className="bg-blue-500 w-xl text-white px-4 py-2 rounded"
@@ -254,11 +292,16 @@ const FaceAttendance = () => {
                 </div>
 
                 {availableCameras.length > 1 && (
-                    <div className="mb-4">
-                        <label className="block text-sm font-semibold mb-1">Select Camera:</label>
+                    <div className="mb-2">
+                        <label className="block text-sm font-semibold ">Select Camera:</label>
                         <select
                             value={selectedDeviceId || ''}
-                            onChange={(e) => setSelectedDeviceId(e.target.value)}
+                            onChange={(e) => {
+                                const deviceId = e.target.value;
+                                localStorage.setItem('selectedCameraId', deviceId);
+                                setSelectedDeviceId(deviceId);
+                            }}
+
                             className="border rounded px-2 py-1"
                         >
                             {availableCameras?.map((device) => (
@@ -267,14 +310,17 @@ const FaceAttendance = () => {
                                 </option>
                             ))}
                         </select>
+                        <button onClick={() => setmirror(!mirror)} className="bg-teal-600 ml-2 text-white px-4 py-1 rounded mt-2">
+                            Mirror
+                        </button>
                     </div>
                 )}
 
                 {detectedemp && (
                     <>
-                        <div className="flex justify-center flex-col md:flex-row items-center w-[450px] md:items-start gap-6 p-4 bg-white shadow-lg rounded-2xl mt-6 max-w-full">
+                        <div className="flex justify-center flex-col md:flex-row items-center w-full md:w-[450px] md:items-start gap-6 p-2 md:p-4 bg-white shadow-lg rounded-2xl mt-2 mb-2 max-w-full">
                             <img
-                                src={detectedemp?.profile}
+                                src={detectedemp?.profile || employepic}
                                 alt="Profile"
                                 className="w-38 h-38 rounded-full object-cover border-2 border-teal-500 border-dashed p-1"
                             />
@@ -287,25 +333,29 @@ const FaceAttendance = () => {
                                 <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedemp.workinghour}</span></div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center text-center text-lg font-semibold text-gray-700 mb-2">
-                            {detectedemp.punchIn && !detectedemp.punchOut ? (
-                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! You have punched in successfully.</p>
-                            ) : detectedemp.punchOut ? (
-                                <p>✅ Great job today, {detectedemp.name}! You’ve successfully punched out.</p>
-                            ) : null}
+                        <div className="flex flex-col items-center text-center font-semibold text-gray-700 mb-2">
+                            {detectedemp.punchIn && detectedemp.punchOut == '-- : --' ? (<>
+                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! </p><p> You have punched in successfully.</p></>
+                            ) :
+                                <> <p>✅ Great job today, {detectedemp.name}! </p> <p> You’ve successfully punched out.</p> </>
+                            }
                         </div>
                     </>
                 )}
 
                 {cameraActive && (
                     <div className="relative w-fit text-center">
+                        {/* <label className="flex items-center gap-2 mt-2">
+                            <input type="checkbox" checked={mirror} onChange={() => setMirror(!mirror)} />
+                            Mirror video
+                        </label> */}
                         <video
                             ref={videoRef}
                             autoPlay
                             muted
                             width={videoWidth}
                             height={videoHeight}
-                            className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
+                            className={`rounded-full border-2 border-teal-500 ${mirror ? '-scale-x-100' : ''} border-dashed p-1 my-4 }`}
                         />
                         <div ref={canvasRef} className="absolute top-0 left-0" />
                         <button className="bg-teal-600 mr-2 text-white px-4 py-1 rounded mt-2">

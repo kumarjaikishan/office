@@ -49,6 +49,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
       toast.error(err?.response?.data?.message || "Error adding branch");
     }
   };
+  
   const edite = async () => {
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}editBranch`, branch, {

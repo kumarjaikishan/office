@@ -43,11 +43,12 @@ const Main = () => {
     });
 
     setemployeelist(filtered);
-  }, [branc, depfilter]);
+  }, [branc, depfilter,employee]);
 
   useEffect(() => {
     setdepfilter('all')
   }, [branc]);
+
   useEffect(() => {
     attandenceRef.current = attandence;
   }, [attandence]);
@@ -223,11 +224,9 @@ const Main = () => {
         <div className='flex justify-start gap-4'>
           {employeelist?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
-            {/* console.log('today present ', todaypresent) */ }
             const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);
-            {/* console.log(todaypresente) */ }
             return (
-              <Tooltip key={emp._id} placement="top" title={<div className='flex flex-col '>
+              <Tooltip enterDelay={800} key={emp._id} placement="top" title={<div className='flex flex-col '>
                 <span> In &nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : '-:-'}</span>
                 <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>
               </div>}>

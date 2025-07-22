@@ -94,7 +94,7 @@ const Adminleave = () => {
     }
     return (
         <>
-            <div>Admin leave page</div>
+            <h2 className='font-semibold text-center text-xl' >Leave Application</h2>
             <DataTable
                 customStyles={customStyles}
                 columns={columns}

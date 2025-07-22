@@ -200,7 +200,7 @@ const HolidayForm = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className="flex flex-col md:flex-row gap-4 p-4">
+      <Box className="flex flex-col md:flex-row gap-4 p-1 md:p-4">
         <Box className="bg-white shadow rounded p-1 w-full max-w-md">
           <StaticDatePicker
             displayStaticWrapperAs="desktop"
@@ -305,8 +305,8 @@ const HolidayForm = () => {
 
         </Box>
       </Box>
-      <div className='p-4'>
-        <h2>Holiday List</h2>
+      <div className='p-1 md:p-4'>
+        <h2 className='font-semibold text-center text-xl' >Holiday List</h2>
         <DataTable
           columns={columns}
           data={holidays}

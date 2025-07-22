@@ -112,13 +112,13 @@ const menu = [
         roles: ['admin']
       },
       {
-        menu: "Face",
+        menu: "Face Enroll",
         link: '/admin-dashboard/face',
         icon: <FaRegCalendarAlt />,
         roles: ['admin']
       },
       {
-        menu: "Face Atte",
+        menu: "Face Attendance",
         link: '/admin-dashboard/faceatten',
         icon: <FaRegCalendarAlt />,
         roles: ['admin']

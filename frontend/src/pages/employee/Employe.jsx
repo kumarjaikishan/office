@@ -29,6 +29,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { FaRegUser } from "react-icons/fa";
+import useImageUpload from "../../utils/imageresizer";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -41,6 +42,7 @@ const Employe = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
+  const { handleImage } = useImageUpload();
   const { department, branch, employee } = useSelector(e => e.user);
   const [pass, setpass] = useState({
     userid: '',
@@ -51,7 +53,7 @@ const Employe = () => {
     branch: 'all',
     department: 'all'
   });
-  
+
   const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
   useEffect(() => {
@@ -90,7 +92,7 @@ const Employe = () => {
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-   department > 0 && setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
+    department > 0 && setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
   }, [filters.branch]);
 
   const handleNestedChange = (e, type, index, field) => {
@@ -140,10 +142,10 @@ const Employe = () => {
         department: emp.department.department,
         departmentid: emp.department._id,
         action: (<div className="action flex gap-2.5">
-          <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={() => { setviewEmployee(emp._id); setopenviewmodal(true) }} ><IoEyeOutline /></span>
-          <span className="eye edit text-[18px] text-green-500 cursor-pointer" onClick={() => { setpass({ ...pass, userid: emp.userid._id }); setpassmodal(true) }} ><TbPasswordUser /> </span>
-          <span className="eye edit text-[18px] text-amber-500 cursor-pointer" onClick={() => navigate(`/admin-dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
+          <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="View Profile" onClick={() => { setviewEmployee(emp._id); setopenviewmodal(true) }} ><IoEyeOutline /></span>
+          <span className="eye edit text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/admin-dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
           <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
+          <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="Reset Password" onClick={() => { setpass({ ...pass, userid: emp.userid._id }); setpassmodal(true) }} ><TbPasswordUser /> </span>
           <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
         </div>)
       }
@@ -193,9 +195,10 @@ const Employe = () => {
     formData.append('designation', inp.designation);
     formData.append('salary', inp.salary);
 
-    if (employeePhoto) formData.append('photo', employeePhoto);
-
-    // return console.log(inp)
+    if (employeePhoto) {
+      let resizedfile = await handleImage(600, employeePhoto);
+      formData.append('photo', resizedfile);
+    }
 
     await addemployee({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
   };
@@ -214,9 +217,13 @@ const Employe = () => {
       }
     });
 
-    if (employeePhoto) formData.append('photo', employeePhoto);
+    if (employeePhoto) {
+      let resizedfile = await handleImage(600, employeePhoto);
+      formData.append('photo', resizedfile);
+    }
 
-    await employeeupdate({ formData, setisload,setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
+
+    await employeeupdate({ formData, setisload, setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
   };
 
   const resetPhoto = () => {
@@ -340,8 +347,8 @@ const Employe = () => {
   return (
     <div className='employee p-2.5'>
       <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2>
-      <div className='flex justify-between'>
-        <div className="flex gap-1">
+      <div className='flex gap-5 justify-between flex-wrap'>
+        <div className="flex gap-2 md:gap-1 flex-wrap">
           <TextField
             size='small'
             sx={{ width: '160px' }}

@@ -16,6 +16,7 @@ const FaceEnrollment = () => {
     const [descriptor, setDescriptor] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [detecting, setDetecting] = useState(false);
+    const [mirror, setmirror] = useState(false);
 
     // Add state to hold available cameras and selected one
     const [availableCameras, setAvailableCameras] = useState([]);
@@ -40,6 +41,12 @@ const FaceEnrollment = () => {
         if (cameraActive && selectedCameraId) {
             stopCamera();
             startCamera();
+        }
+          let nowcamera = availableCameras.filter(e => e.deviceId == selectedCameraId)[0]
+        let label = nowcamera?.label.toLowerCase();
+        if (label?.includes('webcam') || label?.includes('front')) {
+            console.log('Front-facing webcam detected:', nowcamera);
+            setmirror(true)
         }
     }, [selectedCameraId]);
 
@@ -285,7 +292,7 @@ const FaceEnrollment = () => {
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Choose Camera:</label>
                     <select
-                        className="border p-2 w-full"
+                        className="border p-2 "
                         value={selectedCameraId || ''}
                         onChange={(e) => {
                             const newDeviceId = e.target.value;
@@ -300,6 +307,9 @@ const FaceEnrollment = () => {
                             </option>
                         ))}
                     </select>
+                      <button onClick={() => setmirror(!mirror)} className="bg-teal-600 ml-2 text-white px-4 py-1 rounded mt-2">
+                            Mirror
+                        </button>
                 </div>
             )}
 
@@ -312,7 +322,7 @@ const FaceEnrollment = () => {
                         muted
                         width={videoWidth}
                         height={videoHeight}
-                        className="rounded-full -scale-x-100 border-2 border-teal-500 border-dashed p-1 my-4"
+                        className={`rounded-full border-2 border-teal-500 ${mirror ? '-scale-x-100' : ''} border-dashed p-1 my-4 }`}
                     />
                     <div ref={canvasRef}></div>
 

@@ -35,6 +35,13 @@ const FaceAttendance = () => {
             stopCamera();      // Stop current stream
             startCamera();     // Start with new device
         }
+
+        let nowcamera = availableCameras.filter(e => e.deviceId == selectedDeviceId)[0]
+        let label = nowcamera?.label.toLowerCase();
+        if (label?.includes('webcam') || label?.includes('front')) {
+            console.log('Front-facing webcam detected:', nowcamera);
+            setmirror(true)
+        }
     }, [selectedDeviceId]);
 
     useEffect(() => {
@@ -47,6 +54,12 @@ const FaceAttendance = () => {
         const storedDeviceId = localStorage.getItem('selectedCameraId');
         if (storedDeviceId) {
             setSelectedDeviceId(storedDeviceId);
+        }
+        let nowcamera = availableCameras.filter(e => e.deviceId == storedDeviceId)[0]
+        let label = nowcamera?.label.toLowerCase();
+        if (label?.includes('webcam') || label?.includes('front')) {
+            console.log('Front-facing webcam detected:', nowcamera);
+            setmirror(true)
         }
     }, []);
 
@@ -260,9 +273,9 @@ const FaceAttendance = () => {
     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
     return (
-        <div className="p-6">
+        <div className="p-2 md:p-6">
             <h2 className="text-xl font-bold mb-2">Face Attendance</h2>
-            <div className="flex items-center justify-center flex-col p-4">
+            <div className="flex items-center justify-center flex-col p-0">
                 <div className="flex w-full gap-4 mb-2">
                     <button
                         onClick={() => handleMode('punch-in')}
@@ -280,7 +293,7 @@ const FaceAttendance = () => {
 
                 {availableCameras.length > 1 && (
                     <div className="mb-2">
-                        <label className="block text-sm font-semibold mb-1">Select Camera:</label>
+                        <label className="block text-sm font-semibold ">Select Camera:</label>
                         <select
                             value={selectedDeviceId || ''}
                             onChange={(e) => {
@@ -305,7 +318,7 @@ const FaceAttendance = () => {
 
                 {detectedemp && (
                     <>
-                        <div className="flex justify-center flex-col md:flex-row items-center w-[450px] md:items-start gap-6 p-4 bg-white shadow-lg rounded-2xl mt-2 mb-2 max-w-full">
+                        <div className="flex justify-center flex-col md:flex-row items-center w-full md:w-[450px] md:items-start gap-6 p-2 md:p-4 bg-white shadow-lg rounded-2xl mt-2 mb-2 max-w-full">
                             <img
                                 src={detectedemp?.profile || employepic}
                                 alt="Profile"
@@ -320,7 +333,7 @@ const FaceAttendance = () => {
                                 <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedemp.workinghour}</span></div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center text-center text-lg font-semibold text-gray-700 mb-2">
+                        <div className="flex flex-col items-center text-center font-semibold text-gray-700 mb-2">
                             {detectedemp.punchIn && detectedemp.punchOut == '-- : --' ? (<>
                                 <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! </p><p> You have punched in successfully.</p></>
                             ) :

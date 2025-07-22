@@ -10,7 +10,7 @@ const holiday = require('../controllers/holiday');
 const authmiddlewre = require('../middleware/auth_middleware');
 const adminmiddleware = require('../middleware/isadmin_middleware');
 const upload = require('../middleware/multer_middleware')
-
+const checkPermission = require('../middleware/checkpermission');
 
 router.route('/').get(async (req, res) => {
   return res.status(200).json({
@@ -39,7 +39,7 @@ router.route('/updatepassword').post(authmiddlewre,adminmiddleware,admin.updatep
 
 router.route('/employeelist').get(authmiddlewre,adminmiddleware,admin.employeelist); 
 router.route('/addemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.addemployee); 
-router.route('/updateemployee').post(authmiddlewre,adminmiddleware,upload.single('photo'),admin.updateemployee); 
+router.route('/updateemployee').post(authmiddlewre,checkPermission('canaddEmployee'),upload.single('photo'),admin.updateemployee); 
 router.route('/enrollFace').post(authmiddlewre,adminmiddleware,admin.enrollFace); 
 router.route('/deletefaceenroll').post(authmiddlewre,adminmiddleware,admin.deletefaceenroll); 
 router.route('/deleteemployee').post(authmiddlewre,adminmiddleware,admin.deleteemployee); 
