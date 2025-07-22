@@ -110,7 +110,8 @@ const Main = () => {
                   </span>
                 </div>,
                 {
-                  autoClose: false
+                  // autoClose: false
+                  autoClose: 20000
                 }
               );
 
@@ -134,7 +135,8 @@ const Main = () => {
                   </span>
                 </div>,
                 {
-                  autoClose: false
+                  // autoClose: false
+                   autoClose: 20000
                 }
               );
 
