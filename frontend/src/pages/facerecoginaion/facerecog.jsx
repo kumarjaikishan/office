@@ -16,7 +16,7 @@ const FaceEnrollment = () => {
     const [descriptor, setDescriptor] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [detecting, setDetecting] = useState(false);
-    
+
     // Add state to hold available cameras and selected one
     const [availableCameras, setAvailableCameras] = useState([]);
     const [selectedCameraId, setSelectedCameraId] = useState(null);
@@ -29,11 +29,20 @@ const FaceEnrollment = () => {
         }
     }, []);
 
+
     useEffect(() => {
         if (selectedCameraId) {
             localStorage.setItem('lastUsedCameraId', selectedCameraId);
         }
     }, [selectedCameraId]);
+
+    useEffect(() => {
+        if (cameraActive && selectedCameraId) {
+            stopCamera();
+            startCamera();
+        }
+    }, [selectedCameraId]);
+
 
 
     useEffect(() => {
@@ -47,7 +56,7 @@ const FaceEnrollment = () => {
         loadFaceAPI();
 
         return () => {
-            stopCamera(); // Cleanup on unmount
+            stopCamera(); // ✅ This is the correct place to clean up
         };
     }, []);
 
@@ -106,59 +115,59 @@ const FaceEnrollment = () => {
     };
 
     const captureDescriptor = () => {
-    if (!videoRef.current) return;
+        if (!videoRef.current) return;
 
-    setDetecting(true);
+        setDetecting(true);
 
-    if (detectionIntervalRef.current) {
-        clearInterval(detectionIntervalRef.current);
-    }
-
-    detectionIntervalRef.current = setInterval(async () => {
-        const result = await window.faceapi
-            .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
-            .withFaceLandmarks()
-            .withFaceDescriptor();
-
-        if (result) {
+        if (detectionIntervalRef.current) {
             clearInterval(detectionIntervalRef.current);
-            detectionIntervalRef.current = null;
-
-            const capturedDescriptor = Array.from(result.descriptor);
-            setDescriptor(capturedDescriptor); // still set for UI/debug, etc.
-
-            setDetecting(false);
-            stopCamera();
-
-            swal({
-                title: 'Face Captured Successfully',
-                text: 'Proceed to Face Enrollment?',
-                icon: 'success',
-                buttons: {
-                    cancel: {
-                        text: 'Cancel',
-                        value: false,
-                        visible: true,
-                        className: 'bg-gray-300 text-black px-4 py-1 rounded',
-                        closeModal: true,
-                    },
-                    confirm: {
-                        text: 'Proceed Now',
-                        value: true,
-                        visible: true,
-                        className: 'bg-teal-500 text-white px-4 py-1 rounded',
-                        closeModal: true,
-                    }
-                },
-                dangerMode: false,
-            }).then(async (okay) => {
-                if (okay) {
-                    await handleSubmit(capturedDescriptor); // Pass directly
-                }
-            });
         }
-    }, 500);
-};
+
+        detectionIntervalRef.current = setInterval(async () => {
+            const result = await window.faceapi
+                .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+            if (result) {
+                clearInterval(detectionIntervalRef.current);
+                detectionIntervalRef.current = null;
+
+                const capturedDescriptor = Array.from(result.descriptor);
+                setDescriptor(capturedDescriptor); // still set for UI/debug, etc.
+
+                setDetecting(false);
+                stopCamera();
+
+                swal({
+                    title: 'Face Captured Successfully',
+                    text: 'Proceed to Face Enrollment?',
+                    icon: 'success',
+                    buttons: {
+                        cancel: {
+                            text: 'Cancel',
+                            value: false,
+                            visible: true,
+                            className: 'bg-gray-300 text-black px-4 py-1 rounded',
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Proceed Now',
+                            value: true,
+                            visible: true,
+                            className: 'bg-teal-500 text-white px-4 py-1 rounded',
+                            closeModal: true,
+                        }
+                    },
+                    dangerMode: false,
+                }).then(async (okay) => {
+                    if (okay) {
+                        await handleSubmit(capturedDescriptor); // Pass directly
+                    }
+                });
+            }
+        }, 500);
+    };
 
     const deletefaceenroll = async () => {
         const token = localStorage.getItem('emstoken');
@@ -189,37 +198,37 @@ const FaceEnrollment = () => {
     }
 
     const handleSubmit = async (capturedDescriptor = descriptor) => {
-    if (!selectedEmployee || !capturedDescriptor || capturedDescriptor.length !== 128) {
-        return toast.warn('Invalid face data. Please try capturing again.');
-    }
-
-    const token = localStorage.getItem('emstoken');
-    try {
-        const res = await axios.post(
-            `${import.meta.env.VITE_API_ADDRESS}enrollFace`,
-            {
-                employeeId: selectedEmployee._id,
-                descriptor: capturedDescriptor,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            }
-        );
-
-        toast.success(res.data.message, { autoClose: 1200 });
-        stopCamera();
-        setDescriptor(null);
-    } catch (error) {
-        console.error(error);
-        if (error.response) {
-            toast.warn(error.response.data.message, { autoClose: 1200 });
-        } else {
-            toast.error('An unexpected error occurred.');
+        if (!selectedEmployee || !capturedDescriptor || capturedDescriptor.length !== 128) {
+            return toast.warn('Invalid face data. Please try capturing again.');
         }
-    }
-};
+
+        const token = localStorage.getItem('emstoken');
+        try {
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_ADDRESS}enrollFace`,
+                {
+                    employeeId: selectedEmployee._id,
+                    descriptor: capturedDescriptor,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+
+            toast.success(res.data.message, { autoClose: 1200 });
+            stopCamera();
+            setDescriptor(null);
+        } catch (error) {
+            console.error(error);
+            if (error.response) {
+                toast.warn(error.response.data.message, { autoClose: 1200 });
+            } else {
+                toast.error('An unexpected error occurred.');
+            }
+        }
+    };
 
 
     return (
@@ -278,8 +287,13 @@ const FaceEnrollment = () => {
                     <select
                         className="border p-2 w-full"
                         value={selectedCameraId || ''}
-                        onChange={(e) => setSelectedCameraId(e.target.value)}
+                        onChange={(e) => {
+                            const newDeviceId = e.target.value;
+                            localStorage.setItem('lastUsedCameraId', newDeviceId);
+                            setSelectedCameraId(newDeviceId);
+                        }}
                     >
+
                         {availableCameras.map((device) => (
                             <option key={device.deviceId} value={device.deviceId}>
                                 {device.label || `Camera ${device.deviceId.slice(-4)}`}

@@ -20,6 +20,7 @@ const FaceAttendance = () => {
     const [detectedemp, setDetectedEmp] = useState(null);
     const [availableCameras, setAvailableCameras] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState(null);
+    const [mirror, setmirror] = useState(false);
 
     const { employee } = useSelector((state) => state.user);
 
@@ -27,7 +28,6 @@ const FaceAttendance = () => {
     const matcherRef = useRef(null);
     const idMapRef = useRef({});
     const modelsLoadedRef = useRef(false);
-    const isFrontCamera = cameraActive?.label.toLowerCase().includes('front');
 
 
     useEffect(() => {
@@ -36,6 +36,20 @@ const FaceAttendance = () => {
             startCamera();     // Start with new device
         }
     }, [selectedDeviceId]);
+
+    useEffect(() => {
+        return () => {
+            stopCamera(); // Only run once on unmount
+        };
+    }, []);
+
+    useEffect(() => {
+        const storedDeviceId = localStorage.getItem('selectedCameraId');
+        if (storedDeviceId) {
+            setSelectedDeviceId(storedDeviceId);
+        }
+    }, []);
+
 
     useEffect(() => {
         const loadScript = async () => {
@@ -269,7 +283,12 @@ const FaceAttendance = () => {
                         <label className="block text-sm font-semibold mb-1">Select Camera:</label>
                         <select
                             value={selectedDeviceId || ''}
-                            onChange={(e) => setSelectedDeviceId(e.target.value)}
+                            onChange={(e) => {
+                                const deviceId = e.target.value;
+                                localStorage.setItem('selectedCameraId', deviceId);
+                                setSelectedDeviceId(deviceId);
+                            }}
+
                             className="border rounded px-2 py-1"
                         >
                             {availableCameras?.map((device) => (
@@ -278,6 +297,9 @@ const FaceAttendance = () => {
                                 </option>
                             ))}
                         </select>
+                        <button onClick={() => setmirror(!mirror)} className="bg-teal-600 ml-2 text-white px-4 py-1 rounded mt-2">
+                            Mirror
+                        </button>
                     </div>
                 )}
 
@@ -320,8 +342,7 @@ const FaceAttendance = () => {
                             muted
                             width={videoWidth}
                             height={videoHeight}
-                            className={`rounded-full border-2 border-teal-500 border-dashed p-1 my-4 ${isFrontCamera ? '-scale-x-100' : ''
-                                }`}
+                            className={`rounded-full border-2 border-teal-500 ${mirror ? '-scale-x-100' : ''} border-dashed p-1 my-4 }`}
                         />
                         <div ref={canvasRef} className="absolute top-0 left-0" />
                         <button className="bg-teal-600 mr-2 text-white px-4 py-1 rounded mt-2">
