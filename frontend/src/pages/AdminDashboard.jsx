@@ -79,6 +79,7 @@ const Main = () => {
 
     const connectEventSource = () => {
       // eventSource = new EventSource('http://localhost:5000/events');
+      console.log("see address",import.meta.env.VITE_SSE_ADDRESS)
       eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
       
 
