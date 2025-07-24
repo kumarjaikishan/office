@@ -29,7 +29,7 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
     const total = hell.present.length + hell.absent.length + hell.leave.length;
 
     const perc = {
-        present: total ? Math.floor((hell.present.length / total) * 100)  : 0,
+        present: total ? Math.floor((hell.present.length / total) * 100) : 0,
         absent: total ? Math.floor((hell.absent.length / total) * 100) : 0,
         leave: total ? Math.floor((hell.leave.length / total) * 100) : 0,
     };

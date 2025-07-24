@@ -29,11 +29,46 @@ const FaceAttendance = () => {
     const idMapRef = useRef({});
     const modelsLoadedRef = useRef(false);
 
+    const checkCameraPermission = async () => {
+        try {
+            const result = await navigator.permissions.query({ name: 'camera' });
+
+            if (result.state === 'denied') {
+                toast.error('Camera access is denied. Please allow permission from your browser settings.');
+                return false;
+            }
+
+            if (result.state === 'prompt') {
+                // Prompt will happen on getUserMedia call
+                return true;
+            }
+
+            return result.state === 'granted';
+        } catch (err) {
+            console.warn('Permissions API error or unsupported:', err);
+            // fallback: try to access camera anyway
+            return true;
+        }
+    };
+    useEffect(() => {
+        if (!selectedDeviceId || availableCameras.length === 0) return;
+
+        const nowcamera = availableCameras.find(e => e.deviceId === selectedDeviceId);
+        const label = nowcamera?.label.toLowerCase();
+
+        if (iswebcam(label)) {
+            setmirror(true);
+            localStorage.setItem('mirror', 'true');
+        } else {
+            setmirror(false);
+            localStorage.setItem('mirror', 'false');
+        }
+    }, [availableCameras, selectedDeviceId]);
 
     useEffect(() => {
         if (cameraActive && selectedDeviceId) {
-            stopCamera();      // Stop current stream
-            startCamera();     // Start with new device
+            stopCamera();     
+            startCamera();   
         }
 
         let nowcamera = availableCameras.filter(e => e.deviceId == selectedDeviceId)[0]
@@ -52,16 +87,23 @@ const FaceAttendance = () => {
 
     useEffect(() => {
         const storedDeviceId = localStorage.getItem('selectedCameraId');
+        const storedMirror = localStorage.getItem('mirror');
+
         if (storedDeviceId) {
             setSelectedDeviceId(storedDeviceId);
         }
-        let nowcamera = availableCameras.filter(e => e.deviceId == storedDeviceId)[0]
-        let label = nowcamera?.label.toLowerCase();
-        if (label?.includes('webcam') || label?.includes('front')) {
-            console.log('Front-facing webcam detected:', nowcamera);
-            setmirror(true)
+
+        if (storedMirror !== null) {
+            setmirror(storedMirror === 'true');
         }
     }, []);
+
+    const iswebcam = (label) => {
+        if (label?.includes('webcam') || label?.includes('front')) {
+            return true;
+        }
+        return false;
+    }
 
 
     useEffect(() => {
@@ -259,7 +301,7 @@ const FaceAttendance = () => {
         }
     };
 
-    const handleMode = (selectedMode) => {
+    const handleMode = async (selectedMode) => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
@@ -268,7 +310,12 @@ const FaceAttendance = () => {
         setDetectedEmp(null);
         setMode(selectedMode);
         modeRef.current = selectedMode;
-        startCamera();
+        const hasPermission = await checkCameraPermission();
+        if (hasPermission) {
+            startCamera();
+        } else {
+            toast.warn('Camera permission is required for face recognition.');
+        }
     };
     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 

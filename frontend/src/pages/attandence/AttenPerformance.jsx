@@ -165,17 +165,17 @@ const AttenPerformance = () => {
                 overtime.push(date);
                 overtimemin += workingMinutes;
             } else {
-                const isshort = workingMinutes < setting.workingMinutes.shortDayThreshold;
-                const isOvertime = workingMinutes >= setting.workingMinutes.overtimeAfterMinutes;
+                const isshort = workingMinutes < setting.workingMinutes.fullDay;
+                const isOvertime = workingMinutes >= setting.workingMinutes.fullDay;
 
                 if (isshort) {
                     shortDates.push(date);
-                    shorttimemin += setting.workingMinutes.shortDayThreshold - workingMinutes;
+                    shorttimemin += setting.workingMinutes.fullDay - workingMinutes;
                 }
 
                 if (isOvertime) {
                     overtime.push(date);
-                    overtimemin += workingMinutes - setting.workingMinutes.overtimeAfterMinutes;
+                    overtimemin += workingMinutes - setting.workingMinutes.fullDay;
                 }
             }
 
@@ -280,7 +280,6 @@ const AttenPerformance = () => {
             {attandence && (
                 <>
                     <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
-
                     <div className="p-4 flex gap-3 rounded shadow bg-white my-4">
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Type</InputLabel>
@@ -462,18 +461,19 @@ const columns = (setting) => [
     },
     {
         name: "Working Hours",
+        width: '180px',
         selector: (emp) => emp.workingMinutes,
         cell: (emp) => {
             const wm = emp.workingMinutes;
             if (!wm) return '-';
             return (
-                <span>
-                    {minutesinhours(wm)}
-                    {!emp.remarks && wm < setting?.workingMinutes?.shortDayThreshold && (
-                        <span className="px-2 py-0.5 ml-2 rounded bg-amber-100 text-amber-800 text-xs">Short</span>
+                <span className=' flex'>
+                    <span className='block w-[60px] '>{minutesinhours(wm)}</span>
+                    {!emp.remarks && wm < setting?.workingMinutes?.fullDay && (
+                        <span className=" block w-[100px] px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-xs">Short {setting?.workingMinutes?.fullDay - wm} min</span>
                     )}
-                    {!emp.remarks && wm > setting?.workingMinutes?.overtimeAfterMinutes && (
-                        <span className="px-2 py-0.5 ml-2 rounded bg-green-100 text-green-800 text-xs">Overtime</span>
+                    {!emp.remarks && wm > setting?.workingMinutes?.fullDay && (
+                        <span className="px-2 block w-[115px] py-0.5  rounded bg-green-100 text-green-900 text-xs">Overtime {wm - setting?.workingMinutes?.fullDay} min</span>
                     )}
                 </span>
             );
@@ -482,7 +482,6 @@ const columns = (setting) => [
     {
         name: "Remarks",
         selector: (emp) => emp.remarks && `${emp.workingMinutes} minutes  ${emp.remarks}`,
-
     },
 
 ];

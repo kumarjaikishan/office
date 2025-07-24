@@ -16,8 +16,41 @@ const FaceEnrollment = () => {
     const [descriptor, setDescriptor] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
     const [detecting, setDetecting] = useState(false);
+    const [mirror, setmirror] = useState(false);
+
+    // Add state to hold available cameras and selected one
+    const [availableCameras, setAvailableCameras] = useState([]);
+    const [selectedCameraId, setSelectedCameraId] = useState(null);
 
     const { employee: employeeList } = useSelector((state) => state.user);
+    useEffect(() => {
+        const lastUsedCamera = localStorage.getItem('lastUsedCameraId');
+        if (lastUsedCamera) {
+            setSelectedCameraId(lastUsedCamera);
+        }
+    }, []);
+
+
+    useEffect(() => {
+        if (selectedCameraId) {
+            localStorage.setItem('lastUsedCameraId', selectedCameraId);
+        }
+    }, [selectedCameraId]);
+
+    useEffect(() => {
+        if (cameraActive && selectedCameraId) {
+            stopCamera();
+            startCamera();
+        }
+          let nowcamera = availableCameras.filter(e => e.deviceId == selectedCameraId)[0]
+        let label = nowcamera?.label.toLowerCase();
+        if (label?.includes('webcam') || label?.includes('front')) {
+            console.log('Front-facing webcam detected:', nowcamera);
+            setmirror(true)
+        }
+    }, [selectedCameraId]);
+
+
 
     useEffect(() => {
         const loadFaceAPI = async () => {
@@ -30,9 +63,10 @@ const FaceEnrollment = () => {
         loadFaceAPI();
 
         return () => {
-            stopCamera(); // Cleanup on unmount
+            stopCamera(); // ✅ This is the correct place to clean up
         };
     }, []);
+
 
     const loadModels = async () => {
         await Promise.all([
@@ -47,11 +81,14 @@ const FaceEnrollment = () => {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            const defaultCamera = videoDevices[0];
+            setAvailableCameras(videoDevices);
+
+            const chosenDevice = videoDevices.find(d => d.deviceId === selectedCameraId) || videoDevices[0];
+            setSelectedCameraId(chosenDevice.deviceId);
 
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    deviceId: defaultCamera.deviceId ? { exact: defaultCamera.deviceId } : undefined,
+                    deviceId: chosenDevice.deviceId ? { exact: chosenDevice.deviceId } : undefined,
                     width: videoWidth,
                     height: videoHeight,
                 }
@@ -67,6 +104,7 @@ const FaceEnrollment = () => {
             setCameraActive(false);
         }
     };
+
 
     const stopCamera = () => {
         setCameraActive(false);
@@ -101,9 +139,13 @@ const FaceEnrollment = () => {
             if (result) {
                 clearInterval(detectionIntervalRef.current);
                 detectionIntervalRef.current = null;
-                setDescriptor(Array.from(result.descriptor));
+
+                const capturedDescriptor = Array.from(result.descriptor);
+                setDescriptor(capturedDescriptor); // still set for UI/debug, etc.
+
                 setDetecting(false);
                 stopCamera();
+
                 swal({
                     title: 'Face Captured Successfully',
                     text: 'Proceed to Face Enrollment?',
@@ -127,13 +169,13 @@ const FaceEnrollment = () => {
                     dangerMode: false,
                 }).then(async (okay) => {
                     if (okay) {
-                        handleSubmit();
+                        await handleSubmit(capturedDescriptor); // Pass directly
                     }
                 });
-                // toast.success('Face captured. Click "Submit Enrollment" to save.');
             }
         }, 500);
     };
+
     const deletefaceenroll = async () => {
         const token = localStorage.getItem('emstoken');
         try {
@@ -162,12 +204,10 @@ const FaceEnrollment = () => {
 
     }
 
-    const handleSubmit = async () => {
-       
-        if (!selectedEmployee || !descriptor || descriptor.length !== 128) {
+    const handleSubmit = async (capturedDescriptor = descriptor) => {
+        if (!selectedEmployee || !capturedDescriptor || capturedDescriptor.length !== 128) {
             return toast.warn('Invalid face data. Please try capturing again.');
         }
-
 
         const token = localStorage.getItem('emstoken');
         try {
@@ -175,7 +215,7 @@ const FaceEnrollment = () => {
                 `${import.meta.env.VITE_API_ADDRESS}enrollFace`,
                 {
                     employeeId: selectedEmployee._id,
-                    descriptor,
+                    descriptor: capturedDescriptor,
                 },
                 {
                     headers: {
@@ -196,6 +236,7 @@ const FaceEnrollment = () => {
             }
         }
     };
+
 
     return (
         <div className="p-6">
@@ -247,6 +288,31 @@ const FaceEnrollment = () => {
                     )}
                 </div>
             )}
+            {availableCameras.length > 1 && (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium mb-1">Choose Camera:</label>
+                    <select
+                        className="border p-2 "
+                        value={selectedCameraId || ''}
+                        onChange={(e) => {
+                            const newDeviceId = e.target.value;
+                            localStorage.setItem('lastUsedCameraId', newDeviceId);
+                            setSelectedCameraId(newDeviceId);
+                        }}
+                    >
+
+                        {availableCameras.map((device) => (
+                            <option key={device.deviceId} value={device.deviceId}>
+                                {device.label || `Camera ${device.deviceId.slice(-4)}`}
+                            </option>
+                        ))}
+                    </select>
+                      <button onClick={() => setmirror(!mirror)} className="bg-teal-600 ml-2 text-white px-4 py-1 rounded mt-2">
+                            Mirror
+                        </button>
+                </div>
+            )}
+
 
             {cameraActive && (
                 <div>
@@ -256,7 +322,7 @@ const FaceEnrollment = () => {
                         muted
                         width={videoWidth}
                         height={videoHeight}
-                        className="rounded-full border-2 border-teal-500 border-dashed p-1 my-4"
+                        className={`rounded-full border-2 border-teal-500 ${mirror ? '-scale-x-100' : ''} border-dashed p-1 my-4 }`}
                     />
                     <div ref={canvasRef}></div>
 

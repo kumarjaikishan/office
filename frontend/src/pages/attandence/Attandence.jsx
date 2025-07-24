@@ -256,11 +256,11 @@ const Attandence = () => {
           workingHours: emp.workingMinutes && (
             <span>
               {minutesinhours(emp.workingMinutes)}
-              {emp.workingMinutes < company?.workingMinutes?.shortDayThreshold && (
-                <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short</span>
+              {emp.workingMinutes < company?.workingMinutes?.fullDay && (
+                <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short {company?.workingMinutes?.fullDay - emp.workingMinutes} min</span>
               )}
-              {emp.workingMinutes > company?.workingMinutes?.overtimeAfterMinutes && (
-                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime</span>
+              {emp.workingMinutes > company?.workingMinutes?.fullDay && (
+                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime {emp?.workingMinutes-company?.workingMinutes?.fullDay} min </span>
               )}
             </span>
           ),
@@ -343,7 +343,7 @@ const Attandence = () => {
             <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>
           </div>
 
-          <div className="flex w-full mt-1 md:mt-0  gap-2">
+          <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">
             {selectedRows.length > 0 && <Button className="flex-1" variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
             <Button className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
           </div>

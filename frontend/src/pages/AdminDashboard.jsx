@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import { FaBuilding, FaRegUser, FaTachometerAlt, FaUsers } from 'react-icons/fa'
 import './admindashboard.css'
 import dayjs from 'dayjs';
-import { updateAttendance } from '../../store/userSlice';
+import { FirstFetch, updateAttendance } from '../../store/userSlice';
 import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Tooltip, Typography } from '@mui/material';
 import { CiFilter } from 'react-icons/ci';
 
@@ -95,7 +95,7 @@ const Main = () => {
             console.log(data.payload.action, data.payload.data);
             let datae = data.payload.data;
             if (data.payload.action === 'checkin') {
-              let updated = [...attandenceRef.current, datae];
+              // let updated = [...attandenceRef.current, datae];
               // console.log("checkIn sse merger:",updated);
               // toast.success(`${datae.employeeId.employeename} has Punched In at ${dayjs(datae.punchIn).format('hh:mm A')}`, { autoClose: false });
 
@@ -115,14 +115,15 @@ const Main = () => {
                 }
               );
 
-              dispatch(updateAttendance(updated));
+              // dispatch(updateAttendance(updated));
+              dispatch(FirstFetch());
             }
 
             if (data.payload.action === "checkOut") {
-              let filterout = attandenceRef.current.filter(
-                (e) => e._id !== datae._id
-              );
-              let newlist = [...filterout, datae];
+              // let filterout = attandenceRef.current.filter(
+              //   (e) => e._id !== datae._id
+              // );
+              // let newlist = [...filterout, datae];
               // toast.success(`${datae.employeeId.employeename} has Punched Out at ${dayjs(datae.punchOut).format('hh:mm A')}`, { autoClose: false });
               toast(
                 <div className='flex items-center gap-2 pr-1'>
@@ -140,7 +141,8 @@ const Main = () => {
                 }
               );
 
-              dispatch(updateAttendance(newlist));
+              // dispatch(updateAttendance(newlist));
+              dispatch(FirstFetch());
             }
           }
         } catch (err) {

@@ -105,43 +105,54 @@ const deleteattandence = async (req, res, next) => {
 const checkin = async (req, res, next) => {
   try {
     const { employeeId, date, punchIn, status } = req.body;
-    // console.log(req.body)
 
-    // Normalize date (strip time part)
-    const dateObj = new Date(date);
-    dateObj.setHours(0, 0, 0, 0);
+    if (!employeeId || !date || !status) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
 
-    // Check for existing check-in
-    const existing = await Attendance.findOne({ employeeId, date: dateObj })
+    // Normalize date to UTC midnight
+    const parsedDate = new Date(date);
+    const dateObj = new Date(Date.UTC(
+      parsedDate.getUTCFullYear(),
+      parsedDate.getUTCMonth(),
+      parsedDate.getUTCDate()
+    ));
+
+    // Check if already checked in
+    const existing = await Attendance.findOne({ employeeId, date: dateObj });
     if (existing) {
       return res.status(400).json({ message: 'Already checked in' });
     }
 
-    const attendanceData = { employeeId, date: dateObj, status };
+    const attendanceData = {
+      employeeId,
+      date: dateObj,
+      status
+    };
 
+    // Handle optional punchIn time
     if (punchIn) {
       const punchInTime = new Date(punchIn);
       if (isNaN(punchInTime)) {
         return res.status(400).json({ message: 'Invalid punchIn time' });
       }
-      attendanceData.punchIn = punchIn;
+      attendanceData.punchIn = punchInTime;
     }
 
     const attendance = new Attendance(attendanceData);
-
     await attendance.save();
 
     const updatedRecord = await Attendance.findById(attendance._id)
       .populate({
         path: 'employeeId',
-        select: ' userid profileimage',
+        select: 'userid profileimage',
         populate: {
           path: 'userid',
           select: 'name'
         }
       });
 
-    // Send live update to all clients
+    // Notify clients
     sendToClients({
       type: 'attendance_update',
       payload: {
@@ -157,6 +168,7 @@ const checkin = async (req, res, next) => {
   }
 };
 
+
 const facecheckin = async (req, res, next) => {
   try {
     const { employeeId } = req.body;
@@ -165,24 +177,30 @@ const facecheckin = async (req, res, next) => {
       return res.status(400).json({ message: 'Employee ID is required' });
     }
 
-    // Get today's date (stripped of time)
+    // Get current time
     const now = new Date();
-    now.setSeconds(0, 0); // Zero out seconds and milliseconds
 
-    const dateObj = new Date(now);
-    dateObj.setHours(0, 0, 0, 0);
+    // Normalize punchIn to HH:mm (zero seconds and milliseconds)
+    const punchIn = new Date(now.setSeconds(0, 0));
+
+    // Normalize date to UTC 00:00
+    const dateObj = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate()
+    ));
 
     // Check if already checked in
     const existing = await Attendance.findOne({ employeeId, date: dateObj });
     if (existing) {
-      return res.status(200).json({ message: 'Already checked in today', attendance:existing });
+      return res.status(206).json({ message: 'Already checked in today', attendance: existing });
     }
 
-    // Build attendance object
+    // Create attendance
     const attendanceData = {
       employeeId,
       date: dateObj,
-      punchIn: now,
+      punchIn: punchIn,
       status: 'present'
     };
 
@@ -199,7 +217,7 @@ const facecheckin = async (req, res, next) => {
         }
       });
 
-    // Notify connected clients (if using sockets or similar)
+    // Notify clients
     sendToClients({
       type: 'attendance_update',
       payload: {
@@ -221,11 +239,19 @@ const checkout = async (req, res, next) => {
   try {
     const { employeeId, date, punchOut } = req.body;
 
-    // Normalize date to 00:00:00 for matching
-    const dateObj = new Date(date);
-    dateObj.setHours(0, 0, 0, 0);
+    if (!employeeId || !date || !punchOut) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
 
-    // Find the record
+    // Normalize date to UTC midnight
+    const parsedDate = new Date(date);
+    const dateObj = new Date(Date.UTC(
+      parsedDate.getUTCFullYear(),
+      parsedDate.getUTCMonth(),
+      parsedDate.getUTCDate()
+    ));
+
+    // Find the attendance record
     const record = await Attendance.findOne({ employeeId, date: dateObj });
 
     if (!record) {
@@ -236,7 +262,7 @@ const checkout = async (req, res, next) => {
       return res.status(400).json({ message: 'Already checked out' });
     }
 
-    // Parse punchOut from frontend
+    // Parse punchOut time
     const punchOutTime = new Date(punchOut);
     if (isNaN(punchOutTime)) {
       return res.status(400).json({ message: 'Invalid punchOut time' });
@@ -249,7 +275,7 @@ const checkout = async (req, res, next) => {
     const diffMinutes = (record.punchOut - record.punchIn) / (1000 * 60);
     record.workingMinutes = parseFloat(diffMinutes.toFixed(2));
 
-    // Calculate short minutes (assuming 8 hours = 480 minutes)
+    // Calculate short minutes
     const short = 480 - record.workingMinutes;
     record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
 
@@ -258,14 +284,14 @@ const checkout = async (req, res, next) => {
     const updatedRecord = await Attendance.findById(record._id)
       .populate({
         path: 'employeeId',
-        select: ' userid profileimage',
+        select: 'userid profileimage',
         populate: {
           path: 'userid',
           select: 'name'
         }
       });
 
-    // Send live update to all clients
+    // Notify connected clients
     sendToClients({
       type: 'attendance_update',
       payload: {
@@ -274,26 +300,30 @@ const checkout = async (req, res, next) => {
       }
     });
 
-    return res.status(200).json({ message: 'Punch-out recorded', record });
+    return res.status(200).json({ message: 'Punch-out recorded', record: updatedRecord });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
 
+
 const facecheckout = async (req, res, next) => {
   try {
     const { employeeId } = req.body;
 
-    // Set current time (zero seconds and ms)
+    if (!employeeId) {
+      return res.status(400).json({ message: 'Employee ID is required' });
+    }
+
+    // Get current time
     const now = new Date();
-    now.setSeconds(0, 0);
+    now.setSeconds(0, 0); // Zero out seconds and milliseconds
 
-    // Normalize date to midnight
-    const dateObj = new Date(now);
-    dateObj.setHours(0, 0, 0, 0);
+    // Normalize date to UTC midnight
+    const dateObj = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    // Find today's attendance record
+    // Find today's attendance record using normalized UTC date
     const record = await Attendance.findOne({ employeeId, date: dateObj });
 
     if (!record) {
@@ -301,7 +331,7 @@ const facecheckout = async (req, res, next) => {
     }
 
     if (record.punchOut) {
-      return res.status(200).json({ message: 'Already checked out',attendance:record });
+      return res.status(200).json({ message: 'Already checked out', attendance: record });
     }
 
     // Assign punchOut time
@@ -311,7 +341,7 @@ const facecheckout = async (req, res, next) => {
     const diffMinutes = (record.punchOut - record.punchIn) / (1000 * 60);
     record.workingMinutes = parseFloat(diffMinutes.toFixed(2));
 
-    // Calculate short minutes (8 hours = 480 minutes)
+    // Calculate short minutes (assuming 8-hour day = 480 mins)
     const short = 480 - record.workingMinutes;
     record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
 
@@ -328,7 +358,7 @@ const facecheckout = async (req, res, next) => {
         }
       });
 
-    // Send live update
+    // Notify clients
     sendToClients({
       type: 'attendance_update',
       payload: {
@@ -345,7 +375,6 @@ const facecheckout = async (req, res, next) => {
 };
 
 
-
 // Get all attendance
 const allAttandence = async (req, res, next) => {
   const data = await Attendance.find().populate('employeeId', 'name email');
@@ -353,6 +382,7 @@ const allAttandence = async (req, res, next) => {
 };
 
 const editattandence = async (req, res, next) => {
+  console.log('editattandence', req.body);
   try {
     const { id, punchIn, punchOut, status } = req.body;
 
@@ -361,37 +391,53 @@ const editattandence = async (req, res, next) => {
       return res.status(404).json({ message: "Attendance record not found" });
     }
 
-    if (punchIn !== "" && punchOut !== "") {
+    // Handle working minutes only if both punchIn and punchOut are valid
+    if (punchIn && punchOut) {
       const inTime = new Date(punchIn);
       const outTime = new Date(punchOut);
 
-      const diffMinutes = (outTime - inTime) / (1000 * 60); // Convert ms to minutes
-      data.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+      if (!isNaN(inTime) && !isNaN(outTime)) {
+        const diffMinutes = (outTime - inTime) / (1000 * 60);
+        data.workingMinutes = parseFloat(diffMinutes.toFixed(2));
 
-      const short = 480 - data.workingMinutes;
-      data.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+        const short = 480 - data.workingMinutes;
+        data.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+      }
     }
 
-    if (punchIn !== "") {
+
+    // Handle punchIn
+    if (punchIn) {
       const punchInTime = new Date(punchIn);
       punchInTime.setMilliseconds(0);
       if (isNaN(punchInTime)) {
         return res.status(400).json({ message: 'Invalid punchIn time' });
       }
       data.punchIn = punchInTime;
+    } else {
+      data.punchIn = null;
     }
-    if (punchOut !== "") {
+
+    // Handle punchOut
+    if (punchOut) {
       const punchOutTime = new Date(punchOut);
       punchOutTime.setMilliseconds(0);
       if (isNaN(punchOutTime)) {
         return res.status(400).json({ message: 'Invalid punchOut time' });
       }
       data.punchOut = punchOutTime;
+    } else {
+      data.punchOut = null;
+      data.workingMinutes = null;
     }
+
+
+    // If status is not "present", reset punchIn/out
     if (status !== 'present') {
-      data.punchIn = ''
-      data.punchOut = ''
+      data.punchIn = null;
+      data.punchOut = null;
     }
+
     data.status = status;
 
     await data.save();
@@ -404,6 +450,7 @@ const editattandence = async (req, res, next) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 // Apply for leave
