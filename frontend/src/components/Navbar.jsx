@@ -42,14 +42,14 @@ const Navbar = () => {
       <p>page { }</p>
 
       <div className='flex  gap-4 items-center px-2 text-grey'>
-        <span className='bg-amber-200 w-7 h-7 rounded-full flex items-center justify-center relative cursor-pointer'>
+        {/* <span className='bg-amber-200 w-7 h-7 rounded-full flex items-center justify-center relative cursor-pointer'>
           <CiBullhorn />
           <span className='absolute -top-2 -right-2 bg-purple-800 text-white
               rounded-full w-4 h-4 flex items-center justify-center text-[10px]  font-bold'
           >
             1
           </span>
-        </span>
+        </span> */}
         <NotificationIcon notifications={notification} />
         {/* <NotificationIcon1 notifications={notification} /> */}
         <div className='flex flex-col items-end px-1'>

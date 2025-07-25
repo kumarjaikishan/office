@@ -109,6 +109,7 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                     <Tooltip
                         placement="top"
                         enterDelay={800}
+                        arrow
                         title={
                             <div className="flex gap-1 flex-col text-white">
                                 <span className="flex w-full"> <span className="block w-[70px] ">Basic salary </span> <span> : {employee?.salary} ₹ </span></span>

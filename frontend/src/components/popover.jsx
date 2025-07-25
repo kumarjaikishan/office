@@ -1,5 +1,8 @@
+import { Button } from '@mui/material';
 import React, { useState, useRef, useEffect } from 'react';
 import { CiBullhorn } from 'react-icons/ci';
+import { MdMarkEmailRead } from "react-icons/md";
+import { FaFileDownload, FaGooglePlus, FaTrashAlt } from 'react-icons/fa';
 
 export const NotificationIcon = ({ notifications }) => {
   const [open, setOpen] = useState(false);
@@ -53,9 +56,9 @@ export const NotificationIcon = ({ notifications }) => {
               ))}
             </ul>
             <div className='flex justify-end gap-2 text-[12px] border-t-1 pt-2'>
-              <button className='text-red-500 font-semibold cursor-pointer bg-red-100 border-1 px-2 py-1 rounded'>Clear All</button>
-              <button className='text-blue-500 font-semibold cursor-pointer bg-blue-100 border-1 px-2 py-1 rounded'>Mark Read</button>
-            </div>
+              <Button size='small' color='warning' variant='outlined' startIcon={<FaTrashAlt size={14} />}>Clear All</Button>
+              <Button size='small' variant='contained' startIcon={<MdMarkEmailRead size={14} />} >Mark Read</Button>
+           </div>
           </>)}
         </div>
       )}

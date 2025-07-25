@@ -75,7 +75,7 @@ const Main = () => {
 
     const connectEventSource = () => {
       // eventSource = new EventSource('http://localhost:5000/events');
-      console.log("see address", import.meta.env.VITE_SSE_ADDRESS)
+      // console.log("see address", import.meta.env.VITE_SSE_ADDRESS)
       eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
 
 
@@ -227,7 +227,7 @@ const Main = () => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
             const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);
             return (
-              <Tooltip enterDelay={800} key={emp._id} placement="top" title={<div className='flex flex-col '>
+              <Tooltip arrow enterDelay={800} key={emp._id} placement="top" title={<div className='flex flex-col '>
                 {/* <span className='flex border-b border-white mb-1'> {emp.userid.name} </span> */}
                 <span> In &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : ' -:-'}</span>
                 <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>

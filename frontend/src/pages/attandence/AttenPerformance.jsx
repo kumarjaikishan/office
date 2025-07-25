@@ -123,7 +123,6 @@ const AttenPerformance = () => {
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
             let fdfgfd = dayjs(element.date).format('DD/MM/YYYY');
-            const fdfgfdd = dayjs(element.date, 'DD/MM/YYYY');
 
             const isHoliday = holidaydate.includes(fdfgfd);
 
