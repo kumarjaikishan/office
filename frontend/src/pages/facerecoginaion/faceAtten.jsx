@@ -3,6 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
+import { loadFaceAPI } from './loadModel';
 
 const videoSize = { width: 350, height: 350 };
 const scriptSrc = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
@@ -32,19 +33,6 @@ const FaceAttendance = () => {
     const isWebcam = (label) => label?.includes('webcam') || label?.includes('front');
 
     useEffect(() => {
-        const loadScript = () => {
-            const script = document.createElement('script');
-            script.src = scriptSrc;
-            script.async = true;
-            script.onload = loadModels;
-            document.body.appendChild(script);
-        };
-        loadScript();
-    }, []);
-
-
-
-    useEffect(() => {
         const storedDeviceId = localStorage.getItem('selectedCameraId');
         const storedMirror = localStorage.getItem('mirror');
         if (storedDeviceId) setSelectedDeviceId(storedDeviceId);
@@ -59,20 +47,22 @@ const FaceAttendance = () => {
         localStorage.setItem('mirror', shouldMirror);
     }, [selectedDeviceId, availableCameras]);
 
-    useEffect(() => () => stopCamera(), []);
 
-    const loadModels = async () => {
-        if (modelsLoadedRef.current) return;
+    useEffect(() => {
+        const init = async () => {
+            try {
+                await loadFaceAPI(); // load script + models
+                loadDescriptors();   // only after models are loaded
+            } catch (err) {
+                toast.error("Failed to load face-api models.");
+                console.error(err);
+            }
+        };
 
-        await Promise.all([
-            window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-            window.faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-        ]);
+        init();
 
-        modelsLoadedRef.current = true;
-        loadDescriptors();
-    };
+        return () => stopCamera(); // cleanup
+    }, []);
 
     const loadDescriptors = () => {
         const idMap = {};
@@ -144,16 +134,32 @@ const FaceAttendance = () => {
 
         try {
             const detection = await window.faceapi
-                .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+                .detectSingleFace(
+                    videoRef.current,
+                    new window.faceapi.TinyFaceDetectorOptions({
+                        inputSize: 320,         // Try 224 or 320 or 416 for better accuracy, but slower
+                        scoreThreshold: 0.6     // Lower = More sensitive, detects more faces, even unclear ones., higher = Stricter, detects only confident faces, but may miss blurry or angled ones.
+                    })
+                )
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
-            if (!detection) return (detectionLockRef.current = false);
+            if (!detection) {
+                detectionLockRef.current = false;
+                return; // No face detected — wait for next interval
+            }
+
+            if (!matcherRef.current) {
+                toast.warn('Matcher not initialized. Try again later.');
+                detectionLockRef.current = false;
+                return;
+            }
 
             const bestMatch = matcherRef.current.findBestMatch(detection.descriptor);
             if (bestMatch.label === 'unknown') {
                 toast.error('Face not recognized');
-                return stopCamera();
+                detectionLockRef.current = false;
+                return;
             }
 
             const matchedId = idMapRef.current[bestMatch.label];
@@ -161,10 +167,11 @@ const FaceAttendance = () => {
 
             if (!matchedId || !empDetail) {
                 toast.error('Employee not found');
-                return stopCamera();
+                detectionLockRef.current = false;
+                return;
             }
 
-            // Draw detection
+            // Draw detection box
             const drawCanvas = window.faceapi.createCanvasFromMedia(videoRef.current);
             const displaySize = { width: videoSize.width, height: videoSize.height };
             const resized = window.faceapi.resizeResults(detection, displaySize);
@@ -177,18 +184,22 @@ const FaceAttendance = () => {
             }
 
             const token = localStorage.getItem('emstoken');
-            const endpoint = `${import.meta.env.VITE_API_ADDRESS}${modeRef.current === 'punch-in' ? 'facecheckin' : 'facecheckout'}`;
-            const res = await axios.post(endpoint, { employeeId: matchedId }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const endpoint = `${import.meta.env.VITE_API_ADDRESS}${modeRef.current === 'punch-in' ? 'facecheckin' : 'facecheckout'
+                }`;
+
+            const res = await axios.post(
+                endpoint,
+                { employeeId: matchedId },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
             const { punchIn, punchOut, workingMinutes } = res.data.attendance;
 
-            let formatted=null;
-            if(workingMinutes){
-            const hours = Math.floor(workingMinutes / 60);
-            const minutes = workingMinutes % 60;
-             formatted = `${hours}h ${minutes}m`;
+            let formatted = null;
+            if (workingMinutes) {
+                const hours = Math.floor(workingMinutes / 60);
+                const minutes = workingMinutes % 60;
+                formatted = `${hours}h ${minutes}m`;
             }
 
             setDetectedEmp({
@@ -198,20 +209,26 @@ const FaceAttendance = () => {
                 department: empDetail.department.department,
                 punchIn: punchIn ? dayjs(punchIn).format('hh:mm A') : '-- : --',
                 punchOut: punchOut ? dayjs(punchOut).format('hh:mm A') : '-- : --',
-                workinghour:  formatted ?? '-- : --',
+                workinghour: formatted ?? '-- : --',
             });
-            console.log(res)
-            if (res.status == 206) {
-                return toast.warn(res.data.message || `Successfully punched ${modeRef.current}`, { autoClose: 2100 });
+
+            console.log(res);
+            if (res.status === 206) {
+                toast.warn(res.data.message || `Successfully punched ${modeRef.current}`, { autoClose: 2100 });
+            } else {
+                toast.success(res.data.message || `Successfully punched ${modeRef.current}`);
             }
-            toast.success(res.data.message || `Successfully punched ${modeRef.current}`);
+
+            stopCamera(); // ✅ stop only on success
         } catch (err) {
-            console.log(err)
+            console.error(err);
             toast.warn(err?.response?.data?.message || 'Error during recognition');
+            stopCamera(); // ✅ stop on error
         } finally {
-            stopCamera()
+            detectionLockRef.current = false; // Always release lock
         }
     };
+
 
     const handleMode = async (selectedMode) => {
         clearTimeout(timeoutRef.current);

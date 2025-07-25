@@ -3,13 +3,13 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import swal from 'sweetalert';
+import { loadFaceAPI } from './loadModel';
 
 const videoDimensions = { width: 350, height: 350 };
 
 const FaceEnrollment = () => {
   const videoRef = useRef(null);
   const detectionIntervalRef = useRef(null);
-
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [descriptor, setDescriptor] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
@@ -21,37 +21,29 @@ const FaceEnrollment = () => {
   const { employee: employeeList } = useSelector((state) => state.user);
 
   useEffect(() => {
-    const loadFaceAPI = async () => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
-      script.async = true;
-      script.onload = () => loadModels();
-      document.body.appendChild(script);
+    const init = async () => {
+      try {
+        await loadFaceAPI();
+      } catch (err) {
+        console.error('Failed to load face-api.js or models', err);
+        toast.error('Face recognition models failed to load');
+      }
     };
-
-    loadFaceAPI();
+    init();
     return stopCamera;
   }, []);
 
   useEffect(() => {
-    if (selectedCameraId) localStorage.setItem('lastUsedCameraId', selectedCameraId);
+    if (selectedCameraId) {
+      localStorage.setItem('lastUsedCameraId', selectedCameraId);
+    }
   }, [selectedCameraId]);
 
   useEffect(() => {
     if (!selectedCameraId || !cameraActive) return;
-    stopCamera();
-    startCamera();
     const label = availableCameras.find(e => e.deviceId === selectedCameraId)?.label.toLowerCase();
     setMirror(label?.includes('webcam') || label?.includes('front'));
-  }, [selectedCameraId]);
-
-  const loadModels = async () => {
-    await Promise.all([
-      window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-      window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-      window.faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-    ]);
-  };
+  }, [selectedCameraId, availableCameras]);
 
   const startCamera = async () => {
     setCameraActive(true);
@@ -71,8 +63,14 @@ const FaceEnrollment = () => {
         }
       });
 
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      captureDescriptor();
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+
+        // Wait for video to be ready
+        videoRef.current.onloadeddata = () => {
+          captureDescriptor();
+        };
+      }
     } catch (error) {
       console.error('Camera access error:', error);
       toast.error('Unable to access the camera. Please check permissions.');
@@ -99,31 +97,49 @@ const FaceEnrollment = () => {
     if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
 
     detectionIntervalRef.current = setInterval(async () => {
-      const result = await window.faceapi
-        .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+      try {
+        const result = await window.faceapi
+          .detectSingleFace(
+            videoRef.current,
+            new window.faceapi.TinyFaceDetectorOptions({
+              inputSize: 416,         // High accuracy 160,224,320,416,512,608
+              scoreThreshold: 0.6    // More sensitive
+            })
+          )
+          .withFaceLandmarks()
+          .withFaceDescriptor();
 
-      if (result) {
-        clearInterval(detectionIntervalRef.current);
-        detectionIntervalRef.current = null;
+        if (result) {
+          clearInterval(detectionIntervalRef.current);
+          detectionIntervalRef.current = null;
 
-        const capturedDescriptor = Array.from(result.descriptor);
-        setDescriptor(capturedDescriptor);
-        setDetecting(false);
-        stopCamera();
+          const capturedDescriptor = Array.from(result.descriptor);
+          setDescriptor(capturedDescriptor);
+          setDetecting(false);
+          stopCamera();
 
-        swal({
-          title: 'Face Captured Successfully',
-          text: 'Proceed to Face Enrollment?',
-          icon: 'success',
-          buttons: {
-            cancel: { text: 'Cancel', value: false, className: 'bg-gray-300 text-black px-4 py-1 rounded' },
-            confirm: { text: 'Proceed Now', value: true, className: 'bg-teal-500 text-white px-4 py-1 rounded' }
-          }
-        }).then(async (okay) => {
-          if (okay) await handleSubmit(capturedDescriptor);
-        });
+          swal({
+            title: 'Face Captured Successfully',
+            text: 'Proceed to Face Enrollment?',
+            icon: 'success',
+            buttons: {
+              cancel: {
+                text: 'Cancel',
+                value: false,
+                className: 'bg-gray-300 text-black px-4 py-1 rounded',
+              },
+              confirm: {
+                text: 'Proceed Now',
+                value: true,
+                className: 'bg-teal-500 text-white px-4 py-1 rounded',
+              },
+            },
+          }).then(async (okay) => {
+            if (okay) await handleSubmit(capturedDescriptor);
+          });
+        }
+      } catch (err) {
+        console.error('Face detection error:', err);
       }
     }, 500);
   };

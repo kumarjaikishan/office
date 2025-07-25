@@ -4,8 +4,9 @@ import { SlBag } from "react-icons/sl"
 
 const DashboardCard = ({employee, todaypresent,currentpresent }) => {
     return (
-        <div className="car flex justify-between gap-6" >
-            <div className="relative px-4 py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">
+       <div className="car grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
+
+            <div className="relative px-2 md:px-4 py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">
                 {/* Left color strip */}
                 <div className={`absolute left-0 top-0 h-full w-1 bg-slate-600 rounded-l`} />
 

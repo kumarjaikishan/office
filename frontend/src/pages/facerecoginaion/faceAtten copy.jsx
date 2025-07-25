@@ -3,9 +3,10 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
+import { loadFaceAPI } from './loadModel';
 
-const videoWidth = 350;
-const videoHeight = 350;
+const videoSize = { width: 350, height: 350 };
+const scriptSrc = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
 
 const FaceAttendance = () => {
     const videoRef = useRef(null);
@@ -17,10 +18,10 @@ const FaceAttendance = () => {
 
     const [mode, setMode] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
-    const [detectedemp, setDetectedEmp] = useState(null);
+    const [detectedEmp, setDetectedEmp] = useState(null);
     const [availableCameras, setAvailableCameras] = useState([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState(null);
-    const [mirror, setmirror] = useState(false);
+    const [mirror, setMirror] = useState(false);
 
     const { employee } = useSelector((state) => state.user);
 
@@ -29,136 +30,70 @@ const FaceAttendance = () => {
     const idMapRef = useRef({});
     const modelsLoadedRef = useRef(false);
 
-    const checkCameraPermission = async () => {
-        try {
-            const result = await navigator.permissions.query({ name: 'camera' });
-
-            if (result.state === 'denied') {
-                toast.error('Camera access is denied. Please allow permission from your browser settings.');
-                return false;
-            }
-
-            if (result.state === 'prompt') {
-                // Prompt will happen on getUserMedia call
-                return true;
-            }
-
-            return result.state === 'granted';
-        } catch (err) {
-            console.warn('Permissions API error or unsupported:', err);
-            // fallback: try to access camera anyway
-            return true;
-        }
-    };
-    useEffect(() => {
-        if (!selectedDeviceId || availableCameras.length === 0) return;
-
-        const nowcamera = availableCameras.find(e => e.deviceId === selectedDeviceId);
-        const label = nowcamera?.label.toLowerCase();
-
-        if (iswebcam(label)) {
-            setmirror(true);
-            localStorage.setItem('mirror', 'true');
-        } else {
-            setmirror(false);
-            localStorage.setItem('mirror', 'false');
-        }
-    }, [availableCameras, selectedDeviceId]);
-
-    useEffect(() => {
-        if (cameraActive && selectedDeviceId) {
-            stopCamera();     
-            startCamera();   
-        }
-
-        let nowcamera = availableCameras.filter(e => e.deviceId == selectedDeviceId)[0]
-        let label = nowcamera?.label.toLowerCase();
-        if (label?.includes('webcam') || label?.includes('front')) {
-            console.log('Front-facing webcam detected:', nowcamera);
-            setmirror(true)
-        }
-    }, [selectedDeviceId]);
-
-    useEffect(() => {
-        return () => {
-            stopCamera(); // Only run once on unmount
-        };
-    }, []);
+    const isWebcam = (label) => label?.includes('webcam') || label?.includes('front');
 
     useEffect(() => {
         const storedDeviceId = localStorage.getItem('selectedCameraId');
         const storedMirror = localStorage.getItem('mirror');
-
-        if (storedDeviceId) {
-            setSelectedDeviceId(storedDeviceId);
-        }
-
-        if (storedMirror !== null) {
-            setmirror(storedMirror === 'true');
-        }
+        if (storedDeviceId) setSelectedDeviceId(storedDeviceId);
+        if (storedMirror !== null) setMirror(storedMirror === 'true');
     }, []);
 
-    const iswebcam = (label) => {
-        if (label?.includes('webcam') || label?.includes('front')) {
-            return true;
-        }
-        return false;
-    }
+    useEffect(() => {
+        if (!selectedDeviceId || !availableCameras.length) return;
+        const label = availableCameras.find(e => e.deviceId === selectedDeviceId)?.label.toLowerCase();
+        const shouldMirror = isWebcam(label);
+        setMirror(shouldMirror);
+        localStorage.setItem('mirror', shouldMirror);
+    }, [selectedDeviceId, availableCameras]);
 
 
     useEffect(() => {
-        const loadScript = async () => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
-            script.async = true;
-            script.onload = () => loadModels();
-            document.body.appendChild(script);
+        const init = async () => {
+            try {
+                await loadFaceAPI(); // load script + models
+                loadDescriptors();   // only after models are loaded
+            } catch (err) {
+                toast.error("Failed to load face-api models.");
+                console.error(err);
+            }
         };
-        loadScript();
+
+        init();
+
+        return () => stopCamera(); // cleanup
     }, []);
-
-    const loadModels = async () => {
-        if (modelsLoadedRef.current) return;
-
-        await Promise.all([
-            window.faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            window.faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-            window.faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-        ]);
-
-        modelsLoadedRef.current = true;
-        loadDescriptors();
-    };
 
     const loadDescriptors = () => {
         const idMap = {};
         const labeledDescriptors = employee
-            ?.filter(emp => emp.faceDescriptor && emp.faceDescriptor.length === 128)
+            ?.filter(emp => emp.faceDescriptor?.length === 128)
             .map(emp => {
-                const name = emp.userid.name;
-                const descriptorArray = new Float32Array(emp.faceDescriptor);
-                idMap[name] = emp._id;
-                return new window.faceapi.LabeledFaceDescriptors(name, [descriptorArray]);
+                idMap[emp.userid.name] = emp._id;
+                return new window.faceapi.LabeledFaceDescriptors(emp.userid.name, [new Float32Array(emp.faceDescriptor)]);
             });
 
         descriptorsRef.current = labeledDescriptors;
         idMapRef.current = idMap;
 
-        // 🔐 Don't create matcher if no valid data
-        if (labeledDescriptors.length > 0) {
-            matcherRef.current = new window.faceapi.FaceMatcher(labeledDescriptors, 0.6);
-        } else {
-            matcherRef.current = null;
-            toast.warn('No face data available for comparison. Please enroll first.');
-        }
+        matcherRef.current = labeledDescriptors.length ? new window.faceapi.FaceMatcher(labeledDescriptors, 0.6) : null;
+        if (!matcherRef.current) toast.warn('No face data available for comparison. Please enroll first.');
     };
 
+    const checkCameraPermission = async () => {
+        try {
+            const result = await navigator.permissions.query({ name: 'camera' });
+            return result.state !== 'denied';
+        } catch {
+            return true;
+        }
+    };
 
     const startCamera = async () => {
         setCameraActive(true);
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            const videoDevices = devices.filter(d => d.kind === 'videoinput');
             setAvailableCameras(videoDevices);
 
             const deviceIdToUse = selectedDeviceId || videoDevices[0]?.deviceId;
@@ -166,254 +101,185 @@ const FaceAttendance = () => {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     deviceId: deviceIdToUse ? { exact: deviceIdToUse } : undefined,
-                    width: videoWidth,
-                    height: videoHeight,
+                    ...videoSize
                 },
             });
 
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
-                videoRef.current.onloadedmetadata = () => {
-                    startDetectionLoop();
-                };
+                videoRef.current.onloadedmetadata = () => startDetectionLoop();
             }
         } catch (error) {
-            console.error('Camera access error:', error);
             toast.error('Unable to access the camera. Check permissions.');
             setCameraActive(false);
         }
     };
 
     const stopCamera = () => {
-        if (detectionIntervalRef.current) {
-            clearInterval(detectionIntervalRef.current);
-            detectionIntervalRef.current = null;
-        }
-
-        const videoElement = videoRef.current;
-        if (videoElement && videoElement.srcObject) {
-            const stream = videoElement.srcObject;
-            stream.getTracks().forEach(track => track.stop());
-            videoElement.srcObject = null;
-        }
-
-        detectionLockRef.current = false;
+        clearInterval(detectionIntervalRef.current);
+        const stream = videoRef.current?.srcObject;
+        stream?.getTracks().forEach(track => track.stop());
+        if (videoRef.current) videoRef.current.srcObject = null;
         setCameraActive(false);
+        detectionLockRef.current = false;
     };
 
     const startDetectionLoop = () => {
-        detectionIntervalRef.current = setInterval(() => {
-            recognizeAndPunch();
-        }, 600);
+        detectionIntervalRef.current = setInterval(() => recognizeAndPunch(), 600);
     };
 
     const recognizeAndPunch = async () => {
-        console.log("call lagane aaya")
         if (detectionLockRef.current || !videoRef.current) return;
-
-        // Set lock immediately to avoid parallel calls
         detectionLockRef.current = true;
+
         try {
-
-            const tinyOptions = new window.faceapi.TinyFaceDetectorOptions({
-                inputSize: 224,
-                scoreThreshold: 0.5,
-            });
-
             const detection = await window.faceapi
-                .detectSingleFace(videoRef.current, tinyOptions)
+                .detectSingleFace(videoRef.current, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
-            if (!detection) {
-                detectionLockRef.current = false; // 🟢 Unlock if no face detected
+            if (!detection) return (detectionLockRef.current = false);
+
+            if (!matcherRef.current) {
+                toast.warn('Matcher not initialized. Try again later.');
+                detectionLockRef.current = false;
                 return;
             }
 
-            const bestMatch = matcherRef.current.findBestMatch(detection?.descriptor);
+            const bestMatch = matcherRef.current.findBestMatch(detection.descriptor);
             if (bestMatch.label === 'unknown') {
                 toast.error('Face not recognized');
-                stopCamera();
-                return;
+                return stopCamera();
             }
 
-            detectionLockRef.current = true;
+            const matchedId = idMapRef.current[bestMatch.label];
+            const empDetail = employee.find(e => e._id === matchedId);
 
-            const matchedEmployeeId = idMapRef.current[bestMatch.label];
-            if (!matchedEmployeeId) {
-                toast.error('Matched name not linked to an employee ID');
-                stopCamera();
-                return;
+            if (!matchedId || !empDetail) {
+                toast.error('Employee not found');
+                return stopCamera();
             }
 
-            const empdetail = employee.find((val) => val._id === matchedEmployeeId);
+            // Draw detection
+            const drawCanvas = window.faceapi.createCanvasFromMedia(videoRef.current);
+            const displaySize = { width: videoSize.width, height: videoSize.height };
+            const resized = window.faceapi.resizeResults(detection, displaySize);
 
-            const canvasContainer = canvasRef.current;
-            if (canvasContainer) {
-                while (canvasContainer.firstChild) {
-                    canvasContainer.removeChild(canvasContainer.firstChild);
-                }
-
-                const drawCanvas = window.faceapi.createCanvasFromMedia(videoRef.current);
-                canvasContainer.appendChild(drawCanvas);
-
-                const displaySize = { width: videoWidth, height: videoHeight };
+            if (canvasRef.current) {
+                canvasRef.current.innerHTML = '';
+                canvasRef.current.appendChild(drawCanvas);
                 window.faceapi.matchDimensions(drawCanvas, displaySize);
-                const resized = window.faceapi.resizeResults(detection, displaySize);
                 window.faceapi.draw.drawDetections(drawCanvas, resized);
             }
 
             const token = localStorage.getItem('emstoken');
-            const endpoint =
-                modeRef.current === 'punch-in'
-                    ? `${import.meta.env.VITE_API_ADDRESS}facecheckin`
-                    : `${import.meta.env.VITE_API_ADDRESS}facecheckout`;
-            console.log("calling...")
-            const res = await axios.post(
-                endpoint,
-                { employeeId: matchedEmployeeId },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            setDetectedEmp({
-                name: empdetail?.userid.name,
-                profile: empdetail?.profileimage,
-                designation: empdetail.designation,
-                department: empdetail.department.department,
-                punchIn: res.data.attendance.punchIn ? dayjs(res.data.attendance.punchIn).format('hh:mm A') : '-- : --',
-                punchOut: res.data.attendance.punchOut ? dayjs(res.data.attendance.punchOut).format('hh:mm A') : '-- : --',
-                workinghour: res.data.attendance.workingMinutes ?? '-- : --',
+            const endpoint = `${import.meta.env.VITE_API_ADDRESS}${modeRef.current === 'punch-in' ? 'facecheckin' : 'facecheckout'}`;
+            const res = await axios.post(endpoint, { employeeId: matchedId }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
-            toast.success(res.data.message || `Successfully punched ${modeRef.current === 'punch-in' ? 'in' : 'out'}`);
-            stopCamera();
+            const { punchIn, punchOut, workingMinutes } = res.data.attendance;
 
-            timeoutRef.current = setTimeout(() => { }, 15000);
+            let formatted = null;
+            if (workingMinutes) {
+                const hours = Math.floor(workingMinutes / 60);
+                const minutes = workingMinutes % 60;
+                formatted = `${hours}h ${minutes}m`;
+            }
 
+            setDetectedEmp({
+                name: empDetail.userid.name,
+                profile: empDetail.profileimage,
+                designation: empDetail.designation,
+                department: empDetail.department.department,
+                punchIn: punchIn ? dayjs(punchIn).format('hh:mm A') : '-- : --',
+                punchOut: punchOut ? dayjs(punchOut).format('hh:mm A') : '-- : --',
+                workinghour: formatted ?? '-- : --',
+            });
+            console.log(res)
+            if (res.status == 206) {
+                return toast.warn(res.data.message || `Successfully punched ${modeRef.current}`, { autoClose: 2100 });
+            }
+            toast.success(res.data.message || `Successfully punched ${modeRef.current}`);
         } catch (err) {
-            console.error('Recognition error:', err);
-            toast.warn(err.response?.data?.message || 'Error during recognition');
-            stopCamera();
+            console.log(err)
+            toast.warn(err?.response?.data?.message || 'Error during recognition');
+        } finally {
+            stopCamera()
         }
     };
 
     const handleMode = async (selectedMode) => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = null;
-        }
-
+        clearTimeout(timeoutRef.current);
         setDetectedEmp(null);
         setMode(selectedMode);
         modeRef.current = selectedMode;
-        const hasPermission = await checkCameraPermission();
-        if (hasPermission) {
-            startCamera();
-        } else {
-            toast.warn('Camera permission is required for face recognition.');
-        }
+
+        if (await checkCameraPermission()) startCamera();
+        else toast.warn('Camera permission is required for face recognition.');
     };
-    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
+
+    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp';
 
     return (
         <div className="p-2 md:p-6">
             <h2 className="text-xl font-bold mb-2">Face Attendance</h2>
             <div className="flex items-center justify-center flex-col p-0">
                 <div className="flex w-full gap-4 mb-2">
-                    <button
-                        onClick={() => handleMode('punch-in')}
-                        className="bg-blue-500 w-xl text-white px-4 py-2 rounded"
-                    >
-                        Punch In
-                    </button>
-                    <button
-                        onClick={() => handleMode('punch-out')}
-                        className="bg-red-500 w-xl text-white px-4 py-2 rounded"
-                    >
-                        Punch Out
-                    </button>
+                    <button onClick={() => handleMode('punch-in')} className="bg-blue-500 w-xl text-white px-4 py-2 rounded">Punch In</button>
+                    <button onClick={() => handleMode('punch-out')} className="bg-red-500 w-xl text-white px-4 py-2 rounded">Punch Out</button>
                 </div>
 
                 {availableCameras.length > 1 && (
                     <div className="mb-2">
-                        <label className="block text-sm font-semibold ">Select Camera:</label>
+                        <label className="block text-sm font-semibold">Select Camera:</label>
                         <select
                             value={selectedDeviceId || ''}
                             onChange={(e) => {
-                                const deviceId = e.target.value;
-                                localStorage.setItem('selectedCameraId', deviceId);
-                                setSelectedDeviceId(deviceId);
+                                localStorage.setItem('selectedCameraId', e.target.value);
+                                setSelectedDeviceId(e.target.value);
                             }}
-
                             className="border rounded px-2 py-1"
                         >
-                            {availableCameras?.map((device) => (
-                                <option key={device.deviceId} value={device.deviceId}>
-                                    {device.label || `Camera ${device.deviceId}`}
-                                </option>
+                            {availableCameras.map(device => (
+                                <option key={device.deviceId} value={device.deviceId}>{device.label || `Camera ${device.deviceId}`}</option>
                             ))}
                         </select>
-                        <button onClick={() => setmirror(!mirror)} className="bg-teal-600 ml-2 text-white px-4 py-1 rounded mt-2">
-                            Mirror
-                        </button>
+                        <button onClick={() => setMirror(!mirror)} className="bg-teal-600 ml-2 text-white px-4 py-1 rounded mt-2">Mirror</button>
                     </div>
                 )}
 
-                {detectedemp && (
+                {detectedEmp && (
                     <>
-                        <div className="flex justify-center flex-col md:flex-row items-center w-full md:w-[450px] md:items-start gap-6 p-2 md:p-4 bg-white shadow-lg rounded-2xl mt-2 mb-2 max-w-full">
-                            <img
-                                src={detectedemp?.profile || employepic}
-                                alt="Profile"
-                                className="w-38 h-38 rounded-full object-cover border-2 border-teal-500 border-dashed p-1"
-                            />
-                            <div className="flex flex-col justify-center gap-2 text-sm w-full">
-                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Name</span><span>{detectedemp.name}</span></div>
-                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Designation</span><span>{detectedemp.designation}</span></div>
-                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Department</span><span>{detectedemp.department}</span></div>
-                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch In</span><span>{detectedemp.punchIn}</span></div>
-                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch Out</span><span>{detectedemp.punchOut}</span></div>
-                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedemp.workinghour}</span></div>
+                        <div className="flex flex-col md:flex-row items-center bg-white shadow-lg rounded-2xl p-4 w-full md:w-[450px] gap-6">
+                            <img src={detectedEmp.profile || employepic} alt="Profile" className="w-38 h-38 rounded-full object-cover border-2 border-teal-500 border-dashed p-1" />
+                            <div className="text-sm w-full space-y-1">
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Name</span><span>{detectedEmp.name}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Designation</span><span>{detectedEmp.designation}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Department</span><span>{detectedEmp.department}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch In</span><span>{detectedEmp.punchIn}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Punch Out</span><span>{detectedEmp.punchOut}</span></div>
+                                <div className="flex justify-between"><span className="font-semibold text-gray-600">Working Hour</span><span>{detectedEmp.workinghour}</span></div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-center text-center font-semibold text-gray-700 mb-2">
-                            {detectedemp.punchIn && detectedemp.punchOut == '-- : --' ? (<>
-                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedemp.name}! </p><p> You have punched in successfully.</p></>
-                            ) :
-                                <> <p>✅ Great job today, {detectedemp.name}! </p> <p> You’ve successfully punched out.</p> </>
-                            }
+                        <div className="text-center font-semibold text-gray-700 mb-2">
+                            {detectedEmp.punchIn && detectedEmp.punchOut === '-- : --' ? (
+                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedEmp.name}! You have punched in successfully.</p>
+                            ) : (
+                                <p>✅ Great job today, {detectedEmp.name}! You’ve successfully punched out.</p>
+                            )}
                         </div>
                     </>
                 )}
 
                 {cameraActive && (
-                    <div className="relative w-fit text-center">
-                        {/* <label className="flex items-center gap-2 mt-2">
-                            <input type="checkbox" checked={mirror} onChange={() => setMirror(!mirror)} />
-                            Mirror video
-                        </label> */}
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            muted
-                            width={videoWidth}
-                            height={videoHeight}
-                            className={`rounded-full border-2 border-teal-500 ${mirror ? '-scale-x-100' : ''} border-dashed p-1 my-4 }`}
-                        />
+                    <div className="relative text-center">
+                        <video ref={videoRef} autoPlay muted {...videoSize} className={`rounded-full border-2 border-teal-500 border-dashed p-1 my-4 ${mirror ? '-scale-x-100' : ''}`} />
                         <div ref={canvasRef} className="absolute top-0 left-0" />
-                        <button className="bg-teal-600 mr-2 text-white px-4 py-1 rounded mt-2">
-                            Scanning ...
-                        </button>
-                        <button
-                            onClick={stopCamera}
-                            className="bg-gray-600 text-white px-4 py-1 rounded mt-2"
-                        >
-                            Cancel
-                        </button>
+                        <div className="flex gap-2 justify-center">
+                            <button className="bg-teal-600 text-white px-4 py-1 rounded mt-2">Scanning ...</button>
+                            <button onClick={stopCamera} className="bg-gray-600 text-white px-4 py-1 rounded mt-2">Cancel</button>
+                        </div>
                     </div>
                 )}
             </div>

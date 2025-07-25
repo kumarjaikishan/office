@@ -2,12 +2,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import DashboardCard from '../components/dashboardCard';
-import { FiUsers } from "react-icons/fi";
-import { FiClock } from "react-icons/fi";
-import { SlBag } from "react-icons/sl";
 import { toast } from 'react-toastify';
 import { FaBuilding, FaRegUser, FaTachometerAlt, FaUsers } from 'react-icons/fa'
-import './admindashboard.css'
 import dayjs from 'dayjs';
 import { FirstFetch, updateAttendance } from '../../store/userSlice';
 import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Tooltip, Typography } from '@mui/material';
@@ -43,7 +39,7 @@ const Main = () => {
     });
 
     setemployeelist(filtered);
-  }, [branc, depfilter,employee]);
+  }, [branc, depfilter, employee]);
 
   useEffect(() => {
     setdepfilter('all')
@@ -79,9 +75,9 @@ const Main = () => {
 
     const connectEventSource = () => {
       // eventSource = new EventSource('http://localhost:5000/events');
-      console.log("see address",import.meta.env.VITE_SSE_ADDRESS)
+      console.log("see address", import.meta.env.VITE_SSE_ADDRESS)
       eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
-      
+
 
       eventSource.onopen = () => {
         console.log('✅ SSE connection established successfully');
@@ -137,7 +133,7 @@ const Main = () => {
                 </div>,
                 {
                   // autoClose: false
-                   autoClose: 20000
+                  autoClose: 20000
                 }
               );
 
@@ -171,14 +167,14 @@ const Main = () => {
 
 
   return (
-    <div className='adminDashboard'>
-      <div className="overview">
+    <div className='p-2 md:p-4'>
+      <div className="mb-8">
         <h3>Dashboar overview</h3>
         <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
 
       <div className='w-full flex-col flex gap-5 shadow  bg-white p-2 rounded'>
-        <div className='flex gap-3'>
+        <div className='flex gap-3 pt-3'>
           <FormControl sx={{ width: '160px' }} required size="small">
             <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
             <Select
@@ -226,13 +222,14 @@ const Main = () => {
             </Select>
           </FormControl>
         </div>
-        <div className='flex justify-start gap-4'>
+        <div className='grid grid-cols-5 md:grid-cols-10 lg:grid-cols-15 gap-2 md:gap-4'>
           {employeelist?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
             const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);
             return (
               <Tooltip enterDelay={800} key={emp._id} placement="top" title={<div className='flex flex-col '>
-                <span> In &nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : '-:-'}</span>
+                {/* <span className='flex border-b border-white mb-1'> {emp.userid.name} </span> */}
+                <span> In &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : ' -:-'}</span>
                 <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>
               </div>}>
                 <div key={emp._id} className='flex flex-col items-center'>
@@ -241,8 +238,8 @@ const Main = () => {
                       {!emp.profileimage && <FaRegUser />}
                     </Avatar>
                   </span>
-                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700') : 'text-gray-500'} text-[14px] transition-all duration-300 capitalize `}>
-                    {emp.employeename}
+                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700') : 'text-gray-500'} text-[12px] text-center transition-all duration-300 capitalize `}>
+                    {emp.userid.name}
                   </p>
                 </div>
               </Tooltip>
