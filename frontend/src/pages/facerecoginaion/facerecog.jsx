@@ -92,57 +92,66 @@ const FaceEnrollment = () => {
   };
 
   const captureDescriptor = () => {
-    if (!videoRef.current) return;
-    setDetecting(true);
-    if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
+  if (!videoRef.current) return;
+  setDetecting(true);
+  if (detectionIntervalRef.current) clearInterval(detectionIntervalRef.current);
 
-    detectionIntervalRef.current = setInterval(async () => {
-      try {
-        const result = await window.faceapi
-          .detectSingleFace(
-            videoRef.current,
-            new window.faceapi.TinyFaceDetectorOptions({
-              inputSize: 416,         // High accuracy 160,224,320,416,512,608
-              scoreThreshold: 0.6    // More sensitive
-            })
-          )
-          .withFaceLandmarks()
-          .withFaceDescriptor();
+  detectionIntervalRef.current = setInterval(async () => {
+    try {
+      const result = await window.faceapi
+        .detectSingleFace(
+          videoRef.current,
+          new window.faceapi.TinyFaceDetectorOptions({
+            inputSize: 416,
+            scoreThreshold: 0.6,
+          })
+        )
+        .withFaceLandmarks()
+        .withFaceDescriptor();
 
-        if (result) {
-          clearInterval(detectionIntervalRef.current);
-          detectionIntervalRef.current = null;
+      if (result) {
+        let detectionScore = result.detection?.score || 0;
 
-          const capturedDescriptor = Array.from(result.descriptor);
-          setDescriptor(capturedDescriptor);
-          setDetecting(false);
-          stopCamera();
-
-          swal({
-            title: 'Face Captured Successfully',
-            text: 'Proceed to Face Enrollment?',
-            icon: 'success',
-            buttons: {
-              cancel: {
-                text: 'Cancel',
-                value: false,
-                className: 'bg-gray-300 text-black px-4 py-1 rounded',
-              },
-              confirm: {
-                text: 'Proceed Now',
-                value: true,
-                className: 'bg-teal-500 text-white px-4 py-1 rounded',
-              },
-            },
-          }).then(async (okay) => {
-            if (okay) await handleSubmit(capturedDescriptor);
-          });
+        if (detectionScore < 0.85) {
+          console.warn(`Low face detection confidence: ${detectionScore}`);
+          // toast.warn(`Face not clear enough. Please adjust lighting or position. (Score: ${detectionScore.toFixed(2)})`);
+          return; // skip poor captures
         }
-      } catch (err) {
-        console.error('Face detection error:', err);
+
+        clearInterval(detectionIntervalRef.current);
+        detectionIntervalRef.current = null;
+
+        const capturedDescriptor = Array.from(result.descriptor);
+        setDescriptor(capturedDescriptor);
+        setDetecting(false);
+        stopCamera();
+
+        swal({
+          title: `Face Captured Successfully`,
+          text: `Score : ${detectionScore.toFixed(2) * 10}, Proceed to Face Enrollment?`,
+          icon: 'success',
+          buttons: {
+            cancel: {
+              text: 'Cancel',
+              value: false,
+              className: 'bg-gray-300 text-black px-4 py-1 rounded',
+            },
+            confirm: {
+              text: 'Proceed Now',
+              value: true,
+              className: 'bg-teal-500 text-white px-4 py-1 rounded',
+            },
+          },
+        }).then(async (okay) => {
+          if (okay) await handleSubmit(capturedDescriptor);
+        });
       }
-    }, 500);
-  };
+    } catch (err) {
+      console.error('Face detection error:', err);
+    }
+  }, 500);
+};
+
 
   const deleteFaceEnroll = async () => {
     const token = localStorage.getItem('emstoken');
@@ -182,9 +191,8 @@ const FaceEnrollment = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2 md:p-6">
       <h2 className="text-xl font-bold mb-4">Face Enrollment</h2>
-
       <select
         className="border p-2 mb-4 w-full"
         onChange={(e) => {
