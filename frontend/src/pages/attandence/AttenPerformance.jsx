@@ -207,7 +207,7 @@ const AttenPerformance = () => {
             short: shortDates,
             overtime, shorttimemin, overtimemin, latearrival,
             earlyarrival, earlyLeave, lateleave,
-            overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 30 / company.workingMinutes.fullDay).toFixed(2))
+            overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / company.workingMinutes.fullDay).toFixed(2))
             // overtimesalary: (employee.salary/30/company.workingMinutes.fullDay).toFixed(2)
         });
     }, [attandence, selectedYear, selectedMonth, setting]);

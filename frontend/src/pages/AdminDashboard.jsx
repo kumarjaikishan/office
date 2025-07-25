@@ -169,7 +169,7 @@ const Main = () => {
   return (
     <div className='p-2 md:p-4'>
       <div className="mb-8">
-        <h3>Dashboar overview</h3>
+        <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3>
         <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
 
@@ -233,12 +233,12 @@ const Main = () => {
                 <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>
               </div>}>
                 <div key={emp._id} className='flex flex-col items-center'>
-                  <span className={`${todaypresente ? (isPresent ? 'border-green-500' : 'border-amber-400') : 'border-gray-300'} p-[2px] border-2 rounded-full`}>
+                  <span className={`${todaypresente ? (isPresent ? 'border-green-500' : 'border-amber-400') : 'border-gray-300'} p-[2px] border-3 rounded-full`}>
                     <Avatar src={emp.profileimage} alt={emp.employeename}>
                       {!emp.profileimage && <FaRegUser />}
                     </Avatar>
                   </span>
-                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[18px] font-semibold' : 'text-amber-700') : 'text-gray-500'} text-[12px] text-center transition-all duration-300 capitalize `}>
+                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[14px]' : 'text-amber-700') : 'text-gray-500'} text-[12px] text-center transition-all duration-300 capitalize `}>
                     {emp.userid.name}
                   </p>
                 </div>

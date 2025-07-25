@@ -331,7 +331,7 @@ const facecheckout = async (req, res, next) => {
     }
 
     if (record.punchOut) {
-       return res.status(206).json({ message: 'Already checked in today', attendance: existing });
+      return res.status(206).json({ message: 'Already checked in today', attendance: existing });
     }
 
     // Assign punchOut time
@@ -382,7 +382,7 @@ const allAttandence = async (req, res, next) => {
 };
 
 const editattandence = async (req, res, next) => {
-  console.log('editattandence', req.body);
+  // console.log('editattandence', req.body);
   try {
     const { id, punchIn, punchOut, status } = req.body;
 
@@ -391,55 +391,58 @@ const editattandence = async (req, res, next) => {
       return res.status(404).json({ message: "Attendance record not found" });
     }
 
-    // Handle working minutes only if both punchIn and punchOut are valid
-    if (punchIn && punchOut) {
-      const inTime = new Date(punchIn);
-      const outTime = new Date(punchOut);
+    const baseDate = new Date(data.date);
 
-      if (!isNaN(inTime) && !isNaN(outTime)) {
-        const diffMinutes = (outTime - inTime) / (1000 * 60);
-        data.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+    const mergeDateAndTimeFromDateObj = (date, timeSource) => {
+      const merged = new Date(date);
+      merged.setHours(new Date(timeSource).getHours());
+      merged.setMinutes(new Date(timeSource).getMinutes());
+      merged.setSeconds(0);
+      merged.setMilliseconds(0);
+      return merged;
+    };
 
-        const short = 480 - data.workingMinutes;
-        data.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
-      }
-    }
-
-
-    // Handle punchIn
+    // Process punchIn
     if (punchIn) {
-      const punchInTime = new Date(punchIn);
-      punchInTime.setMilliseconds(0);
-      if (isNaN(punchInTime)) {
+      if (isNaN(Date.parse(punchIn))) {
         return res.status(400).json({ message: 'Invalid punchIn time' });
       }
-      data.punchIn = punchInTime;
+      data.punchIn = mergeDateAndTimeFromDateObj(baseDate, punchIn);
     } else {
       data.punchIn = null;
     }
 
-    // Handle punchOut
+    // Process punchOut
     if (punchOut) {
-      const punchOutTime = new Date(punchOut);
-      punchOutTime.setMilliseconds(0);
-      if (isNaN(punchOutTime)) {
+      if (isNaN(Date.parse(punchOut))) {
         return res.status(400).json({ message: 'Invalid punchOut time' });
       }
-      data.punchOut = punchOutTime;
+      data.punchOut = mergeDateAndTimeFromDateObj(baseDate, punchOut);
     } else {
       data.punchOut = null;
       data.workingMinutes = null;
+      data.shortMinutes = null;
     }
 
+    // Calculate workingMinutes
+    if (data.punchIn && data.punchOut) {
+      const diffMinutes = (data.punchOut - data.punchIn) / (1000 * 60);
+      data.workingMinutes = parseFloat(diffMinutes.toFixed(2));
 
-    // If status is not "present", reset punchIn/out
+      const short = 480 - data.workingMinutes;
+      data.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+    }
+
+    // If status is not "present", reset times
     if (status !== 'present') {
       data.punchIn = null;
       data.punchOut = null;
+      data.workingMinutes = null;
+      data.shortMinutes = null;
     }
 
     data.status = status;
-
+    // console.log('final submit ', data)
     await data.save();
 
     res.status(200).json({
