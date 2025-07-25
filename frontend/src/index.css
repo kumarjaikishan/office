@@ -134,6 +134,6 @@ body {
     }
 }
 
-ul.MuiChartsLegend-root.MuiChartsLegend-vertical{
+.MuiChartsLegend-root.MuiChartsLegend-vertical{
     display: none;
 }
