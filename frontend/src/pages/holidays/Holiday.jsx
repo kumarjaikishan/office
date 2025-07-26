@@ -12,11 +12,11 @@ import { isWithinInterval, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'react-redux';
-import { customStyles } from '../attandence/attandencehelper';
 import DataTable from 'react-data-table-component';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { toast } from 'react-toastify';
+import { customStyles } from '../admin/attandence/attandencehelper';
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {

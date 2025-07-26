@@ -406,7 +406,6 @@ const firstfetch = async (req, res, next) => {
 const setsetting = async (req, res, next) => {
     console.log(req.body)
     const settingsData = req.body;
-    // return  res.status(200).json({ message:'ok thik hai' })
     try {
         const updatedSetting = await comanysettingModal.findOneAndUpdate(
             {},                     // match all (singleton)

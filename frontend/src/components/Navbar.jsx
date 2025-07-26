@@ -12,30 +12,17 @@ import { NotificationIcon1 } from './muipopover';
 
 const Navbar = () => {
   const dispatch = useDispatch();
-  const [notification, setnotification] = useState([]);
+  const [notificatione, setnotification] = useState([]);
   const { isadmin, islogin } = useSelector((state) => state.auth);
+  const { notification } = useSelector((state) => state.employee);
   const user = useSelector((state) => state.user);
   // console.log(isadmin, islogin, user)
 
   useEffect(() => {
-    const hey = async () => {
-      const token = localStorage.getItem('emstoken');
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}employeefetch`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
-        // console.log(res.data)
-        setnotification(res.data.notification);
-      } catch (err) {
-        console.error(err);
-      }
+    if(notification){
+      setnotification(notification)
     }
-    hey();
-  }, [])
+  }, [notification])
 
   return (
     <div className='navbar w-full bg-white flex items-center justify-between px-4 py-2'>
@@ -50,7 +37,7 @@ const Navbar = () => {
             1
           </span>
         </span> */}
-        <NotificationIcon notifications={notification} />
+        <NotificationIcon notifications={notificatione} />
         {/* <NotificationIcon1 notifications={notification} /> */}
         <div className='flex flex-col items-end px-1'>
           <span className='text-xs  font-medium leading-4 capitalize'>{user?.profile?.name}</span>

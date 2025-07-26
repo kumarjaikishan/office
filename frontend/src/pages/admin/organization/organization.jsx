@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import Modalbox from '../../components/custommodal/Modalbox';
+import Modalbox from '../../../components/custommodal/Modalbox';
 import Addbranch from './addbranch';
 import { useSelector } from 'react-redux';
 import { addCompany } from './helper';

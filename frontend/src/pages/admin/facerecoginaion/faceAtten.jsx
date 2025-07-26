@@ -128,6 +128,17 @@ const FaceAttendance = () => {
         detectionIntervalRef.current = setInterval(() => recognizeAndPunch(), 600);
     };
 
+    const speak = (text) => {
+        if (!text) return;
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US'; // Optional: Set language
+        utterance.rate = 1;       // Optional: Speed (0.1 to 10)
+        utterance.pitch = 1;      // Optional: Pitch (0 to 2)
+
+        window.speechSynthesis.speak(utterance);
+    };
+
     const recognizeAndPunch = async () => {
         if (detectionLockRef.current || !videoRef.current) return;
         detectionLockRef.current = true;
@@ -138,7 +149,7 @@ const FaceAttendance = () => {
                     videoRef.current,
                     new window.faceapi.TinyFaceDetectorOptions({
                         inputSize: 320,         // Try 224 or 320 or 416 for better accuracy, but slower
-                        scoreThreshold: 0.6     // Lower = More sensitive, detects more faces, even unclear ones., higher = Stricter, detects only confident faces, but may miss blurry or angled ones.
+                        scoreThreshold: 0.7     // Lower = More sensitive, detects more faces, even unclear ones., higher = Stricter, detects only confident faces, but may miss blurry or angled ones.
                     })
                 )
                 .withFaceLandmarks()
@@ -161,7 +172,7 @@ const FaceAttendance = () => {
                 detectionLockRef.current = false;
                 return;
             }
-
+            // console.log(bestMatch)
             const matchedId = idMapRef.current[bestMatch.label];
             const empDetail = employee.find(e => e._id === matchedId);
 
@@ -212,10 +223,12 @@ const FaceAttendance = () => {
                 workinghour: formatted ?? '-- : --',
             });
 
-            console.log(res);
+            // console.log(res);
             if (res.status === 206) {
+                speak(`you have already ${modeRef.current}`)
                 toast.warn(res.data.message || `Successfully punched ${modeRef.current}`, { autoClose: 2100 });
             } else {
+                 speak(`Thank You for ${modeRef.current}`)
                 toast.success(res.data.message || `Successfully punched ${modeRef.current}`);
             }
 
@@ -284,9 +297,9 @@ const FaceAttendance = () => {
                             </div>
                         </div>
                         <div className="text-center font-semibold text-gray-700 mb-2">
-                            {detectedEmp.punchIn && detectedEmp.punchOut === '-- : --' ? (
-                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedEmp.name}! You have punched in successfully.</p>
-                            ) : (
+                            {detectedEmp.punchIn && detectedEmp.punchOut === '-- : --' ? ( <div className='text-[14px]'>
+                                <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedEmp.name}!</p>  <p> You have punched in successfully.</p>
+                           </div> ) : (
                                 <p>✅ Great job today, {detectedEmp.name}! You’ve successfully punched out.</p>
                             )}
                         </div>

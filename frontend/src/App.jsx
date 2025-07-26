@@ -1,41 +1,45 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import Login from './pages/Login';
 import { ToastContainer } from 'react-toastify';
-import EmployeeDashboard from './pages/EmployeeDashboard';
 import AdminRoutes from './utils/AdminRoutes';
 import PrivateRoute from './utils/PrivateRoute';
-import Employe from './pages/employee/Employe';
-import Department from './pages/department/Department';
 import Salary from './pages/salary/salary';
-import Attandence from './pages/attandence/Attandence';
 import { useDispatch, useSelector } from 'react-redux';
 import { FirstFetch } from '../store/userSlice';
 import { useEffect } from 'react';
 import Logout from './pages/logout';
-import AttenPerformance from './pages/attandence/AttenPerformance';
 import HolidayForm from './pages/holidays/Holiday';
 import Leave from './pages/leave/Leave';
-import Adminleave from './pages/leave/Adminleave';
 import CompanySettingForm from './pages/settingPage';
 import Profile from './pages/profile/profile';
 import EmployeeProfile from './pages/profile/profile';
-import OrganizationSettings from './pages/organization/organization';
-import LazyFaceAuth from './pages/facerecoginaion/facerecog';
-import FaceAttendance from './pages/facerecoginaion/faceAtten';
+import { empFirstFetch } from '../store/employee';
+import EmpAttenPerformance from './pages/employee/attandencee/empAttandence';
+import Employe from './pages/admin/employee/Employe';
+import Department from './pages/admin/department/Department';
+import Attandence from './pages/admin/attandence/Attandence';
+import AttenPerformance from './pages/admin/attandence/AttenPerformance';
+import Adminleave from './pages/admin/leave/Adminleave';
+import OrganizationSettings from './pages/admin/organization/organization';
+import FaceEnrollment from './pages/admin/facerecoginaion/facerecog';
+import FaceAttendance from './pages/admin/facerecoginaion/faceAtten';
+import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 
 
 function App() {
   const dispatch = useDispatch();
-  const { islogin ,isadmin} = useSelector((state) => state.auth);
+  const { islogin, isadmin } = useSelector((state) => state.auth);
   const user = useSelector((state) => state.user);
 
   useEffect(() => {
     // console.log("login check",islogin)
-    if (islogin && user?.profile?.role=='admin') {
+    if (islogin && user?.profile?.role == 'admin') {
       dispatch(FirstFetch());
+    } else if (islogin && user?.profile?.role == 'employee') {
+      dispatch(empFirstFetch());
     }
-  }, [islogin, dispatch]);
+  }, [islogin, user?.profile?.role]);
 
   return (
     <>
@@ -77,7 +81,7 @@ function App() {
           <Route path="holiday" element={<HolidayForm />} />
           <Route path="adminleave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
-          <Route path="face" element={<LazyFaceAuth />} />
+          <Route path="face" element={<FaceEnrollment />} />
           <Route path="faceatten" element={<FaceAttendance />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />
         </Route>
@@ -87,11 +91,15 @@ function App() {
           element={<PrivateRoute />}
         >
           <Route path="" element={<EmployeeDashboard />} />
+          <Route path="empattandence" element={<EmpAttenPerformance />} />
           <Route path="leave" element={<Leave />} />
         </Route>
-          {/* <Route path="profile" element={<Profile />} /> */}
-          <Route path="profile" element={<EmployeeProfile />} />
-
+        <Route
+          element={<PrivateRoute />}
+        >
+         <Route path="profile" element={<EmployeeProfile />} />
+        </Route>
+        {/* <Route path="profile" element={<EmployeeProfile />} /> */}
       </Routes>
     </>
   )

@@ -3,13 +3,13 @@ import { Button, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInpu
 import './department.css'
 import { useEffect, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
-import Modalbox from '../../components/custommodal/Modalbox';
 import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
 import { adddepartment, columns, delette, fetche, update } from './departmenthelper';
 import { customStyles } from '../attandence/attandencehelper';
 import { CiFilter } from 'react-icons/ci';
 import { useSelector } from 'react-redux';
+import Modalbox from '../../../components/custommodal/Modalbox';
 
 const Department = () => {
   const [openmodal, setopenmodal] = useState(false);

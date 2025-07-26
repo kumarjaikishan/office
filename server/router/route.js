@@ -8,6 +8,7 @@ const attendance = require('../controllers/attandence');
 const employee = require('../controllers/employee');
 const holiday = require('../controllers/holiday');
 const authmiddlewre = require('../middleware/auth_middleware');
+const employeemiddlewre = require('../middleware/employee_middleware');
 const adminmiddleware = require('../middleware/isadmin_middleware');
 const upload = require('../middleware/multer_middleware')
 const checkPermission = require('../middleware/checkpermission');
@@ -65,7 +66,9 @@ router.route('/getholidays').get(authmiddlewre,holiday.getholidays);
 router.route('/addleave').post(authmiddlewre,employee.addleave); 
 router.route('/getleave').get(authmiddlewre,employee.getleave); 
 router.route('/fetchleave').get(authmiddlewre,employee.fetchleave); 
-router.route('/employeefetch').get(authmiddlewre,employee.employeefetch); 
+router.route('/employeefetch').get(authmiddlewre,employeemiddlewre,employee.employeefetch); 
+router.route('/empFirstFetch').get(authmiddlewre,employeemiddlewre,employee.employeefetch); 
+
 
 
 module.exports = router;

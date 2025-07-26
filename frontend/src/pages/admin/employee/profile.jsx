@@ -19,12 +19,10 @@ const EmployeeProfile = ({ viewEmployee }) => {
   const [isload, setisload] = useState(false);
   const [employee, setemployee] = useState(null);
   const [submenu, setsubmenu] = useState(1);
-  const user = useSelector((state) => state.user);
-  const employeee = useSelector((state) => state.employee);
+  const { profile } = useSelector((state) => state.user);
 
   useEffect(() => {
-    console.log(user);
-    console.log(employeee);
+    // console.log(viewEmployee);
     if (!viewEmployee) {
       // console.log(profile)
     }
@@ -55,21 +53,22 @@ const EmployeeProfile = ({ viewEmployee }) => {
         setisload(false);
       }
     }
-    // first();
+    first();
   }, [])
   // if (isload) return;
 
-  return <div className='p-4'>
-    {isload ? <div className="w-full h-[300px] flex gap-5 flex-col justify-center items-center bg-white">
-      <div className='relative'>
-        <GoGear className='animate-spin' style={{ animationDuration: '2.5s' }} size={50} color='teal' />
-        <GoGear className='absolute -bottom-4 left-0 animate-spin' style={{ animationDuration: '3s' }} size={20} color='teal' />
-      </div>
-      <p className='text-teal-600'>loading...</p>
-    </div> :
+  return <>
+    {isload ?
+      <div className="w-full h-[300px] flex gap-5 flex-col justify-center items-center bg-white">
+        <div className='relative'>
+          <GoGear className='animate-spin' style={{ animationDuration: '2.5s' }} size={50} color='teal' />
+          <GoGear className='absolute -bottom-4 left-0 animate-spin' style={{ animationDuration: '3s' }} size={20} color='teal' />
+        </div>
+        <p className='text-teal-600'>loading...</p>
+      </div> :
       <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-4 capitalize">
         <h2 className="text-xl mx-auto font-semibold text-gray-700 mb-4">Employee Details</h2>
-        <div className="flex gap-4 items-start pb-2">
+        <div className="flex gap-4  pb-2 md:items-start">
           <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center overflow-hidden">
             {employee?.profileimage ? (
               <img
@@ -82,7 +81,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             )}
           </div>
 
-          <div className="flex-1">
+          <div className="md:flex-1 w-auto">
             <h3 className="text-xl font-bold text-gray-800">{employee?.userid?.name}</h3>
             <p className="text-sm text-gray-600">{employee?.userid?.role}</p>
 
@@ -91,13 +90,20 @@ const EmployeeProfile = ({ viewEmployee }) => {
               <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">active</span>
             </div>
 
-            <div className="mt-3 justify-start flex flex-wrap text-sm text-gray-600 space-y-1">
+            <div className="hidden md:flex mt-3 justify-start flex-wrap text-sm text-gray-600 space-y-1">
               <div className="flex w-1/2 items-center gap-2"><FaEnvelope className="text-gray-500 lowercase" /> {employee?.userid?.email}</div>
               <div className="flex w-1/2 items-center gap-2"><FaPhone className="text-gray-500" /> {employee?.phone || 'N/A'}</div>
               <div className="flex w-1/2 items-center gap-2"><FaCalendarAlt className="text-gray-500" /> {dayjs(employee?.userid?.createdAt).format('DD MMM, YYYY')}</div>
               <div className="flex w-1/2 items-center gap-2"><FaIdCard className="text-gray-500" /> ID: emp0002</div>
             </div>
           </div>
+
+        </div>
+        <div className="md:hidden mt-3 justify-start flex flex-wrap text-sm text-gray-600 space-y-1">
+          <div className="flex w-1/2 items-center gap-2"><FaEnvelope className="text-gray-500 lowercase" /> {employee?.userid?.email}</div>
+          <div className="flex w-1/2 items-center gap-2"><FaPhone className="text-gray-500" /> {employee?.phone || 'N/A'}</div>
+          <div className="flex w-1/2 items-center gap-2"><FaCalendarAlt className="text-gray-500" /> {dayjs(employee?.userid?.createdAt).format('DD MMM, YYYY')}</div>
+          <div className="flex w-1/2 items-center gap-2"><FaIdCard className="text-gray-500" /> ID: emp0002</div>
         </div>
 
         <div className="pt-1">
@@ -107,7 +113,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             <div onClick={() => setsubmenu(3)} className={`${submenu == 3 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Documents & Skills</div>
           </div>
           {submenu == 1 &&
-            <div className="mt-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-sm text-gray-700">
               <div className="flex items-start gap-2">
                 <FaBirthdayCake className="mt-1 text-gray-500" />
                 <div>
@@ -138,7 +144,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
               </div>
             </div>}
           {submenu == 2 &&
-            <div className="mt-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-sm text-gray-700">
               <div className="flex items-start gap-2">
                 <PiOfficeChairFill className="mt-1 text-gray-500" />
                 <div>
@@ -191,7 +197,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             </div>}
         </div>
       </div>}
-  </div>;
+  </>;
 };
 
 export default EmployeeProfile;

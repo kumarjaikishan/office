@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Modalbox from '../../components/custommodal/Modalbox'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -16,6 +15,7 @@ import { useSelector } from 'react-redux';
 import { FaRegUser } from "react-icons/fa";
 import { CgLayoutGrid } from 'react-icons/cg';
 import dayjs from 'dayjs';
+import Modalbox from '../../../components/custommodal/Modalbox';
 
 const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 

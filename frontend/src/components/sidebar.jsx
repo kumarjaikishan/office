@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FaCalendarCheck, FaMailBulk, FaRegBuilding, FaRegCalendarAlt, FaSitemap, FaTachometerAlt, FaUmbrellaBeach, FaUserCircle, FaUsers, FaUserTie } from 'react-icons/fa'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { SiAudiotechnica } from "react-icons/si";
@@ -18,7 +18,10 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const { islogin } = useSelector((state) => state.auth);
   const user = useSelector((state) => state.user);
-  const role = user.profile.role;
+  useEffect(() => {
+    // console.log(user)
+  }, [user])
+  const role = user?.profile?.role;
 
   const handleLogout = () => {
     swal({
@@ -40,7 +43,7 @@ const Sidebar = () => {
         <span className='hidden lg:block capitalize'>{user?.company?.name || 'company Name'}</span>
       </div>
       {menu.map((item) => {
-         const filteredItems = item.items.filter(item => item.roles.includes(role));
+        const filteredItems = item.items.filter(item => item.roles.includes(role));
 
         return <div className='w-full' key={item.title}>
           <div className='hidden lg:block mt-3 font-light text-gray-400'>{item.title}</div>
@@ -58,7 +61,7 @@ const Sidebar = () => {
               <NavLink
                 to={iteme.link}
                 end
-                key={iteme.menu}
+                key={iteme.link}
                 className={({ isActive }) =>
                   `flex justify-center lg:justify-start w-full mb-1 px-2 items-center gap-3 py-2 
                                     rounded text-gray-600
@@ -86,6 +89,12 @@ const menu = [
         link: '/admin-dashboard',
         icon: <VscDashboard />,
         roles: ['admin']
+      },
+      {
+        menu: "Dashboard",
+        link: '/employe-dashboard',
+        icon: <VscDashboard />,
+        roles: ['employee']
       },
       {
         menu: "Organization",
@@ -143,8 +152,8 @@ const menu = [
       },
       {
         menu: "Attendance",
-        link: '/admin-dashboard/attandence',
-        icon: <FaCalendarCheck />,
+        link: '/employe-dashboard/empattandence',
+        icon: <TbReportAnalytics />,
         roles: ['employee']
       },
       // {

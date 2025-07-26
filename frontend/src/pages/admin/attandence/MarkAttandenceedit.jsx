@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Modalbox from '../../components/custommodal/Modalbox'
+import Modalbox from '../../../components/custommodal/Modalbox'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -18,7 +18,7 @@ import { CgLayoutGrid } from 'react-icons/cg';
 import dayjs from 'dayjs';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { FirstFetch } from '../../../store/userSlice';
+import { FirstFetch } from '../../../../store/userSlice';
 
 const MarkAttandenceedit = ({ openmodal,setisload,dispatch, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 

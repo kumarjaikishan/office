@@ -1,11 +1,11 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
-import DashboardCard from '../components/dashboardCard';
+import DashboardCard from '../../components/dashboardCard';
 import { toast } from 'react-toastify';
 import { FaBuilding, FaRegUser, FaTachometerAlt, FaUsers } from 'react-icons/fa'
 import dayjs from 'dayjs';
-import { FirstFetch, updateAttendance } from '../../store/userSlice';
+import { FirstFetch, updateAttendance } from '../../../store/userSlice';
 import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Tooltip, Typography } from '@mui/material';
 import { CiFilter } from 'react-icons/ci';
 

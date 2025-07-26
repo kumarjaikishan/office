@@ -12,7 +12,7 @@ const authmiddlewre = async (req, res, next) => {
         // console.log("authmiddleware",verified);
 
         req.user = verified;
-        req.userid = verified.userId;
+        req.userid = verified.id;
         req.token = token;
         next();
     } catch (error) {

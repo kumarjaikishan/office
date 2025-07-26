@@ -3,7 +3,7 @@ import TextField from '@mui/material/TextField';
 import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, OutlinedInput, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
-import Modalbox from '../../components/custommodal/Modalbox';
+import Modalbox from '../../../components/custommodal/Modalbox';
 import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
 import InputLabel from '@mui/material/InputLabel';
@@ -20,7 +20,7 @@ import { FiDownload } from "react-icons/fi";
 import { TbPasswordUser } from "react-icons/tb";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
-import EmployeeProfile from "../profile/profile";
+import EmployeeProfile from "./profile";
 import { useSelector } from "react-redux";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
@@ -29,7 +29,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { FaRegUser } from "react-icons/fa";
-import useImageUpload from "../../utils/imageresizer";
+import useImageUpload from "../../../utils/imageresizer";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);

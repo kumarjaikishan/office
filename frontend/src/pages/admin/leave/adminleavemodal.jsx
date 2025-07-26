@@ -1,5 +1,5 @@
 import React from 'react'
-import Modalbox from '../../components/custommodal/Modalbox';
+import Modalbox from '../../../components/custommodal/Modalbox';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { IoIosSend } from 'react-icons/io';
 import axios from 'axios';
@@ -21,8 +21,8 @@ const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, s
                     }
                 }
             );
-setopenmodal(false);
-setInp(init);
+            setopenmodal(false);
+            setInp(init);
             toast.success(res.data.message, { autoClose: 2000 })
         } catch (err) {
             console.error(err);

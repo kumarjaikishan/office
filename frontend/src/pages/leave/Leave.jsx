@@ -9,7 +9,8 @@ import { CiFilter } from 'react-icons/ci'
 import { toast } from 'react-toastify'
 import Modalbox from '../../components/custommodal/Modalbox'
 import { GoPlus } from 'react-icons/go'
-import { customStyles } from '../attandence/attandencehelper'
+import { useSelector } from 'react-redux'
+import { customStyles } from '../admin/attandence/attandencehelper'
 
 const Leave = () => {
     const init = {
@@ -20,35 +21,17 @@ const Leave = () => {
     }
     const [inp, setinp] = useState(init);
     const [leaverequest, setleaverequest] = useState([]);
+    const { leave } = useSelector((state) => state.employee);
     const [openmodal, setopenmodal] = useState(false)
     const [loading, setLoading] = useState(false)
     const changehandle = (value, field) => {
         setinp({ ...inp, [field]: value })
     }
     useEffect(() => {
-        const fetche = async () => {
-            const token = localStorage.getItem('emstoken');
-            setLoading(true)
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}getleave`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-                console.log(res.data);
-                setleaverequest(res.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setopenmodal(false)
-                setLoading(false)
-                setinp(init);
-            }
+        if (leave) {
+            setleaverequest(leave);
         }
-        fetche()
-    }, [])
+    }, [leave])
 
     const handleSubmit = async (e) => {
         e.preventDefault();

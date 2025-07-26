@@ -6,10 +6,10 @@ import { Box, FormControl, InputLabel, Select, MenuItem, TextField, Button } fro
 import { BiMessageRoundedError } from 'react-icons/bi';
 import DataTable from 'react-data-table-component';
 import { useSelector } from 'react-redux';
-import EmployeeProfileCard from '../../components/performanceCard';
 import { customStyles } from './attandencehelper';
 import { RxReset } from "react-icons/rx";
 import { IoMdTime } from 'react-icons/io';
+import EmployeeProfileCard from '../../../components/performanceCard';
 
 const AttenPerformance = () => {
     const { userid } = useParams();
