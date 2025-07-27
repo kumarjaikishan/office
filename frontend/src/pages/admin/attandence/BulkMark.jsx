@@ -91,7 +91,7 @@ const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, seto
                             />
                         </LocalizationProvider>
 
-                        <Box sx={{ width: '100%', gap: 0, display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ width: '100%',  gap: 0, display: 'flex', flexDirection: 'column' }}>
                             <div className='w-full  flex justify-between'>
                                 <Typography>Select Employee</Typography>
                                 <span className='flex gap-1'>
@@ -101,9 +101,9 @@ const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, seto
                                     /> <label>Select All</label>
                                 </span>
                             </div>
-                            <div className='flex max-h-[200px] pt-1 pl-1 flex-col border border-gray-400 w-full rounded' >
-                                {employee?.map((val) => {
-                                    return <div className='m-0 p-0 gap-1 flex items-center'>
+                            <div className='flex max-h-[200px] overflow-y-auto pt-1 pl-1 flex-col border border-gray-400 w-full rounded' >
+                                {employee?.map((val,ind) => {
+                                    return <div key={ind} className='m-0 p-0 gap-1 flex items-center'>
                                         <input
                                             type="checkbox"
                                             value={val._id}

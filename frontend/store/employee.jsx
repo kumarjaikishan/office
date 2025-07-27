@@ -9,7 +9,7 @@ export const empFirstFetch = createAsyncThunk(
         const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}empFirstFetch`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        console.log("empFirstFetch", res)
+        console.log("empFirstFetch", res.data)
         return res.data;
     }
 );

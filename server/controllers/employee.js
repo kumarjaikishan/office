@@ -62,11 +62,12 @@ const fetchleave = async (req, res, next) => {
 const employeefetch = async (req, res, next) => {
   try {
     const notification = await notificationmodal.find({ userId: req.user.id }).sort({ createdAt: -1 });
-    const attendance = await attendanceModal.find({ employeeId: req.empId }).sort({date:-1});
-    const leave = await Leave.find({ employeeId: req.empId });
-    const companySetting = await companySchema.findById( req.companyId );
+    const attendance = await attendanceModal.find({ employeeId: req.user.employeeId }).sort({date:-1});
+    const leave = await Leave.find({ employeeId: req.user.employeeId });
+    const employeeee = await employee.findById(req.user.employeeId).populate('branchId','companyId');
+    const companySetting = await companySchema.findById(employeeee.branchId.companyId);
 
-    return res.status(200).json({profile:req.profile, notification, leave, attendance,companySetting });
+    return res.status(200).json({profile:employeeee, notification, leave, attendance,companySetting });
 
   } catch (error) {
     console.error("Attendance error:", error);

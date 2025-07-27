@@ -2,7 +2,7 @@ const user = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const userRegister = async (req, res,next) => {
+const userRegister = async (req, res, next) => {
     try {
         const { name, email, role, password } = req.body;
         if (!name || !email || !role || !password) {
@@ -24,10 +24,10 @@ const userRegister = async (req, res,next) => {
 
     } catch (error) {
         console.log(error.message)
-         return next({ status: 500, message: error.message });
+        return next({ status: 500, message: error.message });
     }
 }
-const userLogin = async (req, res,next) => {
+const userLogin = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -36,38 +36,46 @@ const userLogin = async (req, res,next) => {
     try {
         const isUser = await user.findOne({ email });
         // console.log(isUser)
-    if (!isUser) {
-        return next({ status: 400, message: "User not found" });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, isUser.password);
-    if (!passwordMatch) {
-        return next({ status: 400,success:false, message: "Passowrd is incorrect" });
-
-    }
-
-    const token = jwt.sign({ id: isUser._id,name:isUser.name , role: isUser.role },
-        process.env.JWT_Key,
-        { expiresIn: '10d' }
-    )
-
-    isUser.password = undefined;
-    isUser.createdAt = undefined;
-    isUser._id = undefined;
-
-    return res.status(200).json({
-        success: true,
-        message: 'login successfull',
-        token,
-        user: {
-            name:isUser.name,
-            email:isUser.email,
-            role:isUser.role
+        if (!isUser) {
+            return next({ status: 400, message: "User not found" });
         }
-    })
+
+        const passwordMatch = await bcrypt.compare(password, isUser.password);
+        if (!passwordMatch) {
+            return next({ status: 400, success: false, message: "Passowrd is incorrect" });
+
+        }
+        let tobe = {
+            id: isUser._id,
+            name: isUser.name,
+            role: isUser.role
+        }
+        if (isUser.role !== 'admin' && isUser.role !== 'superadmin') {
+            tobe.employeeId = isUser.employeeId
+        }
+
+        const token = jwt.sign(tobe,
+            process.env.JWT_Key,
+            { expiresIn: '10d' }
+        )
+
+        isUser.password = undefined;
+        isUser.createdAt = undefined;
+        isUser._id = undefined;
+
+        return res.status(200).json({
+            success: true,
+            message: 'login successfull',
+            token,
+            user: {
+                name: isUser.name,
+                email: isUser.email,
+                role: isUser.role
+            }
+        })
     } catch (error) {
-         console.log(error.message)
-          return next({ status: 500, message: error.message });
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
     }
 }
 
