@@ -62,7 +62,7 @@ const Leave = () => {
     }
     return (
         <div className='employee p-2.5'>
-            <h2 className="text-2xl mb-4 font-bold text-slate-800">Manage Employees</h2>
+            <h2 className="text-2xl mb-4 font-bold text-slate-800">Manage Leaves</h2>
             <div className='flex justify-end mb-2'>
                 <div className="flex gap-1">
                     <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Leave</Button>

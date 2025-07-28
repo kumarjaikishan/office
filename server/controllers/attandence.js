@@ -331,7 +331,7 @@ const facecheckout = async (req, res, next) => {
     }
 
     if (record.punchOut) {
-      return res.status(206).json({ message: 'Already checked in today', attendance: existing });
+      return res.status(206).json({ message: 'Already checked Out today', attendance: record });
     }
 
     // Assign punchOut time

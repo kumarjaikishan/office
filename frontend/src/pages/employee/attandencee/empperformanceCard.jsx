@@ -68,8 +68,8 @@ const EmployeePerformanceCard = ({ attandence, hell }) => {
 
                 <div className="absolute w-63 h-63 rounded-full overflow-hidden border-4 border-white">
                     <img
-                        src={profile.profileimage || employepic}
-                        alt={profile.designation || "Employee"}
+                        src={profile?.profileimage || employepic}
+                        alt={profile?.designation || "Employee"}
                         className="w-full h-full object-cover"
                     />
                 </div>

@@ -9,7 +9,7 @@ const authmiddlewre = async (req, res, next) => {
     try {
         const token = bearertoken.replace("Bearer", "").trim();
         const verified = jwt.verify(token, process.env.JWT_Key);
-        console.log("authmiddleware",verified);
+        // console.log("authmiddleware",verified);
 
         req.user = verified;
         req.userid = verified.id;

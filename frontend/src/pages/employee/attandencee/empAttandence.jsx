@@ -13,7 +13,7 @@ import { customStyles } from '../../admin/attandence/attandencehelper';
 
 const EmpAttenPerformance = () => {
     const [attandence, setattandence] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const { company, holidays } = useSelector((state) => state.user);
     const { attendance, companysetting,profile } = useSelector((state) => state.employee);
     const [setting, setsetting] = useState(null)

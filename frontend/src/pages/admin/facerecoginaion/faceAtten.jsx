@@ -264,7 +264,7 @@ const FaceAttendance = () => {
                     <button onClick={() => handleMode('punch-out')} className="bg-red-500 w-xl text-white px-4 py-2 rounded">Punch Out</button>
                 </div>
 
-                {availableCameras.length > 1 && (
+                {availableCameras.length > 0 && (
                     <div className="mb-2">
                         <label className="block text-sm font-semibold">Select Camera:</label>
                         <select
