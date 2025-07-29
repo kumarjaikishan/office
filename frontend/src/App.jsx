@@ -25,6 +25,7 @@ import FaceEnrollment from './pages/admin/facerecoginaion/facerecog';
 import FaceAttendance from './pages/admin/facerecoginaion/faceAtten';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 import Leave from './pages/employee/leave/Leave';
+import LedgerSystem from './pages/employee/ledger/ledger';
 
 
 function App() {
@@ -93,6 +94,7 @@ function App() {
           <Route path="" element={<EmployeeDashboard />} />
           <Route path="empattandence" element={<EmpAttenPerformance />} />
           <Route path="leave" element={<Leave />} />
+          <Route path="ledger" element={<LedgerSystem />} />
         </Route>
         <Route
           element={<PrivateRoute />}

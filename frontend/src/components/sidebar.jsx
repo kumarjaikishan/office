@@ -139,6 +139,12 @@ const menu = [
         roles: ['employee']
       },
       {
+        menu: "Ledger",
+        link: '/employe-dashboard/ledger',
+        icon: <FaUmbrellaBeach />,
+        roles: ['admin','employee']
+      },
+      {
         menu: "Leave Request",
         link: '/admin-dashboard/adminleave',
         icon: <FaMailBulk />,
