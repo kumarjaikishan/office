@@ -13,6 +13,7 @@ import { addCompany } from './helper';
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import Department from '../department/Department';
 import { FaRegUser } from 'react-icons/fa';
+import { AiFillAmazonCircle } from "react-icons/ai";
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -134,7 +135,7 @@ export default function OrganizationSettings() {
                         <div className="relative flex items-center mx-auto">
                             <div className="relative w-30 h-30 mx-auto">
                                 <img
-                                    src={companyinp.logo || 'https://via.placeholder.com/100'}
+                                    src={companyinp?.logo || <AiFillAmazonCircle/> }
                                     alt="Company Logo"
                                     className="w-full h-full object-cover rounded-full border-2 border-dashed border-blue-300"
                                 />

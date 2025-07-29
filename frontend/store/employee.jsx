@@ -22,6 +22,7 @@ const EmployeeSlice = createSlice({
         attendance: null,
         leave: null,
         salary: null,
+        holiday: null,
         companysetting: null,
         status: 'idle',
     },
@@ -32,6 +33,7 @@ const EmployeeSlice = createSlice({
             state.notification = null;
             state.attendance = null;
             state.leave = null;
+            state.holiday = null;
             state.companysetting = null;
             state.salary = null;
         },
@@ -44,6 +46,7 @@ const EmployeeSlice = createSlice({
                 state.attendance = action.payload?.attendance;
                 state.leave = action.payload?.leave;
                 state.companysetting = action.payload?.companySetting;
+                state.holiday = action.payload?.holiday;
                 state.salary = action.payload?.salary;
                 state.status = 'succeeded';
             })

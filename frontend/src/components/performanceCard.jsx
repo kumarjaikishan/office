@@ -18,6 +18,8 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
     useEffect(() => {
         // console.log(attandence)
     }, [attandence]);
+     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
+
 
     const total =
         (hell?.present?.length || 0) +
@@ -63,7 +65,7 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
 
                 <div className="absolute w-63 h-63 rounded-full overflow-hidden border-4 border-white">
                     <img
-                        src={employee?.profileimage || "/default-avatar.png"}
+                        src={employee?.profileimage || employepic}
                         alt={employee?.name || "Employee"}
                         className="w-full h-full object-cover"
                     />

@@ -267,7 +267,7 @@ const Employe = () => {
   }
 
   const edite = (employee) => {
-    console.log(employee)
+    // console.log(employee)
     setisupdate(true);
     setInp({
       employeeId: employee._id,
@@ -480,7 +480,7 @@ const Employe = () => {
                 <TextField fullWidth value={inp.salary} onChange={(e) => handleChange(e, 'salary')} label="salary" size="small" />
               </Box>
 
-              <div className="mt-1 gap-2 flex items-center">
+              {/* <div className="mt-1 gap-2 flex items-center">
                 {!photoPreview && <div className="chooseFile w-[250px] h-[90px] rounded flex flex-col justify-center
                 items-center gap-2 cursor-pointer border-teal-700 text-teal-700 border-2 border-dashed " onClick={() => inputref.current.click()}>
                   <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
@@ -488,7 +488,24 @@ const Employe = () => {
                   Upload
                 </div>}
                 {photoPreview && <img src={photoPreview} alt="Preview" className="mt-2" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }} />}
-                {photoPreview && <Button color="warning" onClick={resetPhoto} startIcon={<GrPowerReset />} size="small" sx={{ height: '30px' }} variant="outlined">Reset</Button>}
+               {photoPreview && <Button color="warning" onClick={resetPhoto} startIcon={<GrPowerReset />} size="small" sx={{ height: '30px' }} variant="outlined">Reset</Button>}
+              </div> */}
+              <div className="mt-1 gap-2 flex items-center relative">
+                <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
+
+                {/* { <Avatar
+                    sx={{ width: 100, height: 100 }}
+                    alt={inp.employeeName} src={photoPreview} />} */}
+                {photoPreview ?
+                  <img src={photoPreview} alt="Preview" className="mt-2 w-[100px] h-[100px] rounded-full object-cover" />
+                  : <Avatar
+                    sx={{ width: 100, height: 100 }}
+                    alt={inp.employeeName} src="/static/images/avatar/1.jpg" />}
+                <span onClick={() => inputref.current.click()}
+                  className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
+                >
+                  <MdOutlineModeEdit size={18} />
+                </span>
               </div>
 
               {isupdate &&

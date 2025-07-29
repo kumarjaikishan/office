@@ -7,10 +7,10 @@ import React, { useEffect, useState } from 'react'
 import DataTable from 'react-data-table-component'
 import { CiFilter } from 'react-icons/ci'
 import { toast } from 'react-toastify'
-import Modalbox from '../../components/custommodal/Modalbox'
+import Modalbox from '../../../components/custommodal/Modalbox'
 import { GoPlus } from 'react-icons/go'
 import { useSelector } from 'react-redux'
-import { customStyles } from '../admin/attandence/attandencehelper'
+import { customStyles } from '../../admin/attandence/attandencehelper'
 
 const Leave = () => {
     const init = {
@@ -73,7 +73,6 @@ const Leave = () => {
                 columns={columns}
                 data={leaverequest}
                 pagination
-                selectableRows
                 highlightOnHover
             />
 
@@ -168,12 +167,12 @@ export const columns = [
         name: "Status",
         selector: (row) => <span
             className={`
-    px-2 py-1 capitalize rounded-l relative overflow-hidden
-    before:absolute before:content-[''] before:w-[2px] before:h-full before:left-0
-    ${row.status === 'approved' && 'text-green-700 bg-green-100 before:bg-green-800'}
-    ${row.status === 'pending' && 'text-yellow-700 bg-yellow-100 before:bg-yellow-600'}
-    ${row.status === 'rejected' && 'text-red-700 bg-red-100 before:bg-red-800'}
-  `}
+                  px-2 py-1 capitalize rounded-l relative overflow-hidden
+                  before:absolute before:content-[''] before:w-[2px] before:h-full before:left-0
+                  ${row.status === 'approved' && 'text-green-700 bg-green-100 before:bg-green-800'}
+                  ${row.status === 'pending' && 'text-yellow-700 bg-yellow-100 before:bg-yellow-600'}
+                  ${row.status === 'rejected' && 'text-red-700 bg-red-100 before:bg-red-800'}
+               `}
         >
             {row.status}
         </span>

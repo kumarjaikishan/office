@@ -17,6 +17,7 @@ import { MdOutlineModeEdit } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { toast } from 'react-toastify';
 import { customStyles } from '../admin/attandence/attandencehelper';
+import HolidayCalander from './holidayCalander';
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {
@@ -32,6 +33,11 @@ const HolidayForm = () => {
   const [holidaylist, setholidaylist] = useState([])
   const [weeklyOffs, setweeklyOffs] = useState([1])
 
+  const [filterYear, setFilterYear] = useState("All");
+  const [filterMonth, setFilterMonth] = useState("All");
+  const [filterType, setFilterType] = useState("All");
+
+
   useEffect(() => {
     setweeklyOffs(company?.weeklyOffs || [1]);
     // console.log(company)
@@ -43,7 +49,7 @@ const HolidayForm = () => {
 
   const impordate = ['06/15/2025', '06/10/2025'];
   const highlightedDates = holidaylist.map(dateObj => ({
-    date: dayjs(dateObj.date).toDate(), // Convert to Date object
+    date: dayjs(dateObj.date).toDate(),
     name: dateObj.name
   }));
 
@@ -197,57 +203,27 @@ const HolidayForm = () => {
     setdescription('');
   }
 
+  const years = Array.from(
+  new Set(holidaylist.map(h => dayjs(h.fromDate).year()))
+);
+
+const months = Array.from(
+  new Set(holidaylist.map(h => dayjs(h.fromDate).format("MMMM")))
+);
+const filteredHolidays = holidays.filter((h) => {
+  const fromDate = dayjs(h.From, "DD MMM, YYYY");
+  const yearMatch = filterYear === "All" || fromDate.year().toString() === filterYear;
+  const monthMatch = filterMonth === "All" || fromDate.format("MMMM") === filterMonth;
+  const typeMatch = filterType === "All" || h.type === filterType;
+
+  return yearMatch && monthMatch && typeMatch;
+});
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box className="flex flex-col md:flex-row gap-4 p-1 md:p-4">
-        <Box className="bg-white shadow rounded p-1 w-full max-w-md">
-          <StaticDatePicker
-            displayStaticWrapperAs="desktop"
-            value={null}
-            onChange={() => { }}
-            slots={{
-              day: (props) => {
-                const date = props.day;
-                const matched = highlightedDates.find(d =>
-                  date.toDateString() === d.date.toDateString()
-                );
-
-                const isWeeklyOff = weeklyOffs?.includes(date.getDay());
-
-                const tooltipText = matched ? matched.name : (isWeeklyOff ? 'Weekly Off' : '');
-
-                return (
-                  <Tooltip title={tooltipText}>
-                    <PickersDay
-                      {...props}
-                      sx={{
-                        ...(isWeeklyOff && {
-                          backgroundColor: 'teal',
-                          borderRadius: '50%',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: 'darkcyan', // darker teal on hover
-                            color: 'white',
-                          },
-                        }),
-                        ...(matched && {
-                          backgroundColor: '#ffeb3b',
-                          borderRadius: '50%',
-                          color: 'black',
-                          '&:hover': {
-                            backgroundColor: '#ffeb3b', // darker teal on hover
-                            color: 'black',
-                          },
-                        }),
-                      }}
-                    />
-                  </Tooltip>
-                );
-              }
-            }}
-          />
-        </Box>
+        <HolidayCalander highlightedDates={highlightedDates} weeklyOffs={weeklyOffs} />
 
         <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
           <TextField
@@ -306,10 +282,54 @@ const HolidayForm = () => {
         </Box>
       </Box>
       <div className='p-1 md:p-4'>
+        <div className="flex flex-wrap gap-4 mb-4 items-center justify-start">
+          <TextField
+            select
+            size="small"
+            label="Filter by Year"
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value="All">All</option>
+            {years?.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </TextField>
+
+          <TextField
+            select
+            size="small"
+            label="Filter by Month"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value="All">All</option>
+            {months.map((month) => (
+              <option key={month} value={month}>{month}</option>
+            ))}
+          </TextField>
+
+          <TextField
+            select
+            size="small"
+            label="Filter by Type"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value="All">All</option>
+            {[...new Set(holidays.map(h => h.type))].map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </TextField>
+        </div>
+
         <h2 className='font-semibold text-center text-xl' >Holiday List</h2>
         <DataTable
           columns={columns}
-          data={holidays}
+          data={filteredHolidays}
           pagination
           selectableRows
           customStyles={customStyles}

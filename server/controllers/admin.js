@@ -182,6 +182,7 @@ const updateemployee = async (req, res, next) => {
 
         // Get existing employee data (to keep old image if no new one uploaded)
         const existingEmployee = await employeeModal.findById(employeeId);
+        // console.log("existingEmployee",existingEmployee)
         if (!existingEmployee) {
             return next({ status: 404, message: "Employee not found" });
         }
@@ -233,12 +234,6 @@ const updateemployee = async (req, res, next) => {
 
             // Set new photo URL
             updatedFields.profileimage = cloudinaryResult.secure_url;
-
-            if (existingEmployee.profileimage != "") {
-                let arraye = [];
-                arraye.push(existingEmployee.profileimage);
-                await removePhotoBySecureUrl(arraye);
-            }
         }
 
         // Update employee
@@ -252,6 +247,12 @@ const updateemployee = async (req, res, next) => {
             updatedFields,
             { new: true }
         );
+
+        if (existingEmployee.profileimage && existingEmployee.profileimage !== "") {
+            let arraye = [];
+            arraye.push(existingEmployee.profileimage);
+            await removePhotoBySecureUrl(arraye);
+        }
 
         if (!updatedEmployee) {
             return next({ status: 400, message: "Something went wrong while updating" });
@@ -472,10 +473,10 @@ const addBranch = async (req, res, next) => {
 
         // Update user roles to 'manager' if managerIds provided
         if (managerIds.length > 0) {
-           
+
             // Or, if you want faster parallel execution:
-            await Promise.all(managerIds.map(empId => 
-                usermodal.findOneAndUpdate({employeeId:empId}, { role: 'manager' })
+            await Promise.all(managerIds.map(empId =>
+                usermodal.findOneAndUpdate({ employeeId: empId }, { role: 'manager' })
             ));
         }
 
@@ -507,19 +508,19 @@ const editBranch = async (req, res, next) => {
 
         // Find added managers (in new but not in previous)
         const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
-         console.log("new to be added id", addedManagerIds)
+        console.log("new to be added id", addedManagerIds)
 
         // Update the branch
         await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
 
         // Demote removed managers to "employee"
         for (const removedId of removedManagerIds) {
-            await usermodal.findOneAndUpdate({employeeId:removedId}, { role: 'employee' });
+            await usermodal.findOneAndUpdate({ employeeId: removedId }, { role: 'employee' });
         }
 
         // Promote new managers to "manager"
         for (const addedId of addedManagerIds) {
-            await usermodal.findOneAndUpdate({employeeId:addedId}, { role: 'manager' });
+            await usermodal.findOneAndUpdate({ employeeId: addedId }, { role: 'manager' });
         }
 
         return res.status(200).json({ message: "Branch Edited Successfully" });

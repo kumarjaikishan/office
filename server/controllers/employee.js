@@ -4,6 +4,7 @@ const Leave = require('../models/leave');
 const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
 const companySchema = require('../models/company')
+const holidayschema = require('../models/holiday')
 
 
 const addleave = async (req, res, next) => {
@@ -62,12 +63,18 @@ const fetchleave = async (req, res, next) => {
 const employeefetch = async (req, res, next) => {
   try {
     const notification = await notificationmodal.find({ userId: req.user.id }).sort({ createdAt: -1 });
-    const attendance = await attendanceModal.find({ employeeId: req.user.employeeId }).sort({date:-1});
+    const attendance = await attendanceModal.find({ employeeId: req.user.employeeId }).sort({ date: -1 });
     const leave = await Leave.find({ employeeId: req.user.employeeId });
-    const employeeee = await employee.findById(req.user.employeeId).populate('branchId','companyId');
+    const employeeee = await employee.findById(req.user.employeeId)
+    .populate('branchId')
+    .populate('department')
+    .populate('userid');
+    
+    const holiday = await holidayschema.find({ companyId: employeeee.branchId.companyId });
     const companySetting = await companySchema.findById(employeeee.branchId.companyId);
 
-    return res.status(200).json({profile:employeeee, notification, leave, attendance,companySetting });
+    // console.log(employeeee)
+    return res.status(200).json({ profile: employeeee,holiday, notification, leave, attendance, companySetting });
 
   } catch (error) {
     console.error("Attendance error:", error);

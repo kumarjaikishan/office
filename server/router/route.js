@@ -69,6 +69,4 @@ router.route('/fetchleave').get(authmiddlewre,employee.fetchleave);
 router.route('/employeefetch').get(authmiddlewre,authorizeRoles('employee'),employeemiddlewre,employee.employeefetch); 
 router.route('/empFirstFetch').get(authmiddlewre,authorizeRoles('employee'),employee.employeefetch); 
 
-
-
 module.exports = router;

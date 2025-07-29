@@ -19,7 +19,6 @@ const EmployeeProfile = ({ viewEmployee }) => {
   const [isload, setisload] = useState(false);
   const [employee, setemployee] = useState(null);
   const [submenu, setsubmenu] = useState(1);
-  const { profile } = useSelector((state) => state.user);
 
   useEffect(() => {
     // console.log(viewEmployee);

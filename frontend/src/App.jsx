@@ -10,7 +10,6 @@ import { FirstFetch } from '../store/userSlice';
 import { useEffect } from 'react';
 import Logout from './pages/logout';
 import HolidayForm from './pages/holidays/Holiday';
-import Leave from './pages/leave/Leave';
 import CompanySettingForm from './pages/settingPage';
 import Profile from './pages/profile/profile';
 import EmployeeProfile from './pages/profile/profile';
@@ -25,6 +24,7 @@ import OrganizationSettings from './pages/admin/organization/organization';
 import FaceEnrollment from './pages/admin/facerecoginaion/facerecog';
 import FaceAttendance from './pages/admin/facerecoginaion/faceAtten';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
+import Leave from './pages/employee/leave/Leave';
 
 
 function App() {

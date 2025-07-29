@@ -55,7 +55,7 @@ export const NotificationIcon = ({ notifications }) => {
                 </li>
               ))}
             </ul>
-            <div className='flex justify-end gap-2 text-[12px] border-t-1 pt-2'>
+            <div className='flex justify-end gap-2 text-[12px]  pt-2'>
               <Button size='small' color='warning' variant='outlined' startIcon={<FaTrashAlt size={14} />}>Clear All</Button>
               <Button size='small' variant='contained' startIcon={<MdMarkEmailRead size={14} />} >Mark Read</Button>
            </div>
