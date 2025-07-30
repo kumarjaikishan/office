@@ -1,43 +1,44 @@
 import { IconButton } from "@mui/material";
+import dayjs from "dayjs";
 import { MdDelete, MdEdit } from "react-icons/md";
 
-export const getLedgerColumns = (handleEditEntry, handleDeleteEntry) => [
-  {
-    name: "S.no",
-    selector: (row) => row.sno,
-    width: '60px'
-  },
-  {
-    name: "Date",
-    selector: (row) => row.date
-  },
-  {
-    name: "Particulars",
-    selector: (row) => row.particular
-  },
-  {
-    name: "Debit",
-    selector: (row) => row.debit || '-'
-  },
-  {
-    name: "Credit",
-    selector: (row) => row.credit || '-'
-  },
-  {
-    name: "Balance",
-    selector: (row) => row.balance,
-    width: '90px'
-  },
-  {
-    name: "Action",
-    cell: (row) => (
-      <>
-        <IconButton size="small" onClick={() => handleEditEntry(row)}><MdEdit /></IconButton>
-        <IconButton size="small" onClick={() => handleDeleteEntry(row._id)}><MdDelete /></IconButton>
-      </>
-    ),
-    ignoreRowClick: true,
-    allowOverflow: true,
-    button: true
-  }
+export const getLedgerColumns = (handleEdit, handleDelete) => [
+    {
+        name: 'S.No',
+        selector: row => row.sno,
+        width: '60px'
+    },
+    {
+        name: 'Date',
+        selector: row => dayjs(row.date).format('DD MMM, YYYY'),
+        sortable: true,
+    },
+    {
+        name: 'Particular',
+        selector: row => row.particular,
+    },
+    {
+        name: 'Debit',
+        selector: row => row.debit,
+        width: '90px'
+    },
+    {
+        name: 'Credit',
+        selector: row => row.credit,
+        width: '90px'
+    },
+    {
+        name: 'Balance',
+        selector: row => row.balance,
+    },
+    {
+        name: 'Actions',
+        cell: (row) => (
+            <>
+                <MdEdit title="Edit Entry" onClick={() => handleEdit(row)} style={{ cursor: 'pointer', marginRight: 10 }} />
+                <MdDelete title="Delete Entry" onClick={() => handleDelete(row._id)} style={{ cursor: 'pointer' }} />
+            </>
+        ),
+        width: '120px',
+    }
 ];

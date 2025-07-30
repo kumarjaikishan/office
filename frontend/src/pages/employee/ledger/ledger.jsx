@@ -13,6 +13,7 @@ import { IoMdCloudDownload } from "react-icons/io";
 import DataTable from "react-data-table-component";
 import { getLedgerColumns } from "./ledgerhelper";
 import swal from "sweetalert";
+import dayjs from "dayjs";
 
 const LedgerSystem = () => {
   const token = localStorage.getItem("emstoken");
@@ -63,6 +64,7 @@ const LedgerSystem = () => {
   const saveEntry = async () => {
     const debit = parseFloat(entry.debit || 0);
     const credit = parseFloat(entry.credit || 0);
+
     if (debit && credit) {
       toast.warn("Only one of Debit or Credit allowed");
       return;
@@ -71,6 +73,7 @@ const LedgerSystem = () => {
     try {
       const payload = {
         ...entry,
+        date: new Date(entry.date), // ✅ Convert to Date object
         ledgerId: selectedLedger._id,
         debit: debit || 0,
         credit: credit || 0
@@ -83,17 +86,21 @@ const LedgerSystem = () => {
       } else {
         res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}ledgerentry`, payload, { headers });
       }
+
       toast.success(res.data.message);
       setOpen(false);
       fetchLedgersEntires();
     } catch (error) {
+      console.log(error)
       toast.error("Error saving entry");
     }
   };
 
+
   const handleEditEntry = (entry) => {
+    const formattedDate = new Date(entry.date).toISOString().split("T")[0]; // ✅ format to 'YYYY-MM-DD'
     setEntry({
-      date: entry.date,
+      date: formattedDate,
       particular: entry.particular,
       debit: entry.debit?.toString() || "",
       credit: entry.credit?.toString() || ""
@@ -101,6 +108,7 @@ const LedgerSystem = () => {
     setEditIndex(entry._id);
     setOpen(true);
   };
+
 
   const handleDeleteEntry = async (idx) => {
     swal({
@@ -150,21 +158,23 @@ const LedgerSystem = () => {
   };
 
   const filtered = selectedledgerEntry?.filter(e => {
-    const d = new Date(e.date);
-    const yearMatch = filterYear ? d.getFullYear().toString() === filterYear : true;
-    const monthMatch = filterMonth ? (d.getMonth() + 1).toString() === filterMonth : true;
-    const dateMatch = filterDate ? e.date === filterDate : true;
+    const d = dayjs(e.date);
+    const yearMatch = filterYear ? d.year() === Number(filterYear) : true;
+    const monthMatch = filterMonth ? (d.month() + 1) === Number(filterMonth) : true;
+    const dateMatch = filterDate ? d.isSame(filterDate, "day") : true;
     return yearMatch && monthMatch && dateMatch;
   });
 
+
+
   const totalDebit = filtered?.reduce((sum, e) => sum + (e.debit || 0), 0);
   const totalCredit = filtered?.reduce((sum, e) => sum + (e.credit || 0), 0);
-  const totalBalance = filtered?.length ? filtered[filtered.length - 1].balance : 0;
+  const totalBalance = totalDebit - totalCredit;
 
   const exportCSV = () => {
     const headers = ["S.No", "Date", "Particular", "Debit", "Credit", "Balance"];
     const rows = filtered.map((e, idx) => [
-      idx + 1, e.date, e.particular, e.debit, e.credit, e.balance
+      idx + 1, dayjs(e.date).format('YYYY-MM-DD'), e.particular, e.debit, e.credit, e.balance
     ]);
     const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -206,10 +216,17 @@ const LedgerSystem = () => {
       toast.error("Failed to save ledger");
     }
   };
+  const SummaryBox = ({ label, value }) => (
+  <Box className="bg-teal-50 border border-teal-300 rounded-md px-4 py-2 min-w-[150px] text-center">
+    <Typography variant="subtitle2" color="textSecondary">{label}</Typography>
+    <Typography variant="subtitle1" fontWeight="bold">{value} ₹</Typography>
+  </Box>
+);
+
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Paper sx={{ p: 2, mb: 3 }}>
+    <Container maxWidth="md" className="mt-4 md:mt-8" >
+      <Paper className="p-2 md:p-4 py-4 mb-4">
         <Box display="flex" flexWrap="wrap" justifyContent="space-between" alignItems="center" gap={2}>
           <Autocomplete
             size="small"
@@ -240,29 +257,30 @@ const LedgerSystem = () => {
       </Paper>
 
       {selectedLedger && (
-        <Paper sx={{ p: 2 }}>
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography variant="h6">Ledger: {selectedLedger.name}</Typography>
-            <div className="flex gap-2">
-              <Button variant="contained" onClick={() => handleOpenLedgerDialog(selectedLedger)}>Edit Ledger</Button>
-              <Button variant="outlined" color="error" onClick={() => deleteLedger(selectedLedger._id)}>Delete Ledger</Button>
-            </div>
+        <Paper className="md:p-3 p-1">
+          <Box className="border border-teal-600 border-dashed rounded-md p-2 md:p-4 mb-4">
+            <Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <Typography variant="h6">
+                Ledger: <span className="text-teal-700">{selectedLedger.name}</span>
+              </Typography>
+
+              <div className="flex gap-2">
+                <Button variant="contained" onClick={() => handleOpenLedgerDialog(selectedLedger)}>
+                  Edit Ledger
+                </Button>
+                <Button variant="outlined" color="error" onClick={() => deleteLedger(selectedLedger._id)}>
+                  Delete Ledger
+                </Button>
+              </div>
+            </Box>
+
+            <Box className="flex flex-wrap md:justify-between justify-center gap-4 mt-4">
+              <SummaryBox label="Total Debit" value={totalDebit} />
+              <SummaryBox label="Total Credit" value={totalCredit} />
+              <SummaryBox label="Net Balance" value={totalBalance} />
+            </Box>
           </Box>
 
-          <Box className="flex flex-wrap gap-2 justify-around my-3 border-2 border-dashed p-2 rounded border-teal-600">
-            <div className="w-full md:w-auto flex">
-              <span className="block md:w-auto w-[120px] ">Total Debit</span>
-              <span className="font-bold">: {totalDebit} ₹</span>
-            </div>
-            <div className="w-full md:w-auto flex">
-              <span className="block md:w-auto w-[120px] ">Total Credit</span>
-              <span className="font-bold">: {totalCredit} ₹</span>
-            </div>
-            <div className="w-full md:w-auto flex">
-              <span className="block md:w-auto w-[120px] ">Net Balance</span>
-              <span className="font-bold">: {totalBalance} ₹</span>
-            </div>
-          </Box>
 
           <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
             <FormControl size="small" sx={{ minWidth: 100 }}>
@@ -304,9 +322,10 @@ const LedgerSystem = () => {
 
           <DataTable
             columns={getLedgerColumns(handleEditEntry, handleDeleteEntry)}
-            data={filtered}
+            data={filtered || []}
             pagination
             highlightOnHover
+            noDataComponent="No entries found for selected filters."
           />
         </Paper>
       )}

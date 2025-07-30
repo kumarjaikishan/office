@@ -26,6 +26,8 @@ import FaceAttendance from './pages/admin/facerecoginaion/faceAtten';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
 import Leave from './pages/employee/leave/Leave';
 import LedgerSystem from './pages/employee/ledger/ledger';
+import LedgerListPage from './pages/employee/ledger/ledgerpagelist';
+import LedgerDetailPage from './pages/employee/ledger/ledgerdetailpage';
 
 
 function App() {
@@ -95,11 +97,14 @@ function App() {
           <Route path="empattandence" element={<EmpAttenPerformance />} />
           <Route path="leave" element={<Leave />} />
           <Route path="ledger" element={<LedgerSystem />} />
+          
+          {/* <Route path="ledger" element={<LedgerListPage />} /> */}
+          <Route path="ledger/:id" element={<LedgerDetailPage />} />
         </Route>
         <Route
           element={<PrivateRoute />}
         >
-         <Route path="profile" element={<EmployeeProfile />} />
+          <Route path="profile" element={<EmployeeProfile />} />
         </Route>
         {/* <Route path="profile" element={<EmployeeProfile />} /> */}
       </Routes>
