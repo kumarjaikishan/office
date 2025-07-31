@@ -1,216 +1,290 @@
-import React, { useEffect, useState } from 'react'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import React, { useEffect, useState } from 'react';
+import {
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Paper, Checkbox, Typography, FormControl, Select, MenuItem,
+    InputLabel, Button, Avatar
+} from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Autocomplete, Avatar, Box, Checkbox, Typography } from '@mui/material';
-import { Button, OutlinedInput } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { IoIosSend } from "react-icons/io";
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
-import { FaRegUser } from "react-icons/fa";
-import { CgLayoutGrid } from 'react-icons/cg';
-import dayjs from 'dayjs';
 import Modalbox from '../../../components/custommodal/Modalbox';
+import dayjs from 'dayjs';
 
-const BulkMark = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
-
-    const { department, employee } = useSelector((state) => state.user);
+const BulkMark = ({
+    openmodal, init, submitHandle, setopenmodal,
+    isUpdate, isload, inp, setinp, setisUpdate
+}) => {
+    const { department, branch, employee } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
+    const [rowData, setRowData] = useState({});
+    const [selectedBranch, setselectedBranch] = useState('all')
+    const [selecteddepartment, setselecteddepartment] = useState('all');
+    const [filteredEmployee, setFilteredEmployee] = useState([]);
+    const [attandenceDate, setattandenceDate] = useState(dayjs());
 
     useEffect(() => {
-        // console.log("department:", department)
-    }, [department]);
+        // console.log(branch)
+        // console.log(department)
+        console.log(employee)
+    }, [])
+    useEffect(() => {
+        const result = employee?.filter(e => {
+            const matchBranch = selectedBranch !== "all" ? e.branchId == selectedBranch : true;
+            const matchDepartment = selecteddepartment !== "all" ? e.department.department == selecteddepartment : true;
+            return matchBranch && matchDepartment;
+        });
+        setFilteredEmployee(result);
+    }, [employee, selectedBranch, selecteddepartment]);
 
-    const handleCheckbox = (e) => {
-        const value = e.target.value;
-        const isAlreadyChecked = checkedemployee.includes(value);
+    useEffect(() => {
+        if (employee?.length > 0) {
+            const defaultData = {};
+            employee.forEach(emp => {
+                defaultData[emp._id] = {
+                    punchIn: null,
+                    punchOut: null,
+                    status: 'absent',
+                };
+            });
+            setRowData(defaultData);
+        }
+    }, [employee]);
 
-        if (isAlreadyChecked) {
-            setcheckedemployee(checkedemployee.filter((item) => item !== value));
+    const handleCheckbox = (empId) => {
+        if (checkedemployee.includes(empId)) {
+            setcheckedemployee(checkedemployee.filter(id => id !== empId));
         } else {
-            setcheckedemployee([...checkedemployee, value]);
+            setcheckedemployee([...checkedemployee, empId]);
         }
     };
-    const submitHandlee = (e) => {
-        e.preventDefault();
-        console.log(checkedemployee)
-    }
-    const handleallselect = (e) => {
+
+    const handleAllSelect = (e) => {
         if (e.target.checked) {
-            setcheckedemployee(employee.map(e => e._id))
+            setcheckedemployee(employee.map(e => e._id));
         } else {
-            setcheckedemployee([])
+            setcheckedemployee([]);
         }
-    }
+    };
+
+    const handleTimeChange = (empId, field, value) => {
+        setRowData(prev => {
+            const updated = {
+                ...prev,
+                [empId]: {
+                    ...prev[empId],
+                    [field]: value,
+                    status: 'present' // Automatically set status to 'present'
+                }
+            };
+            return updated;
+        });
+
+        setcheckedemployee(prev => {
+            if (!prev.includes(empId)) {
+                return [...prev, empId]; // Automatically check the row
+            }
+            return prev;
+        });
+    };
+
+
+    const handleStatusChange = (empId, value) => {
+        setRowData(prev => ({
+            ...prev,
+            [empId]: {
+                ...prev[empId],
+                status: value
+            }
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const selectedData = checkedemployee.map(empId => {
+            const { punchIn, punchOut, status } = rowData[empId];
+
+            const data = {
+                empId,
+                status,
+                date: attandenceDate,
+            };
+
+            // Only include punchOut if it's not null or undefined
+            if (punchIn != null) {
+                data.punchIn = punchIn;
+            }
+            if (punchOut != null) {
+                data.punchOut = punchOut;
+            }
+
+            return data;
+        });
+
+        console.log(selectedData)
+        // submitHandle(selectedData);
+    };
+
+
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
-            <div className="membermodal">
-                <form onSubmit={submitHandlee}>
+            <div className="membermodal w-[800px]" style={{ width: '800px', maxWidth: '98vw' }}>
+                <form onSubmit={handleSubmit}>
                     <h2>Bulk Mark Attendance</h2>
-                    <span className="modalcontent">
-                        <FormControl sx={{ width: '100%' }} size="small">
-                            <InputLabel id="demo-simple-select-helper-label">Action</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={isPunchIn}
-                                name="status"
-                                label="Status"
-                                required
-                                onChange={(e) => {
-                                    setisPunchIn(e.target.value)
-                                }}
-                            >
-                                <MenuItem value={true}>Punch In</MenuItem>
-                                <MenuItem value={false}>Punch Out</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                                slotProps={{
-                                    textField: {
-                                        size: 'small',
+                    <span className="modalcontent overflow-x-auto">
+                        {/* Top Filters */}
+                        <div className='w w-full flex justify-between gap-2'>
+                            <FormControl size="small" fullWidth>
+                                <InputLabel>Select Branch</InputLabel>
+                                <Select
+                                    label="Select Branch"
+                                    value={selectedBranch}
+                                    onChange={(e) => setselectedBranch(e.target.value)}
+                                >
+                                    <MenuItem value="all"><em>All</em></MenuItem>
+                                    {branch?.map((b, i) => (
+                                        <MenuItem key={i} value={b._id}>{b.name}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
 
-                                    },
-                                }}
-                                onChange={(newValue) => {
-                                    setinp({
-                                        ...inp, ['date']: newValue
-                                    })
-                                }}
-                                format="DD-MM-YYYY"
-                                value={inp?.date}
-                                sx={{ width: '100%' }}
-                                label="Select date"
-                            />
-                        </LocalizationProvider>
+                            <FormControl size="small" disabled={selectedBranch == 'all'} fullWidth>
+                                <InputLabel>Select Department</InputLabel>
+                                <Select
+                                    label="Select Department"
+                                    value={selecteddepartment}
+                                    onChange={(e) => setselecteddepartment(e.target.value)}
+                                >
+                                    <MenuItem value="all"><em>All</em></MenuItem>
+                                    {
+                                        (selectedBranch !== 'all'
+                                            ? department.filter(i => i.branchId._id === selectedBranch)
+                                            : department
+                                        )?.map((d, i) => (
+                                            <MenuItem key={i} value={d._id}>{d.department}</MenuItem>
+                                        ))
+                                    }
 
-                        <Box sx={{ width: '100%',  gap: 0, display: 'flex', flexDirection: 'column' }}>
-                            <div className='w-full  flex justify-between'>
-                                <Typography>Select Employee</Typography>
-                                <span className='flex gap-1'>
-                                    <input
-                                        type="checkbox"
-                                        onChange={handleallselect}
-                                    /> <label>Select All</label>
-                                </span>
-                            </div>
-                            <div className='flex max-h-[200px] overflow-y-auto pt-1 pl-1 flex-col border border-gray-400 w-full rounded' >
-                                {employee?.map((val,ind) => {
-                                    return <div key={ind} className='m-0 p-0 gap-1 flex items-center'>
-                                        <input
-                                            type="checkbox"
-                                            value={val._id}
-                                            checked={checkedemployee.includes(val._id)}
-                                            onChange={handleCheckbox}
-                                        />
-                                        <span>{val.userid.name}</span>
-                                    </div>
-                                })}
-                            </div>
-                        </Box>
+                                </Select>
+                            </FormControl>
 
-                        <Box sx={{ width: '100%', gap: 2 }}>
-                            {isPunchIn ?
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <TimePicker
-                                        value={inp.punchIn}
-                                        slotProps={{
-                                            textField: {
-                                                size: 'small',
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker
+                                    label="Select Date"
+                                    format="DD/MM/YYYY"
+                                    value={attandenceDate}
+                                    onChange={(newValue) => setattandenceDate(newValue)}
+                                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                                />
+                            </LocalizationProvider>
 
-                                            },
-                                        }}
-                                        onChange={(newValue) => {
-                                            setinp({
-                                                ...inp,
-                                                punchIn: newValue
-                                            })
-                                        }}
-                                        sx={{ width: '100%' }}
-                                        label="Punch In"
-                                    />
-                                </LocalizationProvider> :
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <TimePicker
-                                        value={inp.punchOut}
-                                        slotProps={{
-                                            textField: {
-                                                size: 'small',
+                        </div>
 
-                                            },
-                                        }}
-                                        onChange={(newValue) => {
-                                            setinp({
-                                                ...inp,
-                                                punchOut: newValue
-                                            })
-                                        }} sx={{ width: '100%' }} label="Punch Out" />
-                                </LocalizationProvider>
-                            }
-                            {isPunchIn &&
-                                <FormControl sx={{ width: '100%' }} size="small">
-                                    <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
-                                    <Select
-                                        labelId="demo-simple-select-helper-label"
-                                        id="demo-simple-select-helper"
-                                        value={inp.status}
-                                        name="status"
-                                        label="Status"
-                                        required
-                                        onChange={(e) => {
-                                            setinp({
-                                                ...inp,
-                                                status: e.target.value
-                                            });
-                                        }}
-                                    >
-                                        <MenuItem value={true}>Present</MenuItem>
-                                        <MenuItem value={false}>Absent</MenuItem>
-                                    </Select>
-                                </FormControl>}
-                        </Box>
+                        {/* Attendance Table */}
+                        <div className='border border-dashed border-teal-400 rounded w-full h-[350px]'>
+                            <TableContainer component={Paper}>
+                                <Table size="small">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell padding="checkbox">
+                                                <Checkbox onChange={handleAllSelect} checked={checkedemployee.length === employee.length} />
+                                            </TableCell>
+                                            <TableCell>Employee Name</TableCell>
+                                            <TableCell>Punch In</TableCell>
+                                            <TableCell>Punch Out</TableCell>
+                                            <TableCell>Status</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {filteredEmployee?.map((emp) => (
+                                            <TableRow key={emp._id}>
+                                                <TableCell padding="checkbox">
+                                                    <Checkbox
+                                                        checked={checkedemployee.includes(emp._id)}
+                                                        onChange={() => handleCheckbox(emp._id)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className='flex items-center gap-2'>
+                                                        <Avatar
+                                                            alt={emp.userid.name}
+                                                            src={emp.profileimage}
+                                                            sx={{ width: 30, height: 30 }}
+                                                        />
+                                                        <Typography variant="body2">{emp.userid.name}</Typography>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                        <TimePicker
+                                                            sx={{ width: "140px" }}
+                                                            value={rowData[emp._id]?.punchIn}
+                                                            onChange={(value) => handleTimeChange(emp._id, 'punchIn', value)}
+                                                            slotProps={{ textField: { size: 'small' } }}
+                                                        />
+                                                    </LocalizationProvider>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                        <TimePicker
+                                                            sx={{ width: "140px" }}
+                                                            value={rowData[emp._id]?.punchOut}
+                                                            onChange={(value) => handleTimeChange(emp._id, 'punchOut', value)}
+                                                            slotProps={{ textField: { size: 'small' } }}
+                                                        />
+                                                    </LocalizationProvider>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <FormControl fullWidth size="small">
+                                                        <Select
+                                                            value={rowData[emp._id]?.status ?? false}
+                                                            onChange={(e) => handleStatusChange(emp._id, e.target.value)}
+                                                        >
+                                                            <MenuItem value={'present'}>Present</MenuItem>
+                                                            <MenuItem value={'absent'}>Absent</MenuItem>
+                                                            <MenuItem value={'half day'}>Half Day</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
 
-                        <div className='w-full flex gap-2'>
-                            <Button size="small"
+                        {/* Action Buttons */}
+                        <div className='flex w-full  gap-2 justify-end'>
+                            <Button
+                                size="small"
                                 onClick={() => {
-                                    setopenmodal(false); setisUpdate(false); setinp(init)
+                                    setopenmodal(false);
+                                    setisUpdate(false);
+                                    setinp(init);
                                 }}
-                                variant="outlined"> cancel</Button>
-                            {!isUpdate && <Button
+                                variant="outlined"
+                            >
+                                Cancel
+                            </Button>
 
+                            <Button
                                 loading={isload}
                                 loadingPosition="end"
                                 endIcon={<IoIosSend />}
                                 variant="contained"
                                 type="submit"
                             >
-                                Add
-                            </Button>}
-
-                            {isUpdate && <Button
-
-                                loading={isload}
-                                loadingPosition="end"
-                                endIcon={<IoIosSend />}
-                                variant="contained"
-                                onClick={updatee}
-                            >
-                                Update
-                            </Button>}
-
+                                {isUpdate ? 'Update' : 'Add'}
+                            </Button>
                         </div>
                     </span>
                 </form>
             </div>
         </Modalbox>
-    )
-}
+    );
+};
 
-export default BulkMark
+export default BulkMark;
