@@ -206,9 +206,17 @@ const AttenPerformance = () => {
             short: shortDates,
             overtime, shorttimemin, overtimemin, latearrival,
             earlyarrival, earlyLeave, lateleave,
-            overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / company.workingMinutes.fullDay).toFixed(2))
-            // overtimesalary: (employee.salary/30/company.workingMinutes.fullDay).toFixed(2)
+            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / company.workingMinutes.fullDay))
+            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary /  dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() / company.workingMinutes.fullDay))
+           
+            overtimesalary: selectedMonth !== "all"
+                ? Math.floor((overtimemin - shorttimemin) * parseFloat((
+                    employee.salary /
+                    dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() /
+                    company.workingMinutes.fullDay)))
+                : null
         });
+        console.log('gettitng mothes days',  (employee.salary / 31 / 480))
     }, [attandence, selectedYear, selectedMonth, setting]);
 
 

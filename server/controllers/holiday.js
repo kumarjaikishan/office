@@ -52,7 +52,7 @@ const updateholiday = async (req, res) => {
 
 const getholidays = async (req, res) => {
     try {
-        const holidays = await holidaymodal.find({ userid: req.user.id });
+        const holidays = await holidaymodal.find({ userid: req.user.id }).sort({fromDate:-1});
         res.json({ holidays });
     } catch (err) {
         console.error(err);

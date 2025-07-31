@@ -14,11 +14,11 @@ import {
 } from "react-icons/fa";
 import { Tooltip } from "@mui/material";
 
-const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
+const EmployeeProfileCard = ({ attandence, employee, hell }) => {
     useEffect(() => {
         // console.log(attandence)
     }, [attandence]);
-     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
+    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
 
     const total =
@@ -113,11 +113,24 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                         enterDelay={800}
                         arrow
                         title={
-                            <div className="flex gap-1 flex-col text-white">
-                                <span className="flex w-full"> <span className="block w-[70px] ">Basic salary </span> <span> : {employee?.salary} ₹ </span></span>
-                                <span className="flex w-full"> <span className="block w-[70px] ">Net Overtime </span> <span> : {(hell?.overtimemin || 0) - (hell?.shorttimemin || 0)} min </span></span>
-                                <span className="flex w-full"> <span className="block w-[70px] ">Payment </span> <span> : {hell?.overtimesalary || 0} ₹</span></span>
-                            </div>
+                            hell?.overtimesalary !== null ? (
+                                <div className="flex gap-1 flex-col text-white">
+                                    <span className="flex w-full">
+                                        <span className="block w-[100px]">Basic salary</span>
+                                        <span>: ₹ {employee?.salary}</span>
+                                    </span>
+                                    <span className="flex w-full">
+                                        <span className="block w-[100px]">Net Overtime</span>
+                                        <span>: {(hell?.overtimemin || 0) - (hell?.shorttimemin || 0)} min</span>
+                                    </span>
+                                    <span className="flex w-full">
+                                        <span className="block w-[100px]">Payment</span>
+                                        <span>: ₹ {hell?.overtimesalary || 0}</span>
+                                    </span>
+                                </div>
+                            ) : (
+                                ""
+                            )
                         }
                     >
                         <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow cursor-help">
@@ -130,6 +143,7 @@ const EmployeeProfileCard = ({ user, attandence, employee, hell }) => {
                             </span>
                         </div>
                     </Tooltip>
+
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800">
                             <FaCompressAlt /> Short Time

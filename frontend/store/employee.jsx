@@ -27,15 +27,15 @@ const EmployeeSlice = createSlice({
         status: 'idle',
     },
     reducers: {
-        empdataclear(state, action) {
+        emplogout(state, action) {
             localStorage.clear();
             state.profile = null;
             state.notification = null;
             state.attendance = null;
             state.leave = null;
-            state.holiday = null;
-            state.companysetting = null;
             state.salary = null;
+            state.companysetting = null;
+            state.holiday = null;
         },
     },
     extraReducers: (builder) => {
@@ -56,5 +56,5 @@ const EmployeeSlice = createSlice({
     },
 });
 
-export const { empdataclear } = EmployeeSlice.actions;
+export const { emplogout } = EmployeeSlice.actions;
 export default EmployeeSlice.reducer;

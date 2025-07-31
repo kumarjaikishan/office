@@ -1,341 +1,270 @@
-import React, { useEffect, useState } from 'react';
-import { TextField, Button, Box, Tooltip } from '@mui/material';
-import {
-  DatePicker,
-  StaticDatePicker,
-  PickersDay,
-  LocalizationProvider,
-} from '@mui/x-date-pickers';
+import React, { useEffect, useState, useMemo, startTransition } from 'react';
+import { TextField, Button, Box } from '@mui/material';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import axios from 'axios';
-import { isWithinInterval, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'react-redux';
 import DataTable from 'react-data-table-component';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
+       import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { toast } from 'react-toastify';
 import { customStyles } from '../admin/attandence/attandencehelper';
 import HolidayCalander from './holidayCalander';
+
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {
-  const [name, setName] = useState('');
-  const [type, setType] = useState('Public');
-  const [fromDate, setFromDate] = useState(null);
-  const [toDate, setToDate] = useState(null);
-  const [description, setdescription] = useState('');
-  const [holidayId, setholidayId] = useState(null);
+  const [form, setForm] = useState({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' });
+  const [holidayId, setHolidayId] = useState(null);
   const [holidays, setHolidays] = useState([]);
-  const [isupdate, setisupdate] = useState(false)
+  const [holidaylist, setHolidayList] = useState([]);
+  const [isUpdate, setIsUpdate] = useState(false);
   const { company } = useSelector((state) => state.user);
-  const [holidaylist, setholidaylist] = useState([])
-  const [weeklyOffs, setweeklyOffs] = useState([1])
-
+  const [weeklyOffs, setWeeklyOffs] = useState([1]);
   const [filterYear, setFilterYear] = useState("All");
   const [filterMonth, setFilterMonth] = useState("All");
   const [filterType, setFilterType] = useState("All");
-
-
-  useEffect(() => {
-    setweeklyOffs(company?.weeklyOffs || [1]);
-    // console.log(company)
-  }, [company])
-  useEffect(() => {
-    setToDate(fromDate);
-    // console.log(company)
-  }, [fromDate])
-
-  const impordate = ['06/15/2025', '06/10/2025'];
-  const highlightedDates = holidaylist.map(dateObj => ({
-    date: dayjs(dateObj.date).toDate(),
-    name: dateObj.name
-  }));
-
-  const edite = async (holi) => {
-    console.log(holi)
-    setisupdate(true);
-
-    setholidayId(holi._id)
-    setName(holi.name);
-    setFromDate(dayjs(holi.fromDate).toDate());
-    setToDate(dayjs(holi.toDate).toDate());
-    setType('Public');
-    setdescription(holi?.description)
-  }
-
-  const updateholiday = async () => {
-    try {
-      const token = localStorage.getItem('emstoken');
-      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}updateholiday`, {
-        holidayId, name, fromDate, toDate, type, description
-      },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
-
-      toast.success(res.data.message, { autoClose: 1200 });
-      setName('');
-      setFromDate(null);
-      setToDate(null);
-      setType('Public');
-      setdescription('')
-      setisupdate(false);
-    } catch (err) {
-      console.error(err);
-      alert("Error saving holiday");
-      // toast.warn(res.data.message ,{autoClose:1200});
-    }
-  }
-
-  const deletee = async (id) => {
-    try {
-      const token = localStorage.getItem('emstoken');
-      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}deleteholiday`, {
-        id
-      },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
-
-      toast.success(res.data.message, { autoClose: 1200 });
-    } catch (err) {
-      console.error(err);
-      alert("Error saving holiday");
-      // toast.warn(res.data.message ,{autoClose:1200});
-    }
-  }
+  const nameInputRef = React.useRef(null);
 
   useEffect(() => {
-    const fetchHolidays = async () => {
-      try {
-        const token = localStorage.getItem('emstoken');
-        const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}getholidays`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
-            }
-          }
-        );
-        const holidaysData = res.data.holidays;
+    setWeeklyOffs(company?.weeklyOffs || [1]);
+  }, [company]);
 
-        const dateObjects = [];
-
-        holidaysData.forEach(holiday => {
-          let current = dayjs(holiday.fromDate);
-          const end = holiday.toDate ? dayjs(holiday.toDate) : current;
-
-          while (current.isSameOrBefore(end, 'day')) {
-            dateObjects.push({
-              date: current.format('MM/DD/YYYY'),
-              name: holiday.name,
-            });
-            current = current.add(1, 'day');
-          }
-        });
-        // console.log(dateObjects)
-        console.log(holidaysData)
-        setholidaylist(dateObjects);
-
-        // setHolidays(holidaysData);
-        let sno = 1;
-
-        const data = holidaysData.map((holi) => {
-          return {
-            sno: sno++,
-            name: holi.name,
-            From: dayjs(holi.fromDate).format("DD MMM, YYYY"),
-            till: dayjs(holi.toDate).format("DD MMM, YYYY"),
-            type: holi.type,
-            description: holi?.description,
-            action: (<div className="action flex gap-2.5">
-              <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(holi)}><MdOutlineModeEdit /></span>
-              <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(holi._id)}><AiOutlineDelete /></span>
-            </div>)
-          }
-        })
-        setHolidays(data);
-      } catch (err) {
-        console.error("Error fetching holidays:", err);
+  useEffect(() => {
+    if (form.fromDate && !form.toDate) {
+      const from = dayjs(form.fromDate).toDate();
+      if (!isNaN(from.getTime())) {
+        setForm(prev => ({ ...prev, toDate: from }));
       }
-    };
+    }
+  }, [form.fromDate]);
 
+
+  useEffect(() => {
     fetchHolidays();
   }, []);
 
-  const handleSubmit = async () => {
-    // return console.log(fromDate)
+  const fetchHolidays = async () => {
     try {
       const token = localStorage.getItem('emstoken');
-      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}addholiday`, {
-        name, fromDate, toDate, type, description
-      },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
+      const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}getholidays`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
 
-      toast.success(res.data.message, { autoClose: 1200 });
-      setName('');
-      setFromDate(null);
-      setToDate(null);
-      setType('Public');
-      setdescription('');
-      // setHolidays([...holidays, res.data.newHoliday]); // Make sure your API returns newHoliday
+      const holidaysData = res.data.holidays;
+      const dateObjects = [];
+
+      holidaysData.forEach((holiday) => {
+        let current = dayjs(holiday.fromDate);
+        const end = holiday.toDate ? dayjs(holiday.toDate) : current;
+        while (current.isSameOrBefore(end, 'day')) {
+          dateObjects.push({
+            date: current.format('MM/DD/YYYY'),
+            name: holiday.name,
+          });
+          current = current.add(1, 'day');
+        }
+      });
+
+      const data = holidaysData.map((holi) => ({
+        name: holi.name,
+        From: holi.fromDate,
+        till: holi.toDate,
+        type: holi.type,
+        description: holi?.description,
+        action: (
+          <div className="action flex gap-2.5">
+            <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => handleEdit(holi)}><MdOutlineModeEdit /></span>
+            <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => handleDelete(holi._id)}><AiOutlineDelete /></span>
+          </div>
+        )
+      }));
+
+      startTransition(() => {
+        setHolidayList(dateObjects);
+        setHolidays(data);
+      });
     } catch (err) {
-      console.error(err);
-      toast.warning("Error saving holiday", { autoClose: 1200 });
+      console.error("Error fetching holidays:", err);
     }
   };
-  const cancele = () => {
-    setisupdate(false);
-    setName('');
-    setFromDate(null);
-    setToDate(null);
-    setType('Public');
-    setdescription('');
-  }
 
-  const years = Array.from(
-  new Set(holidaylist.map(h => dayjs(h.fromDate).year()))
-);
+  const handleEdit = (holi) => {
+    setIsUpdate(true);
+    setHolidayId(holi._id);
+    setForm({
+      name: holi.name,
+      type: 'Public',
+      fromDate: dayjs(holi.fromDate).toDate(),
+      toDate: dayjs(holi.toDate).toDate(),
+      description: holi.description || ''
+    });
+    setTimeout(() => {
+      nameInputRef.current?.focus();
+    }, 0);
+  };
 
-const months = Array.from(
-  new Set(holidaylist.map(h => dayjs(h.fromDate).format("MMMM")))
-);
-const filteredHolidays = holidays.filter((h) => {
-  const fromDate = dayjs(h.From, "DD MMM, YYYY");
-  const yearMatch = filterYear === "All" || fromDate.year().toString() === filterYear;
-  const monthMatch = filterMonth === "All" || fromDate.format("MMMM") === filterMonth;
-  const typeMatch = filterType === "All" || h.type === filterType;
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem('emstoken');
+      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}deleteholiday`, { id }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(res.data.message);
+      fetchHolidays();
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting holiday");
+    }
+  };
 
-  return yearMatch && monthMatch && typeMatch;
-});
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem('emstoken');
+      const endpoint = isUpdate ? 'updateholiday' : 'addholiday';
+      const payload = isUpdate ? { ...form, holidayId } : form;
+      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}${endpoint}`, payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(res.data.message);
+      setForm({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' });
+      setIsUpdate(false);
+      fetchHolidays();
+    } catch (err) {
+      console.error(err);
+      toast.warning("Error saving holiday");
+    }
+  };
+
+const filteredHolidays = useMemo(() => {
+  return holidays.filter((h) => {
+    const fromDate = dayjs(h.From); 
+    const yearMatch = filterYear === "All" || fromDate.year().toString() === filterYear;
+    const monthMatch = filterMonth === "All" || fromDate.month() === parseInt(filterMonth); // if using month index (0-11)
+    const typeMatch = filterType === "All" || h.type === filterType;
+
+    return yearMatch && monthMatch && typeMatch;
+  });
+}, [holidays, filterYear, filterMonth, filterType]);
+
+
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const years = useMemo(() => {
+    if (!holidaylist || holidaylist.length === 0) return [];
+
+    const startYear = dayjs(holidaylist[holidaylist.length - 1].date).year(); // oldest
+    const endYear = dayjs(holidaylist[0].date).year(); // latest
+    const yearList = [];
+    for (let y = startYear; y <= endYear; y++) {
+      yearList.push(y);
+    }
+
+    return yearList;
+  }, [holidaylist]);
 
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className="flex flex-col md:flex-row gap-4 p-1 md:p-4">
-        <HolidayCalander highlightedDates={highlightedDates} weeklyOffs={weeklyOffs} />
+      <Box className="flex flex-col md:flex-row gap-4 p-4">
+        <HolidayCalander highlightedDates={holidaylist.map(dateObj => ({ date: dayjs(dateObj.date).toDate(), name: dateObj.name }))} weeklyOffs={weeklyOffs} />
 
         <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
-          <TextField
-            size='small'
-            label="Holiday Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-          />
-
-          <DatePicker
-            label="From Date"
-            size='small'
-            format='dd/MM/yyyy'
-            value={fromDate}
-            onChange={(newValue) => setFromDate(newValue)}
-            slotProps={{ textField: { fullWidth: true } }}
-          />
-
-          <DatePicker
-            format='dd/MM/yyyy'
-            label="To Date"
-            size='small'
-            value={toDate}
-            onChange={(newValue) => setToDate(newValue)}
-            slotProps={{ textField: { fullWidth: true } }}
-          />
-
-          <TextField
-            label="Type"
-            size='small'
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            fullWidth
-          />
-          <TextField
-            label="Description"
-            multiline
-            rows={2}
-            value={description}
-            onChange={(e) => setdescription(e.target.value)}
-            fullWidth
-          />
-          {isupdate ? <div className='flex justify-end gap-2'>
-            <Button variant="outlined" onClick={cancele}>
-              Cancel
-            </Button>
-            <Button variant="contained" onClick={updateholiday}>
-              Edit Holiday
-            </Button>
-          </div> :
-            <Button variant="contained" onClick={handleSubmit}>
-              Add Holiday
-            </Button>}
-
+          <TextField inputRef={nameInputRef} label="Holiday Name" size="small" value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} fullWidth />
+          <DatePicker label="From Date" format='dd/MM/yyyy' value={form.fromDate} onChange={(newValue) => setForm(prev => ({ ...prev, fromDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+          <DatePicker label="To Date" format='dd/MM/yyyy' value={form.toDate} onChange={(newValue) => setForm(prev => ({ ...prev, toDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+          <TextField label="Type" size="small" value={form.type} onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))} fullWidth />
+          <TextField label="Description" multiline rows={2} size="small" value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} fullWidth />
+          <div className='flex justify-end gap-2'>
+            {isUpdate && <Button variant="outlined" onClick={() => { setIsUpdate(false); setForm({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' }); }}>Cancel</Button>}
+            <Button variant="contained" onClick={handleSave}>{isUpdate ? 'Update' : 'Add'} Holiday</Button>
+          </div>
         </Box>
       </Box>
-      <div className='p-1 md:p-4'>
-        <div className="flex flex-wrap gap-4 mb-4 items-center justify-start">
-          <TextField
-            select
-            size="small"
-            label="Filter by Year"
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-            SelectProps={{ native: true }}
-          >
-            <option value="All">All</option>
-            {years?.map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </TextField>
 
-          <TextField
-            select
-            size="small"
-            label="Filter by Month"
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(e.target.value)}
-            SelectProps={{ native: true }}
-          >
-            <option value="All">All</option>
-            {months.map((month) => (
-              <option key={month} value={month}>{month}</option>
-            ))}
-          </TextField>
+      <Box className='p-4'>
 
-          <TextField
-            select
-            size="small"
-            label="Filter by Type"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            SelectProps={{ native: true }}
-          >
-            <option value="All">All</option>
-            {[...new Set(holidays.map(h => h.type))].map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </TextField>
+<div className="flex flex-wrap gap-4 mb-4 items-end">
+  {/* Year Filter */}
+  <FormControl sx={{ width: '150px' }} size="small">
+    <InputLabel>Filter by Year</InputLabel>
+    <Select
+      label="Filter by Year"
+      value={filterYear}
+      onChange={(e) => setFilterYear(e.target.value)}
+    >
+      <MenuItem value="All">All</MenuItem>
+      {years.map((year) => (
+        <MenuItem key={year} value={year}>
+          {year}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+
+  {/* Month Filter */}
+  <FormControl sx={{ width: '150px' }} size="small">
+    <InputLabel>Filter by Month</InputLabel>
+    <Select
+      label="Filter by Month"
+      value={filterMonth}
+      onChange={(e) => setFilterMonth(e.target.value)}
+    >
+      <MenuItem value="All">All</MenuItem>
+      {months.map((month, ind) => (
+        <MenuItem key={month} value={ind}>
+          {month}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+
+  {/* Type Filter */}
+  <FormControl sx={{ width: '150px' }} size="small">
+    <InputLabel>Filter by Type</InputLabel>
+    <Select
+      label="Filter by Type"
+      value={filterType}
+      onChange={(e) => setFilterType(e.target.value)}
+    >
+      <MenuItem value="All">All</MenuItem>
+      {[...new Set(holidays.map((h) => h.type))].map((type) => (
+        <MenuItem key={type} value={type}>
+          {type}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+
+  {/* Reset Filters Button */}
+  <Button
+    variant="outlined"
+    color="secondary"
+    onClick={() => {
+      setFilterYear("All");
+      setFilterMonth("All");
+      setFilterType("All");
+    }}
+  >
+    Reset Filters
+  </Button>
+</div>
+
+        <div className='capitalize'>
+          <DataTable
+            columns={columns}
+            data={filteredHolidays}
+            pagination
+            selectableRows
+            customStyles={customStyles}
+            highlightOnHover
+          />
         </div>
-
-        <h2 className='font-semibold text-center text-xl' >Holiday List</h2>
-        <DataTable
-          columns={columns}
-          data={filteredHolidays}
-          pagination
-          selectableRows
-          customStyles={customStyles}
-          highlightOnHover
-        />
-      </div>
+      </Box>
     </LocalizationProvider>
   );
 };
@@ -343,34 +272,11 @@ const filteredHolidays = holidays.filter((h) => {
 export default HolidayForm;
 
 const columns = [
-  {
-    name: "S.no",
-    selector: (row) => row.sno,
-    width: '50px'
-  },
-  {
-    name: "Name",
-    selector: (row) => row.name
-  },
-  {
-    name: "From",
-    selector: (row) => row.From
-  },
-  {
-    name: "Till",
-    selector: (row) => row.till
-  },
-  {
-    name: "Type",
-    selector: (row) => row.type
-  },
-  {
-    name: "Description",
-    selector: (row) => row.description
-  },
-  {
-    name: "Action",
-    selector: (row) => row.action,
-    width: '160px'
-  }
-]
+  { name: "S.no", selector: (row ,ind) => ++ind, width: '50px' },
+  { name: "Name", selector: (row) => row.name },
+  { name: "From", selector: (row) => dayjs(row.From).format('DD MMM, YYYY'), width: '110px' },
+  { name: "Till", selector: (row) => dayjs(row.till).format('DD MMM, YYYY'), width: '110px' },
+  { name: "Type", selector: (row) => row.type, width: '90px' },
+  // { name: "Description", selector: (row) => row.description, width: '180px' },
+  { name: "Action", selector: (row) => row.action, width: '80px' }
+];

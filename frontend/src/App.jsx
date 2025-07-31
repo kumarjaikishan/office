@@ -24,10 +24,10 @@ import OrganizationSettings from './pages/admin/organization/organization';
 import FaceEnrollment from './pages/admin/facerecoginaion/facerecog';
 import FaceAttendance from './pages/admin/facerecoginaion/faceAtten';
 import EmployeeDashboard from './pages/employee/EmployeeDashboard';
-import Leave from './pages/employee/leave/Leave';
-import LedgerSystem from './pages/employee/ledger/ledger';
-import LedgerListPage from './pages/employee/ledger/ledgerpagelist';
-import LedgerDetailPage from './pages/employee/ledger/ledgerdetailpage';
+import LedgerListPage from './pages/admin/ledger/ledgerpagelist';
+import LedgerDetailPage from './pages/admin/ledger/ledgerdetailpage';
+import LedgerSystem from './pages/admin/ledger/ledger';
+import EmpLeave from './pages/employee/leave/Leave';
 
 
 function App() {
@@ -86,6 +86,10 @@ function App() {
           <Route path="setting" element={<CompanySettingForm />} />
           <Route path="face" element={<FaceEnrollment />} />
           <Route path="faceatten" element={<FaceAttendance />} />
+           {/* <Route path="ledger" element={<LedgerSystem />} /> */}
+          
+          <Route path="ledger" element={<LedgerListPage />} />
+          <Route path="ledger/:id" element={<LedgerDetailPage />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />
         </Route>
 
@@ -95,11 +99,7 @@ function App() {
         >
           <Route path="" element={<EmployeeDashboard />} />
           <Route path="empattandence" element={<EmpAttenPerformance />} />
-          <Route path="leave" element={<Leave />} />
-          <Route path="ledger" element={<LedgerSystem />} />
-          
-          {/* <Route path="ledger" element={<LedgerListPage />} /> */}
-          <Route path="ledger/:id" element={<LedgerDetailPage />} />
+          <Route path="leave" element={<EmpLeave />} />
         </Route>
         <Route
           element={<PrivateRoute />}

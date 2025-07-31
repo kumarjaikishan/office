@@ -14,6 +14,7 @@ import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import Department from '../department/Department';
 import { FaRegUser } from 'react-icons/fa';
 import { AiFillAmazonCircle } from "react-icons/ai";
+import { CgLayoutGrid } from 'react-icons/cg';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -135,26 +136,51 @@ export default function OrganizationSettings() {
                         <div className="relative flex items-center mx-auto">
                             <div className="relative w-30 h-30 mx-auto">
                                 <img
-                                    src={companyinp?.logo || <AiFillAmazonCircle/> }
+                                    src={companyinp?.logo || <AiFillAmazonCircle />}
                                     alt="Company Logo"
-                                    className="w-full h-full object-cover rounded-full border-2 border-dashed border-blue-300"
+                                    className="w-full h-full object-fill rounded-2xl border-2 border-dashed border-blue-300"
                                 />
                                 <input
                                     type="file"
                                     id="logo-upload"
                                     accept="image/*"
-                                    onChange={(e) => {
+                                    onChange={async (e) => {
                                         const file = e.target.files[0];
-                                        if (file) {
-                                            const reader = new FileReader();
-                                            reader.onloadend = () => {
-                                                setcompany({ ...companyinp, logo: reader.result });
-                                            };
-                                            reader.readAsDataURL(file);
+                                        if (!file) return;
+
+                                        const formData = new FormData();
+                                        formData.append('_id', companyinp._id);
+                                        formData.append('logo', file);
+
+                                        try {
+                                            console.log('api calling')
+                                            setisload(true);
+                                            const token = localStorage.getItem('emstoken');
+                                            const res = await axios.post(
+                                                `${import.meta.env.VITE_API_ADDRESS}updateCompany`, // replace with your actual upload route
+                                                formData,
+                                                {
+                                                    headers: {
+                                                        Authorization: `Bearer ${token}`,
+                                                        'Content-Type': 'multipart/form-data'
+                                                    }
+                                                }
+                                            );
+
+                                            const uploadedUrl = res.data.logoUrl; // assumes backend returns { logoUrl: '...' }
+
+                                            setcompany((prev) => ({ ...prev, logo: uploadedUrl }));
+                                            toast.success("Logo uploaded successfully!");
+                                        } catch (error) {
+                                            console.error(error);
+                                            toast.error("Failed to upload logo.");
+                                        } finally {
+                                            setisload(false);
                                         }
                                     }}
                                     className="hidden"
                                 />
+
                                 <label
                                     htmlFor="logo-upload"
                                     className="absolute w-8 h-8 text-center bottom-0 right-0 bg-white border border-gray-300 rounded-full p-1 cursor-pointer shadow-md"
@@ -192,7 +218,7 @@ export default function OrganizationSettings() {
                                 </Button>
                             ) : (
 
-                                <Button loading={isload} variant="contained" onClick={() => addCompany({ companyinp,setisload })}>
+                                <Button loading={isload} variant="contained" onClick={() => addCompany({ companyinp, setisload })}>
                                     + Create Company
                                 </Button>
                             )}

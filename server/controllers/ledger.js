@@ -40,12 +40,48 @@ exports.ledgerEntries = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch ledgers" });
   }
 };
+exports.ledger = async (req, res) => {
+  try {
+    const ledgers = await Ledger.find({ userId: req.userid });
+
+    const ledgersWithBalance = await Promise.all(
+      ledgers.map(async (ledger) => {
+        const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
+          .sort({ date: -1 });
+
+        return {
+          ...ledger.toObject(),
+          netBalance: lastEntry ? lastEntry.balance : 0
+        };
+      })
+    );
+
+    res.json({ ledgers: ledgersWithBalance });
+  } catch (err) {
+    console.error("Error fetching ledgers:", err);
+    res.status(500).json({ error: "Failed to fetch ledgers" });
+  }
+};
+
+
+exports.Entries = async (req, res) => {
+  try {
+    const entries = await Entry.find({ ledgerId: req.params.id }).sort({ date: -1 });
+    res.json({ entries });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch ledgers" });
+  }
+};
 
 // Delete a ledger
 exports.deleteLedger = async (req, res) => {
   try {
     const { id } = req.params;
+    // Delete the ledger
     await Ledger.findByIdAndDelete(id);
+
+    // Delete all related entries
+    await Entry.deleteMany({ ledgerId: id });
     res.json({ message: "Ledger deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete ledger" });

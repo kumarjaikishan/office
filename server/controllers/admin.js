@@ -449,20 +449,55 @@ const addcompany = async (req, res, next) => {
 };
 const updateCompany = async (req, res, next) => {
     const { _id, ...updateFields } = req.body;
-    //    console.log(req.body)
 
     try {
-        // Check if a company already exists for this admin
-        const update = await company.findByIdAndUpdate(_id, { ...updateFields });
+        // Fetch the existing company document
+        const companyDoc = await company.findById(_id);
 
+        if (!companyDoc) {
+            return res.status(404).json({ message: "Company not found" });
+        }
 
-        return res.status(200).json({ message: "Updated" });
+        // Keep track of the old logo before any changes
+        const oldLogo = companyDoc.logo;
+
+        // Update fields
+        Object.assign(companyDoc, updateFields);
+
+        // If a new file is uploaded
+        if (req.file) {
+            const cloudinaryResult = await cloudinary.uploader.upload(
+                req.file.path,
+                { folder: 'ems/company' }
+            );
+
+            // Delete local file
+            fs.unlink(req.file.path, (err) => {
+                if (err) console.log("Error deleting local file:", err.message);
+            });
+
+            // Set new logo URL
+            companyDoc.logo = cloudinaryResult.secure_url;
+
+            // Delete old logo from cloudinary if it exists
+            if (oldLogo && oldLogo !== "") {
+                await removePhotoBySecureUrl([oldLogo]);
+            }
+        }
+
+        await companyDoc.save();
+
+        return res.status(200).json({
+            message: "Company updated successfully",
+            logoUrl: companyDoc.logo
+        });
 
     } catch (error) {
         console.error(error.message);
         return next({ status: 500, message: error.message });
     }
 };
+
 
 const addBranch = async (req, res, next) => {
     const { name, location, companyId, managerIds = [] } = req.body;

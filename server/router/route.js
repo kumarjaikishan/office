@@ -32,7 +32,7 @@ router.route('/firstfetch').get(authmiddlewre, authorizeRoles('admin'), admin.fi
 router.route('/leavehandle').post(authmiddlewre, authorizeRoles('admin'), admin.leavehandle);
 router.route('/setsetting').post(authmiddlewre, authorizeRoles('admin'), admin.setsetting);
 router.route('/addcompany').post(authmiddlewre, authorizeRoles('admin'), admin.addcompany);
-router.route('/updateCompany').post(authmiddlewre, authorizeRoles('admin'), admin.updateCompany);
+router.route('/updateCompany').post(authmiddlewre, authorizeRoles('admin'),upload.single('logo'), admin.updateCompany);
 router.route('/addBranch').post(authmiddlewre, authorizeRoles('admin'), admin.addBranch);
 router.route('/editBranch').post(authmiddlewre, authorizeRoles('admin'), admin.editBranch);
 router.route('/getsetting').get(authmiddlewre, authorizeRoles('admin'), admin.getsetting);
@@ -73,6 +73,10 @@ router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), em
 
 router.route("/ledgerEntries")
   .get(authmiddlewre, authorizeRoles('admin'), ledger.ledgerEntries);
+router.route("/ledger")
+  .get(authmiddlewre, authorizeRoles('admin'), ledger.ledger);
+router.route("/entries/:id")
+  .get(authmiddlewre, authorizeRoles('admin'), ledger.Entries);
 
 router.route("/ledger")
   .post(authmiddlewre, authorizeRoles('admin'), ledger.createLedger)

@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import swal from 'sweetalert';
 import { setlogin } from '../../store/authSlice';
 import { userlogout } from '../../store/userSlice';
+import { emplogout } from '../../store/employee';
 
 const Logout = () => {
   const dispatch = useDispatch();
@@ -11,6 +12,7 @@ const Logout = () => {
   useEffect(() => {
     localStorage.removeItem("emstoken");
     dispatch(userlogout());
+    dispatch(emplogout());
     dispatch(setlogin(false));
     return navigate('/login');
   }, [])

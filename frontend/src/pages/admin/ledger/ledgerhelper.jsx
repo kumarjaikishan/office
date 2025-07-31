@@ -4,9 +4,9 @@ import { MdDelete, MdEdit } from "react-icons/md";
 
 export const getLedgerColumns = (handleEdit, handleDelete) => [
     {
-        name: 'S.No',
-        selector: row => row.sno,
-        width: '60px'
+        name: "S.No",
+        selector: (row, index) => index + 1,
+        width: "60px",
     },
     {
         name: 'Date',

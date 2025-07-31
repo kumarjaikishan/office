@@ -6,7 +6,7 @@ const HolidayCalander = ({ highlightedDates, weeklyOffs }) => {
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box className="bg-white shadow rounded p-1 w-full max-w-md">
-            <p className="font-bold text-center text-xl text-slate-600">Holiday Calander</p>
+            <p className="font-bold text-center text-xl text-slate-600">Holiday Calendar</p>
                 <StaticDatePicker
                     displayStaticWrapperAs="desktop"
                     value={null}

@@ -12,7 +12,7 @@ import { GoPlus } from 'react-icons/go'
 import { useSelector } from 'react-redux'
 import { customStyles } from '../../admin/attandence/attandencehelper'
 
-const Leave = () => {
+const EmpLeave = () => {
     const init = {
         type: '',
         fromDate: null,
@@ -140,7 +140,7 @@ const Leave = () => {
     )
 }
 
-export default Leave;
+export default EmpLeave;
 export const columns = [
     // {
     //     name: "S.no",

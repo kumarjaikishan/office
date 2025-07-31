@@ -17,6 +17,7 @@ import { FiSettings } from 'react-icons/fi';
 const Sidebar = () => {
   const navigate = useNavigate();
   const { islogin } = useSelector((state) => state.auth);
+  const { company } = useSelector((state) => state.user);
   const user = useSelector((state) => state.user);
   useEffect(() => {
     // console.log(user)
@@ -38,10 +39,25 @@ const Sidebar = () => {
 
   return (
     <div className=' w-full h-full px-1 md:px-2 '>
-      <div className="logo h-[60px]  flex items-center gap-4">
-        <span className='text-3xl'> <SiAudiotechnica /></span>
-        <span className='hidden lg:block capitalize'>{user?.company?.name || 'company Name'}</span>
+      <div className="logo h-[60px] flex items-center gap-4">
+        <span className="text-3xl">
+          {company?.logo ? (
+            <div className='rounded-full overflow-hidden w-14 h-14 object-cover  '>
+            <img
+              className=" w-[100%] h-[100%] object-fill"
+              src={company.logo}
+              alt="Company Logo"
+            />
+            </div>
+          ) : (
+            <SiAudiotechnica />
+          )}
+        </span>
+        <span className="hidden lg:block capitalize">
+          {user?.company?.name || 'Company Name'}
+        </span>
       </div>
+
       {menu.map((item) => {
         const filteredItems = item.items.filter(item => item.roles.includes(role));
 
@@ -140,9 +156,9 @@ const menu = [
       },
       {
         menu: "Ledger",
-        link: '/employe-dashboard/ledger',
+        link: '/admin-dashboard/ledger',
         icon: <FaUmbrellaBeach />,
-        roles: ['admin','employee']
+        roles: ['admin']
       },
       {
         menu: "Leave Request",
