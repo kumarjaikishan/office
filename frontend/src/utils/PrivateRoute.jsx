@@ -6,18 +6,15 @@ import Sidebar from '../components/sidebar';
 import Navbar from '../components/Navbar';
 
 const PrivateRoute = () => {
-  const user = useSelector((state) => state.user);
-  // const isLogin = user.islogin;
-  const isLogin = true;
+   const {islogin} = useSelector((state) => state.auth);
 
   useEffect(() => {
-    // console.log(user)
-    if (!isLogin) {
+    if (!islogin) {
       toast.warn('Please LogIn', { autoClose: 1700 });
     }
-  }, [isLogin]);
+  }, [islogin]);
 
- return isLogin ?
+ return islogin ?
       <div className='h-screen bg-amber-200 w-full flex'>
         {/* left side */}
         <div className='w-[14%] md:w-[8%] lg:w-[16%] bg-white shadow-xl' >

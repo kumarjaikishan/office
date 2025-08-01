@@ -85,7 +85,6 @@ function App() {
           <Route path="holiday" element={<HolidayForm />} />
           <Route path="adminleave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
-          {/* <Route path="face" element={<FaceEnrollment />} /> */}
           <Route path="faceatten" element={<FaceAttandance />} />
            {/* <Route path="ledger" element={<LedgerSystem />} /> */}
           
