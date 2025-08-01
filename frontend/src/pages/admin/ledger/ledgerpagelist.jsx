@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Container, Paper, Autocomplete, TextField, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Container, Paper, Autocomplete, TextField, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdDelete } from "react-icons/md";
 import axios from "axios";
 import { toast } from "react-toastify";
+import useImageUpload from "../../../utils/imageresizer";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
@@ -11,6 +12,10 @@ const LedgerListPage = () => {
     const [editLedgerId, setEditLedgerId] = useState(null);
     const [editLedgerName, setEditLedgerName] = useState("");
     const [editOpen, setEditOpen] = useState(false);
+    const [editLedgerImage, setEditLedgerImage] = useState(null);
+    const { handleImage } = useImageUpload();
+    const [loading, setloading] = useState(false);
+
 
     const token = localStorage.getItem("emstoken");
     const headers = { Authorization: `Bearer ${token}` };
@@ -33,32 +38,66 @@ const LedgerListPage = () => {
         if (ledger) {
             setEditLedgerName(ledger.name);
             setEditLedgerId(ledger._id);
+            // Optional: set existing image if you store image URL
+            // setEditLedgerImage(ledger.image); 
         } else {
             setEditLedgerName("");
             setEditLedgerId(null);
+            setEditLedgerImage(null);
         }
         setEditOpen(true);
     };
+
     const handleSaveLedger = async () => {
         const name = editLedgerName.trim();
         if (!name) return toast.warn("Ledger name can't be empty");
         if (name.length < 3) return toast.warn("Ledger name must be at least 3 characters");
 
+        const formData = new FormData();
+        formData.append("name", name);
+        if (editLedgerImage) {
+            let resizedfile = await handleImage(200, editLedgerImage);
+            formData.append("image", resizedfile);
+        }
+
         try {
+            setloading(true)
             if (editLedgerId) {
-                await axios.put(`${import.meta.env.VITE_API_ADDRESS}ledger/${editLedgerId}`, { name }, { headers });
+                await axios.put(
+                    `${import.meta.env.VITE_API_ADDRESS}ledger/${editLedgerId}`,
+                    formData,
+                    {
+                        headers: {
+                            ...headers,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
                 toast.success("Ledger updated");
             } else {
-                await axios.post(`${import.meta.env.VITE_API_ADDRESS}ledger`, { name }, { headers });
+                await axios.post(
+                    `${import.meta.env.VITE_API_ADDRESS}ledger`,
+                    formData,
+                    {
+                        headers: {
+                            ...headers,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
                 toast.success("Ledger created");
             }
+
             setEditOpen(false);
             fetchLedgers();
         } catch (err) {
-            console.log(err)
+            console.error(err);
             toast.error("Failed to save ledger");
+        } finally {
+            setloading(false)
         }
     };
+
 
     const deleteLedger = async (ledger) => {
         swal({
@@ -84,7 +123,11 @@ const LedgerListPage = () => {
 
     const handleNavigate = (ledger) => {
         if (ledger) {
-            navigate(`./${ledger._id}?name=${encodeURIComponent(ledger.name)}`);
+            let url = `./${ledger._id}?name=${encodeURIComponent(ledger.name)}`;
+            if (ledger.profileImage) {
+                url += `&profileimage=${encodeURIComponent(ledger.profileImage)}`;
+            }
+          return navigate(url);
         }
     };
 
@@ -111,18 +154,23 @@ const LedgerListPage = () => {
                             <div
                                 key={ind}
                                 onClick={() => handleNavigate(l)}
-                                className="relative group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all px-4 py-2 bg-white"
+                                className="relative group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all pl-3 pr-1 py-3 bg-gray-50"
                             >
                                 {/* Card content */}
-                                <h3 className="text-lg font-semibold text-gray-800 mb-2 capitalize">{l.name}</h3>
-                                <p className={`text-md font-medium ${l.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <div className="flex gap-1 items-center">
+                                    <Avatar
+                                        sx={{ width: 35, height: 35 }}
+                                        alt={l.name} src={l.profileImage} />
+                                    <div className="text-l font-semibold text-gray-800 mb-2 capitalize">{l.name}</div>
+                                </div>
+                                <p className={`text-md  text-end font-medium ${l.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     ₹ {l.netBalance.toLocaleString()}
                                 </p>
                                 <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
 
                                 <div
                                     onClick={(e) => e.stopPropagation()} // prevent parent onClick
-                                    className="absolute bottom-2 right-1 flex gap-2 transform translate-x-20 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-600 delay-400"
+                                    className="absolute bottom-1 left-3 flex gap-2 transform -translate-x-25 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-600 delay-400"
                                 >
                                     <span
                                         title="Edit Ledger"
@@ -150,14 +198,32 @@ const LedgerListPage = () => {
             <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
                 <DialogTitle>{editLedgerId ? "Edit Ledger" : "Add Ledger"}</DialogTitle>
                 <DialogContent>
+
                     <TextField
                         autoFocus fullWidth margin="dense" label="Ledger Name"
                         value={editLedgerName} onChange={(e) => setEditLedgerName(e.target.value)}
                     />
+
+                    <div className="mt-4">
+                        <label className="block text-sm text-gray-600 mb-1">Upload Ledger Image</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setEditLedgerImage(e.target.files[0])}
+                        />
+                        {editLedgerImage && (
+                            <img
+                                src={URL.createObjectURL(editLedgerImage)}
+                                alt="preview"
+                                className="mt-2 w-24 h-24 object-cover rounded shadow"
+                            />
+                        )}
+                    </div>
+
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={handleSaveLedger}>
+                    <Button loading={loading} variant="contained" onClick={handleSaveLedger}>
                         {editLedgerId ? "Update" : "Create"}
                     </Button>
                 </DialogActions>

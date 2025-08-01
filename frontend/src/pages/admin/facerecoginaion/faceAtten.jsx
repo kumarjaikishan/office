@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import dayjs from 'dayjs';
 import { loadFaceAPI } from './loadModel';
+import { useDispatch } from "react-redux";
+import { FirstFetch } from '../../../../store/userSlice';
 
 const videoSize = { width: 350, height: 350 };
 const scriptSrc = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
@@ -15,6 +17,7 @@ const FaceAttendance = () => {
     const detectionLockRef = useRef(false);
     const detectionIntervalRef = useRef(null);
     const modeRef = useRef(null);
+    const dispatch = useDispatch();
 
     const [mode, setMode] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
@@ -228,7 +231,8 @@ const FaceAttendance = () => {
                 speak(`you have already ${modeRef.current}`)
                 toast.warn(res.data.message || `Successfully punched ${modeRef.current}`, { autoClose: 2100 });
             } else {
-                 speak(`Thank You for ${modeRef.current}`)
+                dispatch(FirstFetch());
+                speak(`Thank You for ${modeRef.current}`)
                 toast.success(res.data.message || `Successfully punched ${modeRef.current}`);
             }
 
@@ -297,9 +301,9 @@ const FaceAttendance = () => {
                             </div>
                         </div>
                         <div className="text-center font-semibold text-gray-700 mb-2">
-                            {detectedEmp.punchIn && detectedEmp.punchOut === '-- : --' ? ( <div className='text-[14px]'>
+                            {detectedEmp.punchIn && detectedEmp.punchOut === '-- : --' ? (<div className='text-[14px]'>
                                 <p>👋 Good {dayjs().hour() < 12 ? 'Morning' : dayjs().hour() < 17 ? 'Afternoon' : 'Evening'}, {detectedEmp.name}!</p>  <p> You have punched in successfully.</p>
-                           </div> ) : (
+                            </div>) : (
                                 <p>✅ Great job today, {detectedEmp.name}! You’ve successfully punched out.</p>
                             )}
                         </div>

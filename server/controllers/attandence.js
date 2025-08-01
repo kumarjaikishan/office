@@ -233,6 +233,75 @@ const facecheckin = async (req, res, next) => {
   }
 };
 
+function normalizeDateToUTC(date) {
+  const d = new Date(date);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+}
+
+
+const bulkMarkAttendance = async (req, res, next) => {
+  try {
+    const { attendanceRecords } = req.body;
+
+    if (!Array.isArray(attendanceRecords) || attendanceRecords.length === 0) {
+      return res.status(400).json({ message: 'No attendance data provided.' });
+    }
+
+    const bulkOps = attendanceRecords.map(record => {
+      const {
+        empId: employeeId,
+        date,
+        punchIn,
+        punchOut,
+        status,
+        source = 'manual'
+      } = record;
+
+      // ✅ Normalize date to midnight UTC (YYYY-MM-DDT00:00:00.000Z)
+      const parsedDate = new Date(date);
+      const dateObj = normalizeDateToUTC(parsedDate);
+
+      const punchInDate = punchIn ? new Date(punchIn) : null;
+      const punchOutDate = punchOut ? new Date(punchOut) : null;
+
+      let workingMinutes = 0;
+      let shortMinutes = 0;
+
+      if (punchInDate && punchOutDate && punchOutDate > punchInDate) {
+        workingMinutes = Math.floor((punchOutDate - punchInDate) / (1000 * 60)); // in minutes
+        shortMinutes = Math.max(0, 480 - workingMinutes); // 8 hours = 480 minutes
+      }
+
+      return {
+        updateOne: {
+          filter: { employeeId, date: dateObj },
+          update: {
+            $set: {
+              punchIn: punchInDate,
+              punchOut: punchOutDate,
+              workingMinutes,
+              shortMinutes,
+              status,
+              source,
+            },
+          },
+          upsert: true
+        }
+      };
+    });
+
+    await Attendance.bulkWrite(bulkOps);
+
+    res.status(200).json({ message: 'Bulk attendance marked successfully.' });
+  } catch (error) {
+    console.error('Bulk Attendance Error:', error);
+    res.status(500).json({ message: 'Server error while marking attendance.' });
+  }
+};
+
+module.exports = { bulkMarkAttendance };
+
+
 
 
 const checkout = async (req, res, next) => {
@@ -495,4 +564,4 @@ const employeeAttandence = async (req, res, next) => {
 }
 
 
-module.exports = { checkout, deleteattandence, facecheckin, facecheckout, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
+module.exports = { checkout, deleteattandence, bulkMarkAttendance, facecheckin, facecheckout, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };

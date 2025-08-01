@@ -28,6 +28,7 @@ import LedgerListPage from './pages/admin/ledger/ledgerpagelist';
 import LedgerDetailPage from './pages/admin/ledger/ledgerdetailpage';
 import LedgerSystem from './pages/admin/ledger/ledger';
 import EmpLeave from './pages/employee/leave/Leave';
+import FaceAttandance from './pages/admin/facerecoginaion/faceAttandance';
 
 
 function App() {
@@ -84,8 +85,8 @@ function App() {
           <Route path="holiday" element={<HolidayForm />} />
           <Route path="adminleave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
-          <Route path="face" element={<FaceEnrollment />} />
-          <Route path="faceatten" element={<FaceAttendance />} />
+          {/* <Route path="face" element={<FaceEnrollment />} /> */}
+          <Route path="faceatten" element={<FaceAttandance />} />
            {/* <Route path="ledger" element={<LedgerSystem />} /> */}
           
           <Route path="ledger" element={<LedgerListPage />} />

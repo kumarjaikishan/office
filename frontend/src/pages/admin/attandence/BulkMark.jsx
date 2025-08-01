@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+
     Paper, Checkbox, Typography, FormControl, Select, MenuItem,
-    InputLabel, Button, Avatar
+    InputLabel, Button, Avatar,
+    TextField
 } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import {
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+} from '@mui/material';
 import { IoIosSend } from "react-icons/io";
 import { useSelector } from 'react-redux';
 import Modalbox from '../../../components/custommodal/Modalbox';
 import dayjs from 'dayjs';
+import { FirstFetch } from '../../../../store/userSlice';
+import { toast } from 'react-toastify';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const BulkMark = ({
     openmodal, init, submitHandle, setopenmodal,
-    isUpdate, isload, inp, setinp, setisUpdate
+    isUpdate, isload, inp, setinp, setisUpdate, dispatch
 }) => {
     const { department, branch, employee } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
@@ -28,7 +33,7 @@ const BulkMark = ({
     useEffect(() => {
         // console.log(branch)
         // console.log(department)
-        console.log(employee)
+        // console.log(employee)
     }, [])
     useEffect(() => {
         const result = employee?.filter(e => {
@@ -90,7 +95,6 @@ const BulkMark = ({
         });
     };
 
-
     const handleStatusChange = (empId, value) => {
         setRowData(prev => ({
             ...prev,
@@ -101,31 +105,68 @@ const BulkMark = ({
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (checkedemployee.length === 0) {
+            alert("Please select at least one employee.");
+            return;
+        }
+
         const selectedData = checkedemployee.map(empId => {
             const { punchIn, punchOut, status } = rowData[empId];
 
             const data = {
                 empId,
                 status,
-                date: attandenceDate,
+                date: attandenceDate.toISOString(), // Ensure ISO string for backend
             };
 
-            // Only include punchOut if it's not null or undefined
             if (punchIn != null) {
-                data.punchIn = punchIn;
+                data.punchIn = new Date(`${attandenceDate.format('YYYY-MM-DD')}T${punchIn}`).toISOString();
             }
             if (punchOut != null) {
-                data.punchOut = punchOut;
+                data.punchOut = new Date(`${attandenceDate.format('YYYY-MM-DD')}T${punchOut}`).toISOString();
             }
 
             return data;
         });
 
-        console.log(selectedData)
-        // submitHandle(selectedData);
+        try {
+            const token = localStorage.getItem('emstoken')
+            setisUpdate(true); // Show loading state
+            const response = await fetch(`${import.meta.env.VITE_API_ADDRESS}bulkMarkAttendance`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ attendanceRecords: selectedData }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to submit attendance');
+            }
+
+            const result = await response.json();
+            console.log('Bulk Attendance Response:', result);
+
+            // Reset form
+            // setinp(init);
+            dispatch(FirstFetch());
+            setcheckedemployee([]);
+            setattandenceDate(dayjs())
+            setopenmodal(false);
+            setisUpdate(false);
+            toast.success('Attendance marked successfully.');
+
+        } catch (error) {
+            console.error('Bulk Attendance Error:', error);
+            alert('Failed to mark attendance. Please try again.');
+            setisUpdate(false);
+        }
     };
+
 
 
 
@@ -171,20 +212,39 @@ const BulkMark = ({
                                 </Select>
                             </FormControl>
 
+                            {/* <TextField
+                                size="small"
+                                fullWidth
+                                type="date"
+                                label="Search Employee"
+                                value={attandenceDate.format('YYYY-MM-DD')}
+                                onChange={(e) => setattandenceDate(dayjs(e.target.value))}
+                                InputLabelProps={{ shrink: true }}
+                            /> */}
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker
-                                    label="Select Date"
-                                    format="DD/MM/YYYY"
+                                    slotProps={{
+                                        textField: {
+                                            size: 'small',
+                                        },
+                                    }}
+                                    onChange={(newValue) => {
+                                        setattandenceDate(newValue)
+                                    }}
+                                    format="DD-MM-YYYY"
                                     value={attandenceDate}
-                                    onChange={(newValue) => setattandenceDate(newValue)}
-                                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                                    sx={{ width: '100%' }}
+                                    label="Select date"
                                 />
                             </LocalizationProvider>
+
+
+
 
                         </div>
 
                         {/* Attendance Table */}
-                        <div className='border border-dashed border-teal-400 rounded w-full h-[350px]'>
+                        <div className='border border-dashed border-teal-400 rounded w-full h-[60vh]'>
                             <TableContainer component={Paper}>
                                 <Table size="small">
                                     <TableHead>
@@ -218,24 +278,21 @@ const BulkMark = ({
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                        <TimePicker
-                                                            sx={{ width: "140px" }}
-                                                            value={rowData[emp._id]?.punchIn}
-                                                            onChange={(value) => handleTimeChange(emp._id, 'punchIn', value)}
-                                                            slotProps={{ textField: { size: 'small' } }}
-                                                        />
-                                                    </LocalizationProvider>
+                                                    <input
+                                                        type="time"
+                                                        className="form-input outline-0 border-1 border-teal-500 border-dashed p-1 rounded"
+                                                        value={rowData[emp._id]?.punchIn || ''}
+                                                        onChange={(e) => handleTimeChange(emp._id, 'punchIn', e.target.value)}
+                                                    />
+
                                                 </TableCell>
                                                 <TableCell>
-                                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                        <TimePicker
-                                                            sx={{ width: "140px" }}
-                                                            value={rowData[emp._id]?.punchOut}
-                                                            onChange={(value) => handleTimeChange(emp._id, 'punchOut', value)}
-                                                            slotProps={{ textField: { size: 'small' } }}
-                                                        />
-                                                    </LocalizationProvider>
+                                                    <input
+                                                        type="time"
+                                                        className="form-input outline-0 border-1 border-teal-500 border-dashed p-1 rounded"
+                                                        value={rowData[emp._id]?.punchOut || ''}
+                                                        onChange={(e) => handleTimeChange(emp._id, 'punchOut', e.target.value)}
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
                                                     <FormControl fullWidth size="small">

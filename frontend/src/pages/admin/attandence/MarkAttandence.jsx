@@ -38,7 +38,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 labelId="demo-simple-select-helper-label"
                                 id="demo-simple-select-helper"
                                 value={isPunchIn}
-                               
+
                                 required
                                 onChange={(e) => {
                                     setisPunchIn(e.target.value)
@@ -153,7 +153,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         labelId="demo-simple-select-helper-label"
                                         id="demo-simple-select-helper"
                                         value={inp.status}
-                                       
+
                                         required
                                         onChange={(e) => {
                                             setinp({
@@ -185,18 +185,6 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                             >
                                 Add
                             </Button>}
-
-                            {isUpdate && <Button
-
-                                loading={isload}
-                                loadingPosition="end"
-                                endIcon={<IoIosSend />}
-                                variant="contained"
-                                onClick={updatee}
-                            >
-                                Update
-                            </Button>}
-
                         </div>
                     </span>
                 </form>

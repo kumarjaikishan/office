@@ -1,7 +1,15 @@
 const Ledger = require("../models/ledger");
 const Entry = require("../models/entry");
+const fs = require("fs");
+const removePhotoBySecureUrl = require("../utils/cloudinaryremove");
+const cloudinary = require("cloudinary").v2;
 
-// Create a new ledger
+cloudinary.config({
+  cloud_name: 'dusxlxlvm',
+  api_key: '214119961949842',
+  api_secret: "kAFLEVAA5twalyNYte001m_zFno"
+});
+
 exports.createLedger = async (req, res) => {
   try {
     const { name } = req.body;
@@ -11,24 +19,75 @@ exports.createLedger = async (req, res) => {
       return res.status(400).json({ message: "Ledger with this name already exists." });
     }
 
-    const ledger = await Ledger.create({ name, userId: req.userid });
-    res.status(201).json({ message: "Ledger Created" });
+    const ledger = new Ledger({ name, userId: req.userid });
+
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'ems/ledger'
+      });
+
+      ledger.profileImage = uploadResult.secure_url;
+
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Error deleting local file:", err.message);
+      });
+    }
+
+    await ledger.save();
+    res.status(201).json({ message: "Ledger created successfully." });
+
   } catch (err) {
+    console.error("Ledger creation error:", err.message);
     res.status(500).json({ error: "Failed to create ledger", details: err.message });
   }
 };
+
 
 // Update a ledger name
 exports.updateLedger = async (req, res) => {
   try {
     const { name } = req.body;
-    const updated = await Ledger.findByIdAndUpdate(req.params.id, { name }, { new: true });
-    if (!updated) return res.status(404).json({ message: "Ledger not found" });
-    res.json({ message: "Ledger updated" });
+
+    const ledger = await Ledger.findById(req.params.id);
+    if (!ledger) {
+      return res.status(404).json({ message: "Ledger not found" });
+    }
+
+    const profileImage = ledger.profileImage;
+
+    // Handle image upload if file provided
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'ems/ledger'
+      });
+
+      ledger.profileImage = uploadResult.secure_url;
+
+      // Delete temp file
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Error deleting local file:", err.message);
+      });
+
+      // Optionally delete old image from Cloudinary
+      if (profileImage && profileImage !== "") {
+        await removePhotoBySecureUrl([profileImage]);  // assuming this helper exists and works as expected
+      }
+    }
+
+    // Update name
+    if (name) {
+      ledger.name = name;
+    }
+    console.log(ledger)
+    await ledger.save();
+    res.json({ message: "Ledger updated successfully" });
+
   } catch (err) {
+    console.error("Ledger update error:", err.message);
     res.status(500).json({ error: "Failed to update ledger", details: err.message });
   }
 };
+
 
 // Get all ledgers and entries for user
 exports.ledgerEntries = async (req, res) => {

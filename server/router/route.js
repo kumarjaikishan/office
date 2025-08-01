@@ -52,6 +52,7 @@ router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('admin'), salary.
 router.route('/allAttandence').get(authmiddlewre, attendance.allAttandence);
 router.route('/editattandence').post(authmiddlewre, authorizeRoles('admin'), attendance.editattandence);
 router.route('/webattandence').post(authmiddlewre, attendance.webattandence);
+router.route('/bulkMarkAttendance').post(authmiddlewre, attendance.bulkMarkAttendance);
 router.route('/checkout').post(authmiddlewre, attendance.checkout);
 router.route('/checkin').post(authmiddlewre, attendance.checkin);
 router.route('/facecheckin').post(authmiddlewre, attendance.facecheckin);
@@ -79,10 +80,10 @@ router.route("/entries/:id")
   .get(authmiddlewre, authorizeRoles('admin'), ledger.Entries);
 
 router.route("/ledger")
-  .post(authmiddlewre, authorizeRoles('admin'), ledger.createLedger)
+  .post(authmiddlewre, authorizeRoles('admin'),upload.single('image'), ledger.createLedger)
 
 router.route("/ledger/:id")
-  .put(authmiddlewre, authorizeRoles('admin'), ledger.updateLedger)
+  .put(authmiddlewre, authorizeRoles('admin'),upload.single('image'), ledger.updateLedger)
   .delete(authmiddlewre, authorizeRoles('admin'), ledger.deleteLedger);
 
 router.route("/ledgerentry")

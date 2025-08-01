@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Paper, Box, Typography, Button, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Dialog,  DialogTitle, DialogContent,   DialogActions
+    Paper, Box, Typography, Button, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+    Avatar
 } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { VscDebugRestart } from 'react-icons/vsc';
@@ -23,10 +24,11 @@ const SummaryBox = ({ label, value }) => (
 const LedgerDetailPage = () => {
     const { id: ledgerId } = useParams();
     const [searchParams] = useSearchParams();
-        const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const ledgerName = searchParams.get('name');
-    const [ledger, setLedger] = useState(null);
+    const profile = decodeURIComponent(searchParams.get("profileimage"));
+
     const [entries, setEntries] = useState([]);
     const [filtered, setFiltered] = useState([]);
 
@@ -37,8 +39,10 @@ const LedgerDetailPage = () => {
     const [totalDebit, setTotalDebit] = useState(0);
     const [totalCredit, setTotalCredit] = useState(0);
     const [totalBalance, setTotalBalance] = useState(0);
-
-    const [entry, setEntry] = useState({ date: "", particular: "", debit: "", credit: "" });
+    const init = {
+        date: dayjs().format('YYYY-MM-DD'), particular: "", debit: "", credit: ""
+    }
+    const [entry, setEntry] = useState(init);
     const [open, setOpen] = useState(false);
     const [editIndex, setEditIndex] = useState(null);
 
@@ -161,12 +165,14 @@ const LedgerDetailPage = () => {
 
             toast.success(res.data.message);
             setOpen(false);
+            setEntry(init)
             fetchEnteries();
         } catch (error) {
             console.log(error)
             toast.error("Error saving entry");
         }
     };
+
     const handleEditEntry = (entry) => {
         const formattedDate = new Date(entry.date).toISOString().split("T")[0]; // ✅ format to 'YYYY-MM-DD'
         setEntry({
@@ -185,10 +191,14 @@ const LedgerDetailPage = () => {
         <Paper className="md:p-3 p-1 m-2">
             <Box className="border border-teal-600 border-dashed rounded-md p-2 md:p-4 mb-4">
                 <Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <Typography variant="h6">
-                        Ledger: <span className="text-teal-700 text-2xl font-semibold capitalize">{ledgerName}</span>
-                    </Typography>
-                    <Button onClick={()=> navigate(-1)} variant='contained' >Master Sheet</Button>
+                    <Box display="flex" alignItems="center" gap={1}>
+                        <Avatar  sx={{ width: 55, height: 55 }} alt={ledgerName} src={profile} />
+                        <Typography variant="h6">
+                            <span className="text-teal-700 text-2xl font-semibold capitalize">{ledgerName}</span>
+                        </Typography>
+                    </Box>
+
+                    <Button onClick={() => navigate(-1)} variant='contained' >Master Sheet</Button>
 
                     {/* <div className="flex gap-3">
                         <div
@@ -219,7 +229,7 @@ const LedgerDetailPage = () => {
                 <Box className="flex flex-wrap md:justify-between justify-center gap-4 mt-4">
                     <SummaryBox label="Total Debit" value={totalDebit} />
                     <SummaryBox label="Total Credit" value={totalCredit} />
-                    <SummaryBox label="Net Balance" value={totalBalance} />
+                    <SummaryBox label="Net Balance" value={totalBalance.toFixed(2)} />
                 </Box>
             </Box>
 
@@ -256,7 +266,7 @@ const LedgerDetailPage = () => {
                 <IconButton onClick={resetFilters}><VscDebugRestart /></IconButton>
 
                 <div className="flex gap-2">
-                    <Button variant="contained" onClick={() => { setEntry({}); setOpen(true); setEditIndex(null); }}>
+                    <Button variant="contained" onClick={() => { setOpen(true); setEditIndex(null); }}>
                         Add Entry
                     </Button>
                     <Button variant="outlined" onClick={exportCSV} startIcon={<IoMdCloudDownload />}>
