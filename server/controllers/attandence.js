@@ -125,6 +125,7 @@ const checkin = async (req, res, next) => {
     }
 
     const attendanceData = {
+      companyId: req.user.companyId,
       employeeId,
       date: dateObj,
       status
@@ -198,6 +199,7 @@ const facecheckin = async (req, res, next) => {
 
     // Create attendance
     const attendanceData = {
+      companyId: req.user.companyId,
       employeeId,
       date: dateObj,
       punchIn: punchIn,
@@ -246,7 +248,7 @@ const bulkMarkAttendance = async (req, res, next) => {
     if (!Array.isArray(attendanceRecords) || attendanceRecords.length === 0) {
       return res.status(400).json({ message: 'No attendance data provided.' });
     }
-
+    let companyId = req.user.companyId
     const bulkOps = attendanceRecords.map(record => {
       const {
         empId: employeeId,
@@ -277,6 +279,7 @@ const bulkMarkAttendance = async (req, res, next) => {
           filter: { employeeId, date: dateObj },
           update: {
             $set: {
+              companyId,
               punchIn: punchInDate,
               punchOut: punchOutDate,
               workingMinutes,

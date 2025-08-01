@@ -5,6 +5,7 @@ const leaveSchema = new mongoose.Schema({
   type: { type: String },
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
+  duration: { type: Number, required: true },
   reason: { type: String },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
 },{ timestamps: true});

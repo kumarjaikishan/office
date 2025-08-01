@@ -5,7 +5,6 @@ const leavemodal = require('../models/leave')
 const holidaymodal = require('../models/holiday')
 const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
-const comanysettingModal = require('../models/comanysetting')
 const salaryModal = require('../models/salary')
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
@@ -29,7 +28,7 @@ const addDepartment = async (req, res, next) => {
             return next({ status: 400, message: "all fields are required" });
         }
 
-        const query = new departmentModal({ branchId, department, description });
+        const query = new departmentModal({companyId:req.user.companyId, branchId, department, description });
         const result = await query.save();
         if (!result) {
             return next({ status: 400, message: "Something went wrong" });
@@ -104,7 +103,6 @@ const departmentlist = async (req, res, next) => {
 
 
 const addemployee = async (req, res, next) => {
-    // console.log(req.body)
 
     const { employeeName, branchId, department, email, username, password, designation, salary } = req.body;
 
@@ -117,7 +115,6 @@ const addemployee = async (req, res, next) => {
     session.startTransaction();
 
     try {
-
         const existingUser = await usermodal.findOne({ email }).session(session);
         if (existingUser) {
             await session.abortTransaction();
@@ -144,7 +141,7 @@ const addemployee = async (req, res, next) => {
             }
         }
 
-        const query = new employeeModal({
+        const query = new employeeModal({ companyId:req.user.companyId,
             userid: resulten._id, designation, salary, branchId, profileimage: uploadResult?.secure_url, username, department,
         });
         const resulte = await query.save({ session });
@@ -404,41 +401,23 @@ const firstfetch = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
-const setsetting = async (req, res, next) => {
-    console.log(req.body)
-    const settingsData = req.body;
-    try {
-        const updatedSetting = await comanysettingModal.findOneAndUpdate(
-            {},                     // match all (singleton)
-            settingsData,           // new data
-            {
-                new: true,            // return updated doc
-                upsert: true,         // create if not exists
-                setDefaultsOnInsert: true
-            }
-        );
 
-        return res.status(200).json({ message: "updated", updatedSetting });
-
-    } catch (error) {
-        console.log(error.message)
-        return next({ status: 500, message: error.message });
-    }
-}
 const addcompany = async (req, res, next) => {
     const { name, industry } = req.body;
 
     try {
         // Check if a company already exists for this admin
-        const existingCompany = await company.findOne({ adminId: req.user.id });
+        const existingCompany = await company.findOne({ adminId: req.userid });
 
         if (existingCompany) {
             return res.status(400).json({ message: "Company already created" });
         }
 
         // Create a new company
-        const newCompany = new company({ name, industry, adminId: req.user.id });
+        const newCompany = new company({ name, industry, adminId: req.userid });
         await newCompany.save();
+
+        await usermodal.findByIdAndUpdate(req.userid, { companyId: newCompany._id })
 
         return res.status(200).json({ message: "Created new company", company: newCompany });
 
@@ -447,6 +426,7 @@ const addcompany = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 };
+
 const updateCompany = async (req, res, next) => {
     const { _id, ...updateFields } = req.body;
 
@@ -567,21 +547,7 @@ const editBranch = async (req, res, next) => {
 };
 
 
-const getsetting = async (req, res, next) => {
-    try {
-        const companySetting = await comanysettingModal.findOne();
 
-        if (!companySetting) {
-            return res.status(404).json({ message: 'Company settings not found' });
-        }
-
-        return res.status(200).json(companySetting);
-
-    } catch (error) {
-        console.error(error.message);
-        return next({ status: 500, message: 'Internal Server Error' });
-    }
-};
 const getemployee = async (req, res, next) => {
     // console.log(req.query)
     const { empid } = req.query;
@@ -675,6 +641,7 @@ const leavehandle = async (req, res, next) => {
                 } else {
                     // Insert new leave attendance
                     const attendanceData = {
+                        companyId:req.user.companyId,
                         employeeId,
                         date: currentDate,
                         status: 'leave',
@@ -697,6 +664,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, setsetting, getsetting, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

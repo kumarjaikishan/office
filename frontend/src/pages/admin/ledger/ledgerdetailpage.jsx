@@ -14,12 +14,20 @@ import dayjs from 'dayjs';
 import { getLedgerColumns } from './ledgerhelper';
 import { MdDelete, MdEdit } from 'react-icons/md';
 
-const SummaryBox = ({ label, value }) => (
-    <Box className="bg-teal-50 border border-teal-300 border-dashed rounded-md px-4 py-2 min-w-[150px] text-center">
-        <Typography variant="subtitle2" color="textSecondary">{label}</Typography>
-        <Typography variant="subtitle1" fontWeight="bold">{value} ₹</Typography>
-    </Box>
-);
+const SummaryBox = ({ label, value }) => {
+  const isNegative = parseFloat(value) < 0;
+
+  return (
+    <div className="bg-teal-50 border border-teal-300 border-dashed rounded-md px-4 py-2 min-w-[150px] text-center">
+      <p className="text-sm text-gray-600">{label}</p>
+      <hr className="my-2 border-teal-200" />
+      <p className={`text-lg font-semibold ${isNegative ? 'text-red-600' : 'text-black'}`}>
+        {value} ₹
+      </p>
+    </div>
+  );
+};
+
 
 const LedgerDetailPage = () => {
     const { id: ledgerId } = useParams();
@@ -188,84 +196,71 @@ const LedgerDetailPage = () => {
     // if (!ledger) return <div>Loading...</div>;
 
     return (
-        <Paper className="md:p-3 p-1 m-2">
-            <Box className="border border-teal-600 border-dashed rounded-md p-2 md:p-4 mb-4">
-                <Box className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <Box display="flex" alignItems="center" gap={1}>
-                        <Avatar  sx={{ width: 55, height: 55 }} alt={ledgerName} src={profile} />
-                        <Typography variant="h6">
-                            <span className="text-teal-700 text-2xl font-semibold capitalize">{ledgerName}</span>
-                        </Typography>
-                    </Box>
+        <div className="bg-white rounded shadow-md p-3 md:p-5 m-2">
+            {/* Header */}
+            <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
+                <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+                    <div className="flex items-center gap-3">
+                        <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName} src={profile} />
+                        <h2 className="text-2xl font-semibold text-teal-700 capitalize">{ledgerName}</h2>
+                    </div>
+                    <Button onClick={() => navigate(-1)} variant="contained">Master Sheet</Button>
+                </div>
 
-                    <Button onClick={() => navigate(-1)} variant='contained' >Master Sheet</Button>
-
-                    {/* <div className="flex gap-3">
-                        <div
-                            onClick={handleOpenLedgerDialog}
-                            className="group cursor-pointer bg-blue-600 text-white rounded-full transition-all duration-300 w-10 h-10 hover:w-36 flex items-center justify-center group-hover:justify-start px-2"
-                        >
-                            <div className="w-6 h-6 flex items-center justify-center">
-                                <MdEdit className="text-xl" />
-                            </div>
-                            <span className="group-hover:ml-2 w-0 overflow-hidden group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                                Edit Ledger
-                            </span>
-                        </div>
-                        <div
-                            onClick={deleteLedger}
-                            className="group cursor-pointer border border-red-600 text-red-600 rounded-full transition-all duration-300 w-10 h-10 hover:w-40 flex items-center justify-center group-hover:justify-start px-2"
-                        >
-                            <div className="w-6 h-6 flex items-center justify-center">
-                                <MdDelete className="text-xl" />
-                            </div>
-                            <span className="group-hover:ml-2 w-0 overflow-hidden group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                                Delete Ledger
-                            </span>
-                        </div>
-                    </div> */}
-                </Box>
-
-                <Box className="flex flex-wrap md:justify-between justify-center gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <SummaryBox label="Total Debit" value={totalDebit} />
                     <SummaryBox label="Total Credit" value={totalCredit} />
                     <SummaryBox label="Net Balance" value={totalBalance.toFixed(2)} />
-                </Box>
-            </Box>
+                </div>
+            </div>
 
-            <Box display="flex" gap={2} mb={2} flexWrap="wrap" alignItems="center">
-                <FormControl size="small" sx={{ minWidth: 100 }}>
-                    <InputLabel>Year</InputLabel>
-                    <Select value={filterYear} onChange={e => setFilterYear(e.target.value)} label="Year">
-                        <MenuItem value="all">All</MenuItem>
-                        {[...new Set(entries.map(e => dayjs(e.date).year()))].map(y => (
-                            <MenuItem key={y} value={y}>{y}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center  gap-3 mb-4">
+                <div className="flex flex-wrap items-end  p-2 rounded shadow  gap-3 mb-4">
+                    <div className="min-w-[100px]">
+                        <label className="text-sm block">Year</label>
+                        <select
+                            value={filterYear}
+                            onChange={e => setFilterYear(e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-1 w-full"
+                        >
+                            <option value="all">All</option>
+                            {[...new Set(entries.map(e => dayjs(e.date).year()))].map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                <FormControl size="small" sx={{ minWidth: 100 }}>
-                    <InputLabel>Month</InputLabel>
-                    <Select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} label="Month">
-                        <MenuItem value="all">All</MenuItem>
-                        {Array.from({ length: 12 }, (_, i) => (
-                            <MenuItem key={i} value={i + 1}>{dayjs().month(i).format("MMMM")}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                    <div className="min-w-[100px]">
+                        <label className="text-sm block">Month</label>
+                        <select
+                            value={filterMonth}
+                            onChange={e => setFilterMonth(e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-1 w-full"
+                        >
+                            <option value="all">All</option>
+                            {Array.from({ length: 12 }, (_, i) => (
+                                <option key={i} value={i + 1}>{dayjs().month(i).format("MMMM")}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                <TextField
-                    size="small"
-                    type="date"
-                    label="Date"
-                    InputLabelProps={{ shrink: true }}
-                    value={filterDate}
-                    onChange={e => setFilterDate(e.target.value)}
-                />
+                    <div className="min-w-[160px]">
+                        <label className="text-sm block">Date</label>
+                        <input
+                            type="date"
+                            value={filterDate}
+                            onChange={e => setFilterDate(e.target.value)}
+                            className="border border-gray-300 rounded px-2 py-1 w-full"
+                        />
+                    </div>
 
-                <IconButton onClick={resetFilters}><VscDebugRestart /></IconButton>
+                    <span title='Reset' onClick={resetFilters} className="p-2 rounded-full bg-teal-800 text-white">
+                        <VscDebugRestart size={20} />
+                    </span>
+                </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 ml-auto">
                     <Button variant="contained" onClick={() => { setOpen(true); setEditIndex(null); }}>
                         Add Entry
                     </Button>
@@ -273,22 +268,25 @@ const LedgerDetailPage = () => {
                         Export CSV
                     </Button>
                 </div>
-            </Box>
+            </div>
 
-            <DataTable
-                columns={getLedgerColumns(handleEditEntry, handleDeleteEntry)}
-                data={filtered || []}
-                pagination
-                highlightOnHover
-                noDataComponent="No entries found for selected filters."
-                paginationPerPage={10}
-                paginationRowsPerPageOptions={
-                    [10, 25, 50, 100, filtered.length > 100 ? filtered.length : null].filter(Boolean)
-                }
-                paginationComponentOptions={{
-                    rowsPerPageText: 'Rows per page:',
-                }}
-            />
+            {/* Table */}
+            <div className="overflow-x-auto">
+                <DataTable
+                    columns={getLedgerColumns(handleEditEntry, handleDeleteEntry)}
+                    data={filtered || []}
+                    pagination
+                    highlightOnHover
+                    noDataComponent="No entries found for selected filters."
+                    paginationPerPage={10}
+                    paginationRowsPerPageOptions={
+                        [10, 25, 50, 100, filtered.length > 100 ? filtered.length : null].filter(Boolean)
+                    }
+                    paginationComponentOptions={{
+                        rowsPerPageText: 'Rows per page:',
+                    }}
+                />
+            </div>
 
             {/* Entry Modal */}
             <Dialog open={open} onClose={() => { setOpen(false); setEditIndex(null); }}>
@@ -314,8 +312,33 @@ const LedgerDetailPage = () => {
                     <Button variant="contained" onClick={saveEntry}>{editIndex !== null ? "Update" : "Add"}</Button>
                 </DialogActions>
             </Dialog>
-        </Paper>
+        </div>
     );
 };
 
 export default LedgerDetailPage;
+
+{/* <div className="flex gap-3">
+                        <div
+                            onClick={handleOpenLedgerDialog}
+                            className="group cursor-pointer bg-blue-600 text-white rounded-full transition-all duration-300 w-10 h-10 hover:w-36 flex items-center justify-center group-hover:justify-start px-2"
+                        >
+                            <div className="w-6 h-6 flex items-center justify-center">
+                                <MdEdit className="text-xl" />
+                            </div>
+                            <span className="group-hover:ml-2 w-0 overflow-hidden group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                                Edit Ledger
+                            </span>
+                        </div>
+                        <div
+                            onClick={deleteLedger}
+                            className="group cursor-pointer border border-red-600 text-red-600 rounded-full transition-all duration-300 w-10 h-10 hover:w-40 flex items-center justify-center group-hover:justify-start px-2"
+                        >
+                            <div className="w-6 h-6 flex items-center justify-center">
+                                <MdDelete className="text-xl" />
+                            </div>
+                            <span className="group-hover:ml-2 w-0 overflow-hidden group-hover:w-auto transition-all duration-300 whitespace-nowrap">
+                                Delete Ledger
+                            </span>
+                        </div>
+                    </div> */}

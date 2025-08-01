@@ -30,12 +30,10 @@ router.route('/updatedepartment').post(authmiddlewre, authorizeRoles('admin'), a
 router.route('/deletedepartment').post(authmiddlewre, authorizeRoles('admin'), admin.deletedepartment);
 router.route('/firstfetch').get(authmiddlewre, authorizeRoles('admin'), admin.firstfetch);
 router.route('/leavehandle').post(authmiddlewre, authorizeRoles('admin'), admin.leavehandle);
-router.route('/setsetting').post(authmiddlewre, authorizeRoles('admin'), admin.setsetting);
 router.route('/addcompany').post(authmiddlewre, authorizeRoles('admin'), admin.addcompany);
 router.route('/updateCompany').post(authmiddlewre, authorizeRoles('admin'),upload.single('logo'), admin.updateCompany);
 router.route('/addBranch').post(authmiddlewre, authorizeRoles('admin'), admin.addBranch);
 router.route('/editBranch').post(authmiddlewre, authorizeRoles('admin'), admin.editBranch);
-router.route('/getsetting').get(authmiddlewre, authorizeRoles('admin'), admin.getsetting);
 router.route('/getemployee').get(authmiddlewre, authorizeRoles('admin'), admin.getemployee);
 router.route('/updatepassword').post(authmiddlewre, authorizeRoles('admin'), admin.updatepassword);
 
@@ -49,16 +47,16 @@ router.route('/deleteemployee').post(authmiddlewre, authorizeRoles('admin'), adm
 router.route('/addsalary').post(authmiddlewre, authorizeRoles('admin'), salary.addsalary);
 router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('admin'), salary.salaryfetch);
 
-router.route('/allAttandence').get(authmiddlewre, attendance.allAttandence);
+router.route('/allAttandence').get(authmiddlewre,authorizeRoles('admin'), attendance.allAttandence);
 router.route('/editattandence').post(authmiddlewre, authorizeRoles('admin'), attendance.editattandence);
-router.route('/webattandence').post(authmiddlewre, attendance.webattandence);
-router.route('/bulkMarkAttendance').post(authmiddlewre, attendance.bulkMarkAttendance);
-router.route('/checkout').post(authmiddlewre, attendance.checkout);
-router.route('/checkin').post(authmiddlewre, attendance.checkin);
-router.route('/facecheckin').post(authmiddlewre, attendance.facecheckin);
-router.route('/facecheckout').post(authmiddlewre, attendance.facecheckout);
+router.route('/webattandence').post(authmiddlewre,authorizeRoles('admin'), attendance.webattandence);
+router.route('/bulkMarkAttendance').post(authmiddlewre,authorizeRoles('admin'), attendance.bulkMarkAttendance);
+router.route('/checkout').post(authmiddlewre,authorizeRoles('admin'), attendance.checkout);
+router.route('/checkin').post(authmiddlewre,authorizeRoles('admin'), attendance.checkin);
+router.route('/facecheckin').post(authmiddlewre,authorizeRoles('admin'), attendance.facecheckin);
+router.route('/facecheckout').post(authmiddlewre,authorizeRoles('admin'), attendance.facecheckout);
 router.route('/employeeAttandence').get(attendance.employeeAttandence);
-router.route('/deleteattandence').post(attendance.deleteattandence);
+router.route('/deleteattandence').post(authmiddlewre,authorizeRoles('admin'),attendance.deleteattandence);
 
 router.route('/addholiday').post(authmiddlewre, holiday.addholiday);
 router.route('/deleteholiday').post(authmiddlewre, holiday.deleteholiday);

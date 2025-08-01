@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import HolidayCalander from '../holidays/holidayCalander';
 import dayjs from 'dayjs';
-import OfficialNoticeBoard from './notice';
+import OfficialNoticeBoard from '../../components/notice';
 
 const EmployeeDashboard = () => {
   const { attendance, companysetting, holiday } = useSelector((state) => state.employee);
@@ -51,7 +51,6 @@ const EmployeeDashboard = () => {
           <HolidayCalander highlightedDates={highlightedDates} weeklyOffs={weeklyOffs} />
         </div>
         <div className=" " >
-
           <OfficialNoticeBoard notices={notices} />
         </div>
       </div>

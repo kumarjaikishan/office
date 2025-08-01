@@ -35,7 +35,7 @@ const userLogin = async (req, res, next) => {
     }
     try {
         const isUser = await user.findOne({ email });
-        // console.log(isUser)
+        // console.log("inlogin", isUser)
         if (!isUser) {
             return next({ status: 400, message: "User not found" });
         }
@@ -51,9 +51,11 @@ const userLogin = async (req, res, next) => {
             role: isUser.role
         }
         if (isUser.role !== 'admin' && isUser.role !== 'superadmin') {
-            tobe.employeeId = isUser.employeeId
+            tobe.employeeId = isUser.employeeId;
         }
-
+        if (isUser.role == 'admin' || isUser.role == 'superadmin') {
+            tobe.companyId = isUser.companyId;
+        }
         const token = jwt.sign(tobe,
             process.env.JWT_Key,
             { expiresIn: '10d' }

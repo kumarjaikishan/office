@@ -132,7 +132,7 @@ const LedgerListPage = () => {
     };
 
     return (
-        <Container maxWidth="md" className="mt-4 md:mt-8">
+        <Container maxWidth="lg" className="mt-4 md:mt-8">
             <Paper className="p-2 md:p-4 py-4 mb-4">
                 <div className="flex gap-2">
                     <Autocomplete

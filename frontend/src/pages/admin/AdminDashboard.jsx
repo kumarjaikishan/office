@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { FirstFetch, updateAttendance } from '../../../store/userSlice';
 import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Tooltip, Typography } from '@mui/material';
 import { CiFilter } from 'react-icons/ci';
+import OfficialNoticeBoard from '../../components/notice';
 
 
 const Main = () => {
@@ -164,11 +165,21 @@ const Main = () => {
     };
   }, []);
 
-
+  const notices = [
+    { title: 'Annual General Meeting on Sep 10', date: '2025-08-01' },
+    { title: 'New ID Cards to be issued by next week', date: '2025-07-30' },
+    { title: 'Office renovation starts next Monday', date: '2025-07-28' },
+    { title: 'Annual General Meeting on Sep 10', date: '2025-08-01' },
+    { title: 'New ID Cards to be issued by next week', date: '2025-07-30' },
+    { title: 'Office renovation starts next Monday', date: '2025-07-28' },
+    { title: 'Annual General Meeting on Sep 10', date: '2025-08-01' },
+    { title: 'New ID Cards to be issued by next week', date: '2025-07-30' },
+    { title: 'Office renovation starts next Monday', date: '2025-07-28' },
+  ];
 
   return (
     <div className='p-2 md:p-4'>
-      <div className="mb-8">
+      <div className="mb-3">
         <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3>
         <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
@@ -222,6 +233,7 @@ const Main = () => {
             </Select>
           </FormControl>
         </div>
+
         <div className='grid grid-cols-5 md:grid-cols-10 lg:grid-cols-15 gap-2 md:gap-4'>
           {employeelist?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
@@ -246,6 +258,7 @@ const Main = () => {
             );
           })}
         </div>
+
         <div className='flex gap-5'>
           <span className='flex items-center gap-1 text-green-500 text-[13px] '>
             <span className='block w-[15px] rounded-3xl h-[15px] bg-green-500 '></span> In Premise
@@ -257,7 +270,12 @@ const Main = () => {
             <span className='block w-[15px] rounded-3xl h-[15px] bg-gray-500  '></span> Absent
           </span>
         </div>
+
       </div>
+
+      {/* <div className='mt-3'>
+        <OfficialNoticeBoard notices={notices} />
+      </div> */}
 
       {/* <div className="leaveDetail">
         <h3>Leave Details</h3>

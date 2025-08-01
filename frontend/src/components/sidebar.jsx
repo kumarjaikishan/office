@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { FaCalendarCheck, FaMailBulk, FaRegBuilding, FaRegCalendarAlt, FaSitemap, FaTachometerAlt, FaUmbrellaBeach, FaUserCircle, FaUsers, FaUserTie } from 'react-icons/fa'
+import { FaBook, FaCalendarCheck, FaCalendarDay, FaCamera, FaMailBulk, FaRegBuilding, FaRegCalendarAlt, FaSitemap, FaTachometerAlt, FaUmbrellaBeach, FaUserCircle, FaUsers, FaUserTie } from 'react-icons/fa'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { SiAudiotechnica } from "react-icons/si";
 import { GoPeople } from "react-icons/go";
@@ -133,13 +133,13 @@ const menu = [
       {
         menu: "Holiday",
         link: '/admin-dashboard/holiday',
-        icon: <FaRegCalendarAlt />,
+        icon: <FaCalendarDay  />,
         roles: ['admin']
       },
       {
         menu: "Face Attendance",
         link: '/admin-dashboard/faceatten',
-        icon: <FaRegCalendarAlt />,
+        icon: <FaCamera />,
         roles: ['admin']
       },
       {
@@ -151,7 +151,7 @@ const menu = [
       {
         menu: "Ledger",
         link: '/admin-dashboard/ledger',
-        icon: <FaUmbrellaBeach />,
+        icon: <FaBook />,
         roles: ['admin']
       },
       {

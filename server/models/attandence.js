@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company',required: true },
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
   date: { type: Date, required: true },
   punchIn: { type: Date },
@@ -10,7 +11,7 @@ const attendanceSchema = new mongoose.Schema({
   shortMinutes: { type: Number },  // hours short of 8
   status: {
     type: String,
-    enum: ['present','absent','leave','half day'],
+    enum: ['present', 'absent', 'leave', 'half day'],
     required: true
   },
   leave: { type: mongoose.Schema.Types.ObjectId, ref: 'Leave' },

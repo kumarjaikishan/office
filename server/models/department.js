@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const departmentSchema = new mongoose.Schema({
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+    },
     branchId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Branch',
