@@ -22,7 +22,7 @@ router.route('/').get(async (req, res) => {
 
 
 router.route('/signin').post(users.userLogin);
-router.route('/signup').post(users.userRegister);
+// router.route('/signup').post(users.userRegister);
 
 router.route('/departmentlist').get(authmiddlewre, authorizeRoles('admin'), admin.departmentlist);
 router.route('/adddepartment').post(authmiddlewre, authorizeRoles('admin'), admin.addDepartment);
@@ -69,6 +69,8 @@ router.route('/fetchleave').get(authmiddlewre, employee.fetchleave);
 router.route('/employeefetch').get(authmiddlewre, authorizeRoles('employee'), employeemiddlewre, employee.employeefetch);
 router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), employee.employeefetch);
 
+
+router.route('/superfirstfetch').post(authmiddlewre, employee.addleave);
 
 router.route("/ledgerEntries")
   .get(authmiddlewre, authorizeRoles('admin'), ledger.ledgerEntries);
