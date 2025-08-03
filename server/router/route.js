@@ -31,7 +31,7 @@ router.route('/deletedepartment').post(authmiddlewre, authorizeRoles('admin'), a
 router.route('/firstfetch').get(authmiddlewre, authorizeRoles('admin'), admin.firstfetch);
 router.route('/leavehandle').post(authmiddlewre, authorizeRoles('admin'), admin.leavehandle);
 router.route('/addcompany').post(authmiddlewre, authorizeRoles('admin'), admin.addcompany);
-router.route('/updateCompany').post(authmiddlewre, authorizeRoles('admin'),upload.single('logo'), admin.updateCompany);
+router.route('/updateCompany').post(authmiddlewre, authorizeRoles('admin'), upload.single('logo'), admin.updateCompany);
 router.route('/addBranch').post(authmiddlewre, authorizeRoles('admin'), admin.addBranch);
 router.route('/editBranch').post(authmiddlewre, authorizeRoles('admin'), admin.editBranch);
 router.route('/getemployee').get(authmiddlewre, authorizeRoles('admin'), admin.getemployee);
@@ -47,16 +47,16 @@ router.route('/deleteemployee').post(authmiddlewre, authorizeRoles('admin'), adm
 router.route('/addsalary').post(authmiddlewre, authorizeRoles('admin'), salary.addsalary);
 router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('admin'), salary.salaryfetch);
 
-router.route('/allAttandence').get(authmiddlewre,authorizeRoles('admin'), attendance.allAttandence);
+router.route('/allAttandence').get(authmiddlewre, authorizeRoles('admin'), attendance.allAttandence);
 router.route('/editattandence').post(authmiddlewre, authorizeRoles('admin'), attendance.editattandence);
-router.route('/webattandence').post(authmiddlewre,authorizeRoles('admin'), attendance.webattandence);
-router.route('/bulkMarkAttendance').post(authmiddlewre,authorizeRoles('admin'), attendance.bulkMarkAttendance);
-router.route('/checkout').post(authmiddlewre,authorizeRoles('admin'), attendance.checkout);
-router.route('/checkin').post(authmiddlewre,authorizeRoles('admin'), attendance.checkin);
-router.route('/facecheckin').post(authmiddlewre,authorizeRoles('admin'), attendance.facecheckin);
-router.route('/facecheckout').post(authmiddlewre,authorizeRoles('admin'), attendance.facecheckout);
+router.route('/webattandence').post(authmiddlewre, authorizeRoles('admin'), attendance.webattandence);
+router.route('/bulkMarkAttendance').post(authmiddlewre, authorizeRoles('admin'), attendance.bulkMarkAttendance);
+router.route('/checkout').post(authmiddlewre, authorizeRoles('admin'), attendance.checkout);
+router.route('/checkin').post(authmiddlewre, authorizeRoles('admin'), attendance.checkin);
+router.route('/facecheckin').post(authmiddlewre, authorizeRoles('admin'), attendance.facecheckin);
+router.route('/facecheckout').post(authmiddlewre, authorizeRoles('admin'), attendance.facecheckout);
 router.route('/employeeAttandence').get(attendance.employeeAttandence);
-router.route('/deleteattandence').post(authmiddlewre,authorizeRoles('admin'),attendance.deleteattandence);
+router.route('/deleteattandence').post(authmiddlewre, authorizeRoles('admin'), attendance.deleteattandence);
 
 router.route('/addholiday').post(authmiddlewre, holiday.addholiday);
 router.route('/deleteholiday').post(authmiddlewre, holiday.deleteholiday);
@@ -69,6 +69,10 @@ router.route('/fetchleave').get(authmiddlewre, employee.fetchleave);
 router.route('/employeefetch').get(authmiddlewre, authorizeRoles('employee'), employeemiddlewre, employee.employeefetch);
 router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), employee.employeefetch);
 
+router.route('/addAdmin').post(authmiddlewre, upload.single('photo'), admin.addAdmin);
+router.route('/getAdmin').get(authmiddlewre, admin.getAdmin);
+router.route('/editAdmin/:id').post(authmiddlewre, upload.single('photo'), admin.getAdmin);
+
 
 router.route('/superfirstfetch').post(authmiddlewre, employee.addleave);
 
@@ -80,10 +84,10 @@ router.route("/entries/:id")
   .get(authmiddlewre, authorizeRoles('admin'), ledger.Entries);
 
 router.route("/ledger")
-  .post(authmiddlewre, authorizeRoles('admin'),upload.single('image'), ledger.createLedger)
+  .post(authmiddlewre, authorizeRoles('admin'), upload.single('image'), ledger.createLedger)
 
 router.route("/ledger/:id")
-  .put(authmiddlewre, authorizeRoles('admin'),upload.single('image'), ledger.updateLedger)
+  .put(authmiddlewre, authorizeRoles('admin'), upload.single('image'), ledger.updateLedger)
   .delete(authmiddlewre, authorizeRoles('admin'), ledger.deleteLedger);
 
 router.route("/ledgerentry")

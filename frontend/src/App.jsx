@@ -29,6 +29,7 @@ import LedgerDetailPage from './pages/admin/ledger/ledgerdetailpage';
 import LedgerSystem from './pages/admin/ledger/ledger';
 import EmpLeave from './pages/employee/leave/Leave';
 import FaceAttandance from './pages/admin/facerecoginaion/faceAttandance';
+import SuperAdminDashboard from './pages/admin/create';
 
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
           <Route path="adminleave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
           <Route path="faceatten" element={<FaceAttandance />} />
+          <Route path="admine" element={<SuperAdminDashboard />} />
            {/* <Route path="ledger" element={<LedgerSystem />} /> */}
           
           <Route path="ledger" element={<LedgerListPage />} />

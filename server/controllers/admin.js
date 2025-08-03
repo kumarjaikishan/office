@@ -28,7 +28,7 @@ const addDepartment = async (req, res, next) => {
             return next({ status: 400, message: "all fields are required" });
         }
 
-        const query = new departmentModal({companyId:req.user.companyId, branchId, department, description });
+        const query = new departmentModal({ companyId: req.user.companyId, branchId, department, description });
         const result = await query.save();
         if (!result) {
             return next({ status: 400, message: "Something went wrong" });
@@ -141,7 +141,8 @@ const addemployee = async (req, res, next) => {
             }
         }
 
-        const query = new employeeModal({ companyId:req.user.companyId,
+        const query = new employeeModal({
+            companyId: req.user.companyId,
             userid: resulten._id, designation, salary, branchId, profileimage: uploadResult?.secure_url, username, department,
         });
         const resulte = await query.save({ session });
@@ -340,6 +341,7 @@ const deleteemployee = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+
 const employeelist = async (req, res, next) => {
     try {
         const query = await employeeModal.find()
@@ -358,6 +360,165 @@ const employeelist = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+
+const addAdmin = async (req, res, next) => {
+    console.log('addAdmin: ', req.body);
+
+    const { name, email, role, password, permissions } = req.body;
+
+    if (!name || !email || !role || !password) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const existingUser = await usermodal.findOne({ email }).session(session);
+        if (existingUser) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(409).json({ message: 'Email already in use.' });
+        }
+
+        const fields = {
+            name,
+            email,
+            role,
+            password,
+            companyId: req.user.companyId,
+        };
+
+        if (permissions && typeof permissions === 'object') {
+            fields.permission = permissions; // note: `permission` matches schema
+        }
+
+        let uploadResult = null;
+        if (req.file) {
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'ems/employee',
+            });
+
+            if (uploadResult?.secure_url) {
+                fs.unlink(req.file.path, (err) => {
+                    if (err) console.error('Failed to delete local file:', err);
+                });
+                fields.profileImage = uploadResult.secure_url;
+            }
+        }
+
+        const createUser = new usermodal({ ...fields }); // <-- FIXED
+        await createUser.save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+            message: `${role} Created Successfully`,
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error(error.message);
+        return res.status(500).json({
+            message: 'Server error',
+        });
+    }
+};
+const getAdmin = async (req, res, next) => {
+    console.log('addAdmin: ', req.body);
+
+    try {
+        const admins = await usermodal.find({});
+
+        res.status(200).json(
+            admins
+        );
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({
+            message: 'Server error',
+        });
+    }
+};
+const editAdmin = async (req, res, next) => {
+    const { name, email, role, password, permissions } = req.body;
+    const { id } = req.params;
+
+    if (!name || !email || !role) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const existingUser = await usermodal.findOne({ email }).session(session);
+        if (existingUser && existingUser._id.toString() !== id) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(409).json({ message: 'Email already in use.' });
+        }
+
+        const fields = {
+            name,
+            email,
+            role,
+            companyId: req.user.companyId
+        };
+
+        // Only update password if provided
+        if (password) {
+            fields.password = password;
+        }
+
+        // Convert permissions if stringified
+        if (permissions && typeof permissions === 'string') {
+            fields.permissions = JSON.parse(permissions);
+        } else if (permissions && typeof permissions === 'object') {
+            fields.permissions = permissions;
+        }
+
+        // Handle profile image upload
+        if (req.file) {
+            const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'ems/employee'
+            });
+
+            if (uploadResult) {
+                fs.unlink(req.file.path, (err) => {
+                    if (err) console.error('Failed to delete local file:', err);
+                });
+                fields.profileImage = uploadResult.secure_url;
+            }
+        }
+
+        const updatedUser = await usermodal.findByIdAndUpdate(
+            id,
+            { $set: fields },
+            { new: true, session }
+        );
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+            message: 'Admin updated successfully',
+            user: updatedUser
+        });
+
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        console.error(error.message);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+
 const firstfetch = async (req, res, next) => {
     // console.log("first fetch", req.user)
     try {
@@ -641,7 +802,7 @@ const leavehandle = async (req, res, next) => {
                 } else {
                     // Insert new leave attendance
                     const attendanceData = {
-                        companyId:req.user.companyId,
+                        companyId: req.user.companyId,
                         employeeId,
                         date: currentDate,
                         status: 'leave',
@@ -664,6 +825,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, addAdmin, getAdmin, editAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['developer','superadmin', 'admin', 'manager', 'employee'],
+        enum: ['developer', 'superadmin', 'admin', 'manager', 'employee'],
         required: true,
     },
     employeeId: {
@@ -36,7 +36,13 @@ const userSchema = new mongoose.Schema({
     },
     profileImage: {
         type: String,
+    },
+    permissions: {
+        type: Map,
+        of: [Number],
+        default: {}
     }
+
 }, { timestamps: true })
 
 
