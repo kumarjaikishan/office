@@ -143,12 +143,6 @@ const menu = [
         roles: ['admin','superadmin']
       },
       {
-        menu: "admine",
-        link: '/admin-dashboard/admine',
-        icon: <FaCamera />,
-        roles: ['superadmin']
-      },
-      {
         menu: "Leave",
         link: '/employe-dashboard/leave',
         icon: <FaUmbrellaBeach />,

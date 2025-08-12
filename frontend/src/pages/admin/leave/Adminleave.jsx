@@ -93,7 +93,7 @@ const Adminleave = () => {
         setopenmodal(true);
     }
     return (
-        <>
+        <div className='p-2'>
             <h2 className='font-semibold text-center text-xl' >Leave Application</h2>
             <DataTable
                 customStyles={customStyles}
@@ -103,7 +103,7 @@ const Adminleave = () => {
                 highlightOnHover
             />
             <Adminleavemodal handleChange={handleChange} inp={inp} isload={isload} init={init} setInp={setInp} openmodal={openmodal} setopenmodal={setopenmodal} />
-        </>
+        </div>
     )
 }
 

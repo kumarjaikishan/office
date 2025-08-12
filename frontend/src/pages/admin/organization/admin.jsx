@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { MdEdit, MdDelete } from "react-icons/md";
-import useImageUpload from "../../utils/imageresizer";
+import useImageUpload from "../../../utils/imageresizer";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
@@ -67,6 +67,11 @@ export default function SuperAdminDashboard() {
     const [editingIndex, setEditingIndex] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [newModule, setNewModule] = useState("");
+    const [expandedIndex, setExpandedIndex] = useState(null);
+
+    const toggleExpand = (index) => {
+        setExpandedIndex((prev) => (prev === index ? null : index));
+    };
 
     const resetForm = () => {
         setForm({
@@ -244,9 +249,9 @@ export default function SuperAdminDashboard() {
     );
 
     return (
-        <div className="p-6 space-y-6 max-w-5xl mx-auto">
+        <div className="p-1 max-w-5xl mx-auto">
             {/* Admin List */}
-            <div className="bg-white shadow-md rounded-lg p-6">
+            <div className="bg-white shadow-md rounded-lg p-2">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Admin Management</h2>
                     <button
@@ -282,17 +287,30 @@ export default function SuperAdminDashboard() {
                                         <p className="text-sm mt-1">
                                             <span className="font-semibold">Role:</span> {admin.role}
                                         </p>
-                                        <div className="text-sm mt-1">
-                                            <span className="font-semibold">Permissions:</span>
-                                            {Object.entries(admin.permissions).map(([module, levels]) => (
-                                                <div key={module} className="ml-2 text-xs">
-                                                    <strong>{module}:</strong>{" "}
-                                                    {levels.map((l) => PERMISSION_LABELS[l]).join(", ")}
-                                                </div>
-                                            ))}
-                                        </div>
+
+                                        {/* Toggle Button */}
+                                        <button
+                                            onClick={() => toggleExpand(index)}
+                                            className="text-blue-600 text-sm mt-1 hover:underline"
+                                        >
+                                            {expandedIndex === index ? "Hide Permissions" : "View Permissions"}
+                                        </button>
+
+                                        {/* Expandable Permissions */}
+                                        {expandedIndex === index && (
+                                            <div className="text-sm mt-2">
+                                                <span className="font-semibold">Permissions:</span>
+                                                {Object.entries(admin.permissions).map(([module, levels]) => (
+                                                    <div key={module} className="ml-2 text-xs">
+                                                        <strong>{module}:</strong>{" "}
+                                                        {levels.map((l) => PERMISSION_LABELS[l]).join(", ")}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
                                 <div className="flex gap-2 mt-2">
                                     <button
                                         className="p-2 border rounded hover:bg-gray-100"
@@ -439,131 +457,6 @@ export default function SuperAdminDashboard() {
                 </DialogActions>
             </Dialog>
 
-            {/* {showForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <h2 className="text-xl font-bold mb-4">
-                            {editingIndex !== null ? "Edit Admin" : "Add Admin"}
-                        </h2>
-                        <div className="space-y-4">
-                            <input
-                                className="w-full border p-2 rounded"
-                                placeholder="Name"
-                                value={form.name}
-                                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            />
-                            <input
-                                className="w-full border p-2 rounded"
-                                placeholder="Email"
-                                value={form.email}
-                                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            />
-                            <input
-                                className="w-full border p-2 rounded"
-                                placeholder="Password"
-                                type="password"
-                                value={form.password}
-                                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            />
-
-                            <div>
-                                <label className="block mb-1 font-semibold">Profile Image</label>
-                                <input type="file" accept="image/*" onChange={handleProfileImageChange} />
-                                {form.profilePreview && (
-                                    <img
-                                        src={form.profilePreview}
-                                        alt="Preview"
-                                        className="w-20 h-20 mt-2 rounded-full object-cover border"
-                                    />
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="font-semibold block mb-1">Role</label>
-                                <select
-                                    className="w-full border p-2 rounded"
-                                    value={form.role}
-                                    onChange={(e) => handleRoleChange(e.target.value)}
-                                >
-                                    <option value="admin">Admin</option>
-                                    <option value="manager">Manager</option>
-                                </select>
-                            </div>
-
-                            {form.role === "manager" && (
-                                <div className="flex items-center gap-2">
-                                    <select
-                                        className="border p-2 rounded w-full"
-                                        value={newModule}
-                                        onChange={(e) => setNewModule(e.target.value)}
-                                    >
-                                        <option value="">-- Select Module to Add --</option>
-                                        {availableModulesToAdd.map((mod) => (
-                                            <option key={mod} value={mod}>
-                                                {mod}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={handleAddModule}
-                                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                                    >
-                                        Add
-                                    </button>
-                                </div>
-                            )}
-
-                            
-                            <div>
-                                <p className="font-semibold mb-2">Permissions</p>
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full text-sm border">
-                                        <thead>
-                                            <tr>
-                                                <th className="border p-2 text-left">Module</th>
-                                                {Object.entries(PERMISSION_LABELS).map(([code, label]) => (
-                                                    <th key={code} className="border p-2 text-center">{label}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentModules.map((module) => (
-                                                <tr key={module}>
-                                                    <td className="border p-2 capitalize">{module}</td>
-                                                    {Object.keys(PERMISSION_LABELS).map((level) => (
-                                                        <td key={level} className="border text-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={form.permissions[module]?.includes(Number(level)) || false}
-                                                                onChange={() => togglePermission(module, Number(level))}
-                                                            />
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div className="flex justify-end gap-2 mt-6">
-                                <button
-                                    className="px-4 py-2 border rounded hover:bg-gray-100"
-                                    onClick={resetForm}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    onClick={handleSave}
-                                >
-                                    {editingIndex !== null ? "Update" : "Create"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )} */}
         </div>
     );
 }

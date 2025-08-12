@@ -63,6 +63,7 @@ const webattandence = async (req, res, next) => {
     }
 
     attendance = new Attendance({
+      attendanceById: req.user.id,
       employeeId,
       departmentId,
       date: dateOnly,
@@ -126,6 +127,7 @@ const checkin = async (req, res, next) => {
 
     const attendanceData = {
       companyId: req.user.companyId,
+      attendanceById: req.user.id,
       employeeId,
       date: dateObj,
       status

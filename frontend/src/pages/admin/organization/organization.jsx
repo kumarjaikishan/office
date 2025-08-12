@@ -15,6 +15,7 @@ import Department from '../department/Department';
 import { FaRegUser } from 'react-icons/fa';
 import { AiFillAmazonCircle } from "react-icons/ai";
 import { CgLayoutGrid } from 'react-icons/cg';
+import SuperAdminDashboard from './admin';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -307,7 +308,6 @@ export default function OrganizationSettings() {
             </div>
 
             <div>
-
                 <div
                     className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('department')}
@@ -324,7 +324,24 @@ export default function OrganizationSettings() {
                         <Department />
                     </div>
                 )}
-
+            </div>
+            <div>
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
+                    onClick={() => toggleSection('admin')}
+                >
+                    <span className="font-semibold text-lg text-left">Admin</span>
+                    {openSection === 'admin' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+                {openSection === 'admin' && (
+                    <div className="p-1 rounded  border-teal-300 border-2 border-dashed mt-2 ">
+                        <SuperAdminDashboard />
+                    </div>
+                )}
             </div>
 
             <div>

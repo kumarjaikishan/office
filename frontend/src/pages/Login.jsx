@@ -34,7 +34,7 @@ const Login = () => {
             dispatch(setlogin(true));
             dispatch(setuser(res.data.user));
 
-            if (res.data.user.role == "admin") {
+            if (res.data.user.role == "admin" || res.data.user.role == "superadmin") {
                 dispatch(setadmin(true));
                 return navigate('/admin-dashboard');
             }
