@@ -663,6 +663,7 @@ const Employe = () => {
           <EmployeeProfile viewEmployee={viewEmployee} />
         </div>
       </Modalbox>
+      
       <Modalbox open={passmodal} onClose={() => {
         setpassmodal(false);
       }}>

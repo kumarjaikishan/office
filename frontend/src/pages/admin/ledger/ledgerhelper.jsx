@@ -35,8 +35,8 @@ export const getLedgerColumns = (handleEdit, handleDelete) => [
         name: 'Actions',
         cell: (row) => (
             <>
-                <MdEdit title="Edit Entry" onClick={() => handleEdit(row)} style={{ cursor: 'pointer', marginRight: 10 }} />
-                <MdDelete title="Delete Entry" onClick={() => handleDelete(row._id)} style={{ cursor: 'pointer' }} />
+                <MdEdit className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit Entry" onClick={() => handleEdit(row)} style={{ cursor: 'pointer', marginRight: 10 }} />
+                <MdDelete className="delete text-[18px] text-red-500 cursor-pointer" title="Delete Entry" onClick={() => handleDelete(row._id)} style={{ cursor: 'pointer' }} />
             </>
         ),
         width: '120px',
