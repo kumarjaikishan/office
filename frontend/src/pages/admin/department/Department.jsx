@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
-import { adddepartment, columns, delette, fetche, update } from './departmenthelper';
+import { adddepartment, columns, delette, update } from './departmenthelper';
 import { customStyles } from '../attandence/attandencehelper';
 import { CiFilter } from 'react-icons/ci';
 import { useSelector } from 'react-redux';
 import Modalbox from '../../../components/custommodal/Modalbox';
+import { MdOutlineModeEdit } from 'react-icons/md';
+import { AiOutlineDelete } from 'react-icons/ai';
 
 const Department = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -17,7 +19,7 @@ const Department = () => {
   const [departmentlist, setdepartmentlist] = useState([]);
   const [isupdate, setisupdate] = useState(false)
   const [filterattandence, setfilterattandence] = useState([]);
-  const { branch } = useSelector(e => e.user)
+  const { branch, department } = useSelector(e => e.user)
   const [filtere, setfiltere] = useState({
     branch: 'all',
     department: " ",
@@ -26,6 +28,7 @@ const Department = () => {
     filtere.branch !== 'all' ||
     filtere.department.trim() !== ''
   );
+
 
   useEffect(() => {
     if (!departmentlist || departmentlist.length === 0) return;
@@ -52,9 +55,26 @@ const Department = () => {
     description: ''
   }
   const [inp, setInp] = useState(init);
+
   useEffect(() => {
-    fetche({ setisload, setdepartmentlist, edite, deletee });
-  }, [])
+    if (department.length > 0) {
+      let sno = 1;
+      const data = department.map((dep) => {
+        return {
+          id: dep._id,
+          sno: sno++,
+          branchid: dep.branchId._id,
+          branch: dep.branchId.name,
+          dep_name: dep.department,
+          action: (<div className="action">
+            <span className="edit" title="Edit" onClick={() => edite(dep)}><MdOutlineModeEdit /></span>
+            <span className="delete" onClick={() => deletee(dep._id)}><AiOutlineDelete /></span>
+          </div>)
+        }
+      })
+      setdepartmentlist(data);
+    }
+  }, [department])
 
   const handleChange = (e, name) => {
     setInp({
@@ -72,7 +92,7 @@ const Department = () => {
     console.log("edit", depart)
     setisupdate(true);
     setInp({
-      branchId:depart.branchId._id ,
+      branchId: depart.branchId._id,
       departmentId: depart._id,
       department: depart.department,
       description: depart.description
@@ -106,7 +126,7 @@ const Department = () => {
       {/* <h2>Manage Departments</h2> */}
       <div className='head flex flex-wrap gap-1'>
         <div className='flex gap-2 w-full justify-around md:w-auto'>
-          <FormControl  size="small">
+          <FormControl size="small">
             <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
             <Select
               value={filtere.branch}

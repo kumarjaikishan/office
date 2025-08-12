@@ -145,48 +145,4 @@ export const delette = async ({departmentId,setisload}) => {
     }
 };
 
-export const fetche = async ({ setisload, setdepartmentlist,deletee,edite }) => {
-    const token = localStorage.getItem('emstoken');
-    setisload(true);
 
-    try {
-        const res = await axios.get(
-            `${import.meta.env.VITE_API_ADDRESS}departmentlist`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            }
-        );
-
-        // console.log('Query:', res);
-        let sno = 1;
-        const data = await res.data.list.map((dep) => {
-            return {
-                id: dep._id,
-                sno: sno++,
-                branchid:dep.branchId._id ,
-                branch:dep.branchId.name ,
-                dep_name: dep.department,
-                action: (<div className="action">
-                    <span className="edit" title="Edit" onClick={() => edite(dep)}><MdOutlineModeEdit /></span>
-                    <span className="delete" onClick={() => deletee(dep._id)}><AiOutlineDelete /></span>
-                </div>)
-            }
-        })
-        // console.log(res.data.list)
-        setdepartmentlist(data);
-
-    } catch (error) {
-        console.log(error);
-        if (error.response) {
-            toast.warn(error.response.data.message, { autoClose: 1200 });
-        } else if (error.request) {
-            console.error('No response from server:', error.request);
-        } else {
-            console.error('Error:', error.message);
-        }
-    } finally {
-        setisload(false);
-    }
-};

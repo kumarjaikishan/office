@@ -11,8 +11,7 @@ const addholiday = async (req, res) => {
     }
 
     try {
-        const companyid = await companymodal.findOne({ adminId: req.user.id }).select('_id');
-        const holiday = new holidaymodal({ companyId: companyid._id, userid: req.user.id, name, description, fromDate, toDate, type });
+        const holiday = new holidaymodal({ companyId:req.user.companyId , userid: req.user.id, name, description, fromDate, toDate, type });
         await holiday.save();
         res.json({ message: 'Holiday added successfully' });
     } catch (err) {
@@ -52,7 +51,7 @@ const updateholiday = async (req, res) => {
 
 const getholidays = async (req, res) => {
     try {
-        const holidays = await holidaymodal.find({ userid: req.user.id }).sort({fromDate:-1});
+        const holidays = await holidaymodal.find({ companyId: req.user.companyId }).sort({fromDate:-1});
         res.json({ holidays });
     } catch (err) {
         console.error(err);

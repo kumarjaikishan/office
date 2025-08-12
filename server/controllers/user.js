@@ -45,6 +45,7 @@ const userLogin = async (req, res, next) => {
             return next({ status: 400, success: false, message: "Passowrd is incorrect" });
 
         }
+
         let tobe = {
             id: isUser._id,
             name: isUser.name,
@@ -53,9 +54,10 @@ const userLogin = async (req, res, next) => {
         if (isUser.role !== 'admin' && isUser.role !== 'superadmin') {
             tobe.employeeId = isUser.employeeId;
         }
-        if (isUser.role == 'admin' || isUser.role == 'superadmin') {
+        if (isUser.companyId) {
             tobe.companyId = isUser.companyId;
         }
+
         const token = jwt.sign(tobe,
             process.env.JWT_Key,
             { expiresIn: '10d' }

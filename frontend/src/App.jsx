@@ -39,7 +39,7 @@ function App() {
 
   useEffect(() => {
     // console.log("login check",islogin)
-    if (islogin && user?.profile?.role == 'admin') {
+    if (islogin && (user?.profile?.role == 'admin' || user?.profile?.role == 'superadmin')) {
       dispatch(FirstFetch());
     } else if (islogin && user?.profile?.role == 'employee') {
       dispatch(empFirstFetch());

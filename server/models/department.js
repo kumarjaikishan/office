@@ -4,6 +4,7 @@ const departmentSchema = new mongoose.Schema({
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
+        required: true
     },
     branchId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -21,7 +21,7 @@ cloudinary.config({
 });
 
 const addDepartment = async (req, res, next) => {
-    // console.log(req.body)
+    // console.log('add depart',req.user)
     try {
         const { branchId, department, description } = req.body;
         if (!department) {
@@ -122,7 +122,7 @@ const addemployee = async (req, res, next) => {
             return res.status(409).json({ message: 'Email already in use.' });
         }
 
-        let createUser = new usermodal({ name: employeeName, email, role, password });
+        let createUser = new usermodal({ companyId: req.user.companyId, name: employeeName, email, role, password });
         let resulten = await createUser.save({ session });
         // console.log("createUser",createUser)
         // console.log("usersave",resulten)
@@ -426,15 +426,16 @@ const addAdmin = async (req, res, next) => {
         });
     }
 };
+
 const getAdmin = async (req, res, next) => {
-    console.log('addAdmin: ', req.body);
-
     try {
-        const admins = await usermodal.find({});
+        const admins = await usermodal.find({
+            companyId: req.user.companyId,
+            role: { $in: ["admin", "manager"] },
+            _id: { $ne: req.userid }
+        });
 
-        res.status(200).json(
-            admins
-        );
+        res.status(200).json(admins);
 
     } catch (error) {
         console.error(error.message);
@@ -443,6 +444,8 @@ const getAdmin = async (req, res, next) => {
         });
     }
 };
+
+
 const editAdmin = async (req, res, next) => {
     const { name, email, role, password, permissions } = req.body;
     const { id } = req.params;
@@ -520,48 +523,70 @@ const editAdmin = async (req, res, next) => {
 
 
 const firstfetch = async (req, res, next) => {
-    // console.log("first fetch", req.user)
     try {
-        const employee = await employeeModal.find().populate('department', 'department').populate('userid').sort({ employeename: 1 });
-        const companye = await company.findOne({ adminId: req.user.id });
-        const holidays = await holidaymodal.find({ userid: req.user.id });
-        const branche = await branch.find({ companyId: companye._id }).populate({
-            path: 'managerIds',
-            select: 'userid profileimage',
-            populate: ({
-                path: 'userid',
-                select: 'name',
-            })
-        });
-        const departmentlist = await departmentModal.find().populate('branchId', 'name').select('department branchId').sort({ department: 1 });
-        const attendance = await attendanceModal.find().sort({ date: -1 })
-            .populate({
-                path: 'employeeId',
-                select: 'employeename userid profileimage branchId department',
-                populate: {
-                    path: 'userid',
-                    select: 'name'
-                },
-            }).populate({
-                path: 'leave',
-                select: 'reason',
-            });
+        // 1️⃣ Find the company for this admin
+        // const companye = await company.findOne({ adminId: req.user.id });
+        const companye = await company.findOne({ _id: req.user.companyId });
+
+        let branches = [];
+        let departmentlist = [];
+        let employees = [];
+        let attendance = [];
+        let holidays = [];
+
+        if (companye) {
+            const compId = companye._id;
+
+            branches = await branch.find({ companyId: compId })
+                .populate({
+                    path: 'managerIds',
+                    select: 'userid profileimage',
+                    populate: { path: 'userid', select: 'name' }
+                });
+
+            departmentlist = await departmentModal.find({ companyId: compId })
+                .populate('branchId', 'name')
+                .select('department branchId')
+                .sort({ department: 1 });
+
+            employees = await employeeModal.find({ companyId: compId })
+                .populate('department', 'department')
+                .populate('userid')
+                .sort({ employeename: 1 });
+
+            attendance = await attendanceModal.find({ companyId: compId })
+                .sort({ date: -1 })
+                .populate({
+                    path: 'employeeId',
+                    select: 'employeename userid profileimage branchId department',
+                    populate: { path: 'userid', select: 'name' }
+                })
+                .populate({
+                    path: 'leave',
+                    select: 'reason',
+                });
+            holidays = await holidaymodal.find({ companyId: compId });
+        }
+
 
         res.status(200).json({
             user: req.user,
-            employee,
+            company: companye || null,
+            branch: branches,
             departmentlist,
+            employee: employees,
             attendance,
             holidays,
-            company: companye,
-            branch: branche,
-        })
+        });
 
     } catch (error) {
-        console.log(error.message)
+        console.error(error.message);
         return next({ status: 500, message: error.message });
     }
-}
+};
+
+
+
 
 const addcompany = async (req, res, next) => {
     const { name, industry } = req.body;

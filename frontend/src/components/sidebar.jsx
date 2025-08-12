@@ -104,7 +104,7 @@ const menu = [
         menu: "Dashboard",
         link: '/admin-dashboard',
         icon: <VscDashboard />,
-        roles: ['admin']
+        roles: ['admin','superadmin']
       },
       {
         menu: "Dashboard",
@@ -116,13 +116,13 @@ const menu = [
         menu: "Organization",
         link: '/admin-dashboard/organization',
         icon: <FaSitemap />,
-        roles: ['admin']
+        roles: ['superadmin','admin']
       },
       {
         menu: "Employees",
         link: '/admin-dashboard/employe',
         icon: <FaUserTie />,
-        roles: ['admin']
+        roles: ['admin','superadmin']
       },
       // {
       //   menu: "Department",
@@ -134,19 +134,19 @@ const menu = [
         menu: "Holiday",
         link: '/admin-dashboard/holiday',
         icon: <FaCalendarDay  />,
-        roles: ['admin']
+        roles: ['superadmin','admin']
       },
       {
         menu: "Face Attendance",
         link: '/admin-dashboard/faceatten',
         icon: <FaCamera />,
-        roles: ['admin']
+        roles: ['admin','superadmin']
       },
       {
         menu: "admine",
         link: '/admin-dashboard/admine',
         icon: <FaCamera />,
-        roles: ['admin']
+        roles: ['superadmin']
       },
       {
         menu: "Leave",
@@ -158,19 +158,19 @@ const menu = [
         menu: "Ledger",
         link: '/admin-dashboard/ledger',
         icon: <FaBook />,
-        roles: ['admin']
+        roles: ['admin','superadmin']
       },
       {
         menu: "Leave Request",
         link: '/admin-dashboard/adminleave',
         icon: <FaMailBulk />,
-        roles: ['admin']
+        roles: ['admin','superadmin']
       },
       {
         menu: "Attendance",
         link: '/admin-dashboard/attandence',
         icon: <TbReportAnalytics />,
-        roles: ['admin']
+        roles: ['admin','superadmin']
       },
       {
         menu: "Attendance",
@@ -193,19 +193,19 @@ const menu = [
         menu: "Profile",
         link: '/profile',
         icon: <FaUserCircle />,
-        roles: ['admin', 'employee']
+        roles: ['admin', 'employee','superadmin']
       },
       {
         menu: "Setting",
         link: '/admin-dashboard/setting',
         icon: <FiSettings />,
-        roles: ['admin']
+        roles: []
       },
       {
         menu: "Logout",
         isLogout: true,
         icon: <CgLogOut />,
-        roles: ['admin', 'employee']
+        roles: ['admin', 'employee','superadmin','developer']
       }
     ]
   }

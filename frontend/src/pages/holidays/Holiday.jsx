@@ -9,8 +9,9 @@ import { useSelector } from 'react-redux';
 import DataTable from 'react-data-table-component';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
-       import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { toast } from 'react-toastify';
+import swal from 'sweetalert';
 import { customStyles } from '../admin/attandence/attandencehelper';
 import HolidayCalander from './holidayCalander';
 
@@ -55,7 +56,7 @@ const HolidayForm = () => {
           Authorization: `Bearer ${token}`,
         }
       });
-
+      // console.log(res.data)
       const holidaysData = res.data.holidays;
       const dateObjects = [];
 
@@ -110,17 +111,27 @@ const HolidayForm = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      const token = localStorage.getItem('emstoken');
-      const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}deleteholiday`, { id }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success(res.data.message);
-      fetchHolidays();
-    } catch (err) {
-      console.error(err);
-      alert("Error deleting holiday");
-    }
+    swal({
+      title: "Are you sure you want to Delete?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then(async (deletee) => {
+      if (deletee) {
+        try {
+          const token = localStorage.getItem('emstoken');
+          const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}deleteholiday`, { id }, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          toast.success(res.data.message);
+          fetchHolidays();
+        } catch (err) {
+          console.error(err);
+          toast.warning(err.response.data.message);
+        }
+      }
+    });
+
   };
 
   const handleSave = async () => {
@@ -136,21 +147,22 @@ const HolidayForm = () => {
       setIsUpdate(false);
       fetchHolidays();
     } catch (err) {
-      console.error(err);
-      toast.warning("Error saving holiday");
+      console.error(err.response);
+      toast.warning(err.response.data.message);
+      // toast.warning(err.message);
     }
   };
 
-const filteredHolidays = useMemo(() => {
-  return holidays.filter((h) => {
-    const fromDate = dayjs(h.From); 
-    const yearMatch = filterYear === "All" || fromDate.year().toString() === filterYear;
-    const monthMatch = filterMonth === "All" || fromDate.month() === parseInt(filterMonth); // if using month index (0-11)
-    const typeMatch = filterType === "All" || h.type === filterType;
+  const filteredHolidays = useMemo(() => {
+    return holidays.filter((h) => {
+      const fromDate = dayjs(h.From);
+      const yearMatch = filterYear === "All" || fromDate.year().toString() === filterYear;
+      const monthMatch = filterMonth === "All" || fromDate.month() === parseInt(filterMonth); // if using month index (0-11)
+      const typeMatch = filterType === "All" || h.type === filterType;
 
-    return yearMatch && monthMatch && typeMatch;
-  });
-}, [holidays, filterYear, filterMonth, filterType]);
+      return yearMatch && monthMatch && typeMatch;
+    });
+  }, [holidays, filterYear, filterMonth, filterType]);
 
 
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -188,71 +200,71 @@ const filteredHolidays = useMemo(() => {
 
       <Box className='p-4'>
 
-<div className="flex flex-wrap gap-4 mb-4 items-end">
-  {/* Year Filter */}
-  <FormControl sx={{ width: '150px' }} size="small">
-    <InputLabel>Filter by Year</InputLabel>
-    <Select
-      label="Filter by Year"
-      value={filterYear}
-      onChange={(e) => setFilterYear(e.target.value)}
-    >
-      <MenuItem value="All">All</MenuItem>
-      {years.map((year) => (
-        <MenuItem key={year} value={year}>
-          {year}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
+        <div className="flex flex-wrap gap-4 mb-4 items-end">
+          {/* Year Filter */}
+          <FormControl sx={{ width: '150px' }} size="small">
+            <InputLabel>Filter by Year</InputLabel>
+            <Select
+              label="Filter by Year"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {years.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-  {/* Month Filter */}
-  <FormControl sx={{ width: '150px' }} size="small">
-    <InputLabel>Filter by Month</InputLabel>
-    <Select
-      label="Filter by Month"
-      value={filterMonth}
-      onChange={(e) => setFilterMonth(e.target.value)}
-    >
-      <MenuItem value="All">All</MenuItem>
-      {months.map((month, ind) => (
-        <MenuItem key={month} value={ind}>
-          {month}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
+          {/* Month Filter */}
+          <FormControl sx={{ width: '150px' }} size="small">
+            <InputLabel>Filter by Month</InputLabel>
+            <Select
+              label="Filter by Month"
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {months.map((month, ind) => (
+                <MenuItem key={month} value={ind}>
+                  {month}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-  {/* Type Filter */}
-  <FormControl sx={{ width: '150px' }} size="small">
-    <InputLabel>Filter by Type</InputLabel>
-    <Select
-      label="Filter by Type"
-      value={filterType}
-      onChange={(e) => setFilterType(e.target.value)}
-    >
-      <MenuItem value="All">All</MenuItem>
-      {[...new Set(holidays.map((h) => h.type))].map((type) => (
-        <MenuItem key={type} value={type}>
-          {type}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
+          {/* Type Filter */}
+          <FormControl sx={{ width: '150px' }} size="small">
+            <InputLabel>Filter by Type</InputLabel>
+            <Select
+              label="Filter by Type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {[...new Set(holidays.map((h) => h.type))].map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-  {/* Reset Filters Button */}
-  <Button
-    variant="outlined"
-    color="secondary"
-    onClick={() => {
-      setFilterYear("All");
-      setFilterMonth("All");
-      setFilterType("All");
-    }}
-  >
-    Reset Filters
-  </Button>
-</div>
+          {/* Reset Filters Button */}
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setFilterYear("All");
+              setFilterMonth("All");
+              setFilterType("All");
+            }}
+          >
+            Reset Filters
+          </Button>
+        </div>
 
         <div className='capitalize'>
           <DataTable
@@ -272,7 +284,7 @@ const filteredHolidays = useMemo(() => {
 export default HolidayForm;
 
 const columns = [
-  { name: "S.no", selector: (row ,ind) => ++ind, width: '50px' },
+  { name: "S.no", selector: (row, ind) => ++ind, width: '50px' },
   { name: "Name", selector: (row) => row.name },
   { name: "From", selector: (row) => dayjs(row.From).format('DD MMM, YYYY'), width: '110px' },
   { name: "Till", selector: (row) => dayjs(row.till).format('DD MMM, YYYY'), width: '110px' },

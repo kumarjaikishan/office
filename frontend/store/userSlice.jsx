@@ -33,6 +33,10 @@ const userSlice = createSlice({
             state.profile = null;
             state.department = null;
             state.employee = null;
+            state.company = null;
+            state.holidays = null;
+            state.branch = null;
+            state.attandence = null;
             state.salary = null;
         },
         updateAttendance(state, action) {

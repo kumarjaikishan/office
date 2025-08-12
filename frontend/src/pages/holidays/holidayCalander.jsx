@@ -37,12 +37,12 @@ const HolidayCalander = ({ highlightedDates, weeklyOffs }) => {
                                                 },
                                             }),
                                             ...(matched && {
-                                                backgroundColor: '#ffeb3b',
+                                                backgroundColor: '#d97706',
                                                 borderRadius: '50%',
-                                                color: 'black',
+                                                color: 'white',
                                                 '&:hover': {
-                                                    backgroundColor: '#ffeb3b', // darker teal on hover
-                                                    color: 'black',
+                                                    backgroundColor: '#d97706', // darker teal on hover
+                                                    color: 'white',
                                                 },
                                             }),
                                         }}

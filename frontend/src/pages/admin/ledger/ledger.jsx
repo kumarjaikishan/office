@@ -217,11 +217,11 @@ const LedgerSystem = () => {
     }
   };
   const SummaryBox = ({ label, value }) => (
-  <Box className="bg-teal-50 border border-teal-300 rounded-md px-4 py-2 min-w-[150px] text-center">
-    <Typography variant="subtitle2" color="textSecondary">{label}</Typography>
-    <Typography variant="subtitle1" fontWeight="bold">{value} ₹</Typography>
-  </Box>
-);
+    <Box className="bg-teal-50 border border-teal-300 rounded-md px-4 py-2 min-w-[150px] text-center">
+      <Typography variant="subtitle2" color="textSecondary">{label}</Typography>
+      <Typography variant="subtitle1" fontWeight="bold">{value} ₹</Typography>
+    </Box>
+  );
 
 
   return (
