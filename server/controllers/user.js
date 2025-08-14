@@ -54,6 +54,9 @@ const userLogin = async (req, res, next) => {
         if (isUser.role !== 'admin' && isUser.role !== 'superadmin') {
             tobe.employeeId = isUser.employeeId;
         }
+        if (isUser.role == 'admin' || isUser.role == 'manager') {
+            tobe.permissions = isUser.permissions;
+        }
         if (isUser.companyId) {
             tobe.companyId = isUser.companyId;
         }

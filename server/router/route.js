@@ -39,7 +39,7 @@ router.route('/updatepassword').post(authmiddlewre, authorizeRoles('admin', 'sup
 
 router.route('/employeelist').get(authmiddlewre, authorizeRoles('admin', 'superadmin'), admin.employeelist);
 router.route('/addemployee').post(authmiddlewre, authorizeRoles('admin', 'superadmin'), upload.single('photo'), admin.addemployee);
-router.route('/updateemployee').post(authmiddlewre, checkPermission('canaddEmployee'), upload.single('photo'), admin.updateemployee);
+router.route('/updateemployee').post(authmiddlewre, checkPermission("enrty",2), upload.single('photo'), admin.updateemployee);
 router.route('/enrollFace').post(authmiddlewre, authorizeRoles('admin', 'superadmin'), admin.enrollFace);
 router.route('/deletefaceenroll').post(authmiddlewre, authorizeRoles('admin', 'superadmin'), admin.deletefaceenroll);
 router.route('/deleteemployee').post(authmiddlewre, authorizeRoles('admin', 'superadmin'), admin.deleteemployee);
@@ -79,23 +79,23 @@ router.route('/superfirstfetch').post(authmiddlewre, employee.addleave);
 router.route("/ledgerEntries")
   .get(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.ledgerEntries);
 router.route("/ledger")
-  .get(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.ledger);
+  .get(authmiddlewre, authorizeRoles('admin', 'superadmin'),checkPermission("ledger",1), ledger.ledger);
 router.route("/entries/:id")
-  .get(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.Entries);
+  .get(authmiddlewre, authorizeRoles('admin', 'superadmin'),checkPermission("enrty",1), ledger.Entries);
 
 router.route("/ledger")
-  .post(authmiddlewre, authorizeRoles('admin', 'superadmin'), upload.single('image'), ledger.createLedger)
+  .post(authmiddlewre, authorizeRoles('admin', 'superadmin'),checkPermission("ledger",2), upload.single('image'), ledger.createLedger)
 
 router.route("/ledger/:id")
-  .put(authmiddlewre, authorizeRoles('admin', 'superadmin'), upload.single('image'), ledger.updateLedger)
-  .delete(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.deleteLedger);
+  .put(authmiddlewre, authorizeRoles('admin', 'superadmin'),checkPermission("ledger",3), upload.single('image'), ledger.updateLedger)
+  .delete(authmiddlewre, authorizeRoles('admin', 'superadmin'),checkPermission("ledger",4), ledger.deleteLedger);
 
 router.route("/ledgerentry")
-  .post(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.createEntry)
+  .post(authmiddlewre, authorizeRoles('admin','manager', 'superadmin'),checkPermission("enrty",2), ledger.createEntry)
 
 router.route("/ledgerentry/:id")
-  .put(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.updateEntry)
-  .delete(authmiddlewre, authorizeRoles('admin', 'superadmin'), ledger.deleteEntry);
+  .put(authmiddlewre, authorizeRoles('admin','manager', 'superadmin'),checkPermission("enrty",3), ledger.updateEntry)
+  .delete(authmiddlewre, authorizeRoles('admin', 'superadmin'),checkPermission("enrty",4), ledger.deleteEntry);
 
 
 module.exports = router;

@@ -92,7 +92,7 @@ const LedgerListPage = () => {
             fetchLedgers();
         } catch (err) {
             console.error(err);
-            toast.error("Failed to save ledger");
+            toast.warning(err.response.data.message);
         } finally {
             setloading(false)
         }

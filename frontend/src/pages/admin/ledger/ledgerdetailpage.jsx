@@ -91,7 +91,7 @@ const LedgerDetailPage = () => {
             // console.log(res.data)
         } catch (err) {
             console.log(err);
-            toast.error("Failed to fetch ledgers");
+            toast.error(err.response.data.message);
         }
     };
 
@@ -177,7 +177,7 @@ const LedgerDetailPage = () => {
             fetchEnteries();
         } catch (error) {
             console.log(error)
-            toast.error("Error saving entry");
+            toast.warning(error.response.data.message);
         }
     };
 
