@@ -7,6 +7,7 @@ import {
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaRegUser } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
 const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranchdata }) => {
   const [branch, setBranch] = useState({
@@ -16,6 +17,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
     companyId: '',
     managerIds: [],
   });
+  const { adminManager } = useSelector((state) => state.user);
 
   const [users, setUsers] = useState([]);
 
@@ -23,12 +25,18 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
 
   // Fetch companies and users
   useEffect(() => {
-    console.log(employee)
+    // console.log(adminManager)
     setUsers(employee)
     setBranch({ ...branch, companyId: company._id })
     if (editbranch) setBranch(editbranchdata)
 
-  }, [company, employee, editbranch]);
+  }, [company, editbranch]);
+
+  useEffect(() => {
+    if (adminManager.length > 0) {
+      setUsers(adminManager.filter(e => e.role == 'manager'))
+    }
+  }, [adminManager]);
 
   // Form field handler
   const handleChange = (field, value) => {
@@ -49,8 +57,10 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
       toast.error(err?.response?.data?.message || "Error adding branch");
     }
   };
-  
+
   const edite = async () => {
+    // console.log(branch)
+    // return
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}editBranch`, branch, {
         headers: { Authorization: `Bearer ${token}` },
@@ -109,16 +119,16 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
             onChange={e => handleChange('managerIds', e.target.value)}
             input={<OutlinedInput label="Managers" />}
             renderValue={(selected) =>
-              selected.map(id => users.find(user => user._id === id)?.userid.name).join(', ')
+              selected.map(id => users.find(user => user._id === id)?.name).join(', ')
             }
           >
             {users?.map(user => (
-              <MenuItem key={user._id} value={user._id}>
-                <Checkbox checked={branch.managerIds.includes(user._id)} />
-                <Avatar src={user.profileimage} alt={user.userid.name}>
-                  {!user.profileimage && <FaRegUser />}
+              <MenuItem key={user._id} value={user?._id}>
+                <Checkbox checked={branch?.managerIds?.includes(user._id)} />
+                <Avatar src={user?.profileImage} alt={user?.name}>
+                  {!user.profileImage && <FaRegUser />}
                 </Avatar>
-                <ListItemText className='ml-2 capitalize' primary={user.userid.name} />
+                <ListItemText className='ml-2 capitalize' primary={user?.name} />
               </MenuItem>
             ))}
           </Select>
@@ -127,7 +137,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
 
       <Box sx={{ mt: 3, textAlign: 'right' }}>
         {editbranch ? <Button variant="contained" onClick={edite}>
-          Edit
+          Save
         </Button> :
           <Button variant="contained" onClick={handleSubmit}>
             Add Branch

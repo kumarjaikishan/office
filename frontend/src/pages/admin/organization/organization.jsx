@@ -111,7 +111,7 @@ export default function OrganizationSettings() {
     const handleEditBranch = (id) => {
         console.log(id)
         seteditbranch(true);
-        const dffg = { ...id, managerIds: id.managerIds.map((id) => id._id) };
+        const dffg = { ...id, managerIds: id?.managerIds?.map((id) => id._id) };
         seteditbranchdata(dffg);
         setopenviewmodal(true);
     }
@@ -272,16 +272,16 @@ export default function OrganizationSettings() {
 
                                                 <td className="p-2 border capitalize">
                                                     <div className="flex flex-col gap-2">
-                                                        {bran.managerIds.map((manager, idx) => (
+                                                        {bran?.managerIds?.map((manager, idx) => (
                                                             <div
                                                                 key={idx}
                                                                 className="flex items-center gap-2 cursor-pointer"
                                                                 onClick={() => setemployee(manager.userid)}
                                                             >
-                                                                <Avatar src={manager?.profileimage} alt={manager.userid.name}>
-                                                                    {!manager?.profileimage && <FaRegUser />}
+                                                                <Avatar src={manager?.profileImage} alt={manager.name}>
+                                                                    {!manager?.profileImage && <FaRegUser />}
                                                                 </Avatar>
-                                                                <span>{manager.userid.name}</span>
+                                                                <span>{manager.name}</span>
                                                             </div>
                                                         ))}
                                                     </div>

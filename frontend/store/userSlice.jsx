@@ -19,6 +19,7 @@ const userSlice = createSlice({
     initialState: {
         profile: null,
         department: null,
+        adminManager: null,
         employee: null,
         company:null,
         holidays:null,
@@ -32,6 +33,7 @@ const userSlice = createSlice({
             localStorage.clear();
             state.profile = null;
             state.department = null;
+            state.adminManager = null;
             state.employee = null;
             state.company = null;
             state.holidays = null;
@@ -51,6 +53,7 @@ const userSlice = createSlice({
             .addCase(FirstFetch.fulfilled, (state, action) => {
                 state.profile = action.payload?.user;
                 state.department = action.payload?.departmentlist;
+                state.adminManager = action.payload?.adminManager;
                 state.employee = action.payload?.employee;
                 state.attandence = action.payload?.attendance;
                 state.company = action.payload?.company;

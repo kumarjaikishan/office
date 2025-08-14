@@ -531,6 +531,7 @@ const firstfetch = async (req, res, next) => {
         let branches = [];
         let departmentlist = [];
         let employees = [];
+        let adminManager = [];
         let attendance = [];
         let holidays = [];
 
@@ -540,14 +541,18 @@ const firstfetch = async (req, res, next) => {
             branches = await branch.find({ companyId: compId })
                 .populate({
                     path: 'managerIds',
-                    select: 'userid profileimage',
-                    populate: { path: 'userid', select: 'name' }
+                    select: 'name profileimage',
                 });
 
             departmentlist = await departmentModal.find({ companyId: compId })
                 .populate('branchId', 'name')
                 .select('department branchId')
                 .sort({ department: 1 });
+
+            adminManager = await usermodal.find({
+                companyId: compId,
+                role: { $in: ['admin', 'manager'] }
+            }).select('-password');
 
             employees = await employeeModal.find({ companyId: compId })
                 .populate('department', 'department')
@@ -574,6 +579,7 @@ const firstfetch = async (req, res, next) => {
             company: companye || null,
             branch: branches,
             departmentlist,
+            adminManager,
             employee: employees,
             attendance,
             holidays,
@@ -690,11 +696,54 @@ const addBranch = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 };
+
+// const editBranch = async (req, res, next) => {
+//     const { _id, name, location, companyId, managerIds = [] } = req.body;
+
+//     try {
+//         // Get the current branch before updating
+//         const existingBranch = await branch.findById(_id);
+//         if (!existingBranch) {
+//             return next({ status: 404, message: "Branch not found" });
+//         }
+
+//         const previousManagerIds = existingBranch.managerIds.map(id => id.toString());
+//         const newManagerIds = managerIds.map(id => id.toString());
+
+//         // Find removed managers (were in previous but not in new)
+//         const removedManagerIds = previousManagerIds.filter(id => !newManagerIds.includes(id));
+//         console.log("removed id", removedManagerIds)
+
+//         // Find added managers (in new but not in previous)
+//         const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
+//         console.log("new to be added id", addedManagerIds)
+
+//         // Update the branch
+//         await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
+
+//         // Demote removed managers to "employee"
+//         for (const removedId of removedManagerIds) {
+//             await usermodal.findOneAndUpdate({ _id: removedId }, { branchIds: 'chatgpt remove branchid from array' });
+//         }
+
+//         // Promote new managers to "manager"
+//         for (const addedId of addedManagerIds) {
+//             await usermodal.findOneAndUpdate({ _id: addedId }, { branchIds: {"chatgpt add here new branch to previous branch array"} });
+//         }
+
+//         return res.status(200).json({ message: "Branch Edited Successfully" });
+
+//     } catch (error) {
+//         console.error(error.message);
+//         return next({ status: 500, message: error.message });
+//     }
+// };
+
 const editBranch = async (req, res, next) => {
     const { _id, name, location, companyId, managerIds = [] } = req.body;
+    console.log(req.body)
 
     try {
-        // Get the current branch before updating
         const existingBranch = await branch.findById(_id);
         if (!existingBranch) {
             return next({ status: 404, message: "Branch not found" });
@@ -703,25 +752,28 @@ const editBranch = async (req, res, next) => {
         const previousManagerIds = existingBranch.managerIds.map(id => id.toString());
         const newManagerIds = managerIds.map(id => id.toString());
 
-        // Find removed managers (were in previous but not in new)
         const removedManagerIds = previousManagerIds.filter(id => !newManagerIds.includes(id));
-        console.log("removed id", removedManagerIds)
+        console.log("removed id", removedManagerIds);
 
-        // Find added managers (in new but not in previous)
         const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
-        console.log("new to be added id", addedManagerIds)
+        console.log("new to be added id", addedManagerIds);
 
-        // Update the branch
         await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
 
-        // Demote removed managers to "employee"
+        // Remove this branch from removed managers
         for (const removedId of removedManagerIds) {
-            await usermodal.findOneAndUpdate({ employeeId: removedId }, { role: 'employee' });
+            await usermodal.findByIdAndUpdate(
+                removedId,
+                { $pull: { branchIds: _id } } // remove this branch from their array
+            );
         }
 
-        // Promote new managers to "manager"
+        // Add this branch to added managers
         for (const addedId of addedManagerIds) {
-            await usermodal.findOneAndUpdate({ employeeId: addedId }, { role: 'manager' });
+            await usermodal.findByIdAndUpdate(
+                addedId,
+                { $addToSet: { branchIds: _id } } // add branch if not already in array
+            );
         }
 
         return res.status(200).json({ message: "Branch Edited Successfully" });
@@ -731,6 +783,7 @@ const editBranch = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 };
+
 
 
 
