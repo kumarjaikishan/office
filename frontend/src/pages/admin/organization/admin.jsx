@@ -14,9 +14,8 @@ const PERMISSION_LABELS = {
 };
 
 const AllPermissionNames = [
-    "attandence", "branch", "company", "department", "employee", "enrty",
-    "holiday", "leave", "ledger", "notification", "permission", "salary", "user"
-];
+    "attandence", "branch", "department", "employee", "ledgerentry",
+    "holiday", "leave", "ledger", "notification", "salary"];
 
 // const adminPermission = Object.fromEntries(
 //   AllPermissionNames.map((name) => [name, [1, 2, 3, 4]])
@@ -27,22 +26,23 @@ const adminPermission = {
     branch: [1, 2, 3, 4],
     department: [1, 2, 3, 4],
     employee: [1, 2, 3, 4],
-    enrty: [1, 2, 3, 4],
+    ledgerentry: [1, 2, 3, 4],
     holiday: [1, 2, 3, 4],
     leave: [1, 2, 3, 4],
     ledger: [1, 2, 3, 4],
     notification: [1, 2, 3, 4],
-    permission: [1],
     salary: [1, 2, 3],
-    user: [1, 2, 3, 4],
 }
 
 const managerPermission = {
-    user: [1, 2, 3, 4],
-    attandence: [1, 2, 3, 4],
-    department: [1, 2, 3, 4],
-    holiday: [1, 2, 3],
+    employee: [1, 2, 3],
+    attandence: [1, 2, 3],
+    department: [1, 2, 3],
+    holiday: [1, 2],
     leave: [1, 2, 3],
+    ledger: [1, 2, 3, 4],
+    ledgerentry: [1, 2, 3, 4],
+    notification: [1, 2],
     salary: [1],
 };
 
@@ -90,6 +90,8 @@ export default function SuperAdminDashboard() {
 
     const handleSave = async () => {
         const newEntry = { ...form };
+        console.log(form)
+        //  return
         const formData = new FormData();
 
         try {

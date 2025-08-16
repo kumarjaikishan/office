@@ -12,6 +12,7 @@ const { default: mongoose } = require('mongoose');
 const company = require('../models/company');
 const branch = require('../models/branch');
 const removePhotoBySecureUrl = require('../utils/cloudinaryremove')
+const redisClient = require('../utils/redis');
 
 
 cloudinary.config({
@@ -362,7 +363,6 @@ const employeelist = async (req, res, next) => {
 }
 
 const addAdmin = async (req, res, next) => {
-    console.log('addAdmin: ', req.body);
 
     const { name, email, role, password, permissions } = req.body;
 
@@ -503,6 +503,8 @@ const editAdmin = async (req, res, next) => {
             { $set: fields },
             { new: true, session }
         );
+        await redisClient.del(`permissions:${id}`);
+        // console.log("cached removed form redis")
 
         await session.commitTransaction();
         session.endSession();
@@ -783,6 +785,50 @@ const editBranch = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 };
+const deleteBranch = async (req, res, next) => {
+    const { _id, name, location, companyId, managerIds = [] } = req.body;
+    console.log(req.body)
+
+    try {
+        const existingBranch = await branch.findById(_id);
+        if (!existingBranch) {
+            return next({ status: 404, message: "Branch not found" });
+        }
+
+        const previousManagerIds = existingBranch.managerIds.map(id => id.toString());
+        const newManagerIds = managerIds.map(id => id.toString());
+
+        const removedManagerIds = previousManagerIds.filter(id => !newManagerIds.includes(id));
+        console.log("removed id", removedManagerIds);
+
+        const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
+        console.log("new to be added id", addedManagerIds);
+
+        await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
+
+        // Remove this branch from removed managers
+        for (const removedId of removedManagerIds) {
+            await usermodal.findByIdAndUpdate(
+                removedId,
+                { $pull: { branchIds: _id } } // remove this branch from their array
+            );
+        }
+
+        // Add this branch to added managers
+        for (const addedId of addedManagerIds) {
+            await usermodal.findByIdAndUpdate(
+                addedId,
+                { $addToSet: { branchIds: _id } } // add branch if not already in array
+            );
+        }
+
+        return res.status(200).json({ message: "Branch Edited Successfully" });
+
+    } catch (error) {
+        console.error(error.message);
+        return next({ status: 500, message: error.message });
+    }
+};
 
 
 
@@ -903,6 +949,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, addAdmin, getAdmin, editAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, addAdmin,deleteBranch, getAdmin, editAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

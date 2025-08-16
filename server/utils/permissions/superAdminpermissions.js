@@ -5,7 +5,7 @@ const superAdminpermissions = {
   company: [1, 2, 3, 4],
   department: [1, 2, 3, 4],
   employee: [1, 2, 3, 4],
-  enrty: [1, 2, 3, 4],
+  ledgerentry: [1, 2, 3, 4],
   holiday: [1, 2, 3, 4],
   leave: [1, 2, 3, 4],
   ledger: [1, 2, 3, 4],

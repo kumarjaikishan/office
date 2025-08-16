@@ -29,8 +29,9 @@ const LedgerListPage = () => {
             const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}ledger`, { headers });
             setLedgers(res.data.ledgers);
             // console.log(res.data)
-        } catch {
-            toast.error("Failed to fetch ledgers");
+        } catch (err) {
+            console.log(err.response)
+            toast.warning(err.response.data.message);
         }
     };
 
@@ -127,7 +128,7 @@ const LedgerListPage = () => {
             if (ledger.profileImage) {
                 url += `&profileimage=${encodeURIComponent(ledger.profileImage)}`;
             }
-          return navigate(url);
+            return navigate(url);
         }
     };
 
@@ -163,7 +164,7 @@ const LedgerListPage = () => {
                                         alt={l.name} src={l.profileImage} />
                                     <div className="text-l font-semibold text-gray-800 mb-2 capitalize">{l.name}</div>
                                 </div>
-                                <p className={`text-md  text-end font-medium ${l.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <p className={`text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                     ₹ {l.netBalance.toLocaleString()}
                                 </p>
                                 <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
@@ -174,14 +175,14 @@ const LedgerListPage = () => {
                                 >
                                     <span
                                         title="Edit Ledger"
-                                        className="bg-teal-100 rounded-full p-1"
+                                        className=" rounded-full p-1"
                                         onClick={() => handleOpenLedgerDialog(l)}
                                     >
                                         <MdEdit className=" text-teal-800" />
                                     </span>
                                     <span
                                         title="Delete Ledger"
-                                        className="bg-red-100 rounded-full p-1"
+                                        className=" rounded-full p-1"
                                         onClick={() => deleteLedger(l)}
                                     >
                                         <MdDelete className=" text-red-800" />

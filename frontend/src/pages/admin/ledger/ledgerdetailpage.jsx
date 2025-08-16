@@ -15,17 +15,17 @@ import { getLedgerColumns } from './ledgerhelper';
 import { MdDelete, MdEdit } from 'react-icons/md';
 
 const SummaryBox = ({ label, value }) => {
-  const isNegative = parseFloat(value) < 0;
+    const isNegative = parseFloat(value) < 0;
 
-  return (
-    <div className="bg-teal-50 border border-teal-300 border-dashed rounded-md px-4 py-2 min-w-[150px] text-center">
-      <p className="text-sm text-gray-600">{label}</p>
-      <hr className="my-2 border-teal-200" />
-      <p className={`text-lg font-semibold ${isNegative ? 'text-red-600' : 'text-black'}`}>
-        {value} ₹
-      </p>
-    </div>
-  );
+    return (
+        <div className="bg-teal-50 border border-teal-300 border-dashed rounded-md px-4 py-2 min-w-[150px] text-center">
+            <p className="text-sm text-gray-600">{label}</p>
+            <hr className="my-2 border-teal-200" />
+            <p className={`text-lg font-semibold ${isNegative ? 'text-red-600' : 'text-black'}`}>
+                {value} ₹
+            </p>
+        </div>
+    );
 };
 
 
