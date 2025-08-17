@@ -6,7 +6,7 @@ const managerpermissions = {
   employee: [1, 2, 3],
   ledgerentry:[1,2,3,4],
   holiday: [1, 2],
-  leave: [1, 2, 3],
+  leave: [1, 3],
   ledger: [1, 2, 3,4],
   notification: [1, 2],
   salary: [1],

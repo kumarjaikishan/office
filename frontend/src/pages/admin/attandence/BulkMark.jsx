@@ -250,7 +250,7 @@ const BulkMark = ({
                                     <TableHead>
                                         <TableRow>
                                             <TableCell padding="checkbox">
-                                                <Checkbox onChange={handleAllSelect} checked={checkedemployee.length === employee.length} />
+                                                <Checkbox onChange={handleAllSelect} checked={checkedemployee?.length === employee?.length} />
                                             </TableCell>
                                             <TableCell>Employee Name</TableCell>
                                             <TableCell>Punch In</TableCell>

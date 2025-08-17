@@ -38,6 +38,10 @@ const Login = () => {
                 dispatch(setadmin(true));
                 return navigate('/admin-dashboard');
             }
+            if (res.data.user.role == "manager") {
+                // dispatch(setadmin(true));
+                return navigate('/manager-dashboard');
+            }
             //  dispatch(setadmin(false));
             return navigate('/employe-dashboard');
 

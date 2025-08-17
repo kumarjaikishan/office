@@ -13,8 +13,8 @@ import { customStyles } from '../../admin/attandence/attandencehelper';
 const EmpAttenPerformance = () => {
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { company, holidays } = useSelector((state) => state.user);
-    const { attendance, companysetting,profile } = useSelector((state) => state.employee);
+    const { holidays } = useSelector((state) => state.user);
+    const { attendance, companysetting, profile } = useSelector((state) => state.employee);
     const [setting, setsetting] = useState(null)
     const [holidaydate, setholidaydate] = useState([]);
     const [withremarks, setwithremarks] = useState([]);
@@ -51,7 +51,6 @@ const EmpAttenPerformance = () => {
     }));
 
     useEffect(() => {
-        // console.log(profile)
         if (attendance) setattandence(attendance);
         if (companysetting) setsetting(companysetting);
     }, [attendance]);
@@ -99,7 +98,7 @@ const EmpAttenPerformance = () => {
 
             // const isWeeklyOff = dayjs(element.date).startOf('day').day() === company.weeklyOffs;
             const day = dayjs(element.date).startOf('day').day(); // 0 = Sunday, 1 = Monday, etc.
-            const isWeeklyOff = company.weeklyOffs.includes(day);
+            const isWeeklyOff = companysetting?.weeklyOffs?.includes(day);
             const isleave = element.status == 'leave'
             const isabsent = element.status == 'absent'
 
@@ -177,8 +176,8 @@ const EmpAttenPerformance = () => {
             short: shortDates,
             overtime, shorttimemin, overtimemin, latearrival,
             earlyarrival, earlyLeave, lateleave,
-            overtimesalary: Math.floor((overtimemin - shorttimemin) * (8500 / 31 / company.workingMinutes.fullDay).toFixed(2))
-            // overtimesalary: (employee.salary/30/company.workingMinutes.fullDay).toFixed(2)
+            overtimesalary: Math.floor((overtimemin - shorttimemin) * (8500 / 31 / companysetting?.workingMinutes?.fullDay).toFixed(2))
+            // overtimesalary: (employee.salary/30/companysetting.workingMinutes.fullDay).toFixed(2)
         });
     }, [attandence, selectedYear, selectedMonth, setting]);
 
@@ -249,7 +248,7 @@ const EmpAttenPerformance = () => {
 
             {attandence && (
                 <>
-                    <EmployeePerformanceCard  attandence={attandence} hell={hell} />
+                    <EmployeePerformanceCard attandence={attandence} hell={hell} />
                     <div className="p-4 flex gap-3 rounded shadow bg-white my-4">
                         {/* <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Type</InputLabel>

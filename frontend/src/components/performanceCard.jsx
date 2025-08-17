@@ -117,7 +117,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                                 <div className="flex gap-1 flex-col text-white">
                                     <span className="flex w-full">
                                         <span className="block w-[100px]">Basic salary</span>
-                                        <span>: ₹ {employee?.salary}</span>
+                                        <span>: {employee?.salary} ₹</span>
                                     </span>
                                     <span className="flex w-full">
                                         <span className="block w-[100px]">Net Overtime</span>
@@ -125,7 +125,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                                     </span>
                                     <span className="flex w-full">
                                         <span className="block w-[100px]">Payment</span>
-                                        <span>: ₹ {hell?.overtimesalary || 0}</span>
+                                        <span>: {hell?.overtimesalary || 0} ₹</span>
                                     </span>
                                 </div>
                             ) : (

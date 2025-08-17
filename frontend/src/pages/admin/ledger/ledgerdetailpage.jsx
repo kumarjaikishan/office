@@ -116,7 +116,10 @@ const LedgerDetailPage = () => {
                     fetchEnteries();
                 } catch (err) {
                     console.log(err)
-                    toast.error("Error deleting entry");
+                    toast.warning(
+                        err?.response?.data?.message || err?.message || "Error deleting entry"
+                    );
+
                 }
             }
         });

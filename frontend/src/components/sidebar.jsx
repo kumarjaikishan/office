@@ -108,6 +108,12 @@ const menu = [
       },
       {
         menu: "Dashboard",
+        link: '/manager-dashboard',
+        icon: <VscDashboard />,
+        roles: ['manager']
+      },
+      {
+        menu: "Dashboard",
         link: '/employe-dashboard',
         icon: <VscDashboard />,
         roles: ['employee']
@@ -123,6 +129,12 @@ const menu = [
         link: '/admin-dashboard/employe',
         icon: <FaUserTie />,
         roles: ['admin','superadmin']
+      },
+      {
+        menu: "Employees",
+        link: '/manager-dashboard/employe',
+        icon: <FaUserTie />,
+        roles: ['manager']
       },
       // {
       //   menu: "Department",
@@ -140,7 +152,7 @@ const menu = [
         menu: "Face Attendance",
         link: '/admin-dashboard/faceatten',
         icon: <FaCamera />,
-        roles: ['admin','superadmin']
+        roles: ['admin','superadmin','manager']
       },
       {
         menu: "Leave",
@@ -152,19 +164,31 @@ const menu = [
         menu: "Ledger",
         link: '/admin-dashboard/ledger',
         icon: <FaBook />,
+        roles: ['admin','superadmin','manager']
+      },
+      {
+        menu: "Leave Request",
+        link: '/admin-dashboard/leave',
+        icon: <FaMailBulk />,
         roles: ['admin','superadmin']
       },
       {
         menu: "Leave Request",
-        link: '/admin-dashboard/adminleave',
+        link: '/manager-dashboard/leave',
         icon: <FaMailBulk />,
-        roles: ['admin','superadmin']
+        roles: ['manager']
       },
       {
         menu: "Attendance",
         link: '/admin-dashboard/attandence',
         icon: <TbReportAnalytics />,
         roles: ['admin','superadmin']
+      },
+      {
+        menu: "Attendance",
+        link: '/manager-dashboard/attandence',
+        icon: <TbReportAnalytics />,
+        roles: ['manager']
       },
       {
         menu: "Attendance",
@@ -187,7 +211,7 @@ const menu = [
         menu: "Profile",
         link: '/profile',
         icon: <FaUserCircle />,
-        roles: ['admin', 'employee','superadmin']
+        roles: ['admin', 'employee','superadmin','manager']
       },
       {
         menu: "Setting",
@@ -199,10 +223,10 @@ const menu = [
         menu: "Logout",
         isLogout: true,
         icon: <CgLogOut />,
-        roles: ['admin', 'employee','superadmin','developer']
+        roles: ['admin', 'employee','superadmin','developer','manager']
       }
     ]
   }
 ];
 
-export default Sidebar
+export default Sidebar;

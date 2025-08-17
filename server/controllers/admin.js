@@ -537,7 +537,50 @@ const firstfetch = async (req, res, next) => {
         let attendance = [];
         let holidays = [];
 
-        if (companye) {
+        if (req.user.role == 'manager') {
+            console.log("first fetch manager check", req.user)
+
+            branches = await branch.find({ companyId: req.user.companyId })
+                .populate({
+                    path: 'managerIds',
+                    select: 'name profileimage',
+                });
+            // const branchIds = branches.map(bran => bran._id);
+
+            departmentlist = await departmentModal.find({
+                companyId: req.user.companyId,
+                branchId: { $in: req.user.branchIds }   // ✅ use $in, not $between
+            })
+                .populate('branchId', 'name')
+                .select('department branchId')
+                .sort({ department: 1 });
+
+            employees = await employeeModal.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
+                .populate('department', 'department')
+                .populate('userid')
+                .sort({ employeename: 1 });
+
+            const employeeIds = employees.map(emp => emp._id);
+
+            attendance = await attendanceModal.find({
+                companyId: req.user.companyId, employeeId: {
+                    $in: employeeIds
+                }
+            })
+                .sort({ date: -1 })
+                .populate({
+                    path: 'employeeId',
+                    select: 'employeename userid profileimage branchId department',
+                    populate: { path: 'userid', select: 'name' }
+                })
+                .populate({
+                    path: 'leave',
+                    select: 'reason',
+                });
+            holidays = await holidaymodal.find({ companyId: req.user.companyId });
+        }
+
+        if ((req.user.role == 'superadmin' || req.user.role == 'admin') && companye) {
             const compId = companye._id;
 
             branches = await branch.find({ companyId: compId })
@@ -575,17 +618,27 @@ const firstfetch = async (req, res, next) => {
             holidays = await holidaymodal.find({ companyId: compId });
         }
 
-
-        res.status(200).json({
+        const response = {
             user: req.user,
-            company: companye || null,
-            branch: branches,
             departmentlist,
-            adminManager,
             employee: employees,
             attendance,
             holidays,
-        });
+        }
+        if (company?.length) response.company = companye;
+        if (branches?.length) response.branch = branches;
+        if (adminManager?.length) response.adminManager = adminManager;
+        res.status(200).json(response);
+        // res.status(200).json({
+        //     user: req.user,
+        //     company: companye || null,
+        //     branch: branches,
+        //     departmentlist,
+        //     adminManager,
+        //     employee: employees,
+        //     attendance,
+        //     holidays,
+        // });
 
     } catch (error) {
         console.error(error.message);
@@ -949,6 +1002,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, addAdmin,deleteBranch, getAdmin, editAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, getAdmin, editAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

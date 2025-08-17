@@ -55,7 +55,8 @@ const checkPermission = (permissionName, key) => {
                 return next();
             } else {
                 return res.status(403).json({
-                    message: `Access denied: missing ${permissionName} permission for Action:${legends[key - 1]}`
+                    // message: `Access denied: missing ${permissionName} permission for Action:${legends[key - 1]}`
+                    message: `Permission denied: You can't ${legends[key - 1]} ${permissionName}`
                 });
             }
         } catch (error) {

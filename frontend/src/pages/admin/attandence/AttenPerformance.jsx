@@ -10,6 +10,8 @@ import { customStyles } from './attandencehelper';
 import { RxReset } from "react-icons/rx";
 import { IoMdTime } from 'react-icons/io';
 import EmployeeProfileCard from '../../../components/performanceCard';
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 const AttenPerformance = () => {
     const { userid } = useParams();
@@ -21,6 +23,7 @@ const AttenPerformance = () => {
     const [setting, setsetting] = useState(null)
     const [holidaydate, setholidaydate] = useState([]);
     const [withremarks, setwithremarks] = useState([]);
+    const navigate = useNavigate();
 
     const [selectedYear, setSelectedYear] = useState(dayjs().year());
     const [selectedMonth, setSelectedMonth] = useState(dayjs().month());
@@ -95,7 +98,17 @@ const AttenPerformance = () => {
                 setattandence(res.data.attandence);
                 // console.log(res.data.attandence)
             } catch (err) {
+                // toast.warning(err.response.data.message)
                 console.error('Failed to fetch performance data:', err);
+                if (err.status == 403) {
+                    swal({
+                        title: 'Access Denied',
+                        text: err.response.data.message || 'You are not authorized to manage this tournament.',
+                        icon: 'warning',
+                    })
+                    navigate('/');
+                    return;
+                }
             } finally {
                 setLoading(false);
             }
@@ -208,7 +221,7 @@ const AttenPerformance = () => {
             earlyarrival, earlyLeave, lateleave,
             // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / company.workingMinutes.fullDay))
             // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary /  dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() / company.workingMinutes.fullDay))
-           
+
             overtimesalary: selectedMonth !== "all"
                 ? Math.floor((overtimemin - shorttimemin) * parseFloat((
                     employee.salary /
@@ -216,7 +229,7 @@ const AttenPerformance = () => {
                     company.workingMinutes.fullDay)))
                 : null
         });
-        console.log('gettitng mothes days',  (employee.salary / 31 / 480))
+        console.log('gettitng mothes days', (employee.salary / 31 / 480))
     }, [attandence, selectedYear, selectedMonth, setting]);
 
 

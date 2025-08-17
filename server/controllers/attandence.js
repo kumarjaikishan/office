@@ -3,6 +3,7 @@ const Attendance = require('../models/attandence');
 const employee = require('../models/employee');
 const Leave = require('../models/leave');
 const User = require('../models/user');
+const mongoose = require("mongoose");
 const { sendToClients } = require('../utils/sse');
 
 
@@ -552,11 +553,24 @@ const allleave = async (req, res, next) => {
 };
 
 const employeeAttandence = async (req, res, next) => {
-  const userid = req.query.userid;
-  // console.log(employeeId)
+  const userid = req.query.userid
   if (!userid) return res.status(400).json({ message: 'Employee Id is needed' });
+
+  if (!mongoose.Types.ObjectId.isValid(userid)) {
+    return res.status(400).json({ message: "Invalid Employee Id" });
+  }
+
   try {
     const user = await User.findOne({ _id: userid });
+
+    if (!user) {
+      return res.status(403).json({ message: 'Employee Not Found' })
+    }
+
+    if (!user.companyId.equals(req.user.companyId)) {
+      return res.status(403).json({ owner: false, message: "Forbidden: You don’t have access to this employee’s data." });
+    }
+
     const employeedetail = await employee.findOne({ userid });
     const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: -1 });
 
@@ -565,7 +579,6 @@ const employeeAttandence = async (req, res, next) => {
     console.error(error);
     return res.status(500).json({ message: 'Server error', error });
   }
-
 }
 
 

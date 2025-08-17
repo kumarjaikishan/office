@@ -29,6 +29,7 @@ import LedgerDetailPage from './pages/admin/ledger/ledgerdetailpage';
 import LedgerSystem from './pages/admin/ledger/ledger';
 import EmpLeave from './pages/employee/leave/Leave';
 import FaceAttandance from './pages/admin/facerecoginaion/faceAttandance';
+import ManagerDashboard from './pages/manager/ManagerDashboard';
 
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
 
   useEffect(() => {
     // console.log("login check",islogin)
-    if (islogin && (user?.profile?.role == 'admin' || user?.profile?.role == 'superadmin')) {
+    if (islogin && (user?.profile?.role == 'admin' || user?.profile?.role == 'superadmin') || user?.profile?.role == 'manager') {
       dispatch(FirstFetch());
     } else if (islogin && user?.profile?.role == 'employee') {
       dispatch(empFirstFetch());
@@ -83,11 +84,28 @@ function App() {
           <Route path="salary" element={<Salary />} />
           <Route path="attandence" element={<Attandence />} />
           <Route path="holiday" element={<HolidayForm />} />
-          <Route path="adminleave" element={<Adminleave />} />
+          <Route path="leave" element={<Adminleave />} />
           <Route path="setting" element={<CompanySettingForm />} />
           <Route path="faceatten" element={<FaceAttandance />} />
-        {/* <Route path="ledger" element={<LedgerSystem />} /> */}
-          
+          {/* <Route path="ledger" element={<LedgerSystem />} /> */}
+
+          <Route path="ledger" element={<LedgerListPage />} />
+          <Route path="ledger/:id" element={<LedgerDetailPage />} />
+          <Route path="performance/:userid" element={<AttenPerformance />} />
+        </Route>
+
+        <Route
+          path="/manager-dashboard"
+          element={<AdminRoutes />}
+        >
+          <Route index element={<ManagerDashboard />} />
+          <Route path="employe" element={<Employe />} />
+          <Route path="salary" element={<Salary />} />
+          <Route path="attandence" element={<Attandence />} />
+          <Route path="leave" element={<Adminleave />} />
+          <Route path="faceatten" element={<FaceAttandance />} />
+          {/* <Route path="ledger" element={<LedgerSystem />} /> */}
+
           <Route path="ledger" element={<LedgerListPage />} />
           <Route path="ledger/:id" element={<LedgerDetailPage />} />
           <Route path="performance/:userid" element={<AttenPerformance />} />

@@ -57,6 +57,9 @@ const userLogin = async (req, res, next) => {
         if (isUser.role == 'admin' || isUser.role == 'manager') {
             tobe.permissions = isUser.permissions;
         }
+        if (isUser.role == 'manager') {
+            tobe.branchIds = isUser.branchIds;
+        }
         if (isUser.companyId) {
             tobe.companyId = isUser.companyId;
         }

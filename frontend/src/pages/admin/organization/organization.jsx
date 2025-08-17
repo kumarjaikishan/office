@@ -54,14 +54,14 @@ export default function OrganizationSettings() {
         }
     })
 
-    const { employee, company, branch } = useSelector((state) => state.user);
+    const { employee, company, branch, profile } = useSelector((state) => state.user);
 
     const toggleSection = (section) => {
         setOpenSection((prev) => (prev === section ? null : section));
     };
 
     useEffect(() => {
-        // console.log(company)
+        console.log(profile)
         if (company) {
             setcompany(company)
         }
@@ -119,116 +119,117 @@ export default function OrganizationSettings() {
     return (
         <div className="w-[95%] max-w-6xl mx-auto mt-10 p-1 py-3 md:p-6 bg-white rounded-xl shadow-md space-y-6">
             {/* Company Info */}
-            <div>
-                <div
-                    className="flex justify-between items-center cursor-pointer bg-blue-100 px-4 py-2 rounded-md"
-                    onClick={() => toggleSection('company')}
-                >
-                    <span className="font-semibold text-lg text-left">Company Info</span>
-                    {openSection === 'company' ? (
-                        <MdExpandLess className="text-xl" />
-                    ) : (
-                        <MdExpandMore className="text-xl" />
-                    )}
-                </div>
-
-                {openSection === 'company' && (
-                    <div className="p-4 rounded flex flex-col md:flex-row items-center border-blue-300 border-2 border-dashed mt-2 space-y-4">
-                        <div className="relative flex items-center mx-auto">
-                            <div className="relative w-30 h-30 mx-auto">
-                                <img
-                                    src={companyinp?.logo || <AiFillAmazonCircle />}
-                                    alt="Company Logo"
-                                    className="w-full h-full object-fill rounded-2xl border-2 border-dashed border-blue-300"
-                                />
-                                <input
-                                    type="file"
-                                    id="logo-upload"
-                                    accept="image/*"
-                                    onChange={async (e) => {
-                                        const file = e.target.files[0];
-                                        if (!file) return;
-
-                                        const formData = new FormData();
-                                        formData.append('_id', companyinp._id);
-                                        formData.append('logo', file);
-
-                                        try {
-                                            console.log('api calling')
-                                            setisload(true);
-                                            const token = localStorage.getItem('emstoken');
-                                            const res = await axios.post(
-                                                `${import.meta.env.VITE_API_ADDRESS}updateCompany`, // replace with your actual upload route
-                                                formData,
-                                                {
-                                                    headers: {
-                                                        Authorization: `Bearer ${token}`,
-                                                        'Content-Type': 'multipart/form-data'
-                                                    }
-                                                }
-                                            );
-
-                                            const uploadedUrl = res.data.logoUrl; // assumes backend returns { logoUrl: '...' }
-
-                                            setcompany((prev) => ({ ...prev, logo: uploadedUrl }));
-                                            toast.success("Logo uploaded successfully!");
-                                        } catch (error) {
-                                            console.error(error);
-                                            toast.error("Failed to upload logo.");
-                                        } finally {
-                                            setisload(false);
-                                        }
-                                    }}
-                                    className="hidden"
-                                />
-
-                                <label
-                                    htmlFor="logo-upload"
-                                    className="absolute w-8 h-8 text-center bottom-0 right-0 bg-white border border-gray-300 rounded-full p-1 cursor-pointer shadow-md"
-                                >
-                                    ✎
-                                </label>
-
-                            </div>
-                        </div>
-
-                        <div className="w-full md:w-[70%] flex flex-col gap-3">
-                            <div>
-                                <label className="block">Company Name</label>
-                                <input
-                                    type="text"
-                                    onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
-                                    value={companyinp.name}
-                                    className="w-full border rounded px-3 py-2"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block">Industry</label>
-                                <input
-                                    type="text"
-                                    onChange={(e) => setcompany({ ...companyinp, industry: e.target.value })}
-                                    value={companyinp.industry}
-                                    className="w-full border rounded px-3 py-2"
-                                />
-                            </div>
-
-                            {company ? (
-                                <Button variant="contained" loading={isload} onClick={handleSubmit}>
-                                    Save Changes
-                                </Button>
-                            ) : (
-
-                                <Button loading={isload} variant="contained" onClick={() => addCompany({ companyinp, setisload })}>
-                                    + Create Company
-                                </Button>
-                            )}
-                        </div>
+            {profile?.role == 'superadmin' &&
+                <div>
+                    <div
+                        className="flex justify-between items-center cursor-pointer bg-blue-100 px-4 py-2 rounded-md"
+                        onClick={() => toggleSection('company')}
+                    >
+                        <span className="font-semibold text-lg text-left">Company Info</span>
+                        {openSection === 'company' ? (
+                            <MdExpandLess className="text-xl" />
+                        ) : (
+                            <MdExpandMore className="text-xl" />
+                        )}
                     </div>
-                )}
-            </div>
 
+                    {openSection === 'company' && (
+                        <div className="p-4 rounded flex flex-col md:flex-row items-center border-blue-300 border-2 border-dashed mt-2 space-y-4">
+                            <div className="relative flex items-center mx-auto">
+                                <div className="relative w-30 h-30 mx-auto">
+                                    <img
+                                        src={companyinp?.logo || <AiFillAmazonCircle />}
+                                        alt="Company Logo"
+                                        className="w-full h-full object-fill rounded-2xl border-2 border-dashed border-blue-300"
+                                    />
+                                    <input
+                                        type="file"
+                                        id="logo-upload"
+                                        accept="image/*"
+                                        onChange={async (e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
 
+                                            const formData = new FormData();
+                                            formData.append('_id', companyinp._id);
+                                            formData.append('logo', file);
+
+                                            try {
+                                                console.log('api calling')
+                                                setisload(true);
+                                                const token = localStorage.getItem('emstoken');
+                                                const res = await axios.post(
+                                                    `${import.meta.env.VITE_API_ADDRESS}updateCompany`, // replace with your actual upload route
+                                                    formData,
+                                                    {
+                                                        headers: {
+                                                            Authorization: `Bearer ${token}`,
+                                                            'Content-Type': 'multipart/form-data'
+                                                        }
+                                                    }
+                                                );
+
+                                                const uploadedUrl = res.data.logoUrl; // assumes backend returns { logoUrl: '...' }
+
+                                                setcompany((prev) => ({ ...prev, logo: uploadedUrl }));
+                                                toast.success("Logo uploaded successfully!");
+                                            } catch (error) {
+                                                console.error(error);
+                                                toast.error("Failed to upload logo.");
+                                            } finally {
+                                                setisload(false);
+                                            }
+                                        }}
+                                        className="hidden"
+                                    />
+
+                                    <label
+                                        htmlFor="logo-upload"
+                                        className="absolute w-8 h-8 text-center bottom-0 right-0 bg-white border border-gray-300 rounded-full p-1 cursor-pointer shadow-md"
+                                    >
+                                        ✎
+                                    </label>
+
+                                </div>
+                            </div>
+
+                            <div className="w-full md:w-[70%] flex flex-col gap-3">
+                                <div>
+                                    <label className="block">Company Name</label>
+                                    <input
+                                        type="text"
+                                        onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
+                                        value={companyinp.name}
+                                        className="w-full border rounded px-3 py-2"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block">Industry</label>
+                                    <input
+                                        type="text"
+                                        onChange={(e) => setcompany({ ...companyinp, industry: e.target.value })}
+                                        value={companyinp.industry}
+                                        className="w-full border rounded px-3 py-2"
+                                    />
+                                </div>
+
+                                {company ? (
+                                    <Button variant="contained" loading={isload} onClick={handleSubmit}>
+                                        Save Changes
+                                    </Button>
+                                ) : (
+
+                                    <Button loading={isload} variant="contained" onClick={() => addCompany({ companyinp, setisload })}>
+                                        + Create Company
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>}
+
+            {(profile?.role == 'superadmin' || profile?.role == 'admin') &&
             <div>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-green-100 px-4 py-2 rounded-md"
@@ -304,8 +305,7 @@ export default function OrganizationSettings() {
                         </table>
                     </div>
                 )}
-
-            </div>
+            </div>}
 
             <div>
                 <div
@@ -325,6 +325,8 @@ export default function OrganizationSettings() {
                     </div>
                 )}
             </div>
+
+            {profile?.role == 'superadmin' &&
             <div>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
@@ -342,7 +344,7 @@ export default function OrganizationSettings() {
                         <SuperAdminDashboard />
                     </div>
                 )}
-            </div>
+            </div>}
 
             <div>
                 <div
