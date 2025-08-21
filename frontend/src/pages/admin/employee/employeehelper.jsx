@@ -11,7 +11,7 @@ export const columns = [
     {
         name: "S.no",
         selector: (row) => row.sno,
-        width:'50px'
+        width: '50px'
     },
     {
         name: "Name",
@@ -28,7 +28,7 @@ export const columns = [
     {
         name: "Action",
         selector: (row) => row.action,
-         width:'160px'
+        width: '160px'
     }
 ]
 
@@ -66,7 +66,7 @@ export const addemployee = async ({ formData, setisload, setInp, setopenmodal, i
 };
 
 
-export const employeeupdate = async ({ formData, inp,setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
+export const employeeupdate = async ({ formData, inp, setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -99,8 +99,8 @@ export const employeeupdate = async ({ formData, inp,setEmployeePhoto, setisload
         setisload(false);
     }
 };
-export const employeedelette = async ({ employeeId, setisload }) => {
 
+export const employeedelette = async ({ employeeId, setisload }) => {
     if (!employeeId) {
         alert('All fileds are Required');
         return;

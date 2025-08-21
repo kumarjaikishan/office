@@ -209,7 +209,7 @@ const Employe = () => {
   };
 
   const updatee = async () => {
-    console.log(inp)
+    // console.log(inp)
     const formData = new FormData();
     Object.keys(inp).forEach(key => {
       const value = inp[key];
@@ -284,7 +284,7 @@ const Employe = () => {
       dob: employee?.dob,
       salary: employee?.salary,
 
-      password: 'employee@123',
+      // password: 'employee@123',
 
       designation: employee?.designation,
       phone: employee?.phone,
@@ -347,6 +347,21 @@ const Employe = () => {
     return nameMatch && deptMatch && branchMatch;
   });
 
+  const exportCSV = () => {
+    // return console.log(filteredEmployees)
+          const headers = ["S.No", "Name", "Email", "Department"];
+          const rows = filteredEmployees.map((e, idx) => [
+              idx + 1,  e.rawname, e.email, e.department
+          ]);
+          const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `Employee List.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+      };
 
 
 
@@ -429,7 +444,7 @@ const Employe = () => {
           </FormControl> */}
         </div>
         <div className="flex gap-1">
-          <Button variant='outlined' startIcon={<FiDownload />}>Export</Button>
+          <Button variant='outlined' onClick={exportCSV} startIcon={<FiDownload />}>Export</Button>
           {canCreate && <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Employee</Button>}
         </div>
       </div>
@@ -491,7 +506,7 @@ const Employe = () => {
               </Box>
               <Box sx={{ width: '100%', gap: 2 }}>
                 <TextField fullWidth required value={inp.username} onChange={(e) => handleChange(e, 'username')} label="username" size="small" />
-                <TextField fullWidth value={inp.password} onChange={(e) => handleChange(e, 'password')} label="password" size="small" />
+                <TextField fullWidth disabled={isupdate} value={inp.password} onChange={(e) => handleChange(e, 'password')} label="password" size="small" />
               </Box>
               <Box sx={{ width: '100%', gap: 2 }}>
                 <TextField fullWidth value={inp.designation} onChange={(e) => handleChange(e, 'designation')} label="Designation" size="small" />

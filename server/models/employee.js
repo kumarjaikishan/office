@@ -72,7 +72,7 @@ const employeeSchema = new mongoose.Schema({
         type: String,
     },
     salary: {
-        type: String,
+        type: Number,
     },
     faceDescriptor: {
         type: [Number], // This will store the 128-length descriptor as an array of numbers

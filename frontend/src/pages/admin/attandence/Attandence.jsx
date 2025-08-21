@@ -183,7 +183,7 @@ const Attandence = () => {
 
   useEffect(() => {
     // console.log(department)
-    // console.log(attandence)
+    console.log(attandence)
     if (!attandence) return;
     const today = dayjs().startOf('day');
 
@@ -204,6 +204,10 @@ const Attandence = () => {
               {emp.status}
             </span>
           ),
+          rawname: emp.employeeId.userid.name,
+          rawpunchIn:emp?.punchIn ? dayjs(emp?.punchIn).format('hh:mm A') : '-',
+          rawpunchOut:emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
+          rawworkingHour: emp.workingMinutes || '-',
           rawname: emp.employeeId.userid.name,
           name: (
             <div className="flex items-center gap-3">
@@ -336,6 +340,22 @@ const Attandence = () => {
     setselectedRows(selectedRows)
   };
 
+  const exportCSV = () => {
+    return console.log(attandencelist)
+    const headers = ["S.no", "Name", "Date", "Punch In", "Punch Out", "Status", "Working Minutes"];
+    const rows = (isFilterActive ? filterattandence : attandencelist).map((e, idx) => [
+      idx + 1, e.rawname, dayjs(e.date).format('YYYY-MM-DD'), e.rawpunchIn, e.rawpunchOut, e.status, e.rawworkingHour
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Attendance List.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className='p-2.5'>
       <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div>
@@ -343,12 +363,12 @@ const Attandence = () => {
         <div className="flex justify-between items-center mb-4 flex-wrap">
           <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-teal-600 text-white">
             <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-teal-700  bg-white`}`}>View Attendance</p>
-           {canAdd &&  <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>}
+            {canAdd && <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>}
           </div>
 
           <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">
             {selectedRows.length > 0 && <Button className="flex-1" variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
-            <Button className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
+            <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
           </div>
         </div>
         <div className="flex items-center gap-4 ">

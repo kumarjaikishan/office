@@ -143,7 +143,7 @@ const LedgerDetailPage = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${selectedLedger.name}_ledger.csv`;
+        a.download = `${ledgerName}_ledger.csv`;
         a.click();
         URL.revokeObjectURL(url);
     };
