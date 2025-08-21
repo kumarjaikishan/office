@@ -26,6 +26,7 @@ import BulkMark from "./BulkMark";
 import { FaRegUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import MarkAttandenceedit from "./MarkAttandenceedit";
+import CheckPermission from "../../../utils/CheckPermission";
 
 const Attandence = () => {
   const [markattandence, setmarkattandence] = useState(false);
@@ -176,7 +177,9 @@ const Attandence = () => {
     }));
   }, [filtere.branch]);
 
-
+  const canAdd = CheckPermission('attandence', 2);
+  const canEdit = CheckPermission('attandence', 3);
+  const canDelete = CheckPermission('attandence', 4);
 
   useEffect(() => {
     // console.log(department)
@@ -260,15 +263,15 @@ const Attandence = () => {
                 <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short {company?.workingMinutes?.fullDay - emp.workingMinutes} min</span>
               )}
               {emp.workingMinutes > company?.workingMinutes?.fullDay && (
-                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime {emp?.workingMinutes-company?.workingMinutes?.fullDay} min </span>
+                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime {emp?.workingMinutes - company?.workingMinutes?.fullDay} min </span>
               )}
             </span>
           ),
 
           action: (
             <div className="action flex gap-2.5">
-              <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
-              <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
+              {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
+              {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>}
             </div>
           )
         }
@@ -340,7 +343,7 @@ const Attandence = () => {
         <div className="flex justify-between items-center mb-4 flex-wrap">
           <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-teal-600 text-white">
             <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-teal-700  bg-white`}`}>View Attendance</p>
-            <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>
+           {canAdd &&  <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>}
           </div>
 
           <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">
@@ -358,7 +361,7 @@ const Attandence = () => {
               <CiFilter className="hidden md:block" size={24} color="teal" />
 
               <TextField
-              className="flex-1"
+                className="flex-1"
                 size='small'
                 type="date"
                 sx={{ width: '160px' }}
@@ -370,7 +373,7 @@ const Attandence = () => {
                 InputLabelProps={{ shrink: true }}
               />
 
-              <FormControl  sx={{ width: '160px' }} size="small">
+              <FormControl sx={{ width: '160px' }} size="small">
                 <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
                 <Select
                   value={filtere.branch}

@@ -1,4 +1,4 @@
-import { columns, addemployee, employeedelette, employeefetche, employeeupdate } from "./employeehelper";
+import { columns, addemployee, employeedelette, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
 import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, OutlinedInput, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
@@ -30,6 +30,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { FaRegUser } from "react-icons/fa";
 import useImageUpload from "../../../utils/imageresizer";
+import CheckPermission from "../../../utils/CheckPermission";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -43,7 +44,7 @@ const Employe = () => {
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
   const { handleImage } = useImageUpload();
-  const { department, branch, employee } = useSelector(e => e.user);
+  const { department, branch, employee, profile } = useSelector(e => e.user);
   const [pass, setpass] = useState({
     userid: '',
     pass: ''
@@ -61,6 +62,7 @@ const Employe = () => {
       ...prev,
       department: 'all'
     }));
+    console.log(profile)
   }, [filters.branch]);
   let navigate = useNavigate();
 
@@ -92,7 +94,7 @@ const Employe = () => {
   const [inp, setInp] = useState(init);
 
   useEffect(() => {
-    department > 0 && setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
+    department.length > 0 && setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
   }, [filters.branch]);
 
   const handleNestedChange = (e, type, index, field) => {
@@ -117,6 +119,9 @@ const Employe = () => {
     setInp(prev => ({ ...prev, [type]: updated }));
   };
 
+  const canCreate = CheckPermission('employee', 2);
+  const canEdit = CheckPermission('employee', 3);
+  const canDelete = CheckPermission('employee', 4);
 
   useEffect(() => {
     // console.log(departmentlist)
@@ -144,9 +149,9 @@ const Employe = () => {
         action: (<div className="action flex gap-2.5">
           <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="View Profile" onClick={() => { setviewEmployee(emp._id); setopenviewmodal(true) }} ><IoEyeOutline /></span>
           <span className="eye edit text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/admin-dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
-          <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>
-          <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="Reset Password" onClick={() => { setpass({ ...pass, userid: emp.userid._id }); setpassmodal(true) }} ><TbPasswordUser /> </span>
-          <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>
+          {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
+          {canEdit && <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="Reset Password" onClick={() => { setpass({ ...pass, userid: emp.userid._id }); setpassmodal(true) }} ><TbPasswordUser /> </span>}
+          {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>}
         </div>)
       }
     })
@@ -344,6 +349,7 @@ const Employe = () => {
 
 
 
+
   return (
     <div className='employee p-2.5'>
       <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2>
@@ -403,9 +409,15 @@ const Employe = () => {
               onChange={(e) => handleFilterChange('department', e.target.value)}
             >
               <MenuItem selected value="all">All</MenuItem>
-              {departmentlist.map((list) => (
-                <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
-              ))}
+              {departmentlist.length > 0 ? (
+                departmentlist.map((list) => (
+                  <MenuItem key={list._id} value={list._id}>
+                    {list.department}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No departments found</MenuItem>
+              )}
             </Select>
           </FormControl>
 
@@ -418,7 +430,7 @@ const Employe = () => {
         </div>
         <div className="flex gap-1">
           <Button variant='outlined' startIcon={<FiDownload />}>Export</Button>
-          <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Employee</Button>
+          {canCreate && <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Employee</Button>}
         </div>
       </div>
 
@@ -428,7 +440,6 @@ const Employe = () => {
           // data={employeelist}
           data={filteredEmployees}
           pagination
-          selectableRows
           customStyles={customStyles}
           highlightOnHover
         />
@@ -460,9 +471,18 @@ const Employe = () => {
                   label="Department"
                   onChange={(e) => handleChange(e, 'department')}
                 >
-                  {department?.filter(e => e.branchId._id == inp.branchId).map((list) => (
-                    <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
-                  ))}
+                  {department?.filter(e => e.branchId._id === inp.branchId).length > 0 ? (
+                    department
+                      .filter(e => e.branchId._id === inp.branchId)
+                      .map((list) => (
+                        <MenuItem key={list._id} value={list._id}>
+                          {list.department}
+                        </MenuItem>
+                      ))
+                  ) : (
+                    <MenuItem disabled>No departments found</MenuItem>
+                  )}
+
                 </Select>
               </FormControl>
               <Box sx={{ width: '100%', gap: 2 }}>
@@ -500,7 +520,8 @@ const Employe = () => {
                   <img src={photoPreview} alt="Preview" className="mt-2 w-[100px] h-[100px] rounded-full object-cover" />
                   : <Avatar
                     sx={{ width: 100, height: 100 }}
-                    alt={inp.employeeName} src="/static/images/avatar/1.jpg" />}
+                    alt={inp.employeeName} src="/static/images/avatar/1.jpg" />
+                }
                 <span onClick={() => inputref.current.click()}
                   className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
                 >
@@ -663,7 +684,7 @@ const Employe = () => {
           <EmployeeProfile viewEmployee={viewEmployee} />
         </div>
       </Modalbox>
-      
+
       <Modalbox open={passmodal} onClose={() => {
         setpassmodal(false);
       }}>

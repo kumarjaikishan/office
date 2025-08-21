@@ -43,11 +43,11 @@ const Sidebar = () => {
         <span className="text-3xl">
           {company?.logo ? (
             <div className='rounded-full overflow-hidden w-14 h-14 object-cover  '>
-            <img
-              className=" w-[100%] h-[100%] object-fill"
-              src={company.logo}
-              alt="Company Logo"
-            />
+              <img
+                className=" w-[100%] h-[100%] object-fill"
+                src={company.logo}
+                alt="Company Logo"
+              />
             </div>
           ) : (
             <SiAudiotechnica />
@@ -104,7 +104,7 @@ const menu = [
         menu: "Dashboard",
         link: '/admin-dashboard',
         icon: <VscDashboard />,
-        roles: ['admin','superadmin']
+        roles: ['admin', 'superadmin']
       },
       {
         menu: "Dashboard",
@@ -122,13 +122,13 @@ const menu = [
         menu: "Organization",
         link: '/admin-dashboard/organization',
         icon: <FaSitemap />,
-        roles: ['superadmin','admin']
+        roles: ['superadmin', 'admin']
       },
       {
         menu: "Employees",
         link: '/admin-dashboard/employe',
         icon: <FaUserTie />,
-        roles: ['admin','superadmin']
+        roles: ['admin', 'superadmin']
       },
       {
         menu: "Employees",
@@ -136,53 +136,11 @@ const menu = [
         icon: <FaUserTie />,
         roles: ['manager']
       },
-      // {
-      //   menu: "Department",
-      //   link: '/admin-dashboard/department',
-      //   icon: <FaRegBuilding />,
-      //   roles: ['admin']
-      // },
-      {
-        menu: "Holiday",
-        link: '/admin-dashboard/holiday',
-        icon: <FaCalendarDay  />,
-        roles: ['superadmin','admin']
-      },
-      {
-        menu: "Face Attendance",
-        link: '/admin-dashboard/faceatten',
-        icon: <FaCamera />,
-        roles: ['admin','superadmin','manager']
-      },
-      {
-        menu: "Leave",
-        link: '/employe-dashboard/leave',
-        icon: <FaUmbrellaBeach />,
-        roles: ['employee']
-      },
-      {
-        menu: "Ledger",
-        link: '/admin-dashboard/ledger',
-        icon: <FaBook />,
-        roles: ['admin','superadmin','manager']
-      },
-      {
-        menu: "Leave Request",
-        link: '/admin-dashboard/leave',
-        icon: <FaMailBulk />,
-        roles: ['admin','superadmin']
-      },
-      {
-        menu: "Leave Request",
-        link: '/manager-dashboard/leave',
-        icon: <FaMailBulk />,
-        roles: ['manager']
-      },
       {
         menu: "Attendance",
         link: '/admin-dashboard/attandence',
         icon: <TbReportAnalytics />,
-        roles: ['admin','superadmin']
+        roles: ['admin', 'superadmin']
       },
       {
         menu: "Attendance",
@@ -196,6 +154,49 @@ const menu = [
         icon: <TbReportAnalytics />,
         roles: ['employee']
       },
+      // {
+      //   menu: "Department",
+      //   link: '/admin-dashboard/department',
+      //   icon: <FaRegBuilding />,
+      //   roles: ['admin']
+      // },
+      {
+        menu: "Holiday",
+        link: '/admin-dashboard/holiday',
+        icon: <FaCalendarDay />,
+        roles: ['superadmin', 'admin']
+      },
+      // {
+      //   menu: "Face Attendance",
+      //   link: '/admin-dashboard/faceatten',
+      //   icon: <FaCamera />,
+      //   roles: ['admin','superadmin','manager']
+      // },
+      {
+        menu: "Leave",
+        link: '/employe-dashboard/leave',
+        icon: <FaUmbrellaBeach />,
+        roles: ['employee']
+      },
+      {
+        menu: "Leave Request",
+        link: '/admin-dashboard/leave',
+        icon: <FaMailBulk />,
+        roles: ['admin', 'superadmin']
+      },
+      {
+        menu: "Leave Request",
+        link: '/manager-dashboard/leave',
+        icon: <FaMailBulk />,
+        roles: ['manager']
+      },
+      {
+        menu: "Ledger",
+        link: '/admin-dashboard/ledger',
+        icon: <FaBook />,
+        roles: ['admin', 'superadmin', 'manager']
+      },
+
       // {
       //   menu: "Salary",
       //   link: '/admin-dashboard/salary',
@@ -211,7 +212,7 @@ const menu = [
         menu: "Profile",
         link: '/profile',
         icon: <FaUserCircle />,
-        roles: ['admin', 'employee','superadmin','manager']
+        roles: ['admin', 'employee', 'superadmin', 'manager']
       },
       {
         menu: "Setting",
@@ -223,7 +224,7 @@ const menu = [
         menu: "Logout",
         isLogout: true,
         icon: <CgLogOut />,
-        roles: ['admin', 'employee','superadmin','developer','manager']
+        roles: ['admin', 'employee', 'superadmin', 'developer', 'manager']
       }
     ]
   }

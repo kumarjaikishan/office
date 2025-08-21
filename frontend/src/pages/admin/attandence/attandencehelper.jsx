@@ -47,7 +47,7 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload,dispatch }) =
   } catch (error) {
     console.log(error);
     if (error.response) {
-      toast.warn(error.response.data.message, { autoClose: 2700 });
+      toast.warn(error.response.data.message, { autoClose: 3000 });
     } else if (error.request) {
       console.error('No response from server:', error.request);
     } else {

@@ -8,6 +8,7 @@ import { MdOutlineModeEdit } from 'react-icons/md';
 import Adminleavemodal from './adminleavemodal';
 import { customStyles } from '../attandence/attandencehelper';
 import { FaRegUser } from 'react-icons/fa';
+import CheckPermission from '../../../utils/CheckPermission';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
@@ -22,7 +23,10 @@ const Adminleave = () => {
         reason: '',
         status: ''
     }
-    const [inp, setInp] = useState(init)
+    const [inp, setInp] = useState(init);
+
+    const canEdit = CheckPermission('leave', 3);
+    const canDelete = CheckPermission('leave', 4);
 
     useEffect(() => {
         const firstfetch = async () => {
@@ -59,8 +63,8 @@ const Adminleave = () => {
                             {leave.status}
                         </span>,
                         action: (<div className="flex gap-2">
-                            <span className="edit" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>
-                            <span className="delete" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>
+                            {canEdit && <span className="edit" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>}
+                            {canDelete && <span className="delete" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>}
                         </div>)
                     }
                 })

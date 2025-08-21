@@ -25,8 +25,10 @@ const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, s
             setInp(init);
             toast.success(res.data.message, { autoClose: 2000 })
         } catch (err) {
+            if(err.response){
+                  toast.warning(err.response.data.message, { autoClose: 3000 })
+            }
             console.error(err);
-            alert("Error saving holiday");
         }
     }
 
@@ -66,7 +68,7 @@ const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, s
                         <div className="mt-2">
 
                             <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" type="submit">
-                                Add
+                                Update
                             </Button>
 
                             <Button size="small" onClick={() => {

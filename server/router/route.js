@@ -52,8 +52,8 @@ router.route('/allAttandence').get(authmiddlewre, authorizeRoles('admin', 'manag
 router.route('/editattandence').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("attandence", 3), attendance.editattandence);
 router.route('/webattandence').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.webattandence);
 router.route('/bulkMarkAttendance').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("attandence", 2), attendance.bulkMarkAttendance);
-router.route('/checkout').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.checkout);
-router.route('/checkin').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.checkin);
+router.route('/checkout').post(authmiddlewre, authorizeRoles('admin', 'manager'),checkPermission("attandence", 2), attendance.checkout);
+router.route('/checkin').post(authmiddlewre, authorizeRoles('admin', 'manager'),checkPermission("attandence", 2), attendance.checkin);
 router.route('/facecheckin').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.facecheckin);
 router.route('/facecheckout').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.facecheckout);
 router.route('/employeeAttandence').get(authmiddlewre, attendance.employeeAttandence);

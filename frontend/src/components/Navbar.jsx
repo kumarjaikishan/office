@@ -9,9 +9,10 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { NotificationIcon } from './popover';
 import { NotificationIcon1 } from './muipopover';
+import { useLocation } from 'react-router-dom';
 
 const Navbar = () => {
-  const dispatch = useDispatch();
+  const location = useLocation();
   const [notificatione, setnotification] = useState([]);
   const { isadmin, islogin } = useSelector((state) => state.auth);
   const { notification } = useSelector((state) => state.employee);
@@ -19,14 +20,51 @@ const Navbar = () => {
   // console.log(isadmin, islogin, user)
 
   useEffect(() => {
-    if(notification){
+    if (notification) {
       setnotification(notification)
     }
+    console.log(location.pathname)
   }, [notification])
+
+  const commonTitles = {
+    "dashboard": "Dashboard",
+    "employe": "Employee",
+    "organization": "Organization",
+    "holiday": "Holiday",
+    "ledger": "Ledger",
+    "ledger/:id": "Ledger Detail",
+    "leave": "Leave Request",
+    "attandence": "Attendance",
+    "salary": "Salary",
+    "department": "Department",
+    "setting": "Company Settings",
+    "faceatten": "Face Attendance",
+    "performance/:userid": "Performance",
+    "empattandence": "Attendance",
+    "profile": "Profile",
+  };
+
+  const pathParts = location.pathname.split("/").filter(Boolean);
+
+  const lastPart = pathParts[pathParts.length - 1] || "";
+
+  // special handling for dynamic routes like ledger/:id
+  let pageTitle;
+  if (lastPart && !commonTitles[lastPart]) {
+    if (pathParts.includes("ledger") && pathParts.length > 2) {
+      pageTitle = "Ledger Detail";
+    } else if (pathParts.includes("performance")) {
+      pageTitle = "Performance";
+    } else {
+      pageTitle = "Page";
+    }
+  } else {
+    pageTitle = commonTitles[lastPart] || "Page";
+  }
 
   return (
     <div className='navbar w-full bg-white flex items-center justify-between px-4 py-2'>
-      <p>page { }</p>
+      <p className='font-semibold text-xl'>{pageTitle}</p>
 
       <div className='flex  gap-4 items-center px-2 text-grey'>
         {/* <span className='bg-amber-200 w-7 h-7 rounded-full flex items-center justify-center relative cursor-pointer'>
