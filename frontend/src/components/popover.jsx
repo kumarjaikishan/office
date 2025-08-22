@@ -80,7 +80,7 @@ export const NotificationIcon = ({ notifications }) => {
                       hour: '2-digit', minute: '2-digit', hour12: true,
                     })}
                   </p>
-                 {notif.read==false && <span className='absolute -top-1 left-0 w-2 h-2 bg-red-600 rounded-full'></span>}
+                 {notif.read==false && <span className='absolute top-1 right-0 w-2 h-2 bg-red-600 rounded-full'></span>}
                 </li>
               ))}
             </ul>

@@ -203,11 +203,11 @@ const LedgerDetailPage = () => {
             {/* Header */}
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start md:items-center  gap-3">
                         <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName} src={profile} />
                         <h2 className="text-2xl font-semibold text-teal-700 capitalize">{ledgerName}</h2>
                     </div>
-                    <Button onClick={() => navigate(-1)} variant="contained">Master Sheet</Button>
+                    <Button className=' w-full md:w-auto' onClick={() => navigate(-1)} variant="contained">Master Sheet</Button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

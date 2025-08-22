@@ -65,7 +65,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
         </div>
         <p className='text-teal-600'>loading...</p>
       </div> :
-      <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-4 ">
+      <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-2 md:p-4 ">
         <h2 className="text-xl mx-auto font-semibold text-gray-700 mb-4">Employee Details</h2>
         <div className="flex gap-4  pb-2 md:items-start">
           <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center overflow-hidden">
@@ -81,7 +81,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
           </div>
 
           <div className="md:flex-1 w-auto">
-            <h3 className="text-xl capitalize font-bold text-gray-800">{employee?.userid?.name}</h3>
+            <h3 className="text-l md:text-xl capitalize font-bold text-gray-800">{employee?.userid?.name}</h3>
             <p className="text-sm text-gray-600">{employee?.userid?.role}</p>
 
             <div className="flex gap-2 mt-2">
@@ -96,9 +96,9 @@ const EmployeeProfile = ({ viewEmployee }) => {
               <div className="flex w-1/2 items-center gap-2"><FaIdCard className="text-gray-500" /> ID: emp0002</div>
             </div>
           </div>
-
         </div>
-        <div className="md:hidden mt-3 justify-start flex flex-wrap text-sm text-gray-600 space-y-1">
+        
+        <div className="md:hidden mt-3 justify-start flex flex-wrap text-[12px] md:text-sm text-gray-600 space-y-1">
           <div className="flex w-1/2 items-center gap-2"><FaEnvelope className="text-gray-500 lowercase" /> {employee?.userid?.email}</div>
           <div className="flex w-1/2 items-center gap-2"><FaPhone className="text-gray-500" /> {employee?.phone || 'N/A'}</div>
           <div className="flex w-1/2 items-center gap-2"><FaCalendarAlt className="text-gray-500" /> {dayjs(employee?.userid?.createdAt).format('DD MMM, YYYY')}</div>
@@ -106,13 +106,13 @@ const EmployeeProfile = ({ viewEmployee }) => {
         </div>
 
         <div className="pt-1 capitalize">
-          <div className="flex  gap-6 bg-slate-200 p-1 mt-2 text-sm font-medium text-gray-700">
+          <div className="flex gap-2 md:gap-6 bg-slate-200 p-1 mt-2 text-[12px] md:text-sm font-medium text-gray-700">
             <div onClick={() => setsubmenu(1)} className={`${submenu == 1 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Personal Info</div>
             <div onClick={() => setsubmenu(2)} className={`${submenu == 2 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Employment</div>
             <div onClick={() => setsubmenu(3)} className={`${submenu == 3 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Documents & Skills</div>
           </div>
           {submenu == 1 &&
-            <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-[12px] md:text-sm text-gray-700">
               <div className="flex items-start gap-2">
                 <FaBirthdayCake className="mt-1 text-gray-500" />
                 <div>
@@ -143,7 +143,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
               </div>
             </div>}
           {submenu == 2 &&
-            <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-[12px] md:text-sm text-gray-700">
               <div className="flex items-start gap-2">
                 <PiOfficeChairFill className="mt-1 text-gray-500" />
                 <div>
@@ -168,8 +168,8 @@ const EmployeeProfile = ({ viewEmployee }) => {
 
             </div>}
           {submenu == 3 &&
-            <div className="mt-2 p-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-sm text-gray-700">
-              <div className='rounded border border-gray-300 bg-white p-4 flex flex-col gap-1'>
+            <div className="mt-2 p-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-[12px] md:text-sm text-gray-700">
+              <div className='rounded border border-gray-300 bg-white p-2 md:p-4 flex flex-col gap-1'>
                 <h3 className='font-bold'>Education</h3>
                 {employee.education.length > 0 ? employee.education.map((edu) => {
                   return <div className='relative my-1 pl-2 rounded overflow-hidden'>
@@ -180,7 +180,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
                   </div>
                 }) : <div>No Data found</div>}
               </div>
-              <div className='rounded border border-gray-300 bg-white p-4 flex flex-col gap-1'>
+              <div className='rounded border border-gray-300 bg-white p-2 md:p-4 flex flex-col gap-1'>
                 <h3 className='font-bold'>Achievement</h3>
                 {employee.achievements.length > 0 ? employee.achievements.map((ach) => {
                   return <div className='relative my-1 pl-5 rounded overflow-hidden'>

@@ -349,19 +349,19 @@ const Employe = () => {
 
   const exportCSV = () => {
     // return console.log(filteredEmployees)
-          const headers = ["S.No", "Name", "Email", "Department"];
-          const rows = filteredEmployees.map((e, idx) => [
-              idx + 1,  e.rawname, e.email, e.department
-          ]);
-          const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
-          const blob = new Blob([csv], { type: "text/csv" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `Employee List.csv`;
-          a.click();
-          URL.revokeObjectURL(url);
-      };
+    const headers = ["S.No", "Name", "Email", "Department"];
+    const rows = filteredEmployees.map((e, idx) => [
+      idx + 1, e.rawname, e.email, e.department
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Employee List.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
 
 
@@ -369,24 +369,36 @@ const Employe = () => {
     <div className='employee p-1'>
       {/* <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2> */}
       <div className='flex gap-5 justify-between flex-wrap'>
-        <div className="flex gap-2 md:gap-1 flex-wrap">
+        <div className="flex flex-wrap gap-3 mt-1 w-full justify-between md:justify-start ">
+          {/* Search */}
           <TextField
-            size='small'
-            sx={{ width: '160px' }}
+            size="small"
+            sx={{
+              width: { xs: '100%', md: '160px' }, // full width on small, fixed on large
+            }}
             value={filters.searchText}
             onChange={(e) => handleFilterChange('searchText', e.target.value)}
             InputProps={{
-              startAdornment: <InputAdornment position="start"><IoSearch /></InputAdornment>,
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IoSearch />
+                </InputAdornment>
+              ),
             }}
             label="Search Employee"
           />
 
-          <FormControl sx={{ width: '160px' }} size="small">
+          {/* Branch */}
+          <FormControl
+            size="small"
+            sx={{
+              width: { xs: '46%', md: '160px' }, // half width on small, fixed on large
+            }}
+          >
             <InputLabel>Branch</InputLabel>
             <Select
-              label="Department"
+              label="Branch"
               value={filters.branch}
-
               input={
                 <OutlinedInput
                   startAdornment={
@@ -401,15 +413,24 @@ const Employe = () => {
             >
               <MenuItem selected value="all">All</MenuItem>
               {branch?.map((list) => (
-                <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
+                <MenuItem key={list._id} value={list._id}>
+                  {list.name}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
-          <FormControl sx={{ width: '160px' }} size="small">
+
+          {/* Department */}
+          <FormControl
+            size="small"
+            sx={{
+              width: { xs: '46%', md: '160px' }, // half width on small, fixed on large
+            }}
+          >
             <InputLabel>Department</InputLabel>
             <Select
               label="Department"
-              disabled={filters.branch == 'all'}
+              disabled={filters.branch === 'all'}
               value={filters.department}
               input={
                 <OutlinedInput
@@ -435,14 +456,9 @@ const Employe = () => {
               )}
             </Select>
           </FormControl>
-
-          {/* <FormControl sx={{ width: '160px' }} size="small">
-            <InputLabel>Status</InputLabel>
-            <Select label="Status" value="">
-              <MenuItem value="">Active</MenuItem>
-            </Select>
-          </FormControl> */}
         </div>
+
+
         <div className="flex gap-1">
           <Button variant='outlined' onClick={exportCSV} startIcon={<FiDownload />}>Export</Button>
           {canCreate && <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Employee</Button>}

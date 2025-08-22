@@ -3,6 +3,8 @@ const employeeModal = require('../models/employee');
 const usermodal = require('../models/user');
 const leavemodal = require('../models/leave')
 const holidaymodal = require('../models/holiday')
+const Ledger = require("../models/ledger");
+const Entry = require("../models/entry");
 const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
 const salaryModal = require('../models/salary')
@@ -536,6 +538,7 @@ const firstfetch = async (req, res, next) => {
         let adminManager = [];
         let attendance = [];
         let holidays = [];
+        let ledger = [];
 
         if (req.user.role == 'manager') {
             // console.log("first fetch manager check", req.user)
@@ -617,6 +620,18 @@ const firstfetch = async (req, res, next) => {
                 });
             holidays = await holidaymodal.find({ companyId: compId });
         }
+        ledger = await Ledger.find({ userId: req.user.id });
+        const ledgersWithBalance = await Promise.all(
+            ledger.map(async (ledger) => {
+                const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
+                    .sort({ date: -1 });
+
+                return {
+                    ...ledger.toObject(),
+                    netBalance: lastEntry ? lastEntry.balance : 0
+                };
+            })
+        );
 
         const response = {
             user: req.user,
@@ -624,6 +639,7 @@ const firstfetch = async (req, res, next) => {
             employee: employees,
             attendance,
             holidays,
+            ledger: ledgersWithBalance
         }
         if (company?.length) response.company = companye;
         if (branches?.length) response.branch = branches;

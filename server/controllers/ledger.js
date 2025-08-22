@@ -14,12 +14,12 @@ exports.createLedger = async (req, res) => {
   try {
     const { name } = req.body;
 
-    const existing = await Ledger.findOne({companyId: req.user.companyId, name, userId: req.userid });
+    const existing = await Ledger.findOne({ companyId: req.user.companyId, name, userId: req.userid });
     if (existing) {
       return res.status(400).json({ message: "Ledger with this name already exists." });
     }
 
-    const ledger = new Ledger({companyId: req.user.companyId, name, userId: req.userid });
+    const ledger = new Ledger({ companyId: req.user.companyId, name, userId: req.userid });
 
     if (req.file) {
       const uploadResult = await cloudinary.uploader.upload(req.file.path, {
@@ -137,7 +137,13 @@ exports.deleteLedger = async (req, res) => {
   try {
     const { id } = req.params;
     // Delete the ledger
-    await Ledger.findByIdAndDelete(id);
+    const deletedLedger = await Ledger.findByIdAndDelete(id);
+
+    if (deletedLedger.profileImage && deletedLedger.profileImage !== "") {
+      let arraye = [];
+      arraye.push(deletedLedger.profileImage);
+      await removePhotoBySecureUrl(arraye);
+    }
 
     // Delete all related entries
     await Entry.deleteMany({ ledgerId: id });

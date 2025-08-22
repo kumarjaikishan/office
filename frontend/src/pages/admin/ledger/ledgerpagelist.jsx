@@ -16,13 +16,14 @@ import { MdEdit, MdDelete, MdOutlineModeEdit, MdSearch } from "react-icons/md";
 import axios from "axios";
 import { toast } from "react-toastify";
 import useImageUpload from "../../../utils/imageresizer";
+import { useSelector } from "react-redux";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
     const [filteredLedgers, setFilteredLedgers] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
-
+    const { ledger } = useSelector(e => e.user);
     const [editLedgerId, setEditLedgerId] = useState(null);
     const [editLedgerName, setEditLedgerName] = useState("");
     const [editOpen, setEditOpen] = useState(false);
@@ -35,9 +36,13 @@ const LedgerListPage = () => {
 
     useEffect(() => {
         fetchLedgers();
-    }, []);
+        // console.log(ledger)
+        // setLedgers(ledger);
+        // setFilteredLedgers(ledger);
+    }, [ledger]);
 
     useEffect(() => {
+        if (ledgers.length < 1) return;
         if (searchQuery.trim() === "") {
             setFilteredLedgers(ledgers);
         } else {
@@ -54,6 +59,7 @@ const LedgerListPage = () => {
                 `${import.meta.env.VITE_API_ADDRESS}ledger`,
                 { headers }
             );
+            console.log(res.data)
             setLedgers(res.data.ledgers);
             setFilteredLedgers(res.data.ledgers);
         } catch (err) {
@@ -164,12 +170,13 @@ const LedgerListPage = () => {
     const inputref = useRef(null);
 
     return (
-        <div  className="w-full">
-            <Paper className="p-2 md:p-4 py-4 mb-4">
+        <div className="w-full bg-white rounded">
+            <div className="p-1 md:p-4 py-4 mb-4">
                 <div className="flex mb-4 gap-2 flex-wrap justify-between">
                     <TextField
                         size="small"
                         label="Search Ledger"
+                        className="w-[150px] md:w-[200px]"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         InputProps={{
@@ -185,8 +192,8 @@ const LedgerListPage = () => {
                     </Button>
                 </div>
 
-                <div className="w-full p-1 md:p-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="w-full p-1 md:p-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                         {filteredLedgers.map((l, ind) => (
                             <div
                                 key={ind}
@@ -200,15 +207,15 @@ const LedgerListPage = () => {
                                         alt={l.name}
                                         src={l.profileImage}
                                     />
-                                    <div className="text-l font-semibold text-gray-800 mb-2 capitalize">
+                                    <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
                                         {l.name}
                                     </div>
                                 </div>
                                 <p
-                                    className={`text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
+                                    className={`text-[16px] md:text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
                                         }`}
                                 >
-                                    ₹ {l.netBalance.toLocaleString()}
+                                    ₹ {l?.netBalance?.toLocaleString()}
                                 </p>
                                 <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
 
@@ -235,7 +242,7 @@ const LedgerListPage = () => {
                         ))}
                     </div>
                 </div>
-            </Paper>
+            </div>
 
             {/* Ledger Create/Edit Modal */}
             <Dialog open={editOpen} onClose={() => setEditOpen(false)}>

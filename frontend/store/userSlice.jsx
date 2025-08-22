@@ -25,6 +25,7 @@ const userSlice = createSlice({
         holidays:null,
         branch:null,
         attandence: null,
+        ledger: null,
         salary: null,
         status: 'idle',
     },
@@ -39,6 +40,7 @@ const userSlice = createSlice({
             state.holidays = null;
             state.branch = null;
             state.attandence = null;
+            state.ledger = null;
             state.salary = null;
         },
         updateAttendance(state, action) {
@@ -59,6 +61,7 @@ const userSlice = createSlice({
                 state.company = action.payload?.company;
                 state.branch = action.payload?.branch;
                 state.holidays = action.payload?.holidays;
+                state.ledger = action.payload?.ledger;
                 state.status = 'succeeded';
             })
             .addCase(FirstFetch.pending, (state) => {
