@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MdEdit, MdDelete, MdOutlineModeEdit } from "react-icons/md";
 import useImageUpload from "../../../utils/imageresizer";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { IoIosArrowDown } from "react-icons/io";
-import { Avatar, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Avatar, TextField } from "@mui/material";
+import Modalbox from "../../../components/custommodal/Modalbox";
 
 // Permission labels
 const PERMISSION_LABELS = {
@@ -354,166 +355,137 @@ export default function SuperAdminDashboard() {
                 )}
             </div>
 
-            <Dialog open={showForm} onClose={() => setShowForm(false)}>
-                <DialogTitle>
-                    {editingIndex !== null ? "Edit Admin" : "Add Admin"}
-                </DialogTitle>
-                <DialogContent>
-                    <div className="space-y-4 pt-1 flex items-center gap-5 flex-col w-[500px]">
-                        <div className="mt-1 items-center  w-fit relative">
-                            <input style={{ display: 'none' }} type="file" onChange={handleProfileImageChange} ref={inputref} accept="image/*" name="" id="fileInput" />
+            <Modalbox open={showForm} onClose={() => setShowForm(false)}>
+                <div className="membermodal">
+                    <form onSubmit={handleSave}>
+                        <h2> {editingIndex !== null ? "Edit Admin" : "Add Admin"}</h2>
+                        <span className="modalcontent">
+                            <div className="space-y-3 pt-1 flex items-center gap-4 flex-col w-[100%] md:w-[500px]">
+                                <div className="mt-1 items-center  w-fit relative">
+                                    <input style={{ display: 'none' }} type="file" onChange={handleProfileImageChange} ref={inputref} accept="image/*" name="" id="fileInput" />
 
-                            <Avatar
-                                sx={{ width: 70, height: 70 }}
-                                alt={form.name} src={form.profilePreview} />
+                                    <Avatar
+                                        sx={{ width: 70, height: 70 }}
+                                        alt={form.name} src={form.profilePreview} />
 
-                            <span onClick={() => inputref.current.click()}
-                                className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
-                            >
-                                <MdOutlineModeEdit size={18} />
-                            </span>
-                        </div>
-                        {/* <input
-                            className="w-full border p-2 rounded"
-                            placeholder="Name"
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        /> */}
-                        <TextField fullWidth required
-                            value={form.name}
-                            onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            label="Name" size="small"
-                        />
-                        {/* <input
-                            className="w-full border p-2 rounded"
-                            placeholder="Email"
-                            value={form.email}
-                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                        /> */}
-                        <TextField fullWidth required
-                            value={form.email}
-                            onChange={(e) => setForm({ ...form, email: e.target.value })}
-                            label="Email" size="small"
-                            helperText="*Note - you can also use companyname as mail handler, e.g. xyz@companyname.com"
-                        />
-                        {/* <input
-                            className="w-full border p-2 rounded"
-                            placeholder="Password"
-                            type="password"
-                            value={form.password}
-                            onChange={(e) => setForm({ ...form, password: e.target.value })}
-                        /> */}
-                        <TextField fullWidth required
-                            value={form.password}
-                            type="password"
-                            onChange={(e) => setForm({ ...form, password: e.target.value })}
-                            label="Password" size="small"
-                        />
+                                    <span onClick={() => inputref.current.click()}
+                                        className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
+                                    >
+                                        <MdOutlineModeEdit size={18} />
+                                    </span>
+                                </div>
 
-                        {/* <div>
-                            <label className="block mb-1 font-semibold">Profile Image</label>
-                            <input type="file" accept="image/*" onChange={handleProfileImageChange} />
-                            {form.profilePreview && (
-                                <img
-                                    src={form.profilePreview}
-                                    alt="Preview"
-                                    className="w-20 h-20 mt-2 rounded-full object-cover border"
+                                <TextField fullWidth required
+                                    value={form.name}
+                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                    label="Name" size="small"
                                 />
-                            )}
-                        </div> */}
 
+                                <TextField fullWidth required
+                                    value={form.email}
+                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                    label="Email" size="small"
+                                    helperText="*Note - you can also use companyname as mail handler, e.g. xyz@companyname.com"
+                                />
 
-                        <div className="w-full">
-                            <label className="font-semibold block mb-1">Role</label>
-                            <select
-                                className="w-full border p-2 rounded"
-                                value={form.role}
-                                onChange={(e) => handleRoleChange(e.target.value)}
-                            >
-                                <option value="admin">Admin</option>
-                                <option value="manager">Manager</option>
-                            </select>
-                        </div>
+                                <TextField fullWidth required
+                                    value={form.password}
+                                    type="password"
+                                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                    label="Password" size="small"
+                                />
 
-                        {/* Add Module (Manager only) */}
-                        {form.role === "manager" && (
-                            <div className="flex w-full items-center gap-2">
-                                <select
-                                    className="border p-2 rounded w-full"
-                                    value={newModule}
-                                    onChange={(e) => setNewModule(e.target.value)}
-                                >
-                                    <option value="">-- Select Module to Add --</option>
-                                    {availableModulesToAdd.map((mod) => (
-                                        <option key={mod} value={mod}>
-                                            {mod}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={handleAddModule}
-                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                                >
-                                    Add
-                                </button>
-                            </div>
-                        )}
+                                <div className="w-full">
+                                    <label className="font-semibold block mb-1">Role</label>
+                                    <select
+                                        className="w-full border p-2 rounded"
+                                        value={form.role}
+                                        onChange={(e) => handleRoleChange(e.target.value)}
+                                    >
+                                        <option value="admin">Admin</option>
+                                        <option value="manager">Manager</option>
+                                    </select>
+                                </div>
 
-                        {/* Permissions Table */}
-                        <div className="w-full">
-                            <p className="font-semibold mb-2">Permissions</p>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full text-sm border">
-                                    <thead>
-                                        <tr>
-                                            <th className="border p-2 text-left">Module</th>
-                                            {Object.entries(PERMISSION_LABELS).map(([code, label]) => (
-                                                <th key={code} className="border p-2 text-center">{label}</th>
+                                {/* Add Module (Manager only) */}
+                                {form.role === "manager" && (
+                                    <div className="flex w-full items-center gap-2">
+                                        <select
+                                            className="border p-2 rounded w-full"
+                                            value={newModule}
+                                            onChange={(e) => setNewModule(e.target.value)}
+                                        >
+                                            <option value="">-- Select Module to Add --</option>
+                                            {availableModulesToAdd.map((mod) => (
+                                                <option key={mod} value={mod}>
+                                                    {mod}
+                                                </option>
                                             ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentModules.map((module) => (
-                                            <tr key={module}>
-                                                <td className="border p-2 capitalize">{module}</td>
-                                                {Object.keys(PERMISSION_LABELS).map((level) => (
-                                                    <td key={level} className="border text-center">
-                                                        <input
-                                                            className="h-5 w-5 cursor-pointer rounded-md border-2 border-gray-400 
+                                        </select>
+                                        <button
+                                            onClick={handleAddModule}
+                                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Permissions Table */}
+                                <div className="w-full">
+                                    <p className="font-semibold mb-2">Permissions</p>
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full text-sm border">
+                                            <thead>
+                                                <tr>
+                                                    <th className="border p-2 text-left">Module</th>
+                                                    {Object.entries(PERMISSION_LABELS).map(([code, label]) => (
+                                                        <th key={code} className="border p-2 text-center">{label}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {currentModules.map((module) => (
+                                                    <tr key={module}>
+                                                        <td className="border p-2 capitalize">{module}</td>
+                                                        {Object.keys(PERMISSION_LABELS).map((level) => (
+                                                            <td key={level} className="border text-center">
+                                                                <input
+                                                                    className="h-3 w-3 md:h-5 md:w-5 cursor-pointer rounded-md border-2 border-gray-400 
                                                              checked:bg-teal-600 checked:border-teal-600 
                                                              focus:ring-2 focus:ring-teal-400 focus:outline-none 
                                                              transition duration-200 ease-in-out"
-                                                            type="checkbox"
-                                                            checked={form.permissions[module]?.includes(Number(level)) || false}
-                                                            onChange={() => togglePermission(module, Number(level))}
-                                                        />
-                                                    </td>
+                                                                    type="checkbox"
+                                                                    checked={form.permissions[module]?.includes(Number(level)) || false}
+                                                                    onChange={() => togglePermission(module, Number(level))}
+                                                                />
+                                                            </td>
+                                                        ))}
+                                                    </tr>
                                                 ))}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </DialogContent>
-                <DialogActions>
-                    <div className="flex justify-end gap-2 mt-6">
-                        <button
-                            className="px-4 py-2 border rounded hover:bg-gray-100"
-                            onClick={resetForm}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            onClick={handleSave}
-                        >
-                            {editingIndex !== null ? "Update" : "Create"}
-                        </button>
-                    </div>
-                </DialogActions>
-            </Dialog>
+                            <div className="flex justify-end gap-2 mt-6">
+                                <button
+                                    className="px-4 py-1 border rounded hover:bg-gray-100"
+                                    onClick={resetForm}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    onClick={handleSave}
+                                >
+                                    {editingIndex !== null ? "Update" : "Create"}
+                                </button>
+                            </div>
+                        </span>
+                    </form>
+                </div>
+            </Modalbox>
 
         </div>
     );

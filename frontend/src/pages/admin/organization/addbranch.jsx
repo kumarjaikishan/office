@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Button, TextField, Typography, MenuItem,
+  Box, Button, TextField, MenuItem,
   FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText, Grid,
   Avatar
 } from '@mui/material';
@@ -75,28 +75,31 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
   };
 
   return (
-    <Box sx={{ maxWidth: 700, mx: 'auto', p: 4, bgcolor: 'white', borderRadius: 2, boxShadow: 2 }}>
-      <Typography variant="h5" gutterBottom>{editbranch ? 'Edit Branch' : 'Add New Branch'} </Typography>
-      <Grid container spacing={2}>
+    <form >
+      <h2>{editbranch ? 'Edit Branch' : 'Add New Branch'}</h2>
+      <span className="modalcontent">
+        <Grid container spacing={2}>
 
-        <TextField
-          label="Branch Name"
-          fullWidth
-          value={branch.name}
-          onChange={e => handleChange('name', e.target.value)}
-          required
-          helperText="Enter the official branch name"
-        />
+          <TextField
+            label="Branch Name"
+            fullWidth
+            size='small'
+            value={branch.name}
+            onChange={e => handleChange('name', e.target.value)}
+            required
+            helperText="Enter the official branch name"
+          />
 
-        <TextField
-          label="Location"
-          fullWidth
-          value={branch.location}
-          onChange={e => handleChange('location', e.target.value)}
-          helperText="City, State or Address"
-        />
+          <TextField
+            label="Location"
+            fullWidth
+             size='small'
+            value={branch.location}
+            onChange={e => handleChange('location', e.target.value)}
+            helperText="City, State or Address"
+          />
 
-        {/* <Grid item xs={12}>
+          {/* <Grid item xs={12}>
           <FormControl fullWidth required>
             <InputLabel>Company</InputLabel>
             <Select
@@ -111,40 +114,41 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
           </FormControl>
         </Grid> */}
 
-        <FormControl fullWidth>
-          <InputLabel>Managers</InputLabel>
-          <Select
-            multiple
-            value={branch.managerIds}
-            onChange={e => handleChange('managerIds', e.target.value)}
-            input={<OutlinedInput label="Managers" />}
-            renderValue={(selected) =>
-              selected.map(id => users.find(user => user._id === id)?.name).join(', ')
-            }
-          >
-            {users?.map(user => (
-              <MenuItem key={user._id} value={user?._id}>
-                <Checkbox checked={branch?.managerIds?.includes(user._id)} />
-                <Avatar src={user?.profileImage} alt={user?.name}>
-                  {!user.profileImage && <FaRegUser />}
-                </Avatar>
-                <ListItemText className='ml-2 capitalize' primary={user?.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
+          <FormControl  size='small' fullWidth>
+            <InputLabel>Managers</InputLabel>
+            <Select
+              multiple
+              value={branch.managerIds}
+              onChange={e => handleChange('managerIds', e.target.value)}
+              input={<OutlinedInput label="Managers" />}
+              renderValue={(selected) =>
+                selected.map(id => users.find(user => user._id === id)?.name).join(', ')
+              }
+            >
+              {users?.map(user => (
+                <MenuItem key={user._id} value={user?._id}>
+                  <Checkbox checked={branch?.managerIds?.includes(user._id)} />
+                  <Avatar src={user?.profileImage} alt={user?.name}>
+                    {!user.profileImage && <FaRegUser />}
+                  </Avatar>
+                  <ListItemText className='ml-2 capitalize' primary={user?.name} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
 
-      <Box sx={{ mt: 3, textAlign: 'right' }}>
-        {editbranch ? <Button variant="contained" onClick={edite}>
-          Save
-        </Button> :
-          <Button variant="contained" onClick={handleSubmit}>
-            Add Branch
-          </Button>}
+        <Box sx={{ mt: 3, textAlign: 'right' }}>
+          {editbranch ? <Button variant="contained" onClick={edite}>
+            Save
+          </Button> :
+            <Button variant="contained" onClick={handleSubmit}>
+              Add Branch
+            </Button>}
 
-      </Box>
-    </Box>
+        </Box>
+      </span>
+    </form>
   );
 };
 

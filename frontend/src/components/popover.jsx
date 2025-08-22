@@ -57,7 +57,7 @@ export const NotificationIcon = ({ notifications }) => {
         {/* <button onClick={toggleDropdown} className='bg-amber-200 w-7 h-7 rounded-full flex items-center justify-center relative cursor-pointer'> */}
         <CiBullhorn size={20} />
         {notifications.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-purple-800 text-white text-[8px] md:text-xs w-3 h-3 md:w-4 md:h-4 flex items-center justify-center font-bold rounded-full">
+          <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-purple-800 text-white text-[8px] md:text-xs w-3 h-3 md:w-4 md:h-4 flex items-center justify-center font-bold rounded-full">
             {notifications.length}
           </span>
         )}

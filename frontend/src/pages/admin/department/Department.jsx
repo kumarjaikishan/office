@@ -123,12 +123,12 @@ const Department = () => {
 
   return (
     <div className='department pt-3'>
-      {/* <h2>Manage Departments</h2> */}
       <div className='head flex flex-wrap gap-1'>
         <div className='flex gap-2 w-full justify-around md:w-auto'>
-          <FormControl size="small">
+          <FormControl  className="w-[48%] md:w-[150px]" size="small">
             <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
             <Select
+            
               value={filtere.branch}
               onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
               input={

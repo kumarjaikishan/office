@@ -138,8 +138,8 @@ const Navbar = () => {
             1
           </span>
         </span> */}
-        <NotificationIcon notifications={notifications} />
-        {/* <NotificationIcon notifications={notificatione} /> */}
+        {/* <NotificationIcon notifications={notifications} /> */}
+        <NotificationIcon notifications={notificatione} />
         {/* <NotificationIcon1 notifications={notification} /> */}
         <div className='flex flex-col items-end px-1'>
           <span className='text-[10px] md:text-xs font-medium leading-4 capitalize'>{user?.profile?.name}</span>

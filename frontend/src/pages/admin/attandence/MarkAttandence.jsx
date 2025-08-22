@@ -38,7 +38,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 labelId="demo-simple-select-helper-label"
                                 id="demo-simple-select-helper"
                                 value={isPunchIn}
-
+                                 label="Action"
                                 required
                                 onChange={(e) => {
                                     setisPunchIn(e.target.value)
