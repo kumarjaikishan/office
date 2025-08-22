@@ -21,6 +21,7 @@ const addleave = async (req, res, next) => {
 
   try {
     const whichemployee = await employee.findOne({ userid: req.user.id });
+    // console.log("whichemployee",whichemployee)
 
     // Calculate duration in days (inclusive)
     const from = new Date(fromDate);
@@ -29,6 +30,8 @@ const addleave = async (req, res, next) => {
     const duration = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
 
     const leave = new Leave({
+      companyId: whichemployee.companyId,
+      branchId: whichemployee.branchId,
       employeeId: whichemployee._id,
       type,
       fromDate,
@@ -58,19 +61,28 @@ const getleave = async (req, res, next) => {
   }
 };
 const fetchleave = async (req, res, next) => {
-
+  console.log(req.user)
   try {
-    // const leave = await Leave.find().populate({
-    //   path:'employeeId'
-    // });
-    const leave = await Leave.find().populate({
-      path: 'employeeId',
-      select: 'userid profileimage',
-      populate: {
-        path: 'userid',
-        select: 'name email'
-      }
-    });
+    let leave;
+    if (req.user.role == 'manager') {
+      leave = await Leave.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } }).populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name email'
+        }
+      });
+    } else {
+      leave = await Leave.find({ companyId: req.user.companyId }).populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name email'
+        }
+      });
+    }
     // console.log(leave)
     return res.json({ leave });
 
@@ -100,8 +112,25 @@ const employeefetch = async (req, res, next) => {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+const updatenotification = async (req, res, next) => {
+
+  try {
+    await notificationmodal.updateMany(
+      { userId: req.user.id }, // condition
+      { $set: { read: true } } // update
+    );
+
+
+    // console.log(employeeee)
+    return res.status(200).json({ message: "Marked Read" });
+
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 
 
 
-module.exports = { employeefetch, addleave, fetchleave, getleave };
+module.exports = { employeefetch, addleave, fetchleave, updatenotification, getleave };

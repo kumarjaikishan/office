@@ -117,7 +117,7 @@ export default function OrganizationSettings() {
     }
 
     return (
-        <div className="w-[95%] max-w-6xl mx-auto mt-10 p-1 py-3 md:p-6 bg-white rounded-xl shadow-md space-y-6">
+        <div className="w-full  mx-auto mt-1 p-1 md:p-6 bg-white rounded-xl shadow-md space-y-6">
             {/* Company Info */}
             {profile?.role == 'superadmin' &&
                 <div>
@@ -243,7 +243,7 @@ export default function OrganizationSettings() {
                     )}
                 </div>
                 {openSection === 'branches' && (
-                    <div className="p-4 rounded  border-green-300 border-2 border-dashed mt-2 space-y-4">
+                    <div className="p-1 md:p-4 rounded overflow-auto  border-green-300 border-2 border-dashed mt-2 space-y-4">
                         <div className="flex justify-between items-center">
                             <h3 className="text-md font-medium">Branch List</h3>
                             <button

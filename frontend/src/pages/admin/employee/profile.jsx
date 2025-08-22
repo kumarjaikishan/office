@@ -65,7 +65,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
         </div>
         <p className='text-teal-600'>loading...</p>
       </div> :
-      <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-4 capitalize">
+      <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-4 ">
         <h2 className="text-xl mx-auto font-semibold text-gray-700 mb-4">Employee Details</h2>
         <div className="flex gap-4  pb-2 md:items-start">
           <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center overflow-hidden">
@@ -81,7 +81,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
           </div>
 
           <div className="md:flex-1 w-auto">
-            <h3 className="text-xl font-bold text-gray-800">{employee?.userid?.name}</h3>
+            <h3 className="text-xl capitalize font-bold text-gray-800">{employee?.userid?.name}</h3>
             <p className="text-sm text-gray-600">{employee?.userid?.role}</p>
 
             <div className="flex gap-2 mt-2">
@@ -105,8 +105,8 @@ const EmployeeProfile = ({ viewEmployee }) => {
           <div className="flex w-1/2 items-center gap-2"><FaIdCard className="text-gray-500" /> ID: emp0002</div>
         </div>
 
-        <div className="pt-1">
-          <div className="flex gap-6 bg-slate-200 p-1 mt-2 text-sm font-medium text-gray-700">
+        <div className="pt-1 capitalize">
+          <div className="flex  gap-6 bg-slate-200 p-1 mt-2 text-sm font-medium text-gray-700">
             <div onClick={() => setsubmenu(1)} className={`${submenu == 1 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Personal Info</div>
             <div onClick={() => setsubmenu(2)} className={`${submenu == 2 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Employment</div>
             <div onClick={() => setsubmenu(3)} className={`${submenu == 3 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Documents & Skills</div>

@@ -461,9 +461,17 @@ const editattandence = async (req, res, next) => {
   try {
     const { id, punchIn, punchOut, status } = req.body;
 
-    const data = await Attendance.findById(id);
+    const data = await Attendance.findById(id).populate('employeeId', 'branchId');
     if (!data) {
       return res.status(404).json({ message: "Attendance record not found" });
+    }
+
+    if (req.user.role === 'manager') {
+      const branchIdStr = data.employeeId.branchId.toString();
+
+      if (!req.user.branchIds.includes(branchIdStr)) {
+        return res.status(400).json({ message: "You can't Edit this Data" });
+      }
     }
 
     const baseDate = new Date(data.date);

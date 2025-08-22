@@ -30,6 +30,7 @@ import LedgerSystem from './pages/admin/ledger/ledger';
 import EmpLeave from './pages/employee/leave/Leave';
 import FaceAttandance from './pages/admin/facerecoginaion/faceAttandance';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
+import AdminManagerProfile from './pages/profile/adminManagerProfile';
 
 
 function App() {
@@ -119,10 +120,12 @@ function App() {
           <Route path="empattandence" element={<EmpAttenPerformance />} />
           <Route path="leave" element={<EmpLeave />} />
         </Route>
+
         <Route
           element={<PrivateRoute />}
         >
           <Route path="profile" element={<EmployeeProfile />} />
+          <Route path="adminprofile" element={<AdminManagerProfile />} />
         </Route>
         {/* <Route path="profile" element={<EmployeeProfile />} /> */}
       </Routes>

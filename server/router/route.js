@@ -56,19 +56,20 @@ router.route('/checkout').post(authmiddlewre, authorizeRoles('admin', 'manager')
 router.route('/checkin').post(authmiddlewre, authorizeRoles('admin', 'manager'),checkPermission("attandence", 2), attendance.checkin);
 router.route('/facecheckin').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.facecheckin);
 router.route('/facecheckout').post(authmiddlewre, authorizeRoles('admin', 'manager'), attendance.facecheckout);
-router.route('/employeeAttandence').get(authmiddlewre, attendance.employeeAttandence);
+router.route('/employeeAttandence').get(authmiddlewre,authorizeRoles('admin', 'manager'), attendance.employeeAttandence);
 router.route('/deleteattandence').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("attandence", 4), attendance.deleteattandence);
 
 router.route('/getholidays').get(authmiddlewre, holiday.getholidays);
-router.route('/addholiday').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("attandence", 2), holiday.addholiday);
-router.route('/updateholiday').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("attandence", 3), holiday.updateholiday);
-router.route('/deleteholiday').post(authmiddlewre, authorizeRoles('admine', 'manager'), checkPermission("attandence", 4), holiday.deleteholiday);
+router.route('/addholiday').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("holiday", 2), holiday.addholiday);
+router.route('/updateholiday').post(authmiddlewre, authorizeRoles('admin', 'manager'), checkPermission("holiday", 3), holiday.updateholiday);
+router.route('/deleteholiday').post(authmiddlewre, authorizeRoles('admine', 'manager'), checkPermission("holiday", 4), holiday.deleteholiday);
 
-router.route('/addleave').post(authmiddlewre, employee.addleave);
+router.route('/addleave').post(authmiddlewre,authorizeRoles('employee'), employee.addleave);
 router.route('/getleave').get(authmiddlewre, employee.getleave);
-router.route('/fetchleave').get(authmiddlewre, employee.fetchleave);
+router.route('/fetchleave').get(authmiddlewre,authorizeRoles('admin', 'manager'),checkPermission("leave", 1), employee.fetchleave);
 router.route('/employeefetch').get(authmiddlewre, authorizeRoles('employee'), employeemiddlewre, employee.employeefetch);
 router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), employee.employeefetch);
+router.route('/updatenotification').get(authmiddlewre, employee.updatenotification);
 
 router.route('/addAdmin').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.addAdmin);
 router.route('/getAdmin').get(authmiddlewre, authorizeRoles('superadmin'), admin.getAdmin);

@@ -42,7 +42,7 @@ const Sidebar = () => {
       <div className="logo h-[60px] flex items-center gap-4">
         <span className="text-3xl">
           {company?.logo ? (
-            <div className='rounded-full overflow-hidden w-14 h-14 object-cover  '>
+            <div className='rounded-full overflow-hidden w-10 h-10 md:h-14 md:w-14 object-cover  '>
               <img
                 className=" w-[100%] h-[100%] object-fill"
                 src={company.logo}
@@ -210,9 +210,15 @@ const menu = [
     items: [
       {
         menu: "Profile",
+        link: '/adminprofile',
+        icon: <FaUserCircle />,
+        roles: ['admin','superadmin', 'manager']
+      },
+      {
+        menu: "Profile",
         link: '/profile',
         icon: <FaUserCircle />,
-        roles: ['admin', 'employee', 'superadmin', 'manager']
+        roles: ['employee']
       },
       {
         menu: "Setting",

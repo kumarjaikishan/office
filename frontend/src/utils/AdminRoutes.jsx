@@ -27,7 +27,7 @@ const AdminRoutes = () => {
         {/* right side */}
         <div className='w-[86%] md:w-[92%] lg:w-[84%] bg-gray-100 overflow-auto overflow-x-hidden'>
           <Navbar />
-          <div className="materiale">
+          <div className="materiale p-1 md:p-2">
             <Outlet />
           </div>
         </div>

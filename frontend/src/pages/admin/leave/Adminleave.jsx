@@ -9,6 +9,7 @@ import Adminleavemodal from './adminleavemodal';
 import { customStyles } from '../attandence/attandencehelper';
 import { FaRegUser } from 'react-icons/fa';
 import CheckPermission from '../../../utils/CheckPermission';
+import { toast } from 'react-toastify';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
@@ -39,7 +40,6 @@ const Adminleave = () => {
                         }
                     }
                 );
-                // console.log(res.data.leave)
                 let sno = 1;
                 const data = await res.data.leave.map((leave) => {
                     return {
@@ -63,14 +63,15 @@ const Adminleave = () => {
                             {leave.status}
                         </span>,
                         action: (<div className="flex gap-2">
-                            {canEdit && <span className="edit" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>}
-                            {canDelete && <span className="delete" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>}
+                            {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>}
+                            {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>}
                         </div>)
                     }
                 })
                 setleavelist(data);
             } catch (err) {
                 console.error(err);
+               toast.warning(err.response?.data?.message || "Error")
             }
         }
         firstfetch();
@@ -97,8 +98,8 @@ const Adminleave = () => {
         setopenmodal(true);
     }
     return (
-        <div className='p-2'>
-            <h2 className='font-semibold text-center text-xl' >Leave Application</h2>
+        <div>
+            {/* <h2 className='font-semibold text-center text-xl' >Leave Application</h2> */}
             <DataTable
                 customStyles={customStyles}
                 columns={columns}

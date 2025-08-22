@@ -1,21 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { Container, Paper, Autocomplete, TextField, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, Avatar } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import {
+    Container,
+    Paper,
+    TextField,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Avatar,
+    InputAdornment,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { MdEdit, MdDelete } from "react-icons/md";
+import { MdEdit, MdDelete, MdOutlineModeEdit, MdSearch } from "react-icons/md";
 import axios from "axios";
 import { toast } from "react-toastify";
 import useImageUpload from "../../../utils/imageresizer";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
+    const [filteredLedgers, setFilteredLedgers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+
     const [editLedgerId, setEditLedgerId] = useState(null);
     const [editLedgerName, setEditLedgerName] = useState("");
     const [editOpen, setEditOpen] = useState(false);
     const [editLedgerImage, setEditLedgerImage] = useState(null);
     const { handleImage } = useImageUpload();
-    const [loading, setloading] = useState(false);
-
+    const [loading, setLoading] = useState(false);
 
     const token = localStorage.getItem("emstoken");
     const headers = { Authorization: `Bearer ${token}` };
@@ -24,14 +37,28 @@ const LedgerListPage = () => {
         fetchLedgers();
     }, []);
 
+    useEffect(() => {
+        if (searchQuery.trim() === "") {
+            setFilteredLedgers(ledgers);
+        } else {
+            const lower = searchQuery.toLowerCase();
+            setFilteredLedgers(
+                ledgers.filter((l) => l.name.toLowerCase().includes(lower))
+            );
+        }
+    }, [searchQuery, ledgers]);
+
     const fetchLedgers = async () => {
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}ledger`, { headers });
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_ADDRESS}ledger`,
+                { headers }
+            );
             setLedgers(res.data.ledgers);
-            // console.log(res.data)
+            setFilteredLedgers(res.data.ledgers);
         } catch (err) {
-            console.log(err.response)
-            toast.warning(err.response.data.message);
+            console.log(err.response);
+            toast.warning(err.response?.data?.message || "Failed to fetch ledgers");
         }
     };
 
@@ -39,8 +66,7 @@ const LedgerListPage = () => {
         if (ledger) {
             setEditLedgerName(ledger.name);
             setEditLedgerId(ledger._id);
-            // Optional: set existing image if you store image URL
-            // setEditLedgerImage(ledger.image); 
+            setEditLedgerImage(ledger.profileImage || null);
         } else {
             setEditLedgerName("");
             setEditLedgerId(null);
@@ -52,17 +78,19 @@ const LedgerListPage = () => {
     const handleSaveLedger = async () => {
         const name = editLedgerName.trim();
         if (!name) return toast.warn("Ledger name can't be empty");
-        if (name.length < 3) return toast.warn("Ledger name must be at least 3 characters");
+        if (name.length < 3)
+            return toast.warn("Ledger name must be at least 3 characters");
 
         const formData = new FormData();
         formData.append("name", name);
-        if (editLedgerImage) {
+
+        if (editLedgerImage instanceof File) {
             let resizedfile = await handleImage(200, editLedgerImage);
             formData.append("image", resizedfile);
         }
 
         try {
-            setloading(true)
+            setLoading(true);
             if (editLedgerId) {
                 await axios.put(
                     `${import.meta.env.VITE_API_ADDRESS}ledger/${editLedgerId}`,
@@ -70,8 +98,8 @@ const LedgerListPage = () => {
                     {
                         headers: {
                             ...headers,
-                            'Content-Type': 'multipart/form-data'
-                        }
+                            "Content-Type": "multipart/form-data",
+                        },
                     }
                 );
                 toast.success("Ledger updated");
@@ -82,8 +110,8 @@ const LedgerListPage = () => {
                     {
                         headers: {
                             ...headers,
-                            'Content-Type': 'multipart/form-data'
-                        }
+                            "Content-Type": "multipart/form-data",
+                        },
                     }
                 );
                 toast.success("Ledger created");
@@ -93,29 +121,30 @@ const LedgerListPage = () => {
             fetchLedgers();
         } catch (err) {
             console.error(err);
-            toast.warning(err.response.data.message);
+            toast.warning(err.response?.data?.message || "Failed to save ledger");
         } finally {
-            setloading(false)
+            setLoading(false);
         }
     };
-
 
     const deleteLedger = async (ledger) => {
         swal({
             title: `Are you sure to Delete ${ledger.name}'s Ledger?`,
-            text: 'Once deleted, you will not be able to recover this',
+            text: "Once deleted, you will not be able to recover this",
             icon: "warning",
             buttons: true,
             dangerMode: true,
         }).then(async (proceed) => {
             if (proceed) {
                 try {
-                    await axios.delete(`${import.meta.env.VITE_API_ADDRESS}ledger/${ledger._id}`, { headers });
+                    await axios.delete(
+                        `${import.meta.env.VITE_API_ADDRESS}ledger/${ledger._id}`,
+                        { headers }
+                    );
                     toast.success("Ledger deleted");
-
                     fetchLedgers();
                 } catch (err) {
-                    console.log(err)
+                    console.log(err);
                     toast.error("Failed to delete ledger");
                 }
             }
@@ -132,26 +161,33 @@ const LedgerListPage = () => {
         }
     };
 
+    const inputref = useRef(null);
+
     return (
-        <Container maxWidth="lg" className="mt-4 md:mt-8">
+        <div  className="w-full">
             <Paper className="p-2 md:p-4 py-4 mb-4">
-                <div className="flex gap-2">
-                    <Autocomplete
+                <div className="flex mb-4 gap-2 flex-wrap justify-between">
+                    <TextField
                         size="small"
-                        options={ledgers}
-                        getOptionLabel={(option) => option.name}
-                        onChange={(e, val) => handleNavigate(val)}
-                        renderInput={(params) => <TextField {...params} label="Search Ledger" fullWidth />}
-                        sx={{ flexGrow: 1 }}
+                        label="Search Ledger"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <MdSearch className="text-gray-500" />
+                                </InputAdornment>
+                            ),
+                        }}
                     />
                     <Button variant="contained" onClick={() => handleOpenLedgerDialog()}>
                         Add Ledger
                     </Button>
                 </div>
 
-                <div className="w-full p-4">
+                <div className="w-full p-1 md:p-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {ledgers.map((l, ind) => (
+                        {filteredLedgers.map((l, ind) => (
                             <div
                                 key={ind}
                                 onClick={() => handleNavigate(l)}
@@ -161,10 +197,17 @@ const LedgerListPage = () => {
                                 <div className="flex gap-1 items-center">
                                     <Avatar
                                         sx={{ width: 35, height: 35 }}
-                                        alt={l.name} src={l.profileImage} />
-                                    <div className="text-l font-semibold text-gray-800 mb-2 capitalize">{l.name}</div>
+                                        alt={l.name}
+                                        src={l.profileImage}
+                                    />
+                                    <div className="text-l font-semibold text-gray-800 mb-2 capitalize">
+                                        {l.name}
+                                    </div>
                                 </div>
-                                <p className={`text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <p
+                                    className={`text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
+                                        }`}
+                                >
                                     ₹ {l.netBalance.toLocaleString()}
                                 </p>
                                 <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
@@ -175,14 +218,14 @@ const LedgerListPage = () => {
                                 >
                                     <span
                                         title="Edit Ledger"
-                                        className=" rounded-full p-1"
+                                        className="rounded-full p-1"
                                         onClick={() => handleOpenLedgerDialog(l)}
                                     >
                                         <MdEdit className=" text-teal-800" />
                                     </span>
                                     <span
                                         title="Delete Ledger"
-                                        className=" rounded-full p-1"
+                                        className="rounded-full p-1"
                                         onClick={() => deleteLedger(l)}
                                     >
                                         <MdDelete className=" text-red-800" />
@@ -190,46 +233,61 @@ const LedgerListPage = () => {
                                 </div>
                             </div>
                         ))}
-
                     </div>
                 </div>
-
             </Paper>
+
             {/* Ledger Create/Edit Modal */}
             <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
                 <DialogTitle>{editLedgerId ? "Edit Ledger" : "Add Ledger"}</DialogTitle>
                 <DialogContent>
-
                     <TextField
-                        autoFocus fullWidth margin="dense" label="Ledger Name"
-                        value={editLedgerName} onChange={(e) => setEditLedgerName(e.target.value)}
+                        autoFocus
+                        fullWidth
+                        margin="dense"
+                        label="Ledger Name"
+                        value={editLedgerName}
+                        onChange={(e) => setEditLedgerName(e.target.value)}
                     />
 
-                    <div className="mt-4">
-                        <label className="block text-sm text-gray-600 mb-1">Upload Ledger Image</label>
+                    <div className="mt-1 items-center  w-fit relative">
                         <input
+                            style={{ display: "none" }}
                             type="file"
-                            accept="image/*"
                             onChange={(e) => setEditLedgerImage(e.target.files[0])}
+                            ref={inputref}
+                            accept="image/*"
+                            id="fileInput"
                         />
-                        {editLedgerImage && (
-                            <img
-                                src={URL.createObjectURL(editLedgerImage)}
-                                alt="preview"
-                                className="mt-2 w-24 h-24 object-cover rounded shadow"
-                            />
-                        )}
-                    </div>
 
+                        <Avatar
+                            sx={{ width: 80, height: 80 }}
+                            alt={editLedgerName}
+                            src={
+                                editLedgerImage
+                                    ? editLedgerImage instanceof File
+                                        ? URL.createObjectURL(editLedgerImage)
+                                        : editLedgerImage
+                                    : ""
+                            }
+                        />
+
+                        <span
+                            onClick={() => inputref.current.click()}
+                            className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
+                        >
+                            <MdOutlineModeEdit size={18} />
+                        </span>
+                    </div>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-                    <Button loading={loading} variant="contained" onClick={handleSaveLedger}>
+                    <Button disabled={loading} variant="contained" onClick={handleSaveLedger}>
                         {editLedgerId ? "Update" : "Create"}
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Container>
+        </div>
     );
 };
 

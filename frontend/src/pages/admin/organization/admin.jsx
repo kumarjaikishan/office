@@ -3,6 +3,7 @@ import { MdEdit, MdDelete, MdOutlineModeEdit } from "react-icons/md";
 import useImageUpload from "../../../utils/imageresizer";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { IoIosArrowDown } from "react-icons/io";
 import { Avatar, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 
 // Permission labels
@@ -180,7 +181,7 @@ export default function SuperAdminDashboard() {
         const current = admins[index];
         setForm({
             ...current,
-            profilePreview: current.profilePreview || "",
+            profilePreview: current.profileImage || "",
             profileImage: null, // Don't persist File object
         });
         setEditingIndex(index);
@@ -277,26 +278,21 @@ export default function SuperAdminDashboard() {
                                 className="flex justify-between items-start border border-dashed p-2 rounded-md"
                             >
                                 <div className="flex gap-4">
-                                    {admin.profilePreview && (
-                                        <img
-                                            src={admin.profilePreview}
-                                            alt="Profile"
-                                            className="w-16 h-16 rounded-full object-cover border"
-                                        />
-                                    )}
+                                    <Avatar
+                                        sx={{ width: 60, height: 60 }}
+                                        alt={admin.name} src={admin?.profileImage}
+                                    />
+
                                     <div>
-                                        <p className="font-medium">{admin.name}</p>
+                                        <p className="font-medium">{admin.name} ({admin.role})</p>
                                         <p className="text-sm text-gray-500">{admin.email}</p>
-                                        <p className="text-sm mt-1">
-                                            <span className="font-semibold">Role:</span> {admin.role}
-                                        </p>
 
                                         {/* Toggle Button */}
                                         <button
                                             onClick={() => toggleExpand(index)}
-                                            className="text-blue-600 text-sm mt-1 hover:underline"
+                                            className="text-blue-600 cursor-pointer text-sm mt-1 "
                                         >
-                                            {expandedIndex === index ? "Hide Permissions" : "View Permissions"}
+                                            {expandedIndex === index ? "Hide Permissions" : `View Permissions `}
                                         </button>
 
                                         {/* Expandable Permissions */}
@@ -321,32 +317,20 @@ export default function SuperAdminDashboard() {
                                                                 <td className="border border-gray-300 px-2 py-1 font-semibold">
                                                                     {module}
                                                                 </td>
-                                                                {Object.keys(PERMISSION_LABELS).map((permKey) => (
-                                                                    <td
+                                                                {Object.keys(PERMISSION_LABELS).map((permKey) => {
+                                                                    return <td
                                                                         key={permKey}
                                                                         className="border border-gray-300 px-2 py-1 text-center"
                                                                     >
-                                                                        {levels.includes(permKey) ? "✅" : "-"}
+                                                                        {levels.includes(Number(permKey)) ? "✅" : "-"}
                                                                     </td>
-                                                                ))}
+                                                                })}
                                                             </tr>
                                                         ))}
                                                     </tbody>
                                                 </table>
                                             </div>
                                         )}
-
-                                        {/* {expandedIndex === index && (
-                                            <div className="text-sm mt-2">
-                                                <span className="font-semibold">Permissions:</span>
-                                                {Object.entries(admin.permissions).map(([module, levels]) => (
-                                                    <div key={module} className="ml-2 text-xs">
-                                                        <strong>{module}:</strong>{" "}
-                                                        {levels.map((l) => PERMISSION_LABELS[l]).join(", ")}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )} */}
                                     </div>
                                 </div>
 
@@ -375,7 +359,20 @@ export default function SuperAdminDashboard() {
                     {editingIndex !== null ? "Edit Admin" : "Add Admin"}
                 </DialogTitle>
                 <DialogContent>
-                    <div className="space-y-4 pt-1 flex gap-3 flex-col w-[500px]">
+                    <div className="space-y-4 pt-1 flex items-center gap-5 flex-col w-[500px]">
+                        <div className="mt-1 items-center  w-fit relative">
+                            <input style={{ display: 'none' }} type="file" onChange={handleProfileImageChange} ref={inputref} accept="image/*" name="" id="fileInput" />
+
+                            <Avatar
+                                sx={{ width: 70, height: 70 }}
+                                alt={form.name} src={form.profilePreview} />
+
+                            <span onClick={() => inputref.current.click()}
+                                className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
+                            >
+                                <MdOutlineModeEdit size={18} />
+                            </span>
+                        </div>
                         {/* <input
                             className="w-full border p-2 rounded"
                             placeholder="Name"
@@ -424,23 +421,9 @@ export default function SuperAdminDashboard() {
                                 />
                             )}
                         </div> */}
-                        <div className="mt-1 items-center  w-fit relative">
-                            <input style={{ display: 'none' }} type="file" onChange={handleProfileImageChange} ref={inputref} accept="image/*" name="" id="fileInput" />
 
-                            {form.profilePreview ?
-                                <img src={form.profilePreview} alt="Preview" className="mt-2 w-[100px] h-[100px] rounded-full object-cover" />
-                                : <Avatar
-                                    sx={{ width: 100, height: 100 }}
-                                    alt={""} src="/static/images/avatar/1.jpg" />
-                            }
-                            <span onClick={() => inputref.current.click()}
-                                className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
-                            >
-                                <MdOutlineModeEdit size={18} />
-                            </span>
-                        </div>
 
-                        <div>
+                        <div className="w-full">
                             <label className="font-semibold block mb-1">Role</label>
                             <select
                                 className="w-full border p-2 rounded"
@@ -454,7 +437,7 @@ export default function SuperAdminDashboard() {
 
                         {/* Add Module (Manager only) */}
                         {form.role === "manager" && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex w-full items-center gap-2">
                                 <select
                                     className="border p-2 rounded w-full"
                                     value={newModule}
@@ -477,7 +460,7 @@ export default function SuperAdminDashboard() {
                         )}
 
                         {/* Permissions Table */}
-                        <div>
+                        <div className="w-full">
                             <p className="font-semibold mb-2">Permissions</p>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full text-sm border">

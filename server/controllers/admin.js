@@ -538,7 +538,7 @@ const firstfetch = async (req, res, next) => {
         let holidays = [];
 
         if (req.user.role == 'manager') {
-            console.log("first fetch manager check", req.user)
+            // console.log("first fetch manager check", req.user)
 
             branches = await branch.find({ companyId: req.user.companyId })
                 .populate({

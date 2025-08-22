@@ -13,7 +13,7 @@ import OfficialNoticeBoard from '../../components/notice';
 
 const ManagerDashboard = () => {
 
-  const { attandence, employee, branch, department } = useSelector((state) => state.user);
+  const { attandence, employee, branch, department ,profile} = useSelector((state) => state.user);
   const { islogin, isadmin } = useSelector((state) => state.auth);
   const [currentpresent, setcurrentpresent] = useState([]);
   const [todaypresent, settodaypresent] = useState([])
@@ -23,6 +23,7 @@ const ManagerDashboard = () => {
   const [branc, setbranc] = useState('all');
   const [depfilter, setdepfilter] = useState('all');
   const [employeelist, setemployeelist] = useState([])
+  const [branchlist, setbranchlist] = useState([])
 
   useEffect(() => {
     !islogin && navigate('/login');
@@ -32,24 +33,33 @@ const ManagerDashboard = () => {
     if (!employee || employee.length === 0) return;
 
     const filtered = employee.filter(dep => {
+      const matchBranch =
+        branc === 'all' || dep.branchId === branc;
       const matchdepart =
         depfilter === 'all' || dep.department._id === depfilter;
-      return matchdepart;
+      return matchBranch && matchdepart;
     });
 
     setemployeelist(filtered);
-  }, [depfilter, employee]);
+  }, [branc, depfilter, employee]);
 
   useEffect(() => {
     setdepfilter('all')
   }, [branc]);
 
   useEffect(() => {
+    setbranchlist()
+  }, [branch]);
+
+  useEffect(() => {
     attandenceRef.current = attandence;
   }, [attandence]);
 
   useEffect(() => {
-    
+    // console.log("attandence", attandence)
+    // console.log("employee", employee)
+    // console.log("currentPresent", currentpresent)
+    // console.log("department", department)
     if (!attandence) return;
     let currentPresent = attandence.filter((val) => {
       return dayjs(val.date).isSame(dayjs(), 'day') && !val.punchOut
@@ -57,6 +67,7 @@ const ManagerDashboard = () => {
     let todaypresent = attandence.filter((val) => {
       return dayjs(val.date).isSame(dayjs(), 'day')
     })
+    // console.log("today present",currentPresent)
     setcurrentpresent(currentPresent);
     settodaypresent(todaypresent)
   }, [attandence])
@@ -172,18 +183,40 @@ const ManagerDashboard = () => {
   ];
 
   return (
-    <div className='p-2 md:p-4'>
+    <div className='p-2 md:p-3'>
       <div className="mb-3">
-        <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3>
+        {/* <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3> */}
         <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
 
       <div className='w-full flex-col flex gap-5 shadow  bg-white p-2 rounded'>
         <div className='flex gap-3 pt-3'>
           <FormControl sx={{ width: '160px' }} required size="small">
+            <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
+            <Select
+              value={branc}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="branch"
+                />
+              }
+              onChange={(e) => setbranc(e.target.value)}
+            >
+              <MenuItem selected value={'all'}>All</MenuItem>
+              {branch?.filter(e => profile?.branchIds.includes(e._id))?.map((list) => (
+                <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl sx={{ width: '160px' }} required size="small">
             <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
             <Select
-              // disabled={branc == 'all'}
+              disabled={branc == 'all'}
               value={depfilter}
               input={
                 <OutlinedInput
@@ -198,7 +231,7 @@ const ManagerDashboard = () => {
               onChange={(e) => setdepfilter(e.target.value)}
             >
               <MenuItem selected value={'all'}>All</MenuItem>
-              {department?.map((val) => {
+              {department?.filter(e => e.branchId._id == branc)?.map((val) => {
                 return <MenuItem key={val._id} value={val._id}>{val.department}</MenuItem>
               })}
 
@@ -257,4 +290,4 @@ const ManagerDashboard = () => {
   )
 }
 
-export default ManagerDashboard;
+export default ManagerDashboard

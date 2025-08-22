@@ -23,7 +23,7 @@ const EmployeeProfile = () => {
   const [profile, setprofile] = useState(null)
 
   useEffect(() => {
-    // console.log(user);
+    console.log(user);
     // console.log(employeee.profile);
 
     if (employeee?.profile) {
@@ -39,7 +39,7 @@ const EmployeeProfile = () => {
       </div>
       <p className='text-teal-600'>loading...</p>
     </div> :
-      <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-4 capitalize">
+      <div className="max-w-3xl mx-auto bg-white flex flex-col shadow rounded-lg p-4">
         {/* <h2 className="text-xl mx-auto font-semibold text-gray-700 mb-4">Employee Details</h2> */}
         <div className="flex gap-4 items-start pb-2">
           <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center overflow-hidden">
@@ -55,7 +55,7 @@ const EmployeeProfile = () => {
           </div>
 
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-800">{profile?.userid?.name}</h3>
+            <h3 className="text-xl capitalize font-bold text-gray-800">{profile?.userid?.name}</h3>
             <p className="text-sm text-gray-600">{profile?.userid?.role}</p>
 
             <div className="flex gap-2 mt-2">
@@ -72,7 +72,7 @@ const EmployeeProfile = () => {
           </div>
         </div>
 
-        <div className="pt-1">
+        <div className="pt-1 capitalize">
           <div className="flex gap-6 bg-slate-200 p-1 mt-2 text-sm font-medium text-gray-700">
             <div onClick={() => setsubmenu(1)} className={`${submenu == 1 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Personal Info</div>
             <div onClick={() => setsubmenu(2)} className={`${submenu == 2 ? 'bg-white' : 'text-gray-400'} w-1/3 cursor-pointer py-1.5 text-center rounded`}>Employment</div>
@@ -138,7 +138,7 @@ const EmployeeProfile = () => {
             <div className="mt-2 p-2 grid grid-cols-1 max-h-[300px] overflow-y-auto sm:grid-cols-2 gap-4 text-sm text-gray-700">
               <div className='rounded border border-gray-300 bg-white p-2 md:p-3 flex flex-col gap-1'>
                 <h3 className='font-bold'>Education</h3>
-                {profile.education.length > 0 ? profile.education.map((edu,ind) => {
+                {profile?.education.length > 0 ? profile?.education.map((edu,ind) => {
                   return <div key={ind} className='relative my-1 pl-2 rounded overflow-hidden'>
                     <p className='text-gray-800 font-semibold'>{edu.degree}</p>
                     <p className='text-gray-700'>{edu.institution}</p>
@@ -149,7 +149,7 @@ const EmployeeProfile = () => {
               </div>
               <div className='rounded border border-gray-300 bg-white p-2 md:p-3 flex flex-col gap-1'>
                 <h3 className='font-bold'>Achievement</h3>
-                {profile.achievements.length > 0 ? profile.achievements.map((ach, ind) => {
+                {profile?.achievements.length > 0 ? profile.achievements.map((ach, ind) => {
                   return <div key={ind} className='relative my-1 pl-5 rounded overflow-hidden'>
                     <p className='text-gray-800 font-semibold'>{ach.title}</p>
                     <p className='text-gray-700'>{ach.description}</p>

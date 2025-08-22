@@ -49,7 +49,9 @@ const userLogin = async (req, res, next) => {
         let tobe = {
             id: isUser._id,
             name: isUser.name,
-            role: isUser.role
+            role: isUser.role,
+            profileImage:isUser.profileImage,
+            email:isUser.email
         }
         if (isUser.role !== 'admin' && isUser.role !== 'superadmin') {
             tobe.employeeId = isUser.employeeId;

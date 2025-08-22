@@ -125,7 +125,7 @@ const Employe = () => {
 
   useEffect(() => {
     // console.log(departmentlist)
-    // console.log(employee)
+    console.log(employee)
     if (employee?.length < 1) return;
 
     let sno = 1;
@@ -134,7 +134,7 @@ const Employe = () => {
         id: emp._id,
         sno: sno++,
         rawname: emp.userid.name,
-        name: (<div className="flex items-center gap-3 ">
+        name: (<div className="flex items-center capitalize gap-3 ">
           <Avatar src={emp.profileimage || employepic} alt={emp.employeename}>
             {!emp.profileimage && employepic}
           </Avatar>
@@ -366,8 +366,8 @@ const Employe = () => {
 
 
   return (
-    <div className='employee p-2.5'>
-      <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2>
+    <div className='employee p-1'>
+      {/* <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2> */}
       <div className='flex gap-5 justify-between flex-wrap'>
         <div className="flex gap-2 md:gap-1 flex-wrap">
           <TextField

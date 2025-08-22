@@ -59,14 +59,14 @@ const AttenPerformance = () => {
     useEffect(() => {
         if (!company) return;
         setsetting(company)
-        // console.log("employee", employee)
+
         // console.log("company", company);
         // console.log(dayjs().month())
     }, [company]);
 
     useEffect(() => {
         if (!holidays) return;
-        console.log(holidays)
+        // console.log(holidays)
 
         const dateObjects = [];
         holidays.forEach(holiday => {
@@ -96,7 +96,7 @@ const AttenPerformance = () => {
                 setemployee(res.data.employee);
                 setuser(res.data.user);
                 setattandence(res.data.attandence);
-                // console.log(res.data.attandence)
+                // console.log(res.data.user);
             } catch (err) {
                 // toast.warning(err.response.data.message)
                 console.error('Failed to fetch performance data:', err);
@@ -229,7 +229,7 @@ const AttenPerformance = () => {
                     company.workingMinutes.fullDay)))
                 : null
         });
-        console.log('gettitng mothes days', (employee.salary / 31 / 480))
+        // console.log('gettitng mothes days', (employee.salary / 31 / 480))
     }, [attandence, selectedYear, selectedMonth, setting]);
 
 
@@ -280,7 +280,8 @@ const AttenPerformance = () => {
         <div className="p-4 capitalize bg-gray-200">
             {loading && <p>Loading performance data...</p>}
 
-            <div className="p-3 flex gap-3 rounded shadow bg-white mb-4">
+            <div className="p-3 flex gap-3 items-center justify-between rounded shadow bg-white mb-4">
+            <div className='flex gap-3'>
                 <FormControl size="small" sx={{ minWidth: 120 }}>
                     <InputLabel>Year</InputLabel>
                     <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
@@ -295,6 +296,8 @@ const AttenPerformance = () => {
                         {monthOptions.map((month) => <MenuItem key={month.label} value={month.value}>{month.label}</MenuItem>)}
                     </Select>
                 </FormControl>
+                </div>
+               <div className='font-semibold text-xl'> {user.name}</div>
             </div>
 
             {attandence && (
@@ -385,6 +388,7 @@ const AttenPerformance = () => {
 export default AttenPerformance;
 
 const minutesinhours = (mins) => {
+    // console.log("mins",mins)
     const h = Math.floor(mins / 60);
     const m = mins % 60;
     return `${h}h ${m}m`;
@@ -485,7 +489,7 @@ const columns = (setting) => [
         selector: (emp) => emp.workingMinutes,
         cell: (emp) => {
             const wm = emp.workingMinutes;
-            if (!wm) return '-';
+            if (!wm) return "-";
             return (
                 <span className=' flex'>
                     <span className='block w-[60px] '>{minutesinhours(wm)}</span>
@@ -501,7 +505,7 @@ const columns = (setting) => [
     },
     {
         name: "Remarks",
-        selector: (emp) => emp.remarks && `${emp.workingMinutes} minutes  ${emp.remarks}`,
+        selector: (emp) => emp.remarks && `${emp?.workingMinutes || 0} minutes  ${emp.remarks}`,
     },
 
 ];

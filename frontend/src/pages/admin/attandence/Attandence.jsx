@@ -205,10 +205,9 @@ const Attandence = () => {
             </span>
           ),
           rawname: emp.employeeId.userid.name,
-          rawpunchIn:emp?.punchIn ? dayjs(emp?.punchIn).format('hh:mm A') : '-',
-          rawpunchOut:emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
+          rawpunchIn: emp?.punchIn ? dayjs(emp?.punchIn).format('hh:mm A') : '-',
+          rawpunchOut: emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
           rawworkingHour: emp.workingMinutes || '-',
-          rawname: emp.employeeId.userid.name,
           name: (
             <div className="flex items-center gap-3">
               <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
@@ -341,7 +340,7 @@ const Attandence = () => {
   };
 
   const exportCSV = () => {
-    return console.log(attandencelist)
+    // return console.log(attandencelist)
     const headers = ["S.no", "Name", "Date", "Punch In", "Punch Out", "Status", "Working Minutes"];
     const rows = (isFilterActive ? filterattandence : attandencelist).map((e, idx) => [
       idx + 1, e.rawname, dayjs(e.date).format('YYYY-MM-DD'), e.rawpunchIn, e.rawpunchOut, e.status, e.rawworkingHour
@@ -357,8 +356,8 @@ const Attandence = () => {
   };
 
   return (
-    <div className='p-2.5'>
-      <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div>
+    <div className='p-1'>
+      {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
       <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
         <div className="flex justify-between items-center mb-4 flex-wrap">
           <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-teal-600 text-white">
@@ -377,24 +376,21 @@ const Attandence = () => {
               <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
               <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
-            <div className="border-1 border-gray-400 rounded py-3 px-1 md:py-0 md:border-0 flex items-center gap-4 flex-wrap">
+            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 flex flex-wrap items-center gap-3">
               <CiFilter className="hidden md:block" size={24} color="teal" />
 
               <TextField
-                className="flex-1"
-                size='small'
+                size="small"
                 type="date"
-                sx={{ width: '160px' }}
+                className="w-full md:w-[160px]"
                 value={filtere.date}
-                onChange={(e) => {
-                  setfiltere({ ...filtere, date: e.target.value })
-                }}
+                onChange={(e) => setfiltere({ ...filtere, date: e.target.value })}
                 label="Select Date"
                 InputLabelProps={{ shrink: true }}
               />
 
-              <FormControl sx={{ width: '160px' }} size="small">
-                <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
+              <FormControl size="small" className="w-[48%] md:w-[160px]">
+                <InputLabel>Branch</InputLabel>
                 <Select
                   value={filtere.branch}
                   input={
@@ -408,20 +404,21 @@ const Attandence = () => {
                     />
                   }
                   onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
-                // onChange={(e) => handleChange(e, 'department')}
                 >
-                  <MenuItem selected value={'all'}>All</MenuItem>
-                  {branch?.map((val) => {
-                    return <MenuItem key={val._id} value={val._id}>{val.name}</MenuItem>
-                  })}
-
+                  <MenuItem value="all">All</MenuItem>
+                  {branch?.map((val) => (
+                    <MenuItem key={val._id} value={val._id}>
+                      {val.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-              <FormControl sx={{ width: '160px' }} size="small">
-                <InputLabel id="demo-simple-select-helper-label">Department</InputLabel>
+
+              <FormControl size="small" className="w-[48%] md:w-[160px]">
+                <InputLabel>Department</InputLabel>
                 <Select
                   value={filtere.departmente}
-                  disabled={filtere.branch == 'all'}
+                  disabled={filtere.branch === "all"}
                   input={
                     <OutlinedInput
                       startAdornment={
@@ -433,18 +430,20 @@ const Attandence = () => {
                     />
                   }
                   onChange={(e) => setfiltere({ ...filtere, departmente: e.target.value })}
-                // onChange={(e) => handleChange(e, 'department')}
                 >
-                  <MenuItem selected value={'all'}>All</MenuItem>
-                  {department?.filter(e => e.branchId._id == filtere.branch).map((val) => {
-                    return <MenuItem key={val._id} value={val._id}>{val.department}</MenuItem>
-                  })}
-
+                  <MenuItem value="all">All</MenuItem>
+                  {department
+                    ?.filter((e) => e.branchId._id === filtere.branch)
+                    .map((val) => (
+                      <MenuItem key={val._id} value={val._id}>
+                        {val.department}
+                      </MenuItem>
+                    ))}
                 </Select>
               </FormControl>
 
-              <FormControl sx={{ width: '160px' }} size="small">
-                <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
+              <FormControl size="small" className="w-[48%] md:w-[160px]">
+                <InputLabel>Status</InputLabel>
                 <Select
                   value={filtere.status}
                   input={
@@ -459,24 +458,31 @@ const Attandence = () => {
                   }
                   onChange={(e) => setfiltere({ ...filtere, status: e.target.value })}
                 >
-                  <MenuItem value={"all"}>All</MenuItem>
-                  <MenuItem value={"present"}>Present</MenuItem>
-                  <MenuItem value={"absent"}>Absent</MenuItem>
-                  <MenuItem value={"leave"}>Leave</MenuItem>
-                  <MenuItem value={"half day"}>Half Day</MenuItem>
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="present">Present</MenuItem>
+                  <MenuItem value="absent">Absent</MenuItem>
+                  <MenuItem value="leave">Leave</MenuItem>
+                  <MenuItem value="half day">Half Day</MenuItem>
                 </Select>
               </FormControl>
+
               <TextField
-                size='small'
-                sx={{ width: '160px' }}
+                size="small"
+                className="w-[48%] md:w-[160px]"
                 value={filtere.employee}
                 onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start"><IoSearch /></InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IoSearch />
+                    </InputAdornment>
+                  ),
                   endAdornment: filtere.employee && (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={() => setfiltere({ ...filtere, employee: "" })} edge="end" size="small"
+                        onClick={() => setfiltere({ ...filtere, employee: "" })}
+                        edge="end"
+                        size="small"
                       >
                         <MdClear />
                       </IconButton>
@@ -486,6 +492,7 @@ const Attandence = () => {
                 label="Search Employee"
               />
             </div>
+
           }
         </div>
       </div>

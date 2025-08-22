@@ -182,7 +182,7 @@ const HolidayForm = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className="flex flex-col md:flex-row gap-4 p-4">
+      <Box className="flex flex-col md:flex-row gap-4 p-1">
         <HolidayCalander highlightedDates={holidaylist.map(dateObj => ({ date: dayjs(dateObj.date).toDate(), name: dateObj.name }))} weeklyOffs={weeklyOffs} />
 
         <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
