@@ -13,6 +13,7 @@ const ProtectedRoutes = ({ allowedRoles = [] }) => {
   const isAllowed = islogin && allowedRoles.includes(role);
 
   useEffect(() => {
+    // console.log(user)
     if (!isAllowed) {
       toast.warn('Access denied. You are not authorized.', { autoClose: 1900 });
     }

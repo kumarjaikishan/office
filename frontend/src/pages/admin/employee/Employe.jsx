@@ -201,7 +201,7 @@ const Employe = () => {
     formData.append('salary', inp.salary);
 
     if (employeePhoto) {
-      let resizedfile = await handleImage(600, employeePhoto);
+      let resizedfile = await handleImage(400, employeePhoto);
       formData.append('photo', resizedfile);
     }
 

@@ -28,26 +28,13 @@ const Login = () => {
                 password
             });
 
-            console.log('Login success:', res.data);
+            // console.log('Login success:', res.data);
             toast.success(res.data.message, { autoClose: 1200 });
             localStorage.setItem('emstoken', res.data.token)
             dispatch(setlogin(true));
             dispatch(setuser(res.data.user));
 
-            if (res.data.user.role == "admin" || res.data.user.role == "superadmin") {
-                dispatch(setadmin(true));
-                return navigate('/admin-dashboard');
-            }
-            if (res.data.user.role == "manager") {
-                // dispatch(setadmin(true));
-                return navigate('/manager-dashboard');
-            }
-            if (res.data.user.role == "developer") {
-                // dispatch(setadmin(true));
-                return navigate('/developer-dashboard');
-            }
-            //  dispatch(setadmin(false));
-            return navigate('/employe-dashboard');
+            return navigate('/dashboard');
 
         } catch (error) {
             console.log(error)

@@ -14,7 +14,7 @@ import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import Department from '../department/Department';
 import { FaRegUser } from 'react-icons/fa';
 import { AiFillAmazonCircle } from "react-icons/ai";
-import { CgLayoutGrid } from 'react-icons/cg';
+import useImageUpload from "../../../utils/imageresizer";
 import SuperAdminDashboard from './admin';
 
 const weekdays = [
@@ -33,6 +33,7 @@ export default function OrganizationSettings() {
     const [editbranch, seteditbranch] = useState(false);
     const [openviewmodal, setopenviewmodal] = useState(false);
     const [isload, setisload] = useState(false);
+  const { handleImage } = useImageUpload();
     const [editbranchdata, seteditbranchdata] = useState(null);
     const [companyinp, setcompany] = useState({
         name: '',
@@ -149,10 +150,11 @@ export default function OrganizationSettings() {
                                         onChange={async (e) => {
                                             const file = e.target.files[0];
                                             if (!file) return;
-
+                                            
+                                            const optimisedLogo =await handleImage(200, file);
                                             const formData = new FormData();
                                             formData.append('_id', companyinp._id);
-                                            formData.append('logo', file);
+                                            formData.append('logo', optimisedLogo);
 
                                             try {
                                                 console.log('api calling')

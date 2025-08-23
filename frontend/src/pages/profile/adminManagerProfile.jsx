@@ -20,6 +20,7 @@ const AdminManagerProfile = () => {
   const [profilee, setprofile] = useState(null);
 
   useEffect(() => {
+      console.log("admins  ke profile me");
     if (profile) setprofile(profile);
   }, [profile]);
 

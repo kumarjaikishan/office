@@ -25,10 +25,7 @@ const Navbar = () => {
   }, [notification])
 
   const commonTitles = {
-    "developer-dashboard": "Dashboard",
-    "admin-dashboard": "Dashboard",
-    "manager-dashboard": "Dashboard",
-    "employe-dashboard": "Dashboard",
+    "dashboard": "Dashboard",
     "employe": "Employee",
     "organization": "Organization",
     "permission": "Permission",

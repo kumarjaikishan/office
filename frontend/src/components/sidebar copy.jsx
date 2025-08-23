@@ -102,13 +102,31 @@ const menu = [
     items: [
       {
         menu: "Dashboard",
-        link: '/dashboard',
+        link: '/developer-dashboard',
         icon: <VscDashboard />,
-        roles: ['developer','admin', 'superadmin','manager','employee']
+        roles: ['developer']
+      },
+      {
+        menu: "Dashboard",
+        link: '/admin-dashboard',
+        icon: <VscDashboard />,
+        roles: ['admin', 'superadmin']
+      },
+      {
+        menu: "Dashboard",
+        link: '/manager-dashboard',
+        icon: <VscDashboard />,
+        roles: ['manager']
+      },
+      {
+        menu: "Dashboard",
+        link: '/employe-dashboard',
+        icon: <VscDashboard />,
+        roles: ['employee']
       },
       {
         menu: "Organization",
-        link: '/dashboard/organization',
+        link: '/admin-dashboard/organization',
         icon: <FaSitemap />,
         roles: ['superadmin', 'admin']
       },
@@ -120,19 +138,31 @@ const menu = [
       },
       {
         menu: "Employees",
-        link: '/dashboard/employe',
+        link: '/admin-dashboard/employe',
         icon: <FaUserTie />,
-        roles: ['admin', 'superadmin','manager']
+        roles: ['admin', 'superadmin']
+      },
+      {
+        menu: "Employees",
+        link: '/manager-dashboard/employe',
+        icon: <FaUserTie />,
+        roles: ['manager']
       },
       {
         menu: "Attendance",
-        link: '/dashboard/attandence',
+        link: '/admin-dashboard/attandence',
         icon: <TbReportAnalytics />,
-        roles: ['admin', 'superadmin','manager']
+        roles: ['admin', 'superadmin']
       },
       {
         menu: "Attendance",
-        link: '/dashboard/empattandence',
+        link: '/manager-dashboard/attandence',
+        icon: <TbReportAnalytics />,
+        roles: ['manager']
+      },
+      {
+        menu: "Attendance",
+        link: '/employe-dashboard/empattandence',
         icon: <TbReportAnalytics />,
         roles: ['employee']
       },
@@ -144,7 +174,7 @@ const menu = [
       // },
       {
         menu: "Holiday",
-        link: '/dashboard/holiday',
+        link: '/admin-dashboard/holiday',
         icon: <FaCalendarDay />,
         roles: ['superadmin', 'admin']
       },
@@ -156,15 +186,33 @@ const menu = [
       // },
       {
         menu: "Leave",
-        link: '/dashboard/leave',
+        link: '/employe-dashboard/leave',
         icon: <FaUmbrellaBeach />,
-        roles: ['employee','admin', 'superadmin','manager']
+        roles: ['employee']
+      },
+      {
+        menu: "Leave Request",
+        link: '/admin-dashboard/leave',
+        icon: <FaMailBulk />,
+        roles: ['admin', 'superadmin']
+      },
+      {
+        menu: "Leave Request",
+        link: '/manager-dashboard/leave',
+        icon: <FaMailBulk />,
+        roles: ['manager']
       },
       {
         menu: "Ledger",
-        link: '/dashboard/ledger',
+        link: '/admin-dashboard/ledger',
         icon: <FaBook />,
-        roles: ['admin', 'superadmin','manager']
+        roles: ['admin', 'superadmin']
+      },
+      {
+        menu: "Ledger",
+        link: '/manager-dashboard/ledger',
+        icon: <FaBook />,
+        roles: ['manager']
       },
 
       // {
@@ -180,9 +228,15 @@ const menu = [
     items: [
       {
         menu: "Profile",
-        link: '/dashboard/profile',
+        link: '/adminprofile',
         icon: <FaUserCircle />,
-        roles: ['admin', 'superadmin', 'manager','employee']
+        roles: ['admin', 'superadmin', 'manager']
+      },
+      {
+        menu: "Profile",
+        link: '/profile',
+        icon: <FaUserCircle />,
+        roles: ['employee']
       },
       {
         menu: "Setting",

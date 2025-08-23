@@ -4,7 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, Suspense, lazy } from 'react';
 import { FirstFetch } from '../store/userSlice';
 import { empFirstFetch } from '../store/employee';
-import ProtectedRoutes from './utils/protectedRoute';
+import AdminRoutes from './utils/AdminRoutes';
+import PrivateRoute from './utils/PrivateRoute';
 
 // ✅ Lazy imports
 const Login = lazy(() => import('./pages/Login'));
@@ -43,7 +44,7 @@ const AdminManagerProfile = lazy(() => import('./pages/profile/adminManagerProfi
 // 🔹 Role-based route definitions
 const routesByRole = {
   admin: (
-    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['admin']} />}>
+    <Route path="/admin-dashboard" element={<AdminRoutes />}>
       <Route index element={<AdminDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="organization" element={<OrganizationSettings />} />
@@ -54,14 +55,13 @@ const routesByRole = {
       <Route path="leave" element={<Adminleave />} />
       <Route path="setting" element={<CompanySettingForm />} />
       <Route path="faceatten" element={<FaceAttandance />} />
-      <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
     </Route>
   ),
   superadmin: (
-    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['superadmin']} />}>
+    <Route path="/admin-dashboard" element={<AdminRoutes />}>
       <Route index element={<AdminDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="organization" element={<OrganizationSettings />} />
@@ -72,36 +72,33 @@ const routesByRole = {
       <Route path="leave" element={<Adminleave />} />
       <Route path="setting" element={<CompanySettingForm />} />
       <Route path="faceatten" element={<FaceAttandance />} />
-      <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
     </Route>
   ),
   manager: (
-    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['manager']} />}>
+    <Route path="/manager-dashboard" element={<AdminRoutes />}>
       <Route index element={<ManagerDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="faceatten" element={<FaceAttandance />} />
-      <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
     </Route>
   ),
   employee: (
-    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['employee']} />}>
+    <Route path="/employe-dashboard" element={<PrivateRoute />}>
       <Route index element={<EmployeeDashboard />} />
       <Route path="empattandence" element={<EmpAttenPerformance />} />
-      <Route path="profile" element={<EmployeeProfile />} />
       <Route path="leave" element={<EmpLeave />} />
     </Route>
   ),
   developer: (
-    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['developer']} />}>
+    <Route path="/developer-dashboard" element={<AdminRoutes />}>
       <Route index element={<DeveloperDashboard />} />
       <Route path="permission" element={<Permission />} />
     </Route>
@@ -115,16 +112,13 @@ function App() {
 
   // Fetch data based on role
   useEffect(() => {
-    if (!islogin) return;
-    const role = user?.profile?.role;
-
-    if (['superadmin', 'admin', 'manager'].includes(role)) {
+    // console.log(user.profile.role)
+    if (islogin && (user?.profile?.role === 'admin' || user?.profile?.role === 'superadmin' || user?.profile?.role === 'manager')) {
       dispatch(FirstFetch());
-    } else if (role === 'employee') {
+    } else if (islogin && user?.profile?.role === 'employee') {
       dispatch(empFirstFetch());
     }
   }, [islogin, user?.profile?.role, dispatch]);
-
 
   // ✅ Safe role route resolution
   const roleRoute = islogin ? routesByRole[user?.profile?.role] : null;
@@ -142,7 +136,11 @@ function App() {
           {/* Role based routes */}
           {roleRoute ? roleRoute : islogin && <Route path="*" element={<Navigate to="/profile" />} />}
 
-
+          {/* Common routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="profile" element={<EmployeeProfile />} />
+            <Route path="adminprofile" element={<AdminManagerProfile />} />
+          </Route>
 
           {/* Fallback */}
           <Route path="*" element={<Errorpage />} />
