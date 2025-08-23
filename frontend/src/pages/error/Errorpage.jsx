@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from '@mui/material';
 
-export const Errorpage = () => {
+const Errorpage = () => {
   const navigate = useNavigate();
 
   const handleback = () => {
@@ -55,3 +55,5 @@ export const Errorpage = () => {
     </div>
   );
 };
+
+export default Errorpage

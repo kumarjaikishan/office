@@ -155,7 +155,6 @@ const LedgerListPage = () => {
     const deleteLedger = async (ledger) => {
         swal({
             title: `Are you sure to Delete ${ledger.name}'s Ledger?`,
-            text: "Once deleted, you will not be able to recover this",
             icon: "warning",
             buttons: true,
             dangerMode: true,
@@ -213,38 +212,78 @@ const LedgerListPage = () => {
 
                 <div className="w-full p-1 md:p-3">
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                        {Array.isArray(filteredLedgers) && filteredLedgers.length > 0 ? (
-                            filteredLedgers.map((l, ind) => (
-                                <div key={l._id || ind} onClick={() => handleNavigate(l)} className="relative ...">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex gap-1 items-center">
-                                            <Avatar sx={{ width: 35, height: 35 }} alt={l?.name} src={l?.profileImage} />
-                                            <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
-                                                {l?.name || "Unnamed"}
-                                            </div>
+                        {filteredLedgers.map((l, ind) => (
+                            <div
+                                key={ind}
+                                onClick={() => handleNavigate(l)}
+                                className="relative cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all pl-3 pr-1 py-3 bg-gray-50"
+                            >
+                                {/* Card content */}
+                                <div className="flex justify-between items-start">
+                                    <div className="flex gap-1 items-center">
+                                        <Avatar sx={{ width: 35, height: 35 }} alt={l.name} src={l.profileImage} />
+                                        <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
+                                            {l.name}
                                         </div>
-                                        {/* menu here */}
                                     </div>
 
-                                    {/* Balance (safe fallback) */}
-                                    <p
-                                        className={`text-[16px] md:text-lg mr-1 text-end font-medium ${typeof l?.netBalance === "number" && l.netBalance >= 0
-                                                ? "text-green-600"
-                                                : "text-red-600"
-                                            }`}
+                                    {/* Three-dot menu */}
+                                    <IconButton onClick={handleMenuOpen}  size="small">
+                                        <HiOutlineDotsVertical className="text-gray-700" />
+                                    </IconButton>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={open}
+                                        onClose={handleMenuClose}
+                                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                        transformOrigin={{ vertical: "top", horizontal: "right" }}
                                     >
-                                        ₹{" "}
-                                        {typeof l?.netBalance === "number"
-                                            ? l.netBalance.toLocaleString()
-                                            : "0"}
-                                    </p>
+                                        <MenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMenuClose();
+                                                handleNavigate(l);
+                                            }}
+                                        >
+                                            <MdVisibility className="text-blue-600 mr-2" /> See
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMenuClose();
+                                                handleOpenLedgerDialog(l);
+                                            }}
+                                        >
+                                            <MdEdit className="text-teal-600 mr-2" /> Edit
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMenuClose();
+                                                deleteLedger(l);
+                                            }}
+                                        >
+                                            <MdDelete className="text-red-600 mr-2" /> Delete
+                                        </MenuItem>
+                                    </Menu>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="w-full text-center">No Ledger found</div>
-                        )}
-                    </div>
 
+                                {/* Balance */}
+                                <p
+                                    className={`text-[16px] md:text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
+                                        }`}
+                                >
+                                    ₹ {l?.netBalance?.toLocaleString()}
+                                </p>
+
+                                {/* Left border highlight */}
+                                <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
+                            </div>
+                        ))}
+                        {filteredLedgers?.length < 1 && <div className="w-full text-center ">
+                            No Ledger found
+                        </div> }
+                    </div>
                 </div>
             </div>
 

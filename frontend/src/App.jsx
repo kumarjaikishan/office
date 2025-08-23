@@ -5,6 +5,7 @@ import { useEffect, Suspense, lazy } from 'react';
 import { FirstFetch } from '../store/userSlice';
 import { empFirstFetch } from '../store/employee';
 import ProtectedRoutes from './utils/protectedRoute';
+// import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
 const Login = lazy(() => import('./pages/Login'));
@@ -58,6 +59,7 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
+      <Route path="*" element={<Errorpage />} />
     </Route>
   ),
   superadmin: (
@@ -76,6 +78,7 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
+      <Route path="*" element={<Errorpage />} />
     </Route>
   ),
   manager: (
@@ -90,6 +93,7 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
+      <Route path="*" element={<Errorpage />} />
     </Route>
   ),
   employee: (
@@ -98,6 +102,7 @@ const routesByRole = {
       <Route path="empattandence" element={<EmpAttenPerformance />} />
       <Route path="profile" element={<EmployeeProfile />} />
       <Route path="leave" element={<EmpLeave />} />
+      <Route path="*" element={<Errorpage />} />
     </Route>
   ),
   developer: (
@@ -127,7 +132,9 @@ function App() {
 
 
   // ✅ Safe role route resolution
-  const roleRoute = islogin ? routesByRole[user?.profile?.role] : null;
+  // const roleRoute = islogin ? routesByRole[user?.profile?.role] : null;
+  const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
+
 
   return (
     <>
@@ -140,9 +147,7 @@ function App() {
           <Route path="/logout" element={<Logout />} />
 
           {/* Role based routes */}
-          {roleRoute ? roleRoute : islogin && <Route path="*" element={<Navigate to="/profile" />} />}
-
-
+          {roleRoute}
 
           {/* Fallback */}
           <Route path="*" element={<Errorpage />} />
