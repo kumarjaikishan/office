@@ -3,7 +3,9 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
     Paper, Box, Typography, Button, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-    Avatar
+    Avatar,
+    OutlinedInput,
+    InputAdornment
 } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { VscDebugRestart } from 'react-icons/vsc';
@@ -13,6 +15,7 @@ import { toast } from 'react-toastify';
 import dayjs from 'dayjs';
 import { getLedgerColumns } from './ledgerhelper';
 import { MdDelete, MdEdit } from 'react-icons/md';
+import { CiFilter } from 'react-icons/ci';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -199,7 +202,7 @@ const LedgerDetailPage = () => {
     // if (!ledger) return <div>Loading...</div>;
 
     return (
-        <div className="bg-white rounded shadow-md p-3 md:p-5 m-2">
+        <div className="bg-white rounded shadow-md p-1 md:p-5 rounded">
             {/* Header */}
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
@@ -218,49 +221,74 @@ const LedgerDetailPage = () => {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center  gap-3 mb-4">
-                <div className="flex flex-wrap items-end  p-2 rounded shadow  gap-3 mb-4">
-                    <div className="min-w-[100px]">
-                        <label className="text-sm block">Year</label>
-                        <select
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+                <div className="p-1 md:p-2 rounded shadow mb-4 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-2 mt-1 w-full md:w-fit">
+
+                    <FormControl size="small" className="col-span-1 md:w-[120px]">
+                        <InputLabel>Year</InputLabel>
+                        <Select
                             value={filterYear}
+                            input={
+                                <OutlinedInput
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <CiFilter fontSize="small" />
+                                        </InputAdornment>
+                                    }
+                                    label="Year"
+                                />
+                            }
                             onChange={e => setFilterYear(e.target.value)}
-                            className="border border-gray-300 rounded px-2 py-1 w-full"
                         >
-                            <option value="all">All</option>
+                            <MenuItem value="all">All</MenuItem>
                             {[...new Set(entries.map(e => dayjs(e.date).year()))].map(y => (
-                                <option key={y} value={y}>{y}</option>
+                                <MenuItem key={y} value={y}>{y}</MenuItem>
                             ))}
-                        </select>
-                    </div>
-
-                    <div className="min-w-[100px]">
-                        <label className="text-sm block">Month</label>
-                        <select
+                        </Select>
+                    </FormControl>
+                    
+                    <FormControl size="small" className="col-span-1 md:w-[120px]">
+                        <InputLabel>Month</InputLabel>
+                        <Select
                             value={filterMonth}
+                            input={
+                                <OutlinedInput
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <CiFilter fontSize="small" />
+                                        </InputAdornment>
+                                    }
+                                    label="Month"
+                                />
+                            }
                             onChange={e => setFilterMonth(e.target.value)}
-                            className="border border-gray-300 rounded px-2 py-1 w-full"
                         >
-                            <option value="all">All</option>
+                            <MenuItem value="all">All</MenuItem>
                             {Array.from({ length: 12 }, (_, i) => (
-                                <option key={i} value={i + 1}>{dayjs().month(i).format("MMMM")}</option>
+                                <MenuItem key={i} value={i + 1}>{dayjs().month(i).format("MMMM")}</MenuItem>
                             ))}
-                        </select>
-                    </div>
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        size="small"
+                        type="date"
+                        className="col-span-1 md:w-[120px]"
+                        value={filterDate}
+                        onChange={e => setFilterDate(e.target.value)}
+                        label="Date"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <Button
+                        className="col-span-1  md:w-[120px]"
+                        variant="outlined"
+                        color="secondary"
+                        title='Reset'
 
-                    <div className="min-w-[160px]">
-                        <label className="text-sm block">Date</label>
-                        <input
-                            type="date"
-                            value={filterDate}
-                            onChange={e => setFilterDate(e.target.value)}
-                            className="border border-gray-300 rounded px-2 py-1 w-full"
-                        />
-                    </div>
-
-                    <span title='Reset' onClick={resetFilters} className="p-2 rounded-full bg-teal-800 text-white">
-                        <VscDebugRestart size={20} />
-                    </span>
+                        startIcon={<VscDebugRestart />}
+                        onClick={resetFilters}
+                    >
+                        Reset
+                    </Button>
                 </div>
 
                 <div className="flex flex-wrap gap-2 ml-auto">

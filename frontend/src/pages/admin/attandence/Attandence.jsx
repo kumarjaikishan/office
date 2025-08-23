@@ -376,20 +376,20 @@ const Attandence = () => {
               <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
               <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
-            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 flex flex-wrap items-center justify-between md:justify-start gap-3">
-              <CiFilter className="hidden md:block" size={24} color="teal" />
+            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-5 gap-2 mt-1 w-full md:w-fit">
+              {/* <CiFilter className="hidden md:block" size={24} color="teal" /> */}
 
               <TextField
                 size="small"
                 type="date"
-                className="w-full md:w-[150px]"
+                className="col-span-2 md:col-span-1 md:w-[150px]"
                 value={filtere.date}
                 onChange={(e) => setfiltere({ ...filtere, date: e.target.value })}
                 label="Select Date"
                 InputLabelProps={{ shrink: true }}
               />
 
-              <FormControl size="small" className="w-[46%] md:w-[150px]">
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
                 <InputLabel>Branch</InputLabel>
                 <Select
                   value={filtere.branch}
@@ -414,7 +414,7 @@ const Attandence = () => {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" className="w-[46%] md:w-[150px]">
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
                 <InputLabel>Department</InputLabel>
                 <Select
                   value={filtere.departmente}
@@ -442,7 +442,7 @@ const Attandence = () => {
                 </Select>
               </FormControl>
 
-              <FormControl size="small" className="w-[46%] md:w-[150px]">
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={filtere.status}
@@ -468,7 +468,7 @@ const Attandence = () => {
 
               <TextField
                 size="small"
-                className="w-[46%] md:w-[150px]"
+                className="col-span-1 md:w-[150px]"
                 value={filtere.employee}
                 onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
                 InputProps={{

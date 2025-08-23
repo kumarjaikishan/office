@@ -42,6 +42,10 @@ const Login = () => {
                 // dispatch(setadmin(true));
                 return navigate('/manager-dashboard');
             }
+            if (res.data.user.role == "developer") {
+                // dispatch(setadmin(true));
+                return navigate('/developer-dashboard');
+            }
             //  dispatch(setadmin(false));
             return navigate('/employe-dashboard');
 

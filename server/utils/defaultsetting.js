@@ -1,11 +1,4 @@
-const mongoose = require('mongoose');
-
-const companySchema = new mongoose.Schema({
-    name: { type: String},
-    industry: String,
-    logo: String,
-    adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
-
+const defaultsetting = {
     officeTime: {
         in: { type: String, default: '10:00' },     // e.g., "09:30"
         out: { type: String, default: '18:00' },    // e.g., "18:30"
@@ -31,6 +24,6 @@ const companySchema = new mongoose.Schema({
         considerEarlyExitBefore: { type: String, default: '18:00' },
         considerLateExitAfter: { type: String, default: '18:30' }
     }
-}, { timestamps: true });
+}
 
-module.exports = mongoose.model("Company", companySchema);
+module.exports = defaultsetting;

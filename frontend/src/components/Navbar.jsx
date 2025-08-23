@@ -1,9 +1,7 @@
 import { Avatar, Button } from '@mui/material'
-import { setloader, setlogin, setlogout } from '../../store/authSlice';
 // import './navbar.css'
 import { useSelector, useDispatch } from 'react-redux';
 import { CiBullhorn } from "react-icons/ci";
-import { Popover, Typography, List, ListItem, ListItemText, Badge } from '@mui/material';
 import { FaRegUser, FaUser } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -27,11 +25,13 @@ const Navbar = () => {
   }, [notification])
 
   const commonTitles = {
+    "developer-dashboard": "Dashboard",
     "admin-dashboard": "Dashboard",
     "manager-dashboard": "Dashboard",
     "employe-dashboard": "Dashboard",
     "employe": "Employee",
     "organization": "Organization",
+    "permission": "Permission",
     "holiday": "Holiday",
     "ledger": "Ledger",
     "ledger/:id": "Ledger Detail",

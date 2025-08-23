@@ -31,6 +31,8 @@ import EmpLeave from './pages/employee/leave/Leave';
 import FaceAttandance from './pages/admin/facerecoginaion/faceAttandance';
 import ManagerDashboard from './pages/manager/ManagerDashboard';
 import AdminManagerProfile from './pages/profile/adminManagerProfile';
+import DeveloperDashboard from './pages/developer/Dashboard';
+import Permission from './pages/developer/Permission';
 
 
 function App() {
@@ -119,6 +121,14 @@ function App() {
           <Route path="" element={<EmployeeDashboard />} />
           <Route path="empattandence" element={<EmpAttenPerformance />} />
           <Route path="leave" element={<EmpLeave />} />
+        </Route>
+        <Route
+          path="/developer-dashboard"
+          element={<AdminRoutes />}
+        >
+          <Route path="" element={<DeveloperDashboard />} />
+          <Route path="permission" element={<Permission />} />
+
         </Route>
 
         <Route

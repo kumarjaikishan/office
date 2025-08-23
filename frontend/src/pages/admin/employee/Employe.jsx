@@ -368,16 +368,15 @@ const Employe = () => {
   return (
     <div className='employee p-1'>
       {/* <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2> */}
-      <div className='flex gap-5 justify-between flex-wrap'>
-        <div className="flex flex-wrap gap-3 mt-1 w-full justify-between md:justify-start ">
-          {/* Search */}
+      <div className="flex gap-5 justify-between items-center flex-wrap">
+        {/* Search + Filters */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1 w-full md:w-fit">
+          {/* Search (full on small, shrink on md+) */}
           <TextField
             size="small"
-            sx={{
-              width: { xs: '100%', md: '160px' }, // full width on small, fixed on large
-            }}
+             className="md:col-span-1 md:max-w-[160px] col-span-2"
             value={filters.searchText}
-            onChange={(e) => handleFilterChange('searchText', e.target.value)}
+            onChange={(e) => handleFilterChange("searchText", e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -388,12 +387,10 @@ const Employe = () => {
             label="Search Employee"
           />
 
-          {/* Branch */}
+          {/* Branch (50% on small, shrink on md+) */}
           <FormControl
             size="small"
-            sx={{
-              width: { xs: '46%', md: '160px' }, // half width on small, fixed on large
-            }}
+            className=" md:max-w-[160px] col-span-1"
           >
             <InputLabel>Branch</InputLabel>
             <Select
@@ -409,9 +406,9 @@ const Employe = () => {
                   label="Branch"
                 />
               }
-              onChange={(e) => handleFilterChange('branch', e.target.value)}
+              onChange={(e) => handleFilterChange("branch", e.target.value)}
             >
-              <MenuItem selected value="all">All</MenuItem>
+              <MenuItem value="all">All</MenuItem>
               {branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>
                   {list.name}
@@ -420,17 +417,15 @@ const Employe = () => {
             </Select>
           </FormControl>
 
-          {/* Department */}
+          {/* Department (50% on small, shrink on md+) */}
           <FormControl
             size="small"
-            sx={{
-              width: { xs: '46%', md: '160px' }, // half width on small, fixed on large
-            }}
+            className=" md:max-w-[160px] col-span-1"
           >
             <InputLabel>Department</InputLabel>
             <Select
               label="Department"
-              disabled={filters.branch === 'all'}
+              disabled={filters.branch === "all"}
               value={filters.department}
               input={
                 <OutlinedInput
@@ -442,9 +437,11 @@ const Employe = () => {
                   label="Department"
                 />
               }
-              onChange={(e) => handleFilterChange('department', e.target.value)}
+              onChange={(e) =>
+                handleFilterChange("department", e.target.value)
+              }
             >
-              <MenuItem selected value="all">All</MenuItem>
+              <MenuItem value="all">All</MenuItem>
               {departmentlist.length > 0 ? (
                 departmentlist.map((list) => (
                   <MenuItem key={list._id} value={list._id}>
@@ -458,12 +455,30 @@ const Employe = () => {
           </FormControl>
         </div>
 
+        {/* Buttons */}
+        <div className="flex gap-1 w-full md:w-fit">
+          <Button
+            variant="outlined"
+            className="flex-1 md:w-fit md:flex-none"
+            onClick={exportCSV}
+            startIcon={<FiDownload />}
+          >
+            Export
+          </Button>
 
-        <div className="flex gap-1">
-          <Button variant='outlined' onClick={exportCSV} startIcon={<FiDownload />}>Export</Button>
-          {canCreate && <Button variant='contained' startIcon={<GoPlus />} onClick={() => setopenmodal(true)}>Add Employee</Button>}
+          {canCreate && (
+            <Button
+              variant="contained"
+              className="flex-[2] md:w-fit md:flex-none"
+              startIcon={<GoPlus />}
+              onClick={() => setopenmodal(true)}
+            >
+              Add Employee
+            </Button>
+          )}
         </div>
       </div>
+
 
       <div className="mt-2">
         <DataTable

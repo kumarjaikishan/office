@@ -6,18 +6,15 @@
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
     z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
    
-
-
     .modalbox {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        position: relative;
         width: min-content;
         height: min-content;
         max-width: 98vw;
-        max-height: 95vh;
-        /* box-shadow: 0 10px 20px rgba(0,0,0,0.3); */
+        max-height: 85vh;
     }
 }

@@ -36,7 +36,7 @@ const Modalbox = ({ open, onClose, children, shadow = true }) => {
                             e.stopPropagation();
                         }}
                         style={shadow ? { boxShadow: '0 10px 20px rgba(0,0,0,0.4)' } : undefined}
-                        initial={{ scale: 0.1, x: '-50%', y: '-50%' }}
+                        initial={{ scale: 0.1 }}
                         animate={{ scale: 1 }}
                         transition={{
                             type: "spring",

@@ -7,6 +7,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company'
+    },
+    branchIds: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Branch'
+    }],
+    employeeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'employee'
+    },
     email: {
         type: String,
         required: [true, "Email is required"],
@@ -22,18 +34,6 @@ const userSchema = new mongoose.Schema({
         enum: ['developer', 'superadmin', 'admin', 'manager', 'employee'],
         required: true,
     },
-    employeeId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'employee'
-    },
-    companyId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company'
-    },
-    branchIds: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Branch'
-    }],
     profileImage: {
         type: String,
     },

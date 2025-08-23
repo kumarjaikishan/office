@@ -10,13 +10,20 @@ import {
     DialogActions,
     Avatar,
     InputAdornment,
+    Menu,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdDelete, MdOutlineModeEdit, MdSearch } from "react-icons/md";
 import axios from "axios";
 import { toast } from "react-toastify";
 import useImageUpload from "../../../utils/imageresizer";
+import { MdVisibility } from "react-icons/md";
+import { HiOutlineDotsVertical } from "react-icons/hi";
 import { useSelector } from "react-redux";
+
+
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
@@ -33,6 +40,18 @@ const LedgerListPage = () => {
 
     const token = localStorage.getItem("emstoken");
     const headers = { Authorization: `Bearer ${token}` };
+    const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+
+    const handleMenuOpen = (event) => {
+        event.stopPropagation(); // prevent card click
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = (event) => {
+        event?.stopPropagation();
+        setAnchorEl(null);
+    };
 
     useEffect(() => {
         fetchLedgers();
@@ -176,7 +195,7 @@ const LedgerListPage = () => {
                     <TextField
                         size="small"
                         label="Search Ledger"
-                        className="w-[150px] md:w-[200px]"
+                        className="w-full md:w-[200px]"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         InputProps={{
@@ -187,7 +206,7 @@ const LedgerListPage = () => {
                             ),
                         }}
                     />
-                    <Button variant="contained" onClick={() => handleOpenLedgerDialog()}>
+                    <Button className="w-full md:w-[200px]" variant="contained" onClick={() => handleOpenLedgerDialog()}>
                         Add Ledger
                     </Button>
                 </div>
@@ -198,46 +217,68 @@ const LedgerListPage = () => {
                             <div
                                 key={ind}
                                 onClick={() => handleNavigate(l)}
-                                className="relative group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all pl-3 pr-1 py-3 bg-gray-50"
+                                className="relative cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all pl-3 pr-1 py-3 bg-gray-50"
                             >
                                 {/* Card content */}
-                                <div className="flex gap-1 items-center">
-                                    <Avatar
-                                        sx={{ width: 35, height: 35 }}
-                                        alt={l.name}
-                                        src={l.profileImage}
-                                    />
-                                    <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
-                                        {l.name}
+                                <div className="flex justify-between items-start">
+                                    <div className="flex gap-1 items-center">
+                                        <Avatar sx={{ width: 35, height: 35 }} alt={l.name} src={l.profileImage} />
+                                        <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
+                                            {l.name}
+                                        </div>
                                     </div>
+
+                                    {/* Three-dot menu */}
+                                    <IconButton onClick={handleMenuOpen}  size="small">
+                                        <HiOutlineDotsVertical className="text-gray-700" />
+                                    </IconButton>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        open={open}
+                                        onClose={handleMenuClose}
+                                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                        transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                    >
+                                        <MenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMenuClose();
+                                                handleNavigate(l);
+                                            }}
+                                        >
+                                            <MdVisibility className="text-blue-600 mr-2" /> See
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMenuClose();
+                                                handleOpenLedgerDialog(l);
+                                            }}
+                                        >
+                                            <MdEdit className="text-teal-600 mr-2" /> Edit
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleMenuClose();
+                                                deleteLedger(l);
+                                            }}
+                                        >
+                                            <MdDelete className="text-red-600 mr-2" /> Delete
+                                        </MenuItem>
+                                    </Menu>
                                 </div>
+
+                                {/* Balance */}
                                 <p
                                     className={`text-[16px] md:text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
                                         }`}
                                 >
                                     ₹ {l?.netBalance?.toLocaleString()}
                                 </p>
-                                <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
 
-                                <div
-                                    onClick={(e) => e.stopPropagation()} // prevent parent onClick
-                                    className="absolute bottom-1 left-3 flex gap-2 transform -translate-x-25 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-600 delay-400"
-                                >
-                                    <span
-                                        title="Edit Ledger"
-                                        className="rounded-full p-1"
-                                        onClick={() => handleOpenLedgerDialog(l)}
-                                    >
-                                        <MdEdit className=" text-teal-800" />
-                                    </span>
-                                    <span
-                                        title="Delete Ledger"
-                                        className="rounded-full p-1"
-                                        onClick={() => deleteLedger(l)}
-                                    >
-                                        <MdDelete className=" text-red-800" />
-                                    </span>
-                                </div>
+                                {/* Left border highlight */}
+                                <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
                             </div>
                         ))}
                     </div>
@@ -294,7 +335,7 @@ const LedgerListPage = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </div >
     );
 };
 

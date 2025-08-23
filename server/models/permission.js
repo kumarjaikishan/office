@@ -1,11 +1,8 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const permissionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }, // more generic
-  permission: [{
-    permission_name: String,
-    permission_value: [Number]
-  }]
+  role: { type: String, required: true, unique: true },
+  modules: { type: Object, required: true }, // stores dynamic module keys
 });
 
-module.exports = mongoose.model('Permission', permissionSchema);
+module.exports = mongoose.model("Permission", permissionSchema);

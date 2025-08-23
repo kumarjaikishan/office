@@ -6,7 +6,8 @@ import { AiOutlineDelete } from "react-icons/ai";
 export const columns = [
     {
         name: "S.no",
-        selector: (row) => row.sno
+        selector: (row) => row.sno,
+        width:'40px'
     },
     {
         name: "Branch",
@@ -18,7 +19,8 @@ export const columns = [
     },
     {
         name: "Action",
-        selector: (row) => row.action
+        selector: (row) => row.action,
+         width:'80px'
     }
 ]
 export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) => {

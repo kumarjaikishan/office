@@ -198,85 +198,84 @@ const HolidayForm = () => {
         </Box>
       </Box>
 
-      <Box className='p-4'>
-
-        <div className="flex flex-wrap gap-4 mb-4 items-end">
-          {/* Year Filter */}
-          <FormControl sx={{ width: '150px' }} size="small">
-            <InputLabel>Filter by Year</InputLabel>
-            <Select
-              label="Filter by Year"
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-            >
-              <MenuItem value="All">All</MenuItem>
-              {years.map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Month Filter */}
-          <FormControl sx={{ width: '150px' }} size="small">
-            <InputLabel>Filter by Month</InputLabel>
-            <Select
-              label="Filter by Month"
-              value={filterMonth}
-              onChange={(e) => setFilterMonth(e.target.value)}
-            >
-              <MenuItem value="All">All</MenuItem>
-              {months.map((month, ind) => (
-                <MenuItem key={month} value={ind}>
-                  {month}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Type Filter */}
-          <FormControl sx={{ width: '150px' }} size="small">
-            <InputLabel>Filter by Type</InputLabel>
-            <Select
-              label="Filter by Type"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <MenuItem value="All">All</MenuItem>
-              {[...new Set(holidays.map((h) => h.type))].map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Reset Filters Button */}
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => {
-              setFilterYear("All");
-              setFilterMonth("All");
-              setFilterType("All");
-            }}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2  w-full md:w-fit my-4 ">
+        {/* Year Filter */}
+        <FormControl className="md:max-w-[150px] col-span-1" size="small">
+          <InputLabel>Filter by Year</InputLabel>
+          <Select
+            label="Filter by Year"
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
           >
-            Reset Filters
-          </Button>
-        </div>
+            <MenuItem value="All">All</MenuItem>
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-        <div className='capitalize'>
-          <DataTable
-            columns={columns}
-            data={filteredHolidays}
-            pagination
-            selectableRows
-            customStyles={customStyles}
-            highlightOnHover
-          />
-        </div>
-      </Box>
+        {/* Month Filter */}
+        <FormControl className="md:max-w-[150px] col-span-1" size="small">
+          <InputLabel>Filter by Month</InputLabel>
+          <Select
+            label="Filter by Month"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {months.map((month, ind) => (
+              <MenuItem key={month} value={ind}>
+                {month}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* Type Filter */}
+        <FormControl className="md:max-w-[150px] col-span-1" size="small">
+          <InputLabel>Filter by Type</InputLabel>
+          <Select
+            label="Filter by Type"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {[...new Set(holidays.map((h) => h.type))].map((type) => (
+              <MenuItem key={type} value={type}>
+                {type}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* Reset Filters Button */}
+        <Button
+          className="md:max-w-[150px] col-span-1"
+          variant="outlined"
+          color="secondary"
+          onClick={() => {
+            setFilterYear("All");
+            setFilterMonth("All");
+            setFilterType("All");
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+
+      <div className='capitalize'>
+        <DataTable
+          columns={columns}
+          data={filteredHolidays}
+          pagination
+          selectableRows
+          customStyles={customStyles}
+          highlightOnHover
+        />
+      </div>
+
     </LocalizationProvider>
   );
 };

@@ -117,7 +117,7 @@ export default function OrganizationSettings() {
     }
 
     return (
-        <div className="w-full  mx-auto mt-1 p-1 md:p-6 bg-white rounded-xl shadow-md space-y-6">
+        <div className="w-full mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
             {/* Company Info */}
             {profile?.role == 'superadmin' &&
                 <div>
@@ -125,7 +125,7 @@ export default function OrganizationSettings() {
                         className="flex justify-between items-center cursor-pointer bg-blue-100 px-4 py-2 rounded-md"
                         onClick={() => toggleSection('company')}
                     >
-                        <span className="font-semibold text-lg text-left">Company Info</span>
+                        <span className="font-semibold text-[16px] md:text-lg text-left">Company Info</span>
                         {openSection === 'company' ? (
                             <MdExpandLess className="text-xl" />
                         ) : (
@@ -230,89 +230,89 @@ export default function OrganizationSettings() {
                 </div>}
 
             {(profile?.role == 'superadmin' || profile?.role == 'admin') &&
-            <div>
-                <div
-                    className="flex justify-between items-center cursor-pointer bg-green-100 px-4 py-2 rounded-md"
-                    onClick={() => toggleSection('branches')}
-                >
-                    <span className="font-semibold text-lg text-left">Branches</span>
-                    {openSection === 'branches' ? (
-                        <MdExpandLess className="text-xl" />
-                    ) : (
-                        <MdExpandMore className="text-xl" />
-                    )}
-                </div>
-                {openSection === 'branches' && (
-                    <div className="p-1 md:p-4 rounded overflow-auto  border-green-300 border-2 border-dashed mt-2 space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-md font-medium">Branch List</h3>
-                            <button
-                                onClick={() => setopenviewmodal(true)}
-                                className="bg-green-500 text-white px-3 py-1 rounded"
-                            >
-                                + Add Branch
-                            </button>
-                        </div>
-
-                        <table className="w-full text-sm border">
-                            <thead className="bg-green-200">
-                                <tr>
-                                    <th className="p-2 border">Name</th>
-                                    <th className="p-2 border">Location</th>
-                                    <th className="p-2 border">Manager(s)</th>
-                                    <th className="p-2 border">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {branch &&
-                                    branch.map((bran, ind) => {
-                                        return (
-                                            <tr key={ind}>
-                                                <td className="p-2 border">{bran.name}</td>
-                                                <td className="p-2 border">{bran.location}</td>
-
-                                                <td className="p-2 border capitalize">
-                                                    <div className="flex flex-col gap-2">
-                                                        {bran?.managerIds?.map((manager, idx) => (
-                                                            <div
-                                                                key={idx}
-                                                                className="flex items-center gap-2 cursor-pointer"
-                                                                onClick={() => setemployee(manager.userid)}
-                                                            >
-                                                                <Avatar src={manager?.profileImage} alt={manager.name}>
-                                                                    {!manager?.profileImage && <FaRegUser />}
-                                                                </Avatar>
-                                                                <span>{manager.name}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </td>
-
-                                                <td className="p-2 border">
-                                                    <button
-                                                        onClick={() => handleEditBranch(bran)}
-                                                        className="bg-blue-500 text-white px-3 py-1 rounded"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                }
-                                {!branch && <div>No branch Found</div>}
-                            </tbody>
-                        </table>
+                <div>
+                    <div
+                        className="flex justify-between items-center cursor-pointer bg-green-100 px-4 py-2 rounded-md"
+                        onClick={() => toggleSection('branches')}
+                    >
+                        <span className="font-semibold text-[16px] md:text-lg text-left">Branches</span>
+                        {openSection === 'branches' ? (
+                            <MdExpandLess className="text-xl" />
+                        ) : (
+                            <MdExpandMore className="text-xl" />
+                        )}
                     </div>
-                )}
-            </div>}
+                    {openSection === 'branches' && (
+                        <div className="p-1 md:p-4 rounded overflow-auto  border-green-300 border-2 border-dashed mt-2 space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-md font-medium">Branch List</h3>
+                                <button
+                                    onClick={() => setopenviewmodal(true)}
+                                    className="bg-green-500 text-white px-3 py-1 rounded"
+                                >
+                                    + Add Branch
+                                </button>
+                            </div>
+
+                            <table className="w-full capitalize text-[12px] md:text-sm border">
+                                <thead className="bg-green-200">
+                                    <tr>
+                                        <th className="p-2 border">Name</th>
+                                        <th className="p-2 border">Location</th>
+                                        <th className="p-2 border">Manager(s)</th>
+                                        <th className="p-2 border">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {branch &&
+                                        branch.map((bran, ind) => {
+                                            return (
+                                                <tr key={ind}>
+                                                    <td className="p-2 border">{bran.name}</td>
+                                                    <td className="p-2 border">{bran.location}</td>
+
+                                                    <td className="p-2 border capitalize">
+                                                        <div className="flex flex-col gap-2">
+                                                            {bran?.managerIds?.map((manager, idx) => (
+                                                                <div
+                                                                    key={idx}
+                                                                    className="flex items-center gap-2 cursor-pointer"
+                                                                    onClick={() => setemployee(manager.userid)}
+                                                                >
+                                                                    <Avatar src={manager?.profileImage} alt={manager.name}>
+                                                                        {!manager?.profileImage && <FaRegUser />}
+                                                                    </Avatar>
+                                                                    <span>{manager.name}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="p-2 border">
+                                                        <button
+                                                            onClick={() => handleEditBranch(bran)}
+                                                            className="bg-blue-500 text-white px-3 py-1 rounded"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    }
+                                    {!branch && <div>No branch Found</div>}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>}
 
             <div>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('department')}
                 >
-                    <span className="font-semibold text-lg text-left">Department</span>
+                    <span className="font-semibold text-[16px] md:text-lg text-left">Department</span>
                     {openSection === 'department' ? (
                         <MdExpandLess className="text-xl" />
                     ) : (
@@ -327,31 +327,31 @@ export default function OrganizationSettings() {
             </div>
 
             {profile?.role == 'superadmin' &&
-            <div>
-                <div
-                    className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
-                    onClick={() => toggleSection('admin')}
-                >
-                    <span className="font-semibold text-lg text-left">Admin</span>
-                    {openSection === 'admin' ? (
-                        <MdExpandLess className="text-xl" />
-                    ) : (
-                        <MdExpandMore className="text-xl" />
-                    )}
-                </div>
-                {openSection === 'admin' && (
-                    <div className="p-1 rounded  border-teal-300 border-2 border-dashed mt-2 ">
-                        <SuperAdminDashboard />
+                <div>
+                    <div
+                        className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
+                        onClick={() => toggleSection('admin')}
+                    >
+                        <span className="font-semibold text-[16px] md:text-lg text-left">Admin</span>
+                        {openSection === 'admin' ? (
+                            <MdExpandLess className="text-xl" />
+                        ) : (
+                            <MdExpandMore className="text-xl" />
+                        )}
                     </div>
-                )}
-            </div>}
+                    {openSection === 'admin' && (
+                        <div className="p-1 rounded  border-teal-300 border-2 border-dashed mt-2 ">
+                            <SuperAdminDashboard />
+                        </div>
+                    )}
+                </div>}
 
             <div>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-yellow-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('attendance')}
                 >
-                    <span className="font-semibold text-lg text-left"> Attendance Rules</span>
+                    <span className="font-semibold text-[16px] md:text-lg text-left"> Attendance Rules</span>
                     {openSection === 'attendance' ? (
                         <MdExpandLess className="text-xl" />
                     ) : (

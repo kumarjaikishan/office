@@ -258,9 +258,9 @@ export default function SuperAdminDashboard() {
             {/* Admin List */}
             <div className="bg-white shadow-md rounded-lg p-2">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold">Admin Management</h2>
+                    <h2 className="text-[16px] md:text-xl font-semibold">Admin Management</h2>
                     <button
-                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        className="bg-blue-600 text-white px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700"
                         onClick={() => {
                             resetForm();
                             setShowForm(true);
@@ -276,79 +276,83 @@ export default function SuperAdminDashboard() {
                         {admins.map((admin, index) => (
                             <div
                                 key={index}
-                                className="flex justify-between items-start border border-dashed p-2 rounded-md"
+                                className="flex flex-col justify-between items-start border border-dashed p-2 rounded-md overflow-x-auto "
                             >
-                                <div className="flex gap-4">
-                                    <Avatar
-                                        sx={{ width: 60, height: 60 }}
-                                        alt={admin.name} src={admin?.profileImage}
-                                    />
+                                <div className="flex justify-between w-full  items-center  gap-4">
+                                    <div className="flex gap-2">
+                                        <Avatar
+                                            sx={{ width: 60, height: 60 }}
+                                            alt={admin.name} src={admin?.profileImage}
+                                        />
 
-                                    <div>
-                                        <p className="font-medium">{admin.name} ({admin.role})</p>
-                                        <p className="text-sm text-gray-500">{admin.email}</p>
+                                        <div>
+                                            <p className=" capitalize text-[14px] md:text-[18px] font-medium">{admin.name} ({admin.role})</p>
+                                            <p className="text-[12px] md:text-sm text-gray-500">{admin.email}</p>
+                                        </div>
+                                    </div>
 
-                                        {/* Toggle Button */}
+                                    <div className="flex gap-2 mt-2">
                                         <button
-                                            onClick={() => toggleExpand(index)}
-                                            className="text-blue-600 cursor-pointer text-sm mt-1 "
+                                            className="p-2 border rounded hover:bg-gray-100"
+                                            onClick={() => handleEdit(index)}
                                         >
-                                            {expandedIndex === index ? "Hide Permissions" : `View Permissions `}
+                                            <MdEdit className="h-4 w-4" />
                                         </button>
-
-                                        {/* Expandable Permissions */}
-                                        {expandedIndex === index && (
-                                            <div className="text-sm mt-2">
-                                                <span className="font-semibold">Permissions:</span>
-
-                                                <table className="table-auto border-collapse border border-gray-300 mt-2 text-xs w-full">
-                                                    <thead>
-                                                        <tr>
-                                                            <th className="border border-gray-300 px-2 py-1 text-left">Module</th>
-                                                            {Object.values(PERMISSION_LABELS).map((label) => (
-                                                                <th key={label} className="border border-gray-300 px-2 py-1">
-                                                                    {label}
-                                                                </th>
-                                                            ))}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {Object.entries(admin.permissions).map(([module, levels]) => (
-                                                            <tr key={module}>
-                                                                <td className="border border-gray-300 px-2 py-1 font-semibold">
-                                                                    {module}
-                                                                </td>
-                                                                {Object.keys(PERMISSION_LABELS).map((permKey) => {
-                                                                    return <td
-                                                                        key={permKey}
-                                                                        className="border border-gray-300 px-2 py-1 text-center"
-                                                                    >
-                                                                        {levels.includes(Number(permKey)) ? "✅" : "-"}
-                                                                    </td>
-                                                                })}
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        )}
+                                        <button
+                                            className="p-2 border rounded text-red-600 hover:bg-red-50"
+                                            onClick={() => handleDelete(index)}
+                                        >
+                                            <MdDelete className="h-4 w-4" />
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 mt-2">
+                                <div className="w-full">
                                     <button
-                                        className="p-2 border rounded hover:bg-gray-100"
-                                        onClick={() => handleEdit(index)}
+                                        onClick={() => toggleExpand(index)}
+                                        className="text-blue-600 cursor-pointer text-sm mt-1 "
                                     >
-                                        <MdEdit className="h-4 w-4" />
+                                        {expandedIndex === index ? "Hide Permissions" : `View Permissions `}
                                     </button>
-                                    <button
-                                        className="p-2 border rounded text-red-600 hover:bg-red-50"
-                                        onClick={() => handleDelete(index)}
-                                    >
-                                        <MdDelete className="h-4 w-4" />
-                                    </button>
+
+                                    {expandedIndex === index && (
+                                        <div className="text-sm w-full  mt-2">
+                                            <span className="font-semibold">Permissions:</span>
+
+                                            <table className="table-auto border-collapse border border-gray-300 mt-2 text-xs w-full">
+                                                <thead>
+                                                    <tr>
+                                                        <th className="border border-gray-300 px-2 py-1 text-left">Module</th>
+                                                        {Object.values(PERMISSION_LABELS).map((label) => (
+                                                            <th key={label} className="border border-gray-300 px-2 py-1">
+                                                                {label}
+                                                            </th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {Object.entries(admin.permissions).map(([module, levels]) => (
+                                                        <tr key={module}>
+                                                            <td className="border border-gray-300 px-2 py-1 font-semibold">
+                                                                {module}
+                                                            </td>
+                                                            {Object.keys(PERMISSION_LABELS).map((permKey) => {
+                                                                return <td
+                                                                    key={permKey}
+                                                                    className="border border-gray-300 px-2 py-1 text-center"
+                                                                >
+                                                                    {levels.includes(Number(permKey)) ? "✅" : "-"}
+                                                                </td>
+                                                            })}
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
                                 </div>
+
+
                             </div>
                         ))}
                     </div>

@@ -18,7 +18,7 @@
 
 *::-webkit-scrollbar {
     width: 3px;
-    height: 6px; 
+    height: 6px;
 }
 
 *::-webkit-scrollbar-track {
@@ -84,7 +84,7 @@ body {
     width: 600px;
     max-width: 100%;
     height: max-content;
-    max-height: 90vh;
+    max-height: 80vh;
     overflow: hidden;
     overflow-y: auto;
     border-radius: 10px 10px 5px 5px;

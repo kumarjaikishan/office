@@ -102,6 +102,12 @@ const menu = [
     items: [
       {
         menu: "Dashboard",
+        link: '/developer-dashboard',
+        icon: <VscDashboard />,
+        roles: ['developer']
+      },
+      {
+        menu: "Dashboard",
         link: '/admin-dashboard',
         icon: <VscDashboard />,
         roles: ['admin', 'superadmin']
@@ -123,6 +129,12 @@ const menu = [
         link: '/admin-dashboard/organization',
         icon: <FaSitemap />,
         roles: ['superadmin', 'admin']
+      },
+      {
+        menu: "Permission",
+        link: '/developer-dashboard/permission',
+        icon: <FaSitemap />,
+        roles: ['developer']
       },
       {
         menu: "Employees",
@@ -212,7 +224,7 @@ const menu = [
         menu: "Profile",
         link: '/adminprofile',
         icon: <FaUserCircle />,
-        roles: ['admin','superadmin', 'manager']
+        roles: ['admin', 'superadmin', 'manager']
       },
       {
         menu: "Profile",
