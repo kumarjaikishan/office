@@ -21,7 +21,7 @@ const Navbar = () => {
     if (notification) {
       setnotification(notification)
     }
-    console.log(location.pathname)
+    // console.log(location.pathname)
   }, [notification])
 
   const commonTitles = {

@@ -206,7 +206,13 @@ const menu = [
         menu: "Ledger",
         link: '/admin-dashboard/ledger',
         icon: <FaBook />,
-        roles: ['admin', 'superadmin', 'manager']
+        roles: ['admin', 'superadmin']
+      },
+      {
+        menu: "Ledger",
+        link: '/manager-dashboard/ledger',
+        icon: <FaBook />,
+        roles: ['manager']
       },
 
       // {
