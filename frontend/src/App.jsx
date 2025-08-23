@@ -33,6 +33,7 @@ import ManagerDashboard from './pages/manager/ManagerDashboard';
 import AdminManagerProfile from './pages/profile/adminManagerProfile';
 import DeveloperDashboard from './pages/developer/Dashboard';
 import Permission from './pages/developer/Permission';
+import { Errorpage } from './pages/error/Errorpage';
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
         <Route path="/" element={<Navigate to="/admin-dashboard" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="*" element={<Errorpage />} />
 
         {/* <Route
           path="/admin-dashboard"
