@@ -120,7 +120,10 @@ function App() {
 
   // Fetch data based on role
   useEffect(() => {
-    if (!islogin) return;
+    // if (!islogin) return;
+    if (!islogin) {
+     return <Navigate to="/login" />
+    }
     const role = user?.profile?.role;
 
     if (['superadmin', 'admin', 'manager'].includes(role)) {

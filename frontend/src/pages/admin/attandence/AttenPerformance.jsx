@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Box, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
 import { BiMessageRoundedError } from 'react-icons/bi';
 import DataTable from 'react-data-table-component';
@@ -12,6 +13,7 @@ import { IoMdTime } from 'react-icons/io';
 import EmployeeProfileCard from '../../../components/performanceCard';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+dayjs.extend(isSameOrBefore);
 
 const AttenPerformance = () => {
     const { userid } = useParams();
