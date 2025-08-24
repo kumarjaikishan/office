@@ -314,7 +314,7 @@ const AttenPerformance = () => {
             {attandence && (
                 <>
                     <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
-                    <div className="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 rounded shadow bg-white my-4">
+                    <div className="p-1 md:p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 rounded shadow bg-white my-4">
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Type</InputLabel>
                             <Select value={typeFilter} label="Type" onChange={(e) => setTypeFilter(e.target.value)}>
