@@ -20,6 +20,7 @@ import { BiMessageRoundedError } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import MarkAttandence from "./MarkAttandence";
 import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { useSelector } from "react-redux";
 import { IoMdTime } from "react-icons/io";
 import BulkMark from "./BulkMark";
@@ -28,6 +29,8 @@ import { useDispatch } from "react-redux";
 import MarkAttandenceedit from "./MarkAttandenceedit";
 import CheckPermission from "../../../utils/CheckPermission";
 
+dayjs.extend(isSameOrBefore);
+
 const Attandence = () => {
   const [markattandence, setmarkattandence] = useState(false);
   const [isUpdate, setisUpdate] = useState(false);
@@ -35,11 +38,12 @@ const Attandence = () => {
   const [openmodal, setopenmodal] = useState(false);
   const [atteneditmodal, setatteneditmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
-  const { branch, attandence, department, company } = useSelector((state) => state.user);
+  const { branch, attandence, department, company, holidays } = useSelector((state) => state.user);
   const [attandencelist, setattandencelist] = useState([]);
   const [filterattandence, setfilterattandence] = useState([]);
   const [isPunchIn, setisPunchIn] = useState(true);
   const [selectedRows, setselectedRows] = useState([]);
+  const [holidaydate, setholidaydate] = useState([]);
   const dispatch = useDispatch();
 
 
@@ -142,7 +146,6 @@ const Attandence = () => {
 
 
   useEffect(() => {
-
     if (inp.employeeId && inp.date) {
       const punchedIn = attandence.find((val) => {
         return (
@@ -182,9 +185,27 @@ const Attandence = () => {
   const canDelete = CheckPermission('attandence', 4);
 
   useEffect(() => {
-    // console.log(company)
+    if (!holidays) return;
+    // console.log(holidays)
+
+    const dateObjects = [];
+    holidays.forEach(holiday => {
+      let current = dayjs(holiday.fromDate);
+      const end = holiday.toDate ? dayjs(holiday.toDate) : current;
+
+      while (current.isSameOrBefore(end, 'day')) {
+        dateObjects.push(current.format('DD/MM/YYYY'));
+        current = current.add(1, 'day');
+      }
+
+    });
+    setholidaydate(dateObjects);
+  }, [holidays]);
+
+  useEffect(() => {
+    console.log(company)
     // console.log(branch)
-    // console.log(attandence)
+    console.log(attandence)
 
     if (!attandence) return;
     const today = dayjs().startOf('day');
@@ -192,21 +213,29 @@ const Attandence = () => {
     const data = attandence
       .filter(emp => !dayjs(emp.date).isAfter(today, 'day'))
       .map((emp) => {
+        const day = dayjs(emp.date).startOf('day').day();
+        let formatdate = dayjs(emp.date).format('DD/MM/YYYY');
         let absent = emp.status == 'absent';
         let leave = emp.status == 'leave';
 
+
         const ifdirretent = branch.filter(e => e._id == emp.branchId && e.defaultsetting == false)[0];
-        // console.log("cheing different", ifdirretent)
+        // console.log("caught different", ifdirretent)
         const attendanceSetting = ifdirretent ? {
           attendanceRules: ifdirretent?.setting?.attendanceRules,
-          workingMinutes: ifdirretent?.setting?.workingMinutes
+          workingMinutes: ifdirretent?.setting?.workingMinutes,
+          weeklyOffs: ifdirretent?.setting?.weeklyOffs
         } : {
           attendanceRules: company?.attendanceRules,
-          workingMinutes: company?.workingMinutes
+          workingMinutes: company?.workingMinutes,
+          weeklyOffs: company?.weeklyOffs
         }
+        const isWeeklyOff = attendanceSetting?.weeklyOffs.includes(day);
+        const isHoliday = holidaydate.includes(formatdate);
 
         return {
           attenid: emp._id,
+          remarks: isHoliday ? "Worked on Holiday" : isWeeklyOff ? "Worked on Weekly Off" : undefined,
           departmentId: emp.employeeId.department,
           branchid: emp.branchId,
           employeeId: emp.employeeId._id,
@@ -231,6 +260,7 @@ const Attandence = () => {
             </div>
           ),
           date: dayjs(emp.date).format('DD MMM, YYYY'),
+          //  date: <div> <p>{dayjs(emp.date).format('DD MMM, YYYY')}</p> <p className="text-[12px] text-gray-500">{isHoliday ? '(Holiday)':isWeeklyOff ? "(Weekly Off)":''}</p> </div>,
           punchIn: emp.punchIn && (() => {
             const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
             const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);
@@ -242,11 +272,16 @@ const Attandence = () => {
               <span className="flex items-center gap-1">
                 <IoMdTime className="text-[16px] text-blue-700" />
                 {dayjs(emp.punchIn).format('hh:mm A')}
-                {dayjs(emp.punchIn).isBefore(earlyThreshold) && (
-                  <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Early</span>
-                )}
-                {dayjs(emp.punchIn).isAfter(lateThreshold) && (
-                  <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Late</span>
+
+                {isWeeklyOff || isHoliday ? '' : (
+                  <>
+                    {dayjs(emp.punchIn).isBefore(earlyThreshold) && (
+                      <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Early</span>
+                    )}
+                    {dayjs(emp.punchIn).isAfter(lateThreshold) && (
+                      <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Late</span>
+                    )}
+                  </>
                 )}
               </span>
             );
@@ -262,27 +297,48 @@ const Attandence = () => {
               <span className="flex items-center gap-1">
                 <IoMdTime className="text-[16px] text-blue-700" />
                 {dayjs(emp.punchOut).format('hh:mm A')}
-                {dayjs(emp.punchOut).isBefore(earlyExitThreshold) && (
-                  <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Early</span>
+                {isWeeklyOff || isHoliday ? '' : (
+                  <>
+                    {dayjs(emp.punchOut).isBefore(earlyExitThreshold) && (
+                      <span className="px-3 py-1 rounded bg-amber-100 text-amber-800">Early</span>
+                    )}
+                    {dayjs(emp.punchOut).isAfter(lateExitThreshold) && (
+                      <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Late</span>
+                    )}
+                  </>
                 )}
-                {dayjs(emp.punchOut).isAfter(lateExitThreshold) && (
-                  <span className="px-3 py-1 rounded bg-sky-100 text-sky-800">Late</span>
-                )}
+
               </span>
             );
           })(),
-          workingHours: emp.workingMinutes && (
-            <span>
-              {minutesinhours(emp.workingMinutes)}
-              {emp.workingMinutes < attendanceSetting?.workingMinutes?.fullDay && (
-                <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short {attendanceSetting?.workingMinutes?.fullDay - emp.workingMinutes} min</span>
-              )}
-              {emp.workingMinutes > attendanceSetting?.workingMinutes?.fullDay && (
-                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime {emp?.workingMinutes - attendanceSetting?.workingMinutes?.fullDay} min </span>
-              )}
-            </span>
-          ),
 
+          workingHours: emp.workingMinutes && (
+            <div className="bordere">
+              <p>
+                <span className=" inline-block w-[50px]"> {minutesinhours(emp.workingMinutes)}</span>
+
+                {isWeeklyOff || isHoliday ? (
+                  <span className="px-1  py-1 ml-2 rounded bg-green-100 text-green-800">
+                    Overtime {emp.workingMinutes} min
+                  </span>
+                ) : (
+                  <>
+                    {emp.workingMinutes < attendanceSetting?.workingMinutes?.fullDay && (
+                      <span className="px-1  py-1 ml-2 rounded bg-amber-100 text-amber-800">
+                        Short {attendanceSetting?.workingMinutes?.fullDay - emp.workingMinutes} min
+                      </span>
+                    )}
+                    {emp.workingMinutes > attendanceSetting?.workingMinutes?.fullDay && (
+                      <span className="px-1 py-1 ml-2 rounded bg-green-100 text-green-800">
+                        Overtime {emp.workingMinutes - attendanceSetting?.workingMinutes?.fullDay} min
+                      </span>
+                    )}
+                  </>
+                )}
+              </p>
+              <p className="text-[12px] mt-1 text-gray-600">{isHoliday ? '(Holiday)' : isWeeklyOff ? "(Weekly Off)" : ''}</p>
+            </div>
+          ),
           action: (
             <div className="action flex gap-2.5">
               {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
@@ -350,6 +406,15 @@ const Attandence = () => {
     // console.log("Selected Rows:", selectedRows);
     setselectedRows(selectedRows)
   };
+
+  const conditionalRowStyles = [
+    {
+      when: row => row.remarks,
+      style: {
+        backgroundColor: 'rgba(21, 233, 233, 0.2)',
+      },
+    },
+  ];
 
   const exportCSV = () => {
     // return console.log(attandencelist)
@@ -508,6 +573,7 @@ const Attandence = () => {
           }
         </div>
       </div>
+
       <div className="capitalize">
         <DataTable
           columns={columns}
@@ -515,6 +581,7 @@ const Attandence = () => {
           pagination
           selectableRows
           customStyles={customStyles}
+          conditionalRowStyles={conditionalRowStyles}
           onSelectedRowsChange={handleRowSelect}
           highlightOnHover
           noDataComponent={

@@ -5,8 +5,8 @@ import { FirstFetch } from "../../../../store/userSlice";
 
 
 
-export const submitAttandence = async ({ isPunchIn, inp, setisload,dispatch }) => {
-//  return console.log(inp)
+export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) => {
+  //  return console.log(inp)
   setisload(false);
 
   const basePayload = {
@@ -57,7 +57,7 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload,dispatch }) =
   }
 }
 
-export const deleteAttandence = async ({ attandanceId, setisload,dispatch }) => {
+export const deleteAttandence = async ({ attandanceId, setisload, dispatch }) => {
   if (!attandanceId) return toast.warning('Attandance Id is needed');
   const address = `${import.meta.env.VITE_API_ADDRESS}deleteattandence`
 
@@ -75,7 +75,7 @@ export const deleteAttandence = async ({ attandanceId, setisload,dispatch }) => 
 
     console.log('delete attandence Query:', res);
     toast.success(res.data.message, { autoClose: 1800 });
-     dispatch(FirstFetch());
+    dispatch(FirstFetch());
     return true;
   } catch (error) {
     console.log(error);
@@ -114,13 +114,18 @@ export const columns = [
   {
     name: "Status",
     selector: (row) => row.stat || '-',
-    width: '130px'
+    width: '100px'
   },
   {
     name: "Working Hours",
     selector: (row) => row.workingHours || '-',
-    // width: '130px'
+    width: '210px'
   },
+  // {
+  //   name: "Remarks",
+  //   selector: (row) => row.remarks || '-',
+  //   // width: '130px'
+  // },
   {
     name: "Action",
     selector: (row) => row.action,
@@ -128,23 +133,57 @@ export const columns = [
   },
 ]
 
+// export const customStyles = {
+//   headCells: {
+//     style: {
+//       backgroundColor: 'teal', // header background
+//       fontWeight: 'bold',         // font weight
+//       fontSize: '14px',
+//       color: 'white',             // header cell height
+//       padding: '0px 2px',
+//       border: '1px solid #ddd',
+//     },
+//   },
+//   headRow: {
+//     style: {
+//     },
+//   },
+//   rows: {
+//     style: {
+//       minHeight: '48px',          // height of each row
+//       padding: '0px 2px',
+//     },
+//   },
+// };
 export const customStyles = {
   headCells: {
     style: {
-      backgroundColor: 'teal', // header background
-      fontWeight: 'bold',         // font weight
+      backgroundColor: 'teal',
+      fontWeight: 'bold',
       fontSize: '14px',
-      color: 'white',             // header cell height
-      padding: '0px 5px',
+      color: 'white',
+      // border: '1px solid #ddd',
+      justifyContent: 'flex-start', // align text left
+      paddingLeft: '4px',           // small left padding
+      paddingRight: '4px',
     },
   },
   headRow: {
     style: {
+      borderBottom: '2px solid #ccc',
     },
   },
   rows: {
     style: {
-      minHeight: '48px',          // height of each row
+      minHeight: '48px',
+      borderBottom: '1px solid #eee',
+    },
+  },
+  cells: {
+    style: {
+      justifyContent: 'flex-start', // align text left
+      paddingLeft: '4px',           // small padding like header
+      paddingRight: '4px',
     },
   },
 };

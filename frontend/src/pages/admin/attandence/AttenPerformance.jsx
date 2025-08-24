@@ -90,7 +90,6 @@ const AttenPerformance = () => {
         setholidaydate(dateObjects);
     }, [holidays]);
 
-
     useEffect(() => {
         if (!userid) return;
         const fetchPerformanceData = async () => {
@@ -106,7 +105,6 @@ const AttenPerformance = () => {
                 setattandence(res.data.attandence);
                 // console.log(res.data);
             } catch (err) {
-                // toast.warning(err.response.data.message)
                 console.error('Failed to fetch performance data:', err);
                 if (err.status == 403) {
                     swal({
@@ -117,6 +115,7 @@ const AttenPerformance = () => {
                     navigate('/');
                     return;
                 }
+                toast.warning(err.response?.data?.message || "error")
             } finally {
                 setLoading(false);
             }
@@ -147,7 +146,6 @@ const AttenPerformance = () => {
 
             const isHoliday = holidaydate.includes(fdfgfd);
 
-            // const isWeeklyOff = dayjs(element.date).startOf('day').day() === company.weeklyOffs;
             const day = dayjs(element.date).startOf('day').day(); // 0 = Sunday, 1 = Monday, etc.
             const isWeeklyOff = setting?.weeklyOffs.includes(day);
             const isleave = element.status == 'leave'

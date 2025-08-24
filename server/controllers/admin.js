@@ -559,21 +559,21 @@ const firstfetch = async (req, res, next) => {
                 .sort({ department: 1 });
 
             employees = await employeeModal.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
-                .populate('department', 'department')
+                .populate('departmentId', 'department')
                 .populate('userid')
                 .sort({ employeename: 1 });
 
             const employeeIds = employees.map(emp => emp._id);
 
             attendance = await attendanceModal.find({
-                companyId: req.user.companyId, employeeId: {
+                companyId: req.user.companyId,
+                employeeId: {
                     $in: employeeIds
                 }
-            })
-                .sort({ date: -1 })
+            }).sort({ date: -1 })
                 .populate({
                     path: 'employeeId',
-                    select: 'employeename userid profileimage branchId department',
+                    select: 'userid profileimage department',
                     populate: { path: 'userid', select: 'name' }
                 })
                 .populate({
@@ -611,7 +611,7 @@ const firstfetch = async (req, res, next) => {
                 .sort({ date: -1 })
                 .populate({
                     path: 'employeeId',
-                    select: 'employeename userid profileimage branchId department',
+                    select: 'userid profileimage department',
                     populate: { path: 'userid', select: 'name' }
                 })
                 .populate({
@@ -657,7 +657,7 @@ const firstfetch = async (req, res, next) => {
         // });
 
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
         return next({ status: 500, message: error.message });
     }
 };
