@@ -743,11 +743,19 @@ const updateCompany = async (req, res, next) => {
 
 
 const addBranch = async (req, res, next) => {
-    const { name, location, companyId, managerIds = [] } = req.body;
+    const { defaultsetting, name, location, companyId, managerIds = [] } = req.body;
 
     try {
         // Create new branch
-        const newBranch = new branch({ name, location, companyId, managerIds });
+        let fields = {
+            name, location, companyId,
+            managerIds, defaultsetting
+        }
+        if (!defaultsetting) {
+            const setting = req.body.setting
+            fields.setting = setting
+        }
+        const newBranch = new branch(fields);
 
         // Update user roles to 'manager' if managerIds provided
         if (managerIds.length > 0) {
@@ -768,68 +776,38 @@ const addBranch = async (req, res, next) => {
     }
 };
 
-// const editBranch = async (req, res, next) => {
-//     const { _id, name, location, companyId, managerIds = [] } = req.body;
-
-//     try {
-//         // Get the current branch before updating
-//         const existingBranch = await branch.findById(_id);
-//         if (!existingBranch) {
-//             return next({ status: 404, message: "Branch not found" });
-//         }
-
-//         const previousManagerIds = existingBranch.managerIds.map(id => id.toString());
-//         const newManagerIds = managerIds.map(id => id.toString());
-
-//         // Find removed managers (were in previous but not in new)
-//         const removedManagerIds = previousManagerIds.filter(id => !newManagerIds.includes(id));
-//         console.log("removed id", removedManagerIds)
-
-//         // Find added managers (in new but not in previous)
-//         const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
-//         console.log("new to be added id", addedManagerIds)
-
-//         // Update the branch
-//         await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
-
-//         // Demote removed managers to "employee"
-//         for (const removedId of removedManagerIds) {
-//             await usermodal.findOneAndUpdate({ _id: removedId }, { branchIds: 'chatgpt remove branchid from array' });
-//         }
-
-//         // Promote new managers to "manager"
-//         for (const addedId of addedManagerIds) {
-//             await usermodal.findOneAndUpdate({ _id: addedId }, { branchIds: {"chatgpt add here new branch to previous branch array"} });
-//         }
-
-//         return res.status(200).json({ message: "Branch Edited Successfully" });
-
-//     } catch (error) {
-//         console.error(error.message);
-//         return next({ status: 500, message: error.message });
-//     }
-// };
 
 const editBranch = async (req, res, next) => {
-    const { _id, name, location, companyId, managerIds = [] } = req.body;
-    console.log(req.body)
+    const { _id, name, location, companyId, defaultsetting, managerIds = [] } = req.body;
+    // console.log(req.body)
 
     try {
         const existingBranch = await branch.findById(_id);
         if (!existingBranch) {
             return next({ status: 404, message: "Branch not found" });
         }
+        let updateDoc = {
+            name, location, companyId, managerIds, defaultsetting
+        }
+        if (!defaultsetting) {
+            console.log("setting set kiya")
+            const setting = req.body.setting
+            updateDoc.setting = setting
+        } else {
+            console.log("setting removed  kiya")
+            updateDoc.$unset = { setting: 1 };
+        }
 
         const previousManagerIds = existingBranch.managerIds.map(id => id.toString());
         const newManagerIds = managerIds.map(id => id.toString());
 
         const removedManagerIds = previousManagerIds.filter(id => !newManagerIds.includes(id));
-        console.log("removed id", removedManagerIds);
+        // console.log("removed id", removedManagerIds);
 
         const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
-        console.log("new to be added id", addedManagerIds);
+        // console.log("new to be added id", addedManagerIds);
 
-        await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
+        await branch.findByIdAndUpdate(_id, updateDoc);
 
         // Remove this branch from removed managers
         for (const removedId of removedManagerIds) {
@@ -854,6 +832,7 @@ const editBranch = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 };
+
 const deleteBranch = async (req, res, next) => {
     const { _id, name, location, companyId, managerIds = [] } = req.body;
     console.log(req.body)

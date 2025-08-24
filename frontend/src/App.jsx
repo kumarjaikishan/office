@@ -142,7 +142,7 @@ function App() {
       <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
 

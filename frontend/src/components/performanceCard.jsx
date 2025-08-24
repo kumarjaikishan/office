@@ -42,12 +42,13 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
         ]
         : [{ id: 0, value: 100, color: "rgb(156 163 175)", label: "No record" }];
 
-    const pieChartSize = { width: 300, height: 300 };
-    const pieRadius = { innerRadius: 130, outerRadius: 150 };
+    const pieChartSize = window.innerWidth < 600 ? { width: 220, height: 220 } : { width: 300, height: 300 };
+    const pieRadius = window.innerWidth < 600 ? { innerRadius: 95, outerRadius: 110 } : { innerRadius: 130, outerRadius: 150 };
+    // console.log(window.innerWidth,pieChartSize)
 
     return (
         <div className="flex flex-col md:flex-row items-center justify-center min-h-[200px] bg-[#e0e4e7] p-1 space-y-1 md:space-y-0 md:space-x-2">
-            <div className="relative w-80 h-80 flex items-center justify-center z-2 rounded-full">
+            <div className="relative  mb-2  w-60 h-60 md:w-80 md:h-80 flex items-center justify-center z-2 rounded-full">
                 <PieChart
                     series={[
                         {
@@ -63,7 +64,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                     legend={{ hidden: true }} // ensure version supports this
                 />
 
-                <div className="absolute w-63 h-63 rounded-full overflow-hidden border-4 border-white">
+                <div className="absolute w-46 h-46 md:w-63 md:h-63 rounded-full overflow-hidden border-4 border-white">
                     <img
                         src={employee?.profileimage || employepic}
                         alt={employee?.name || "Employee"}
@@ -72,11 +73,11 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                 </div>
             </div>
 
-            <div className="flex flex-col gap-4 w-[550px]">
-                <div className="attandencecarde">
+            <div className="flex flex-col gap-4 w-full md:w-[550px]">
+                <div className="attandencecarde flex flex-wrap md:flex-none md:flex-nowrap">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800">
-                            <FaCalendarAlt /> Total Days
+                            <FaCalendarAlt /> Total Days {window.innerWidth}
                         </span>
                         <span className="font-bold text-gray-600">{total}</span>
                     </div>
@@ -91,7 +92,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                     </div>
                 </div>
 
-                <div className="attandencecarde md:ml-8">
+                <div className="attandencecarde md:ml-8 flex flex-wrap md:flex-none md:flex-nowrap">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800">
                             <FaSuitcase /> Leave
@@ -107,7 +108,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                     </div>
                 </div>
 
-                <div className="attandencecarde md:ml-12">
+                <div className="attandencecarde md:ml-12 flex flex-wrap md:flex-none md:flex-nowrap">
                     <Tooltip
                         placement="top"
                         enterDelay={800}
@@ -155,7 +156,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                     </div>
                 </div>
 
-                <div className="attandencecarde md:ml-8">
+                <div className="attandencecarde md:ml-8 flex flex-wrap md:flex-none md:flex-nowrap">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800">
                             <FaSignInAlt /> Late Arrival
@@ -171,7 +172,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                     </div>
                 </div>
 
-                <div className="attandencecarde">
+                <div className="attandencecarde flex flex-wrap md:flex-none md:flex-nowrap">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800">
                             <FaArrowCircleLeft /> Early Arrival

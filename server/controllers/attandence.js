@@ -122,6 +122,7 @@ const checkin = async (req, res, next) => {
 
     // Check if already checked in
     const existing = await Attendance.findOne({ employeeId, date: dateObj });
+    const whichemployee = await employee.findById(employeeId).select('branchId');
     if (existing) {
       return res.status(400).json({ message: 'Already checked in' });
     }
@@ -129,6 +130,7 @@ const checkin = async (req, res, next) => {
     const attendanceData = {
       companyId: req.user.companyId,
       attendanceById: req.user.id,
+      branchId: whichemployee.branchId,
       employeeId,
       date: dateObj,
       status
@@ -180,7 +182,7 @@ const facecheckin = async (req, res, next) => {
     if (!employeeId) {
       return res.status(400).json({ message: 'Employee ID is required' });
     }
-
+    const whichemployee = await employee.findById(employeeId).select('branchId');
     // Get current time
     const now = new Date();
 
@@ -203,6 +205,7 @@ const facecheckin = async (req, res, next) => {
     // Create attendance
     const attendanceData = {
       companyId: req.user.companyId,
+      branchId: whichemployee.branchId,
       employeeId,
       date: dateObj,
       punchIn: punchIn,
@@ -247,6 +250,8 @@ function normalizeDateToUTC(date) {
 const bulkMarkAttendance = async (req, res, next) => {
   try {
     const { attendanceRecords } = req.body;
+    //   console.log(attendanceRecords);
+    //  return res.status(200).json({ message: 'Bulk attendance marked successfully.' });
 
     if (!Array.isArray(attendanceRecords) || attendanceRecords.length === 0) {
       return res.status(400).json({ message: 'No attendance data provided.' });
@@ -255,6 +260,7 @@ const bulkMarkAttendance = async (req, res, next) => {
     const bulkOps = attendanceRecords.map(record => {
       const {
         empId: employeeId,
+        branchId,
         date,
         punchIn,
         punchOut,
@@ -283,6 +289,7 @@ const bulkMarkAttendance = async (req, res, next) => {
           update: {
             $set: {
               companyId,
+              branchId,
               punchIn: punchInDate,
               punchOut: punchOutDate,
               workingMinutes,
@@ -579,7 +586,10 @@ const employeeAttandence = async (req, res, next) => {
       return res.status(403).json({ owner: false, message: "Forbidden: You don’t have access to this employee’s data." });
     }
 
-    const employeedetail = await employee.findOne({ userid });
+    const employeedetail = await employee.findOne({ userid }).populate({
+      path:'branchId',
+      select:'name defaultsetting setting'
+    });
     const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: -1 });
 
     return res.status(200).json({ user, employee: employeedetail, attandence });

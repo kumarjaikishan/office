@@ -5,19 +5,18 @@ const companySchema = new mongoose.Schema({
     industry: String,
     logo: String,
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
-
     officeTime: {
         in: { type: String, default: '10:00' },     // e.g., "09:30"
         out: { type: String, default: '18:00' },    // e.g., "18:30"
-        breakMinutes: { type: Number, default: 60 }
+        breakMinutes: { type: Number, default: 30 }
     },
     gracePeriod: {
         lateEntryMinutes: { type: Number, default: 10 },
         earlyExitMinutes: { type: Number, default: 10 }
     },
     workingMinutes: {
-        fullDay: { type: Number, default: 540 },
-        halfDay: { type: Number, default: 270 },
+        fullDay: { type: Number, default: 480 },
+        halfDay: { type: Number, default: 240 },
         shortDayThreshold: { type: Number, default: 360 },
         overtimeAfterMinutes: { type: Number, default: 540 }
     },
@@ -26,10 +25,10 @@ const companySchema = new mongoose.Schema({
         default: [0]
     },
     attendanceRules: {
-        considerEarlyEntryBefore: { type: String, default: '09:00' },
-        considerLateEntryAfter: { type: String, default: '09:40' },
-        considerEarlyExitBefore: { type: String, default: '18:00' },
-        considerLateExitAfter: { type: String, default: '18:30' }
+        considerEarlyEntryBefore: { type: String, default: '09:50' },
+        considerLateEntryAfter: { type: String, default: '10:10' },
+        considerEarlyExitBefore: { type: String, default: '17:50' },
+        considerLateExitAfter: { type: String, default: '18:15' }
     }
 }, { timestamps: true });
 

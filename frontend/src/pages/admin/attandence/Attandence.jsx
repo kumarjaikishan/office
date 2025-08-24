@@ -182,8 +182,10 @@ const Attandence = () => {
   const canDelete = CheckPermission('attandence', 4);
 
   useEffect(() => {
-    // console.log(department)
-    console.log(attandence)
+    // console.log(company)
+    // console.log(branch)
+    // console.log(attandence)
+
     if (!attandence) return;
     const today = dayjs().startOf('day');
 
@@ -193,10 +195,20 @@ const Attandence = () => {
         let absent = emp.status == 'absent';
         let leave = emp.status == 'leave';
 
+        const ifdirretent = branch.filter(e => e._id == emp.branchId && e.defaultsetting == false)[0];
+        // console.log("cheing different", ifdirretent)
+        const attendanceSetting = ifdirretent ? {
+          attendanceRules: ifdirretent?.setting?.attendanceRules,
+          workingMinutes: ifdirretent?.setting?.workingMinutes
+        } : {
+          attendanceRules: company?.attendanceRules,
+          workingMinutes: company?.workingMinutes
+        }
+
         return {
           attenid: emp._id,
           departmentId: emp.employeeId.department,
-          branchid: emp.employeeId.branchId,
+          branchid: emp.branchId,
           employeeId: emp.employeeId._id,
           status: emp.status,
           stat: (
@@ -220,8 +232,8 @@ const Attandence = () => {
           ),
           date: dayjs(emp.date).format('DD MMM, YYYY'),
           punchIn: emp.punchIn && (() => {
-            const [earlyHour, earlyMinute] = company?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
-            const [lateHour, lateMinute] = company?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);
+            const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
+            const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);
 
             const earlyThreshold = dayjs(emp.punchIn).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
             const lateThreshold = dayjs(emp.punchIn).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
@@ -240,8 +252,8 @@ const Attandence = () => {
             );
           })(),
           punchOut: emp.punchOut && (() => {
-            const [earlyHour, earlyMinute] = company?.attendanceRules?.considerEarlyExitBefore.split(':').map(Number);
-            const [lateHour, lateMinute] = company?.attendanceRules?.considerLateExitAfter.split(':').map(Number);
+            const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyExitBefore.split(':').map(Number);
+            const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateExitAfter.split(':').map(Number);
 
             const earlyExitThreshold = dayjs(emp.punchOut).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
             const lateExitThreshold = dayjs(emp.punchOut).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
@@ -262,11 +274,11 @@ const Attandence = () => {
           workingHours: emp.workingMinutes && (
             <span>
               {minutesinhours(emp.workingMinutes)}
-              {emp.workingMinutes < company?.workingMinutes?.fullDay && (
-                <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short {company?.workingMinutes?.fullDay - emp.workingMinutes} min</span>
+              {emp.workingMinutes < attendanceSetting?.workingMinutes?.fullDay && (
+                <span className="px-3 py-1 ml-2 rounded bg-amber-100 text-amber-800">Short {attendanceSetting?.workingMinutes?.fullDay - emp.workingMinutes} min</span>
               )}
-              {emp.workingMinutes > company?.workingMinutes?.fullDay && (
-                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime {emp?.workingMinutes - company?.workingMinutes?.fullDay} min </span>
+              {emp.workingMinutes > attendanceSetting?.workingMinutes?.fullDay && (
+                <span className="px-3 py-1 ml-2 rounded bg-green-100 text-green-800">Overtime {emp?.workingMinutes - attendanceSetting?.workingMinutes?.fullDay} min </span>
               )}
             </span>
           ),

@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 const AttenPerformance = () => {
     const { userid } = useParams();
-    const [user, setuser] = useState({});
+    const [user, setuser] = useState(null);
     const [employee, setemployee] = useState({});
     const [attandence, setattandence] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -57,12 +57,20 @@ const AttenPerformance = () => {
     }));
 
     useEffect(() => {
-        if (!company) return;
-        setsetting(company)
+        if (!company || !employee) return;
+        const attendanceSetting = employee?.branchId?.defaultsetting == false ? {
+            attendanceRules: employee?.branchId?.setting?.attendanceRules,
+            workingMinutes: employee?.branchId?.setting?.workingMinutes,
+            weeklyOffs: employee?.branchId?.setting?.weeklyOffs
+        } : {
+            attendanceRules: company?.attendanceRules,
+            workingMinutes: company?.workingMinutes,
+            weeklyOffs: company?.weeklyOffs
+        }
+        // console.log(company)
+        setsetting(attendanceSetting)
 
-        // console.log("company", company);
-        // console.log(dayjs().month())
-    }, [company]);
+    }, [company, employee]);
 
     useEffect(() => {
         if (!holidays) return;
@@ -96,7 +104,7 @@ const AttenPerformance = () => {
                 setemployee(res.data.employee);
                 setuser(res.data.user);
                 setattandence(res.data.attandence);
-                // console.log(res.data.user);
+                // console.log(res.data);
             } catch (err) {
                 // toast.warning(err.response.data.message)
                 console.error('Failed to fetch performance data:', err);
@@ -141,7 +149,7 @@ const AttenPerformance = () => {
 
             // const isWeeklyOff = dayjs(element.date).startOf('day').day() === company.weeklyOffs;
             const day = dayjs(element.date).startOf('day').day(); // 0 = Sunday, 1 = Monday, etc.
-            const isWeeklyOff = company.weeklyOffs.includes(day);
+            const isWeeklyOff = setting?.weeklyOffs.includes(day);
             const isleave = element.status == 'leave'
             const isabsent = element.status == 'absent'
 
@@ -219,14 +227,14 @@ const AttenPerformance = () => {
             short: shortDates,
             overtime, shorttimemin, overtimemin, latearrival,
             earlyarrival, earlyLeave, lateleave,
-            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / company.workingMinutes.fullDay))
-            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary /  dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() / company.workingMinutes.fullDay))
+            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / setting.workingMinutes.fullDay))
+            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary /  dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() / setting.workingMinutes.fullDay))
 
             overtimesalary: selectedMonth !== "all"
                 ? Math.floor((overtimemin - shorttimemin) * parseFloat((
                     employee.salary /
                     dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() /
-                    company.workingMinutes.fullDay)))
+                    setting.workingMinutes.fullDay)))
                 : null
         });
         // console.log('gettitng mothes days', (employee.salary / 31 / 480))
@@ -277,33 +285,36 @@ const AttenPerformance = () => {
 
 
     return (
-        <div className="p-4 capitalize bg-gray-200">
+        <div className="p-1 md:p-4 capitalize bg-gray-200">
             {loading && <p>Loading performance data...</p>}
 
-            <div className="p-3 flex gap-3 items-center justify-between rounded shadow bg-white mb-4">
-            <div className='flex gap-3'>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel>Year</InputLabel>
-                    <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
-                        {yearOptions.map((year) => <MenuItem key={year} value={year}>{year}</MenuItem>)}
-                    </Select>
-                </FormControl>
+            <div className="p-3 flex gap-1 md:gap-3 items-center justify-between rounded shadow bg-white mb-4">
+                <div className='flex gap-3'>
+                    <FormControl className='w-[90px] md:w-[120px]' size="small">
+                        <InputLabel>Year</InputLabel>
+                        <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
+                            {yearOptions.map((year) => <MenuItem key={year} value={year}>{year}</MenuItem>)}
+                        </Select>
+                    </FormControl>
 
-                <FormControl size="small" sx={{ minWidth: 150 }}>
-                    <InputLabel>Month</InputLabel>
-                    <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
-                        <MenuItem value="all">All</MenuItem>
-                        {monthOptions.map((month) => <MenuItem key={month.label} value={month.value}>{month.label}</MenuItem>)}
-                    </Select>
-                </FormControl>
+                    <FormControl size="small" className='w-[130px] md:w-[160px]'>
+                        <InputLabel>Month</InputLabel>
+                        <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
+                            <MenuItem value="all">All</MenuItem>
+                            {monthOptions.map((month) => <MenuItem key={month.label} value={month.value}>{month.label}</MenuItem>)}
+                        </Select>
+                    </FormControl>
                 </div>
-               <div className='font-semibold text-xl'> {user.name}</div>
+                <div className='text-end' >
+                    <p className='font-semibold text-sm md:text-lg'>{user?.name}</p>
+                    <p className='text-[12px] md:text-sm text-gray-600'>({employee?.branchId?.name})</p>
+                </div>
             </div>
 
             {attandence && (
                 <>
                     <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
-                    <div className="p-4 flex gap-3 rounded shadow bg-white my-4">
+                    <div className="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 rounded shadow bg-white my-4">
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Type</InputLabel>
                             <Select value={typeFilter} label="Type" onChange={(e) => setTypeFilter(e.target.value)}>

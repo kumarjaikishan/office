@@ -37,7 +37,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             }
           }
         );
-        console.log('employee fetch Query:', res.data);
+        // console.log('employee fetch Query:', res.data);
         setemployee(res.data)
       } catch (error) {
         console.log(error);

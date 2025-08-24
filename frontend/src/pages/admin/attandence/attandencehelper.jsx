@@ -6,12 +6,11 @@ import { FirstFetch } from "../../../../store/userSlice";
 
 
 export const submitAttandence = async ({ isPunchIn, inp, setisload,dispatch }) => {
-  // console.log(inp)
+//  return console.log(inp)
   setisload(false);
 
   const basePayload = {
     employeeId: inp.employeeId,
-    departmentId: inp.departmentId,
     date: dayjs(inp.date).toDate(),
   }
 

@@ -8,7 +8,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Modalbox from '../../../components/custommodal/Modalbox';
 import Addbranch from './addbranch';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addCompany } from './helper';
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import Department from '../department/Department';
@@ -16,6 +16,7 @@ import { FaRegUser } from 'react-icons/fa';
 import { AiFillAmazonCircle } from "react-icons/ai";
 import useImageUpload from "../../../utils/imageresizer";
 import SuperAdminDashboard from './admin';
+import { FirstFetch } from '../../../../store/userSlice';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -33,7 +34,7 @@ export default function OrganizationSettings() {
     const [editbranch, seteditbranch] = useState(false);
     const [openviewmodal, setopenviewmodal] = useState(false);
     const [isload, setisload] = useState(false);
-  const { handleImage } = useImageUpload();
+    const { handleImage } = useImageUpload();
     const [editbranchdata, seteditbranchdata] = useState(null);
     const [companyinp, setcompany] = useState({
         name: '',
@@ -42,7 +43,7 @@ export default function OrganizationSettings() {
         gracePeriod: { lateEntryMinutes: 10, earlyExitMinutes: 10 },
         workingMinutes: {
             fullDay: 480,
-            halfDay: 270,
+            halfDay: 240,
             shortDayThreshold: 360,
             overtimeAfterMinutes: 490
         },
@@ -55,6 +56,7 @@ export default function OrganizationSettings() {
         }
     })
 
+    const dispatch = useDispatch();
     const { employee, company, branch, profile } = useSelector((state) => state.user);
 
     const toggleSection = (section) => {
@@ -62,7 +64,7 @@ export default function OrganizationSettings() {
     };
 
     useEffect(() => {
-        console.log(profile)
+        // console.log(profile)
         if (company) {
             setcompany(company)
         }
@@ -91,7 +93,7 @@ export default function OrganizationSettings() {
                     }
                 }
             );
-
+            dispatch(FirstFetch());
             toast.success(res.data.message, { autoClose: 1800 });
         } catch (error) {
             console.log(error);
@@ -110,7 +112,7 @@ export default function OrganizationSettings() {
 
     }
     const handleEditBranch = (id) => {
-        console.log(id)
+        // console.log(id)
         seteditbranch(true);
         const dffg = { ...id, managerIds: id?.managerIds?.map((id) => id._id) };
         seteditbranchdata(dffg);
@@ -150,8 +152,8 @@ export default function OrganizationSettings() {
                                         onChange={async (e) => {
                                             const file = e.target.files[0];
                                             if (!file) return;
-                                            
-                                            const optimisedLogo =await handleImage(200, file);
+
+                                            const optimisedLogo = await handleImage(200, file);
                                             const formData = new FormData();
                                             formData.append('_id', companyinp._id);
                                             formData.append('logo', optimisedLogo);
@@ -362,7 +364,6 @@ export default function OrganizationSettings() {
                 </div>
                 {(openSection === 'attendance' && company) && (
                     <Box className=" border-yellow-300  border-2 border-dashed rounded mt-1 p-2 ">
-
                         <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-3 gap-5">
                             <TextField
                                 label="Office Time In"

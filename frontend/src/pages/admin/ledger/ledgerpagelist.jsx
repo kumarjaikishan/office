@@ -216,7 +216,7 @@ const LedgerListPage = () => {
                             <div
                                 key={ind}
                                 onClick={() => handleNavigate(l)}
-                                className="relative cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all pl-3 pr-1 py-3 bg-gray-50"
+                                className="relative cursor-pointer overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all pl-3 pr-1 py-3 bg-gray-50"
                             >
                                 {/* Card content */}
                                 <div className="flex justify-between items-start">
@@ -228,7 +228,7 @@ const LedgerListPage = () => {
                                     </div>
 
                                     {/* Three-dot menu */}
-                                    <IconButton onClick={handleMenuOpen}  size="small">
+                                    <IconButton onClick={handleMenuOpen} size="small">
                                         <HiOutlineDotsVertical className="text-gray-700" />
                                     </IconButton>
                                     <Menu
@@ -237,6 +237,9 @@ const LedgerListPage = () => {
                                         onClose={handleMenuClose}
                                         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                                         transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                        PaperProps={{
+                                            elevation: 1, // lower the shadow (0 = none, 1-24)
+                                        }}
                                     >
                                         <MenuItem
                                             onClick={(e) => {
@@ -245,7 +248,7 @@ const LedgerListPage = () => {
                                                 handleNavigate(l);
                                             }}
                                         >
-                                            <MdVisibility className="text-blue-600 mr-2" /> See
+                                            <MdVisibility className="text-teal-600 mr-2" /> See
                                         </MenuItem>
                                         <MenuItem
                                             onClick={(e) => {
@@ -254,7 +257,7 @@ const LedgerListPage = () => {
                                                 handleOpenLedgerDialog(l);
                                             }}
                                         >
-                                            <MdEdit className="text-teal-600 mr-2" /> Edit
+                                            <MdEdit className="text-blue-600 mr-2" /> Edit
                                         </MenuItem>
                                         <MenuItem
                                             onClick={(e) => {
@@ -282,7 +285,7 @@ const LedgerListPage = () => {
                         ))}
                         {filteredLedgers?.length < 1 && <div className="w-full text-center ">
                             No Ledger found
-                        </div> }
+                        </div>}
                     </div>
                 </div>
             </div>

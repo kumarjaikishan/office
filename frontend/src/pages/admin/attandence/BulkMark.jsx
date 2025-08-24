@@ -115,10 +115,13 @@ const BulkMark = ({
 
         const selectedData = checkedemployee.map(empId => {
             const { punchIn, punchOut, status } = rowData[empId];
+            const branchId = employee.filter(e=> e._id == empId)[0].branchId;
+            // console.log(branchid)
 
             const data = {
                 empId,
                 status,
+                branchId,
                 date: attandenceDate.toISOString(), // Ensure ISO string for backend
             };
 

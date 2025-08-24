@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const attendanceSchema = new mongoose.Schema({
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company',required: true },
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
+  branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
   attendanceById: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
   date: { type: Date, required: true },
   punchIn: { type: Date },

@@ -57,7 +57,7 @@ router.route('/checkout').post(authmiddlewre, authorizeRoles('superadmin','admin
 router.route('/checkin').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("attandence", 2), attendance.checkin);
 router.route('/facecheckin').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), attendance.facecheckin);
 router.route('/facecheckout').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), attendance.facecheckout);
-router.route('/employeeAttandence').get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), attendance.employeeAttandence);
+router.route('/employeeAttandence').get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'),checkPermission("attandence", 1), attendance.employeeAttandence);
 router.route('/deleteattandence').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("attandence", 4), attendance.deleteattandence);
 
 router.route('/getholidays').get(authmiddlewre, holiday.getholidays);
