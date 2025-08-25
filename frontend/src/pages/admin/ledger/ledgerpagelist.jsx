@@ -1,17 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-    Container,
-    Paper,
-    TextField,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Avatar,
-    InputAdornment,
-    Menu,
-} from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { TextField, Button, Avatar, InputAdornment, Menu, } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdDelete, MdOutlineModeEdit, MdSearch } from "react-icons/md";
 import axios from "axios";
@@ -20,10 +8,9 @@ import useImageUpload from "../../../utils/imageresizer";
 import { MdVisibility } from "react-icons/md";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { useSelector } from "react-redux";
-
-
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
+import Modalbox from "../../../components/custommodal/Modalbox";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
@@ -78,7 +65,7 @@ const LedgerListPage = () => {
                 `${import.meta.env.VITE_API_ADDRESS}ledger`,
                 { headers }
             );
-            console.log(res.data)
+            // console.log(res.data)
             setLedgers(res.data.ledgers);
             setFilteredLedgers(res.data.ledgers);
         } catch (err) {
@@ -290,56 +277,63 @@ const LedgerListPage = () => {
                 </div>
             </div>
 
-            {/* Ledger Create/Edit Modal */}
-            <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
-                <DialogTitle>{editLedgerId ? "Edit Ledger" : "Add Ledger"}</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        fullWidth
-                        margin="dense"
-                        label="Ledger Name"
-                        value={editLedgerName}
-                        onChange={(e) => setEditLedgerName(e.target.value)}
-                    />
+            <Modalbox open={editOpen} onClose={() => {
+                setEditOpen(false);
+            }}>
+                <div className="membermodal w-[300px]">
+                    <div className="whole" >
+                        <div className="modalhead">{editLedgerId ? "Edit Ledger" : "Add Ledger"}</div>
+                        <span className="modalcontent ">
+                            <TextField
+                                autoFocus
+                                size="small"
+                                fullWidth
+                                margin="dense"
+                                label="Ledger Name"
+                                value={editLedgerName}
+                                onChange={(e) => setEditLedgerName(e.target.value)}
+                            />
 
-                    <div className="mt-1 items-center  w-fit relative">
-                        <input
-                            style={{ display: "none" }}
-                            type="file"
-                            onChange={(e) => setEditLedgerImage(e.target.files[0])}
-                            ref={inputref}
-                            accept="image/*"
-                            id="fileInput"
-                        />
+                            <div className="mt-1 items-center  w-fit relative">
+                                <input
+                                    style={{ display: "none" }}
+                                    type="file"
+                                    onChange={(e) => setEditLedgerImage(e.target.files[0])}
+                                    ref={inputref}
+                                    accept="image/*"
+                                    id="fileInput"
+                                />
 
-                        <Avatar
-                            sx={{ width: 80, height: 80 }}
-                            alt={editLedgerName}
-                            src={
-                                editLedgerImage
-                                    ? editLedgerImage instanceof File
-                                        ? URL.createObjectURL(editLedgerImage)
-                                        : editLedgerImage
-                                    : ""
-                            }
-                        />
+                                <Avatar
+                                    sx={{ width: 80, height: 80 }}
+                                    alt={editLedgerName}
+                                    src={
+                                        editLedgerImage
+                                            ? editLedgerImage instanceof File
+                                                ? URL.createObjectURL(editLedgerImage)
+                                                : editLedgerImage
+                                            : ""
+                                    }
+                                />
 
-                        <span
-                            onClick={() => inputref.current.click()}
-                            className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
-                        >
-                            <MdOutlineModeEdit size={18} />
+                                <span
+                                    onClick={() => inputref.current.click()}
+                                    className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
+                                >
+                                    <MdOutlineModeEdit size={18} />
+                                </span>
+                            </div>
                         </span>
+                        <div className="modalfooter">
+                            <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+                            <Button disabled={loading} variant="contained" onClick={handleSaveLedger}>
+                                {editLedgerId ? "Update" : "Create"}
+                            </Button>
+                        </div>
                     </div>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-                    <Button disabled={loading} variant="contained" onClick={handleSaveLedger}>
-                        {editLedgerId ? "Update" : "Create"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                </div>
+            </Modalbox>
+
         </div >
     );
 };

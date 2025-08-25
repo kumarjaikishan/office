@@ -28,6 +28,7 @@ const userSlice = createSlice({
         ledger: null,
         salary: null,
         status: 'idle',
+        sidebar: true
     },
     reducers: {
         userlogout(state, action) {
@@ -42,6 +43,7 @@ const userSlice = createSlice({
             state.attandence = null;
             state.ledger = null;
             state.salary = null;
+            state.sidebar = true;
         },
         updateAttendance(state, action) {
             state.attandence = action.payload;
@@ -49,6 +51,10 @@ const userSlice = createSlice({
         setuser(state, action) {
             state.profile = action.payload;
         },
+        tooglesidebar(state, action) {
+            state.sidebar = !state.sidebar;
+        },
+        
     },
     extraReducers: (builder) => {
         builder
@@ -70,5 +76,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout,updateAttendance,setuser } = userSlice.actions;
+export const { userlogout,updateAttendance,setuser,tooglesidebar } = userSlice.actions;
 export default userSlice.reducer;

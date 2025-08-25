@@ -362,7 +362,7 @@ export default function SuperAdminDashboard() {
             <Modalbox open={showForm} onClose={() => setShowForm(false)}>
                 <div className="membermodal">
                     <form onSubmit={handleSave}>
-                        <h2> {editingIndex !== null ? "Edit Admin" : "Add Admin"}</h2>
+                        <div className="modalhead"> {editingIndex !== null ? "Edit Admin" : "Add Admin"}</div>
                         <span className="modalcontent">
                             <div className="space-y-3 pt-1 flex items-center gap-4 flex-col w-[100%] md:w-[500px]">
                                 <div className="mt-1 items-center  w-fit relative">
@@ -472,7 +472,8 @@ export default function SuperAdminDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-2 mt-6">
+                        </span>
+                        <div className="modalfooter">
                                 <button
                                     className="px-4 py-1 border rounded hover:bg-gray-100"
                                     onClick={resetForm}
@@ -486,7 +487,6 @@ export default function SuperAdminDashboard() {
                                     {editingIndex !== null ? "Update" : "Create"}
                                 </button>
                             </div>
-                        </span>
                     </form>
                 </div>
             </Modalbox>

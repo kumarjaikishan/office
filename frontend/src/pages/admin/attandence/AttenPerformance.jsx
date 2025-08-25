@@ -288,16 +288,16 @@ const AttenPerformance = () => {
         <div className="p-1 md:p-4 capitalize bg-gray-200">
             {loading && <p>Loading performance data...</p>}
 
-            <div className="p-3 flex gap-1 md:gap-3 items-center justify-between rounded shadow bg-white mb-4">
-                <div className='flex gap-3'>
-                    <FormControl className='w-[90px] md:w-[120px]' size="small">
+            <div className="p-1 py-3 md:p-3 flex flex-wrap gap-1 md:gap-3 items-center justify-between rounded shadow bg-white mb-4">
+                <div className=' gap-3 md:gap-3 grid-col-2 '>
+                    <FormControl className='w-[90px]  md:w-[120px]' size="small">
                         <InputLabel>Year</InputLabel>
                         <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
                             {yearOptions.map((year) => <MenuItem key={year} value={year}>{year}</MenuItem>)}
                         </Select>
                     </FormControl>
 
-                    <FormControl size="small" className='w-[130px] md:w-[160px]'>
+                    <FormControl size="small" className='w-[130px] flex-1 md:w-[160px]'>
                         <InputLabel>Month</InputLabel>
                         <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
                             <MenuItem value="all">All</MenuItem>
@@ -314,7 +314,7 @@ const AttenPerformance = () => {
             {attandence && (
                 <>
                     <EmployeeProfileCard employee={employee} user={user} attandence={attandence} hell={hell} />
-                    <div className="p-1 md:p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 rounded shadow bg-white my-4">
+                    <div className="p-1 py-4 md:p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 rounded shadow bg-white my-4">
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                             <InputLabel>Type</InputLabel>
                             <Select value={typeFilter} label="Type" onChange={(e) => setTypeFilter(e.target.value)}>

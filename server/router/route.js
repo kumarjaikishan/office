@@ -23,6 +23,8 @@ router.route('/').get(async (req, res) => {
 
 
 router.route('/signin').post(users.userLogin);
+router.route('/resetrequest').get(authmiddlewre,authorizeRoles('superadmin'),users.passreset);  
+router.route('/setpassword').post(users.setpassword);   
 // router.route('/signup').post(users.userRegister);
 
 router.route('/departmentlist').get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), admin.departmentlist);

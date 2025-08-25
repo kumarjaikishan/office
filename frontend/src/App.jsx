@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, Suspense, lazy } from 'react';
@@ -27,6 +27,7 @@ const FaceAttandance = lazy(() => import('./pages/admin/facerecoginaion/faceAtta
 const LedgerListPage = lazy(() => import('./pages/admin/ledger/ledgerpagelist'));
 const LedgerDetailPage = lazy(() => import('./pages/admin/ledger/ledgerdetailpage'));
 const ManagerDashboard = lazy(() => import('./pages/manager/ManagerDashboard'));
+const PasswordReset = lazy(() => import('./utils/PasswordReset'));
 
 // Employee
 const EmployeeDashboard = lazy(() => import('./pages/employee/EmployeeDashboard'));
@@ -117,12 +118,12 @@ function App() {
   const dispatch = useDispatch();
   const { islogin } = useSelector((state) => state.auth);
   const user = useSelector((state) => state.user);
+  const navigate = useNavigate();
 
-  // Fetch data based on role
   useEffect(() => {
-    // if (!islogin) return;
     if (!islogin) {
-     return <Navigate to="/login" />
+      navigate("/login");
+      return;
     }
     const role = user?.profile?.role;
 
@@ -133,9 +134,6 @@ function App() {
     }
   }, [islogin, user?.profile?.role, dispatch]);
 
-
-  // ✅ Safe role route resolution
-  // const roleRoute = islogin ? routesByRole[user?.profile?.role] : null;
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
 
 
@@ -146,6 +144,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/resetpassword/:token" element={<PasswordReset />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
 

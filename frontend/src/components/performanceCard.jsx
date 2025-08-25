@@ -77,7 +77,7 @@ const EmployeeProfileCard = ({ attandence, employee, hell }) => {
                 <div className="attandencecarde flex flex-wrap md:flex-none md:flex-nowrap">
                     <div className="flex w-full items-center justify-between neu text-gray-800 rounded-xl px-4 py-2 shadow">
                         <span className="font-medium flex items-center gap-2 text-gray-800">
-                            <FaCalendarAlt /> Total Days {window.innerWidth}
+                            <FaCalendarAlt /> Total Days 
                         </span>
                         <span className="font-bold text-gray-600">{total}</span>
                     </div>

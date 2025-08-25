@@ -28,6 +28,7 @@ import { FaRegUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import MarkAttandenceedit from "./MarkAttandenceedit";
 import CheckPermission from "../../../utils/CheckPermission";
+import { color } from "framer-motion";
 
 dayjs.extend(isSameOrBefore);
 
@@ -411,7 +412,8 @@ const Attandence = () => {
     {
       when: row => row.remarks,
       style: {
-        backgroundColor: 'rgba(21, 233, 233, 0.2)',
+        backgroundColor: 'rgba(21, 233, 233, 0.1)',
+        color:'teal'
       },
     },
   ];

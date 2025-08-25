@@ -13,8 +13,6 @@ import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
 import { FaRegUser } from "react-icons/fa";
-import { CgLayoutGrid } from 'react-icons/cg';
-import dayjs from 'dayjs';
 import Modalbox from '../../../components/custommodal/Modalbox';
 
 const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
@@ -22,13 +20,13 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
     const { department, employee } = useSelector((state) => state.user);
 
     useEffect(() => {
-        // console.log("employee:", employee)
+        console.log("employee:", employee)
     }, [department]);
 
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
-            <div className="membermodal">
+            <div className="membermodal w-[200px]">
                 <form onSubmit={submitHandle}>
                     <h2>Mark Attendance</h2>
                     <span className="modalcontent">
@@ -93,10 +91,10 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         <Avatar src={option.profileimage} alt={option.userid.name}>
                                             {!option.profileimage && <FaRegUser />}
                                         </Avatar>
-                                        <Box>
+                                        <Box className=' capitalize'>
                                             <Typography variant="body2">{option.userid.name}</Typography>
                                             <Typography variant="caption" color="text.secondary">
-                                                DOB: {option.dob}
+                                                 {(option.designation)}
                                             </Typography>
                                         </Box>
                                     </Box>

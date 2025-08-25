@@ -41,7 +41,11 @@ const userSchema = new mongoose.Schema({
         type: Map,
         of: [Number],
         default: {}
-    }
+    },
+    temptoken: {
+        type: String,
+        default: ""
+    },
 }, { timestamps: true })
 
 

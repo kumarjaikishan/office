@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Paper, Box, Typography, Button, FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-    Avatar,
-    OutlinedInput,
-    InputAdornment
+    Box, Button, FormControl, InputLabel, Select, MenuItem,
+    TextField, Avatar, OutlinedInput, InputAdornment
 } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { VscDebugRestart } from 'react-icons/vsc';
@@ -16,6 +14,7 @@ import dayjs from 'dayjs';
 import { getLedgerColumns } from './ledgerhelper';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { CiFilter } from 'react-icons/ci';
+import Modalbox from '../../../components/custommodal/Modalbox';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -246,7 +245,7 @@ const LedgerDetailPage = () => {
                             ))}
                         </Select>
                     </FormControl>
-                    
+
                     <FormControl size="small" className="col-span-1 md:w-[120px]">
                         <InputLabel>Month</InputLabel>
                         <Select
@@ -319,30 +318,36 @@ const LedgerDetailPage = () => {
                 />
             </div>
 
-            {/* Entry Modal */}
-            <Dialog open={open} onClose={() => { setOpen(false); setEditIndex(null); }}>
-                <DialogTitle>{editIndex !== null ? "Edit Entry" : "Add Entry"}</DialogTitle>
-                <DialogContent>
-                    <Box display="flex" flexDirection="column" gap={2} mt={1}>
-                        <TextField type="date" label="Date" size="small" InputLabelProps={{ shrink: true }}
-                            value={entry.date || ''} onChange={e => setEntry({ ...entry, date: e.target.value })}
-                        />
-                        <TextField label="Particular" size="small" value={entry.particular || ''}
-                            onChange={e => setEntry({ ...entry, particular: e.target.value })}
-                        />
-                        <TextField type="number" label="Debit" size="small" value={entry.debit || ''}
-                            onChange={e => setEntry({ ...entry, debit: e.target.value, credit: "" })}
-                        />
-                        <TextField type="number" label="Credit" size="small" value={entry.credit || ''}
-                            onChange={e => setEntry({ ...entry, credit: e.target.value, debit: "" })}
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => { setOpen(false); setEditIndex(null) }}>Cancel</Button>
-                    <Button variant="contained" onClick={saveEntry}>{editIndex !== null ? "Update" : "Add"}</Button>
-                </DialogActions>
-            </Dialog>
+            <Modalbox open={open} onClose={() => {
+                setOpen(false); setEditIndex(null);
+            }}>
+                <div className="membermodal w-[310px]">
+                    <div className="whole" >
+                        <div className="modalhead">{editIndex !== null ? "Edit Entry" : "Add Entry"}</div>
+                        <span className="modalcontent ">
+                            <Box display="flex" flexDirection="column" gap={2} mt={1}>
+                                <TextField type="date" label="Date" size="small" InputLabelProps={{ shrink: true }}
+                                    value={entry.date || ''} onChange={e => setEntry({ ...entry, date: e.target.value })}
+                                />
+                                <TextField multiline minRows={2} label="Particular" size="small" value={entry.particular || ''}
+                                    onChange={e => setEntry({ ...entry, particular: e.target.value })}
+                                />
+                                <TextField type="number" label="Debit" size="small" value={entry.debit || ''}
+                                    onChange={e => setEntry({ ...entry, debit: e.target.value, credit: "" })}
+                                />
+                                <TextField type="number" label="Credit" size="small" value={entry.credit || ''}
+                                    onChange={e => setEntry({ ...entry, credit: e.target.value, debit: "" })}
+                                />
+                            </Box>
+                        </span>
+                        <div className="modalfooter">
+                            <Button onClick={() => { setOpen(false); setEditIndex(null) }}>Cancel</Button>
+                            <Button variant="contained" onClick={saveEntry}>{editIndex !== null ? "Update" : "Add"}</Button>
+
+                        </div>
+                    </div>
+                </div>
+            </Modalbox>
         </div>
     );
 };

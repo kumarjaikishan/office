@@ -44,8 +44,8 @@ const Login = () => {
     };
 
     return (
-        <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-green-200 to-white p-4">
-            <div className="flex flex-col md:flex-row items-center md:items-stretch shadow-lg bg-white rounded-xl overflow-hidden w-full max-w-fit">
+        <div className="h-screen w-screen flex items-start md:items-center justify-center bg-gradient-to-b from-green-200 to-white p-4">
+            <div className="flex mt-4 md:mt-0 flex-col md:flex-row items-center md:items-stretch shadow-lg bg-white rounded-xl overflow-hidden w-full max-w-fit">
                 {/* Left Side Image */}
                 <div className="w-full md:w-[350px] h-[200px] md:h-[400px] flex-shrink-0">
                     <img

@@ -374,7 +374,7 @@ const Employe = () => {
           {/* Search (full on small, shrink on md+) */}
           <TextField
             size="small"
-             className="md:col-span-1 md:max-w-[160px] col-span-2"
+            className="md:col-span-1 md:max-w-[160px] col-span-2"
             value={filters.searchText}
             onChange={(e) => handleFilterChange("searchText", e.target.value)}
             InputProps={{
@@ -495,8 +495,8 @@ const Employe = () => {
         setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
       }}>
         <div className="membermodal">
-          <form onSubmit={adddepartcall}>
-            <h2>{isupdate ? "Update Employee" : "Add Employee"}</h2>
+          <div className="whole" >
+            <div className="modalhead">{isupdate ? "Update Employee" : "Add Employee"}</div>
             <span className="modalcontent ">
               <FormControl fullWidth required size="small">
                 <InputLabel>Branch</InputLabel>
@@ -704,22 +704,23 @@ const Employe = () => {
                 </Accordion>
               }
 
-              <div className="mt-2">
-                {!isupdate ? (
-                  <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" type="submit">
-                    Add
-                  </Button>
-                ) : (
-                  <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" onClick={updatee}>
-                    Update
-                  </Button>
-                )}
-                <Button size="small" onClick={() => {
-                  setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
-                }} variant="outlined">Cancel</Button>
-              </div>
+
             </span>
-          </form>
+            <div className="modalfooter">
+              {!isupdate ? (
+                <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" onClick={adddepartcall}>
+                  Add
+                </Button>
+              ) : (
+                <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" onClick={updatee}>
+                  Update
+                </Button>
+              )}
+              <Button size="small" onClick={() => {
+                setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
+              }} variant="outlined">Cancel</Button>
+            </div>
+          </div>
         </div>
       </Modalbox>
 

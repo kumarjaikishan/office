@@ -4,7 +4,10 @@ import { GoGear } from "react-icons/go";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
-import { Avatar } from "@mui/material";
+import { Avatar, Button } from "@mui/material";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { MdExpandLess, MdExpandMore } from "react-icons/md";
 
 const PERMISSION_LABELS = {
   1: "Read",
@@ -18,14 +21,60 @@ const AdminManagerProfile = () => {
   const [expanded, setExpanded] = useState(false);
   const { profile } = useSelector((state) => state.user);
   const [profilee, setprofile] = useState(null);
+  const [isLoading, setisloading] = useState(null);
 
   useEffect(() => {
-      console.log("admins  ke profile me");
+    console.log("admins  ke profile me", profile);
     if (profile) setprofile(profile);
   }, [profile]);
 
+
+  const resetpassword = async () => {
+    let id;
+    try {
+      setisloading(true);
+      id = toast.loading("Please wait...");
+      const token = localStorage.getItem("emstoken");
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_ADDRESS}resetrequest`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = res.data;
+      setisloading(false);
+
+      swal({
+        title: data.extramessage,
+        icon: "success",
+      });
+
+      setmessagesent(data.extramessage);
+      toast.update(id, {
+        render: data.message,
+        type: "success",
+        isLoading: false,
+        autoClose: 2100,
+      });
+    } catch (error) {
+      setisloading(false);
+      toast.update(id, {
+        render: error.response?.data?.message || error.message,
+        type: "warn",
+        isLoading: false,
+        autoClose: 2200,
+      });
+      console.log(error);
+    }
+  };
+
+
   return (
-    <div className="p-1 md:p-4">
+    <div className="p-0 md:p-4">
       {isload ? (
         <div className="w-full h-[300px] flex gap-5 flex-col justify-center items-center overflow-auto bg-white">
           <div className="relative">
@@ -45,7 +94,7 @@ const AdminManagerProfile = () => {
           <p className="text-teal-600">loading...</p>
         </div>
       ) : (
-        <div className="w-full mx-auto bg-white overflow-auto shadow rounded-lg p-1 md:p-4">
+        <div className="w-full mx-auto bg-white overflow-auto shadow rounded-lg p-1 py-2 md:p-4">
           <div className=" flex gap-3 justify-start md:justify-start">
             {/* Avatar container */}
             <div className="w-20 h-20 flex-shrink-0 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center">
@@ -73,18 +122,18 @@ const AdminManagerProfile = () => {
             </div>
           </div>
 
-          <div>
-            {/* Toggle Permissions */}
-            {profilee?.role !== "superadmin" && (
-              <button
-                onClick={() => setExpanded(!expanded)}
-                className="text-blue-600 text-sm mt-3 cursor-pointer hover:text-blue-800"
-              >
-                {expanded ? "Hide Permissions" : "View Permissions"}
-              </button>
-            )}
-
-            {/* Permissions Table */}
+          <div className="mt-2">
+            <div
+              className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-1 md:py-2 rounded-md"
+              onClick={() => setExpanded(!expanded)}
+            >
+              <span className="font-semibold text-[16px] md:text-lg text-left"> {expanded ? "Hide Permissions" : "View Permissions"}</span>
+              {expanded ? (
+                <MdExpandLess className="text-xl" />
+              ) : (
+                <MdExpandMore className="text-xl" />
+              )}
+            </div>
             {expanded && (
               <div className="text-sm mt-3 overflow-x-auto">
                 <span className="font-semibold">Permissions:</span>
@@ -126,8 +175,14 @@ const AdminManagerProfile = () => {
                 </table>
               </div>
             )}
-
           </div>
+
+          {profile.role == "superadmin" &&
+            <div className="my-2">
+              <Button onClick={resetpassword} disabled={isLoading} title='Send Password Reset Link' variant="contained" className='splbtn' >
+                Send Password Reset Link
+              </Button>
+            </div>}
         </div>
       )}
     </div>

@@ -119,8 +119,8 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
   };
 
   return (
-    <form>
-      <h2>{editbranch ? 'Edit Branch' : 'Add New Branch'}</h2>
+    <div className='whole'>
+      <div className='modalhead'>{editbranch ? 'Edit Branch' : 'Add New Branch'}</div>
       <span className="modalcontent">
         <Grid container spacing={2}>
           <TextField
@@ -311,8 +311,8 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
             </Grid>
           </div>
         )}
-
-        <div className='flex gap-2 mt-3 w-full'>
+      </span>
+      <div className='modalfooter'>
           <Button variant="outlined" onClick={cancele}>
             Cancel
           </Button>
@@ -326,8 +326,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
             </Button>
           )}
         </div>
-      </span>
-    </form>
+    </div>
   );
 };
 

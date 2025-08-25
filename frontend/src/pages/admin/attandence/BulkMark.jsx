@@ -175,9 +175,9 @@ const BulkMark = ({
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
-            <div className="membermodal w-[800px]" style={{ width: '800px', maxWidth: '98vw' }}>
+            <div className="membermodal w-[400px] md:w-[800px]">
                 <form onSubmit={handleSubmit}>
-                    <h2>Bulk Mark Attendance</h2>
+                    <div className="modalhead">Bulk Mark Attendance</div>
                     <span className="modalcontent overflow-x-auto">
                         {/* Top Filters */}
                         <div className='w w-full flex justify-between gap-2'>
@@ -315,9 +315,8 @@ const BulkMark = ({
                                 </Table>
                             </TableContainer>
                         </div>
-
-                        {/* Action Buttons */}
-                        <div className='flex w-full  gap-2 justify-end'>
+                    </span>
+                    <div className='modalfooter'>
                             <Button
                                 size="small"
                                 onClick={() => {
@@ -340,7 +339,6 @@ const BulkMark = ({
                                 {isUpdate ? 'Update' : 'Add'}
                             </Button>
                         </div>
-                    </span>
                 </form>
             </div>
         </Modalbox>
