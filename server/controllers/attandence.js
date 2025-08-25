@@ -8,7 +8,6 @@ const { sendToClients } = require('../utils/sse');
 
 
 const webattandence = async (req, res, next) => {
-  // console.log(req.body)
   try {
     let { employeeId, departmentId, date, punchIn, punchOut, status } = req.body;
 
@@ -250,8 +249,6 @@ function normalizeDateToUTC(date) {
 const bulkMarkAttendance = async (req, res, next) => {
   try {
     const { attendanceRecords } = req.body;
-    //   console.log(attendanceRecords);
-    //  return res.status(200).json({ message: 'Bulk attendance marked successfully.' });
 
     if (!Array.isArray(attendanceRecords) || attendanceRecords.length === 0) {
       return res.status(400).json({ message: 'No attendance data provided.' });
@@ -464,7 +461,6 @@ const allAttandence = async (req, res, next) => {
 };
 
 const editattandence = async (req, res, next) => {
-  // console.log('editattandence', req.body);
   try {
     const { id, punchIn, punchOut, status } = req.body;
 
@@ -532,7 +528,6 @@ const editattandence = async (req, res, next) => {
     }
 
     data.status = status;
-    // console.log('final submit ', data)
     await data.save();
 
     res.status(200).json({

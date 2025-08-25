@@ -28,23 +28,27 @@ const ProtectedRoutes = ({ allowedRoles = [] }) => {
 
   // Ensure sidebar is always boolean
   const sidebarOpen = Boolean(user?.sidebar);
+  const extended = Boolean(user?.extendedonMobile);
 
   // Sidebar width logic
-  // const sidebarWidth = isMobile
-  //   ? sidebarOpen
-  //     ? "w-[160px]"
-  //     : "w-0"
-  //   : sidebarOpen
-  //     ? "w-[180px]"
-  //     : "w-[70px]";
-
   const sidebarWidth = isMobile
     ? sidebarOpen
-      ? "w-[60px]"   // 📱 mobile open → 60px
-      : "w-0"        // 📱 mobile closed → 0px
+      ? extended
+        ? 'w-[160px]'
+        : "w-[60px]"
+      : "w-0"
     : sidebarOpen
-      ? "w-[180px]"  // 💻 desktop open → 180px
-      : "w-[70px]";  // 💻 desktop closed → 70px
+      ? "w-[180px]"
+      : "w-[70px]";
+
+  // const sidebarWidth = isMobile
+  //   ? sidebarOpen
+  //     ? "w-[60px]"   // 📱 mobile open → 60px
+  //     : "w-0"        // 📱 mobile closed → 0px
+  //   : sidebarOpen
+  //     ? "w-[180px]"  // 💻 desktop open → 180px
+  //     : "w-[70px]";  // 💻 desktop closed → 70px
+
   return isAllowed ? (
     <div className="h-screen w-full flex bg-amber-200">
       {/* Sidebar */}

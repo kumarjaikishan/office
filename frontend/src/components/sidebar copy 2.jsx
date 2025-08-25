@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import swal from 'sweetalert';
@@ -17,10 +17,8 @@ const Sidebar = () => {
   const user = useSelector((state) => state.user);
 
   const role = user?.profile?.role;
-  const sidebarOpen = Boolean(user?.sidebar);
-  const extended = Boolean(user?.extendedonMobile);
+  const sidebarOpen = Boolean(user?.sidebar); 
   const isMobile = window.innerWidth < 600;
-
 
   const handleLogout = () => {
     swal({
@@ -36,9 +34,7 @@ const Sidebar = () => {
   };
 
   // Decide whether to show menu text
-  const showText = isMobile
-    ? sidebarOpen && extended // 📱 show text only if extended is true
-    : sidebarOpen;            // 💻 show text if sidebarOpen is true
+  const showText = !isMobile && sidebarOpen; // ✅ only show text on large screen when sidebarOpen=true
 
   return (
     <div className="w-full h-full px-1 md:px-2">
@@ -89,7 +85,7 @@ const Sidebar = () => {
                   className={({ isActive }) =>
                     `flex w-full mb-1 items-center rounded text-gray-600 
                         ${showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"} 
-                        ${isActive ? "bg-primary text-white" : ""}`
+                        ${isActive ? "bg-teal-700 text-white" : ""}`
                   }
                 >
                   <span className="text-[18px]">{item.icon}</span>
@@ -123,7 +119,7 @@ const menu = [
     title: 'Others',
     items: [
       { menu: "Profile", link: '/dashboard/profile', icon: <FaUserCircle />, roles: ['admin', 'superadmin', 'manager', 'employee'] },
-      { menu: "Setting", link: '/dashboard/setting', icon: <FiSettings />, roles: ['admin', 'superadmin', 'manager', 'employee'] },
+      { menu: "Setting", link: '/admin-dashboard/setting', icon: <FiSettings />, roles: [] },
       { menu: "Logout", isLogout: true, icon: <CgLogOut />, roles: ['admin', 'employee', 'superadmin', 'developer', 'manager'] }
     ]
   }

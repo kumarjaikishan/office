@@ -3,8 +3,6 @@ const companymodal = require('../models/company')
 
 const addholiday = async (req, res) => {
     const { name, fromDate, toDate, type, description } = req.body;
-    // console.log(req.user);
-    // return  res.json({ message: 'Holiday added successfully' });
 
     if (!name || !fromDate || !toDate) {
         return res.status(400).json({ message: 'All fields are required' });
@@ -35,7 +33,6 @@ const deleteholiday = async (req, res) => {
 };
 const updateholiday = async (req, res) => {
     const { holidayId, name, fromDate, toDate, type, description } = req.body;
-    console.log(req.body)
     if (!holidayId || !name || !fromDate || !toDate) {
         return res.status(400).json({ message: 'All fields are required' });
     }

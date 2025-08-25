@@ -9,7 +9,7 @@ import { NotificationIcon } from './popover';
 import { FaBarsStaggered } from "react-icons/fa6";
 import { NotificationIcon1 } from './muipopover';
 import { useLocation } from 'react-router-dom';
-import { tooglesidebar } from '../../store/userSlice';
+import { toogleextendedonMobile, tooglesidebar } from '../../store/userSlice';
 
 const Navbar = () => {
   const location = useLocation();
@@ -37,7 +37,7 @@ const Navbar = () => {
     "attandence": "Attendance",
     "salary": "Salary",
     "department": "Department",
-    "setting": "Company Settings",
+    "setting": "Settings",
     "faceatten": "Face Attendance",
     "performance/:userid": "Performance",
     "empattandence": "Attendance",

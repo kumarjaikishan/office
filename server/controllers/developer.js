@@ -43,8 +43,6 @@ const addUser = async (req, res, next) => {
 }
 
 const editUser = async (req, res, next) => {
-    // console.log(req.body);
-    // console.log(permission.superAdmin)
     const { name, email, password } = req.body;
     return res.status(200).json({
         message: "User created"
@@ -80,10 +78,8 @@ const deleteUser = async (req, res, next) => {
     }
 }
 const adddefaultpermission = async (req, res, next) => {
-    // console.log(permission)
     try {
         await permissionschema.insertMany(permission);
-        // console.log("Permissions inserted successfully");
     } catch (error) {
         console.log(error.message)
         return next({ status: 500, message: error.message });
@@ -104,10 +100,6 @@ const getdefaultpermission = async (req, res, next) => {
 
 const updatedefaultpermission = async (req, res, next) => {
     const { id } = req.params;
-    // console.log(req.body);
-    // return res.status(200).json({
-    //     message: 'updated'
-    // })
 
     try {
         const defaulte = await permissionschema.findByIdAndUpdate(id, {

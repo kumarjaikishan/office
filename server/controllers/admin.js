@@ -24,7 +24,6 @@ cloudinary.config({
 });
 
 const addDepartment = async (req, res, next) => {
-    // console.log('add depart',req.user)
     try {
         const { branchId, department, description } = req.body;
         if (!department) {
@@ -47,7 +46,6 @@ const addDepartment = async (req, res, next) => {
     }
 }
 const updatedepartment = async (req, res, next) => {
-    // console.log(req.body)
     try {
         const { department, description, departmentId } = req.body;
         if (!department || !departmentId) {
@@ -69,7 +67,6 @@ const updatedepartment = async (req, res, next) => {
     }
 }
 const deletedepartment = async (req, res, next) => {
-    // console.log(req.body)
     try {
         const { departmentId } = req.body;
         if (!departmentId) {
@@ -127,8 +124,6 @@ const addemployee = async (req, res, next) => {
 
         let createUser = new usermodal({ companyId: req.user.companyId, name: employeeName, email, role, password });
         let resulten = await createUser.save({ session });
-        // console.log("createUser",createUser)
-        // console.log("usersave",resulten)
 
         // Step 2: Upload profile image to Cloudinary
         let uploadResult = null;
@@ -171,7 +166,6 @@ const addemployee = async (req, res, next) => {
 }
 
 const updateemployee = async (req, res, next) => {
-    // console.log(req.body);
     try {
         const { employeeId, employeeName, branchId, department, email, username, designation,
             phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary = 0, achievements,
@@ -183,7 +177,6 @@ const updateemployee = async (req, res, next) => {
 
         // Get existing employee data (to keep old image if no new one uploaded)
         const existingEmployee = await employeeModal.findById(employeeId);
-        // console.log("existingEmployee",existingEmployee)
         if (!existingEmployee) {
             return next({ status: 404, message: "Employee not found" });
         }
@@ -270,7 +263,6 @@ const updateemployee = async (req, res, next) => {
 };
 
 const enrollFace = async (req, res, next) => {
-    // console.log(req.body)
     try {
         const { employeeId, descriptor } = req.body;
         if (!employeeId || !descriptor || !Array.isArray(descriptor) || descriptor.length !== 128) {
@@ -313,7 +305,6 @@ const deletefaceenroll = async (req, res, next) => {
     }
 }
 const deleteemployee = async (req, res, next) => {
-    // console.log(req.body)
     try {
         const { employeeId } = req.body;
         if (!employeeId) {
@@ -351,7 +342,6 @@ const employeelist = async (req, res, next) => {
             .populate('department', 'department')
             .populate('userid', 'email');
         const departmentlist = await departmentModal.find().select('department');
-        // console.log(query)
 
         res.status(200).json({
             list: query,
@@ -506,7 +496,6 @@ const editAdmin = async (req, res, next) => {
             { new: true, session }
         );
         await redisClient.del(`permissions:${id}`);
-        // console.log("cached removed form redis")
 
         await session.commitTransaction();
         session.endSession();
@@ -541,7 +530,6 @@ const firstfetch = async (req, res, next) => {
         let ledger = [];
 
         if (req.user.role == 'manager') {
-            // console.log("first fetch manager check", req.user)
 
             branches = await branch.find({ companyId: req.user.companyId })
                 .populate({
@@ -645,16 +633,6 @@ const firstfetch = async (req, res, next) => {
         if (branches?.length) response.branch = branches;
         if (adminManager?.length) response.adminManager = adminManager;
         res.status(200).json(response);
-        // res.status(200).json({
-        //     user: req.user,
-        //     company: companye || null,
-        //     branch: branches,
-        //     departmentlist,
-        //     adminManager,
-        //     employee: employees,
-        //     attendance,
-        //     holidays,
-        // });
 
     } catch (error) {
         console.error(error);
@@ -779,7 +757,6 @@ const addBranch = async (req, res, next) => {
 
 const editBranch = async (req, res, next) => {
     const { _id, name, location, companyId, defaultsetting, managerIds = [] } = req.body;
-    // console.log(req.body)
 
     try {
         const existingBranch = await branch.findById(_id);
@@ -790,11 +767,9 @@ const editBranch = async (req, res, next) => {
             name, location, companyId, managerIds, defaultsetting
         }
         if (!defaultsetting) {
-            console.log("setting set kiya")
             const setting = req.body.setting
             updateDoc.setting = setting
         } else {
-            console.log("setting removed  kiya")
             updateDoc.$unset = { setting: 1 };
         }
 
@@ -835,7 +810,6 @@ const editBranch = async (req, res, next) => {
 
 const deleteBranch = async (req, res, next) => {
     const { _id, name, location, companyId, managerIds = [] } = req.body;
-    console.log(req.body)
 
     try {
         const existingBranch = await branch.findById(_id);
@@ -847,10 +821,10 @@ const deleteBranch = async (req, res, next) => {
         const newManagerIds = managerIds.map(id => id.toString());
 
         const removedManagerIds = previousManagerIds.filter(id => !newManagerIds.includes(id));
-        console.log("removed id", removedManagerIds);
+        // console.log("removed id", removedManagerIds);
 
         const addedManagerIds = newManagerIds.filter(id => !previousManagerIds.includes(id));
-        console.log("new to be added id", addedManagerIds);
+        // console.log("new to be added id", addedManagerIds);
 
         await branch.findByIdAndUpdate(_id, { name, location, companyId, managerIds });
 
@@ -882,7 +856,6 @@ const deleteBranch = async (req, res, next) => {
 
 
 const getemployee = async (req, res, next) => {
-    // console.log(req.query)
     const { empid } = req.query;
     try {
         const employe = await employeeModal.findById(empid)
@@ -900,7 +873,6 @@ const getemployee = async (req, res, next) => {
     }
 };
 const updatepassword = async (req, res, next) => {
-    console.log(req.body)
     const { userid, pass } = req.body.pass;
 
     if (!userid || !pass) {
@@ -922,7 +894,6 @@ const updatepassword = async (req, res, next) => {
 };
 
 const leavehandle = async (req, res, next) => {
-    // console.log(req.body)
     let { leaveid, status } = req.body;
 
     if (!leaveid || !status) return next({ status: 400, message: "Leave id and status is required" });

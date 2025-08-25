@@ -1,14 +1,11 @@
-import { createTheme } from '@mui/material/styles';
-const primarycolor = '#00786f';
-const inputlabelcolor = 'rgb(32, 32, 32)';
+// theme.js (just a helper)
+import { createTheme } from "@mui/material/styles";
 
-const theme = createTheme({
-  
-  palette: {
-    primary: {
-      main: primarycolor,
+export const getTheme = (primaryColor = "#115e59") =>
+  createTheme({
+    palette: {
+      primary: {
+        main: primaryColor,
+      },
     },
-  },
-});
-
-export default theme;
+  });

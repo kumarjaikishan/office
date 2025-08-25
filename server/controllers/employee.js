@@ -21,7 +21,6 @@ const addleave = async (req, res, next) => {
 
   try {
     const whichemployee = await employee.findOne({ userid: req.user.id });
-    // console.log("whichemployee",whichemployee)
 
     // Calculate duration in days (inclusive)
     const from = new Date(fromDate);
@@ -61,7 +60,6 @@ const getleave = async (req, res, next) => {
   }
 };
 const fetchleave = async (req, res, next) => {
-  console.log(req.user)
   try {
     let leave;
     if (req.user.role == 'manager') {
@@ -83,7 +81,6 @@ const fetchleave = async (req, res, next) => {
         }
       });
     }
-    // console.log(leave)
     return res.json({ leave });
 
   } catch (error) {
@@ -104,7 +101,6 @@ const employeefetch = async (req, res, next) => {
     const holiday = await holidayschema.find({ companyId: employeeee.branchId.companyId });
     const companySetting = await companySchema.findById(employeeee.branchId.companyId);
 
-    // console.log(employeeee)
     return res.status(200).json({ profile: employeeee, holiday, notification, leave, attendance, companySetting });
 
   } catch (error) {
@@ -121,7 +117,6 @@ const updatenotification = async (req, res, next) => {
     );
 
 
-    // console.log(employeeee)
     return res.status(200).json({ message: "Marked Read" });
 
   } catch (error) {

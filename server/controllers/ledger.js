@@ -78,7 +78,6 @@ exports.updateLedger = async (req, res) => {
     if (name) {
       ledger.name = name;
     }
-    console.log(ledger)
     await ledger.save();
     res.json({ message: "Ledger updated successfully" });
 

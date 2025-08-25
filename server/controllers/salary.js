@@ -33,7 +33,6 @@ const salaryfetch = async (req, res, next) => {
                  select:'department'
             }
         });
-        console.log(result)
         if (!result) {
             return next({ status: 400, message: "Something went wrong" });
         }

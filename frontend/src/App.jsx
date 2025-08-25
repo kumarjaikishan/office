@@ -5,6 +5,7 @@ import { useEffect, Suspense, lazy } from 'react';
 import { FirstFetch } from '../store/userSlice';
 import { empFirstFetch } from '../store/employee';
 import ProtectedRoutes from './utils/protectedRoute';
+import { GoGear } from 'react-icons/go';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -22,7 +23,7 @@ const Attandence = lazy(() => import('./pages/admin/attandence/Attandence'));
 const AttenPerformance = lazy(() => import('./pages/admin/attandence/AttenPerformance'));
 const Adminleave = lazy(() => import('./pages/admin/leave/Adminleave'));
 const HolidayForm = lazy(() => import('./pages/holidays/Holiday'));
-const CompanySettingForm = lazy(() => import('./pages/settingPage'));
+const Setting = lazy(() => import('./pages/settingPage'));
 const FaceAttandance = lazy(() => import('./pages/admin/facerecoginaion/faceAttandance'));
 const LedgerListPage = lazy(() => import('./pages/admin/ledger/ledgerpagelist'));
 const LedgerDetailPage = lazy(() => import('./pages/admin/ledger/ledgerdetailpage'));
@@ -54,7 +55,7 @@ const routesByRole = {
       <Route path="attandence" element={<Attandence />} />
       <Route path="holiday" element={<HolidayForm />} />
       <Route path="leave" element={<Adminleave />} />
-      <Route path="setting" element={<CompanySettingForm />} />
+      <Route path="setting" element={<Setting />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
@@ -73,7 +74,7 @@ const routesByRole = {
       <Route path="attandence" element={<Attandence />} />
       <Route path="holiday" element={<HolidayForm />} />
       <Route path="leave" element={<Adminleave />} />
-      <Route path="setting" element={<CompanySettingForm />} />
+      <Route path="setting" element={<Setting />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
@@ -140,7 +141,24 @@ function App() {
   return (
     <>
       <ToastContainer closeOnClick />
-      <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
+      <Suspense
+        fallback={<div className="flex items-center justify-center h-screen w-screen bg-white">
+          <div className="relative">
+            <GoGear
+              className="animate-spin"
+              style={{ animationDuration: "2.5s" }}
+              size={60}
+              color="teal"
+            />
+            <GoGear
+              className="absolute -bottom-4 left-0 animate-spin"
+              style={{ animationDuration: "3s" }}
+              size={25}
+              color="teal"
+            />
+          </div>
+        </div>}
+      >
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Navigate to="/dashboard" />} />

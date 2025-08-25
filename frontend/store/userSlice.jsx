@@ -28,7 +28,9 @@ const userSlice = createSlice({
         ledger: null,
         salary: null,
         status: 'idle',
-        sidebar: true
+        sidebar: false,
+        extendedonMobile: false,
+        primaryColor: '#115e59',
     },
     reducers: {
         userlogout(state, action) {
@@ -43,7 +45,6 @@ const userSlice = createSlice({
             state.attandence = null;
             state.ledger = null;
             state.salary = null;
-            state.sidebar = true;
         },
         updateAttendance(state, action) {
             state.attandence = action.payload;
@@ -53,6 +54,12 @@ const userSlice = createSlice({
         },
         tooglesidebar(state, action) {
             state.sidebar = !state.sidebar;
+        },
+        setPrimaryColor(state, action) {
+            state.primaryColor = action.payload;
+        },
+        toogleextendedonMobile(state, action) {
+            state.extendedonMobile = !state.extendedonMobile;
         },
         
     },
@@ -76,5 +83,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout,updateAttendance,setuser,tooglesidebar } = userSlice.actions;
+export const { userlogout,updateAttendance,setPrimaryColor,setuser,tooglesidebar,toogleextendedonMobile } = userSlice.actions;
 export default userSlice.reducer;

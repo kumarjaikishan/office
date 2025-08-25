@@ -23,7 +23,7 @@ const EmployeeProfile = () => {
   const [profile, setprofile] = useState(null)
 
   useEffect(() => {
-    console.log("employe ke profile me");
+    // console.log("employe ke profile me");
     // console.log(employeee.profile);
 
     if (employeee?.profile) {
