@@ -77,7 +77,9 @@ const Main = () => {
     const connectEventSource = () => {
       // eventSource = new EventSource('http://localhost:5000/events');
       // console.log("see address", import.meta.env.VITE_SSE_ADDRESS)
-      eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
+      // eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
+      eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events?token=${localStorage.getItem("emstoken")}`);
+      
 
 
       eventSource.onopen = () => {
@@ -157,7 +159,7 @@ const Main = () => {
       };
     };
 
-    connectEventSource(); // Initial connect
+    // connectEventSource(); // Initial connect
 
     return () => {
       if (eventSource) eventSource.close();

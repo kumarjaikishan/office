@@ -6,6 +6,7 @@ import { IoEyeOutline } from "react-icons/io5";
 import { Avatar, Box, Typography } from "@mui/material";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { FaRegUser } from "react-icons/fa";
+import { FirstFetch } from "../../../../store/userSlice";
 
 export const columns = [
     {
@@ -33,7 +34,7 @@ export const columns = [
 ]
 
 
-export const addemployee = async ({ formData, setisload, setInp, setopenmodal, init, resetPhoto }) => {
+export const addemployee = async ({ formData,dispatch, setisload, setInp, setopenmodal, init, resetPhoto }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -53,6 +54,7 @@ export const addemployee = async ({ formData, setisload, setInp, setopenmodal, i
         setInp(init);
         resetPhoto();
         setopenmodal(false);
+        dispatch(FirstFetch())
     } catch (error) {
         console.log(error);
         if (error.response) {
@@ -66,7 +68,7 @@ export const addemployee = async ({ formData, setisload, setInp, setopenmodal, i
 };
 
 
-export const employeeupdate = async ({ formData, inp, setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
+export const employeeupdate = async ({ formData,dispatch,  setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -81,11 +83,12 @@ export const employeeupdate = async ({ formData, inp, setEmployeePhoto, setisloa
             }
         );
 
-        console.log('Query:', res);
+        // console.log('Query:', res);
         toast.success(res.data.message, { autoClose: 1200 });
         setEmployeePhoto(null)
         setInp(init);
         setopenmodal(false);
+        dispatch(FirstFetch())
     } catch (error) {
         console.log(error);
         if (error.response) {

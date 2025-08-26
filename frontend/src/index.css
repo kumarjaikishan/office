@@ -20,6 +20,14 @@
     background-color: var(--color-primary);
 }
 
+.text-primary {
+    color: var(--color-primary);
+}
+
+input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
 *::-webkit-scrollbar {
     width: 3px;
     height: 6px;
@@ -155,4 +163,23 @@ body {
 
 .MuiChartsLegend-root.MuiChartsLegend-vertical {
     display: none;
+}
+
+@media (max-width: 600px) {
+    .membermodal {
+        max-height: 90vh;
+
+        form,
+        .whole {
+
+            .modalcontent {
+                max-height: 500px;
+                gap: 15px;
+                padding: 20px 10px;
+                padding-bottom: 10px;
+
+            }
+
+        }
+    }
 }

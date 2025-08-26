@@ -325,7 +325,7 @@ const LedgerListPage = () => {
                             </div>
                         </span>
                         <div className="modalfooter">
-                            <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+                            <Button variant="outlined" onClick={() => setEditOpen(false)}>Cancel</Button>
                             <Button disabled={loading} variant="contained" onClick={handleSaveLedger}>
                                 {editLedgerId ? "Update" : "Create"}
                             </Button>

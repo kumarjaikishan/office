@@ -528,6 +528,8 @@ const firstfetch = async (req, res, next) => {
         let attendance = [];
         let holidays = [];
         let ledger = [];
+        // let permissionName=[];
+        // let defaultRolePermission=[];
 
         if (req.user.role == 'manager') {
 
@@ -547,7 +549,7 @@ const firstfetch = async (req, res, next) => {
                 .sort({ department: 1 });
 
             employees = await employeeModal.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
-                .populate('departmentId', 'department')
+                .populate('department', 'department')
                 .populate('userid')
                 .sort({ employeename: 1 });
 
@@ -577,7 +579,7 @@ const firstfetch = async (req, res, next) => {
             branches = await branch.find({ companyId: compId })
                 .populate({
                     path: 'managerIds',
-                    select: 'name profileimage',
+                    select: 'name profileImage',
                 });
 
             departmentlist = await departmentModal.find({ companyId: compId })
@@ -607,7 +609,9 @@ const firstfetch = async (req, res, next) => {
                     select: 'reason',
                 });
             holidays = await holidaymodal.find({ companyId: compId });
+            // await usermodal.find({})
         }
+
         ledger = await Ledger.find({ userId: req.user.id });
         const ledgersWithBalance = await Promise.all(
             ledger.map(async (ledger) => {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button, IconButton, TextField, MenuItem } from "@mui/material";
-import { MdExpandLess, MdExpandMore, MdDelete } from "react-icons/md";
+import { MdExpandLess, MdExpandMore, MdDelete, MdEdit } from "react-icons/md";
 import Modalbox from "../../components/custommodal/Modalbox";
 import { toast } from "react-toastify";
 
@@ -14,12 +14,18 @@ const Permission = () => {
         roleid: "",
         modules: {},
     });
-    const [moduleToAdd, setModuleToAdd] = useState("");
-
     // Final allowed modules (whitelist)
-    const AllPermissionNames = ["attandence", "branch", "department", "employee",
-        "ledgerentry", "holiday", "leave", "ledger", "notification", "salary",
-    ];
+    // const AllPermissionNames = ["branch", "department", "employee", "attandence",
+    //     "ledger", "ledger_entry", "holiday", "leave", "notification", "salary",
+    // ];
+    const [moduleToAdd, setModuleToAdd] = useState("");
+    const [modules, setModules] = useState(null);
+    const [newModule, setNewModule] = useState("");
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editValue, setEditValue] = useState("");
+    
+    const AllPermissionNames = modules;
+
 
     const PERMISSION_LABELS = {
         1: "Read", 2: "Create", 3: "Update", 4: "Delete",
@@ -34,7 +40,9 @@ const Permission = () => {
                 `${import.meta.env.VITE_API_ADDRESS}permission`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setPermission(res.data.permission);
+            // console.log(res.data)
+            setPermission(res.data?.permission);
+            setModules(res.data.permissionnames?.AllPermissionNames);
         } catch (error) {
             console.log(error);
             toast.warn(error.response?.data?.message || "Error", { autoClose: 3000 });
@@ -54,7 +62,7 @@ const Permission = () => {
         // clone only modules that are in the allowed list (defensive)
         const sanitized = Object.fromEntries(
             Object.entries(per.modules || {}).filter(([m]) =>
-                AllPermissionNames.includes(m)
+                AllPermissionNames?.includes(m)
             )
         );
         setForm({
@@ -83,7 +91,7 @@ const Permission = () => {
     };
 
     // Only allow adding modules from whitelist and not already present
-    const availableModules = AllPermissionNames.filter(
+    const availableModules = AllPermissionNames?.filter(
         (m) => !Object.prototype.hasOwnProperty.call(form.modules, m)
     );
 
@@ -92,7 +100,7 @@ const Permission = () => {
             toast.warn("Please select a module to add");
             return;
         }
-        if (!AllPermissionNames.includes(moduleToAdd)) {
+        if (!AllPermissionNames?.includes(moduleToAdd)) {
             toast.warn("Invalid module (not allowed)");
             return;
         }
@@ -122,7 +130,7 @@ const Permission = () => {
             const cleanedModules = Object.fromEntries(
                 Object.entries(form.modules)
                     .filter(
-                        ([m, levels]) => AllPermissionNames.includes(m) && levels.length > 0
+                        ([m, levels]) => AllPermissionNames?.includes(m) && levels.length > 0
                     )
                     .map(([m, levels]) => [m, [...new Set(levels)].sort()])
             );
@@ -152,8 +160,129 @@ const Permission = () => {
         setSelectedRole(null);
     };
 
+    const addModulee = () => {
+        if (!newModule.trim()) return;
+        if (modules.includes(newModule)) return alert("Already exists!");
+        setModules([...modules, newModule.trim()]);
+        setNewModule("");
+    };
+
+    const deleteModule = (index) => {
+        const updated = [...modules];
+        updated.splice(index, 1);
+        setModules(updated);
+    };
+
+    const saveEdit = (index) => {
+        if (!editValue.trim()) return;
+        const updated = [...modules];
+        updated[index] = editValue.trim();
+        setModules(updated);
+        setEditingIndex(null);
+        setEditValue("");
+    };
+    const saveModule = async () => {
+        // console.log(modules)
+        // return
+        try {
+
+            const token = localStorage.getItem("emstoken");
+            const res = await axios.put(
+                `${import.meta.env.VITE_API_ADDRESS}saveModule`,
+                { modules },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(res.data.message || "Updated successfully", {
+                autoClose: 2000,
+            });
+            fetche();
+        } catch (error) {
+            console.log(error);
+            toast.warn(error.response?.data?.message || "Update failed", {
+                autoClose: 3000,
+            });
+        }
+    }
+
     return (
         <div>
+            <div >
+                <div
+                    className={`flex w-full my-2 justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md`}
+                    onClick={() => toggleSection('module')}
+                >
+                    <span className="font-semibold text-[16px] md:text-lg text-left">
+                        Permission Modules
+                    </span>
+                    {openSection === `module` ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+                {openSection === `module` && <>
+                    {/* Add new */}
+                    <div className="flex gap-2 mb-4">
+                        <TextField
+                            size="small"
+                            label="New Module"
+                            value={newModule}
+                            onChange={(e) => setNewModule(e.target.value)}
+                        />
+                        <Button variant="contained" onClick={addModulee}>
+                            Add
+                        </Button>
+
+                        <Button variant="contained" onClick={saveModule}>
+                            Save Module
+                        </Button>
+                    </div>
+
+                    {/* List */}
+                    <table className="min-w-full border text-sm">
+                        <thead>
+                            <tr>
+                                <th className="border p-2 text-left">Module</th>
+                                <th className="border p-2 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {modules.map((mod, i) => (
+                                <tr key={i}>
+                                    <td className="border p-1 capitalize">
+                                        {editingIndex === i ? (
+                                            <TextField
+                                                size="small"
+                                                value={editValue}
+                                                onChange={(e) => setEditValue(e.target.value)}
+                                            />
+                                        ) : (
+                                            mod
+                                        )}
+                                    </td>
+                                    <td className="border p-1 text-center">
+                                        {editingIndex === i ? (
+                                            <Button variant="contained" size="small" onClick={() => saveEdit(i)}>
+                                                Save
+                                            </Button>
+                                        ) : (
+                                            <>
+                                                <IconButton color="primary" onClick={() => { setEditingIndex(i); setEditValue(mod); }}>
+                                                    <MdEdit />
+                                                </IconButton>
+                                                <IconButton color="error" onClick={() => deleteModule(i)}>
+                                                    <MdDelete />
+                                                </IconButton>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </>}
+            </div>
+
             <div className="flex flex-col">
                 {permission?.map((per, ind) => (
                     <div key={per._id}>
@@ -227,12 +356,12 @@ const Permission = () => {
                                     onChange={(e) => setModuleToAdd(e.target.value)}
                                     sx={{ minWidth: 200 }}
                                 >
-                                    {availableModules.length === 0 ? (
+                                    {availableModules?.length === 0 ? (
                                         <MenuItem disabled value="">
                                             No modules available
                                         </MenuItem>
                                     ) : (
-                                        availableModules.map((m) => (
+                                        availableModules?.map((m) => (
                                             <MenuItem key={m} value={m} className="capitalize">
                                                 {m}
                                             </MenuItem>
@@ -261,7 +390,7 @@ const Permission = () => {
                                         {Object.keys(form.modules)
                                             .sort(
                                                 (a, b) =>
-                                                    AllPermissionNames.indexOf(a) - AllPermissionNames.indexOf(b)
+                                                    AllPermissionNames?.indexOf(a) - AllPermissionNames?.indexOf(b)
                                             )
                                             .map((module) => {
                                                 const levels = form.modules[module] || [];
@@ -302,7 +431,7 @@ const Permission = () => {
                     </form>
                 </div>
             </Modalbox>
-        </div>
+        </div >
     );
 };
 

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { MdEdit, MdDelete, MdOutlineModeEdit } from "react-icons/md";
+import { MdEdit, MdDelete, MdOutlineModeEdit, MdExpandLess, MdExpandMore } from "react-icons/md";
 import useImageUpload from "../../../utils/imageresizer";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { IoIosArrowDown } from "react-icons/io";
-import { Avatar, TextField } from "@mui/material";
+import { Avatar, Button, TextField } from "@mui/material";
 import Modalbox from "../../../components/custommodal/Modalbox";
 
 // Permission labels
@@ -15,35 +15,30 @@ const PERMISSION_LABELS = {
     4: "Delete",
 };
 
-const AllPermissionNames = [
-    "attandence", "branch", "department", "employee", "ledgerentry",
-    "holiday", "leave", "ledger", "notification", "salary"];
-
-// const adminPermission = Object.fromEntries(
-//   AllPermissionNames.map((name) => [name, [1, 2, 3, 4]])
-// );
+const AllPermissionNames = ["branch", "department", "employee", "attandence",
+    "ledger", "ledger_entry", "holiday", "leave", "notification", "salary"];
 
 const adminPermission = {
-    attandence: [1, 2, 3, 4], // 1 = read, 2 =create, 3 =update, 4= delete
-    branch: [1, 2, 3, 4],
+    branch: [1, 2, 3, 4], // 1 = read, 2 =create, 3 =update, 4= delete
     department: [1, 2, 3, 4],
     employee: [1, 2, 3, 4],
-    ledgerentry: [1, 2, 3, 4],
+    attandence: [1, 2, 3, 4],
+    ledger: [1, 2, 3, 4],
+    ledger_entry: [1, 2, 3, 4],
     holiday: [1, 2, 3, 4],
     leave: [1, 3, 4],
-    ledger: [1, 2, 3, 4],
     notification: [1, 2, 3, 4],
     salary: [1, 2, 3],
 }
 
 const managerPermission = {
+    department: [1, 2, 3],
     employee: [1, 2, 3],
     attandence: [1, 2, 3],
-    department: [1, 2, 3],
+    ledger: [1, 2, 3, 4],
+    ledger_entry: [1, 2, 3, 4],
     holiday: [1, 2],
     leave: [1, 3],
-    ledger: [1, 2, 3, 4],
-    ledgerentry: [1, 2, 3, 4],
     notification: [1, 2],
     salary: [1],
 };
@@ -93,10 +88,8 @@ export default function SuperAdminDashboard() {
 
     const handleSave = async () => {
         const newEntry = { ...form };
-        console.log(form)
-        //  return
         const formData = new FormData();
-
+        setisload(true)
         try {
             const resizedFile = newEntry.profileImage
                 ? await handleImage(300, newEntry.profileImage)
@@ -129,7 +122,7 @@ export default function SuperAdminDashboard() {
             });
 
             toast.success(res.data.message, { autoClose: 1200 });
-            console.log(res.data)
+            // console.log(res.data)
             resetForm();
             fetech(); // refresh list
 
@@ -257,17 +250,18 @@ export default function SuperAdminDashboard() {
         <div className="p-1 w-full">
             {/* Admin List */}
             <div className="bg-white shadow-md rounded-lg p-2">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-[16px] md:text-xl font-semibold">Admin Management</h2>
-                    <button
-                        className="bg-blue-600 text-white px-3 md:px-4 py-1 md:py-2 rounded hover:bg-blue-700"
+                <div className="flex justify-between flex-wrap items-center mb-4">
+                    <h2 className="text-[16px] mb-2 md:mb-0 md:text-xl font-semibold">Admin/Manager Management</h2>
+
+                    <Button variant="contained"
+                        className='mr-2 w-full md:w-fit'
                         onClick={() => {
                             resetForm();
                             setShowForm(true);
                         }}
                     >
-                        Add Admin
-                    </button>
+                        Add Admin/ Manager
+                    </Button>
                 </div>
                 {admins.length === 0 ? (
                     <p className="text-gray-500">No admins added yet.</p>
@@ -308,12 +302,17 @@ export default function SuperAdminDashboard() {
                                 </div>
 
                                 <div className="w-full">
-                                    <button
+                                    <div
+                                        className="flex mt-2 justify-between items-center cursor-pointer bg-teal-100 px-4 py-1 rounded-md"
                                         onClick={() => toggleExpand(index)}
-                                        className="text-blue-600 cursor-pointer text-sm mt-1 "
                                     >
-                                        {expandedIndex === index ? "Hide Permissions" : `View Permissions `}
-                                    </button>
+                                        <span className="font-semibold text-[16px] md:text-lg text-left"> {expandedIndex === index ? "Hide Permissions" : `View Permissions `}</span>
+                                        {expandedIndex === index ? (
+                                            <MdExpandLess className="text-xl" />
+                                        ) : (
+                                            <MdExpandMore className="text-xl" />
+                                        )}
+                                    </div>
 
                                     {expandedIndex === index && (
                                         <div className="text-sm w-full  mt-2">
@@ -426,12 +425,12 @@ export default function SuperAdminDashboard() {
                                                 </option>
                                             ))}
                                         </select>
-                                        <button
+
+                                        <Button variant="contained"
                                             onClick={handleAddModule}
-                                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                                         >
-                                            Add
-                                        </button>
+                                            Add Module
+                                        </Button>
                                     </div>
                                 )}
 
@@ -455,10 +454,9 @@ export default function SuperAdminDashboard() {
                                                         {Object.keys(PERMISSION_LABELS).map((level) => (
                                                             <td key={level} className="border text-center">
                                                                 <input
-                                                                    className="h-3 w-3 md:h-5 md:w-5 cursor-pointer rounded-md border-2 border-gray-400 
-                                                             checked:bg-teal-600 checked:border-teal-600 
-                                                             focus:ring-2 focus:ring-teal-400 focus:outline-none 
-                                                             transition duration-200 ease-in-out"
+                                                                    className=" h-3 w-3 md:h-5 md:w-5 cursor-pointer rounded-md border-2 border-gray-400 
+                                                                       focus:ring-2 focus:ring-red-400 focus:outline-none 
+                                                                       transition duration-200 ease-in-out"
                                                                     type="checkbox"
                                                                     checked={form.permissions[module]?.includes(Number(level)) || false}
                                                                     onChange={() => togglePermission(module, Number(level))}
@@ -474,19 +472,20 @@ export default function SuperAdminDashboard() {
                             </div>
                         </span>
                         <div className="modalfooter">
-                                <button
-                                    className="px-4 py-1 border rounded hover:bg-gray-100"
-                                    onClick={resetForm}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    onClick={handleSave}
-                                >
-                                    {editingIndex !== null ? "Update" : "Create"}
-                                </button>
-                            </div>
+                            <Button variant="outlined"
+                                onClick={resetForm}
+                            >
+                                Cancel
+                            </Button>
+                            <Button variant="contained"
+                                onClick={handleSave}
+                                loading={isload}
+                            >
+                                {editingIndex !== null ? "Update" : "Create"}
+                            </Button>
+
+
+                        </div>
                     </form>
                 </div>
             </Modalbox>

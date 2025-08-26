@@ -10,7 +10,7 @@ import { toast } from 'react-toastify'
 import Modalbox from '../../../components/custommodal/Modalbox'
 import { GoPlus } from 'react-icons/go'
 import { useSelector } from 'react-redux'
-import { customStyles } from '../../admin/attandence/attandencehelper'
+import { useCustomStyles } from '../../admin/attandence/attandencehelper'
 
 const EmpLeave = () => {
     const init = {
@@ -69,7 +69,7 @@ const EmpLeave = () => {
                 </div>
             </div>
             <DataTable
-                customStyles={customStyles}
+                customStyles={useCustomStyles()}
                 columns={columns}
                 data={leaverequest}
                 pagination

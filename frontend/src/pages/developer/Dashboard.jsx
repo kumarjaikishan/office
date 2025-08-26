@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import DataTable from 'react-data-table-component'
-import { customStyles } from '../admin/attandence/attandencehelper'
+import { useCustomStyles } from '../admin/attandence/attandencehelper'
 import { BiMessageRoundedError } from 'react-icons/bi'
 import dayjs from 'dayjs'
 import { Button, TextField } from '@mui/material'
@@ -111,7 +111,24 @@ const DeveloperDashboard = () => {
     }
 
     const saveedit = async () => {
-
+        // console.log(inp);
+        try {
+            const token = localStorage.getItem('emstoken')
+            const res = await axios.put(`${import.meta.env.VITE_API_ADDRESS}User/${inp.userid}`,
+                { name:inp.name, email:inp.email },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            setpassmodal(false)
+            fetche();
+            toast.success(res.data.message, { autoClose: 1800 });
+        } catch (error) {
+            console.log(error);
+            toast.warn(error.response?.data?.message || 'Error', { autoClose: 3000 });
+        }
     }
 
     const cancel = () => {
@@ -119,13 +136,12 @@ const DeveloperDashboard = () => {
         setinp(init);
         setisedit(false);
     }
-    
+
     const columns = [
         {
             name: "S.No",
             selector: (row, index) => index + 1,
             width: "60px",
-            center: true,
         },
         {
             name: "Name",
@@ -184,7 +200,7 @@ const DeveloperDashboard = () => {
                 columns={columns}
                 data={users}
                 pagination
-                customStyles={customStyles}
+                customStyles={useCustomStyles()}
                 highlightOnHover
                 noDataComponent={
                     <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">

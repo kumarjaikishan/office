@@ -15,6 +15,7 @@ import { getLedgerColumns } from './ledgerhelper';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { CiFilter } from 'react-icons/ci';
 import Modalbox from '../../../components/custommodal/Modalbox';
+import { useCustomStyles } from '../attandence/attandencehelper';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -209,7 +210,7 @@ const LedgerDetailPage = () => {
                         <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName} src={profile} />
                         <h2 className="text-2xl font-semibold text-teal-700 capitalize">{ledgerName}</h2>
                     </div>
-                    <Button className=' w-full md:w-auto' onClick={() => navigate(-1)} variant="contained">Master Sheet</Button>
+                    <Button className=' w-full md:w-auto' onClick={() => navigate(-1)} variant="contained">Ledger Page</Button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -306,6 +307,7 @@ const LedgerDetailPage = () => {
                     columns={getLedgerColumns(handleEditEntry, handleDeleteEntry)}
                     data={filtered || []}
                     pagination
+                    customStyles={useCustomStyles()}
                     highlightOnHover
                     noDataComponent="No entries found for selected filters."
                     paginationPerPage={10}

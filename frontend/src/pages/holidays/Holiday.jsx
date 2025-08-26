@@ -12,7 +12,7 @@ import { AiOutlineDelete } from 'react-icons/ai';
 import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { toast } from 'react-toastify';
 import swal from 'sweetalert';
-import { customStyles } from '../admin/attandence/attandencehelper';
+import { useCustomStyles } from '../admin/attandence/attandencehelper';
 import HolidayCalander from './holidayCalander';
 
 dayjs.extend(isSameOrBefore);
@@ -271,7 +271,7 @@ const HolidayForm = () => {
           data={filteredHolidays}
           pagination
           selectableRows
-          customStyles={customStyles}
+          customStyles={useCustomStyles()}
           highlightOnHover
         />
       </div>

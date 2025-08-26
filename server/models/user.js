@@ -44,7 +44,9 @@ const userSchema = new mongoose.Schema({
     },
     temptoken: {
         type: String,
-        default: ""
+    },
+    AllPermissionNames: {
+        type: Array,
     },
 }, { timestamps: true })
 

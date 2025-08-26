@@ -7,12 +7,12 @@ import { Box, FormControl, InputLabel, Select, MenuItem, TextField, Button } fro
 import { BiMessageRoundedError } from 'react-icons/bi';
 import DataTable from 'react-data-table-component';
 import { useSelector } from 'react-redux';
-import { customStyles } from './attandencehelper';
 import { RxReset } from "react-icons/rx";
 import { IoMdTime } from 'react-icons/io';
 import EmployeeProfileCard from '../../../components/performanceCard';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+import { useCustomStyles } from './attandencehelper';
 dayjs.extend(isSameOrBefore);
 
 const AttenPerformance = () => {
@@ -381,7 +381,7 @@ const AttenPerformance = () => {
                         columns={columns(setting)}
                         data={filteredData}
                         pagination
-                        customStyles={customStyles}
+                        customStyles={useCustomStyles()}
                         conditionalRowStyles={conditionalRowStyles}
                         highlightOnHover
                         noDataComponent={

@@ -21,7 +21,7 @@ import { TbPasswordUser } from "react-icons/tb";
 import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "./profile";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { MdExpandMore } from "react-icons/md";
@@ -31,6 +31,7 @@ import axios from "axios";
 import { FaRegUser } from "react-icons/fa";
 import useImageUpload from "../../../utils/imageresizer";
 import CheckPermission from "../../../utils/CheckPermission";
+import { useCustomStyles } from "../attandence/attandencehelper";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -44,6 +45,7 @@ const Employe = () => {
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
   const { handleImage } = useImageUpload();
+  const dispatch = useDispatch();
   const { department, branch, employee, profile } = useSelector(e => e.user);
   const [pass, setpass] = useState({
     userid: '',
@@ -201,11 +203,11 @@ const Employe = () => {
     formData.append('salary', inp.salary);
 
     if (employeePhoto) {
-      let resizedfile = await handleImage(400, employeePhoto);
+      let resizedfile = await handleImage(300, employeePhoto);
       formData.append('photo', resizedfile);
     }
 
-    await addemployee({ formData, setisload, setInp, setopenmodal, init, resetPhoto });
+    await addemployee({ formData,dispatch, setisload, setInp, setopenmodal, init, resetPhoto });
   };
 
   const updatee = async () => {
@@ -223,12 +225,12 @@ const Employe = () => {
     });
 
     if (employeePhoto) {
-      let resizedfile = await handleImage(600, employeePhoto);
+      let resizedfile = await handleImage(300, employeePhoto);
       formData.append('photo', resizedfile);
     }
 
+    await employeeupdate({ formData,dispatch, setisload, setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
 
-    await employeeupdate({ formData, setisload, setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
   };
 
   const resetPhoto = () => {
@@ -317,22 +319,6 @@ const Employe = () => {
     });
   };
 
-  const customStyles = {
-    headCells: {
-      style: {
-        backgroundColor: 'teal',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        color: 'white',
-        padding: '0px 5px',
-      },
-    },
-    rows: {
-      style: {
-        minHeight: '48px',
-      },
-    },
-  };
   const inputref = useRef(null);
 
   const filteredEmployees = employeelist?.filter(emp => {
@@ -486,7 +472,7 @@ const Employe = () => {
           // data={employeelist}
           data={filteredEmployees}
           pagination
-          customStyles={customStyles}
+          customStyles={useCustomStyles()}
           highlightOnHover
         />
       </div>
@@ -707,6 +693,9 @@ const Employe = () => {
 
             </span>
             <div className="modalfooter">
+              <Button size="small" onClick={() => {
+                setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
+              }} variant="outlined">Cancel</Button>
               {!isupdate ? (
                 <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" onClick={adddepartcall}>
                   Add
@@ -716,9 +705,7 @@ const Employe = () => {
                   Update
                 </Button>
               )}
-              <Button size="small" onClick={() => {
-                setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
-              }} variant="outlined">Cancel</Button>
+
             </div>
           </div>
         </div>

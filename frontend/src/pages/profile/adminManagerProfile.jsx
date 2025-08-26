@@ -24,7 +24,7 @@ const AdminManagerProfile = () => {
   const [isLoading, setisloading] = useState(null);
 
   useEffect(() => {
-    console.log("admins  ke profile me", profile);
+    // console.log("admins  ke profile me", profile);
     if (profile) setprofile(profile);
   }, [profile]);
 
@@ -122,60 +122,62 @@ const AdminManagerProfile = () => {
             </div>
           </div>
 
-          <div className="mt-2">
-            <div
-              className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-1 md:py-2 rounded-md"
-              onClick={() => setExpanded(!expanded)}
-            >
-              <span className="font-semibold text-[16px] md:text-lg text-left"> {expanded ? "Hide Permissions" : "View Permissions"}</span>
-              {expanded ? (
-                <MdExpandLess className="text-xl" />
-              ) : (
-                <MdExpandMore className="text-xl" />
+          {profile?.role !== "superadmin" && profile?.role !== "developer" &&
+            <div className="mt-2">
+              <div
+                className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-1 md:py-2 rounded-md"
+                onClick={() => setExpanded(!expanded)}
+              >
+                <span className="font-semibold text-[16px] md:text-lg text-left"> {expanded ? "Hide Permissions" : "View Permissions"}</span>
+                {expanded ? (
+                  <MdExpandLess className="text-xl" />
+                ) : (
+                  <MdExpandMore className="text-xl" />
+                )}
+              </div>
+              {expanded && (
+                <div className="text-sm mt-3 overflow-x-auto">
+                  <span className="font-semibold">Permissions:</span>
+                  <table className="table-auto border-collapse border border-gray-300 mt-2 text-xs w-full">
+                    <thead>
+                      <tr>
+                        <th className="border border-gray-300 px-2 py-1 text-left">
+                          Module
+                        </th>
+                        {Object.values(PERMISSION_LABELS).map((label) => (
+                          <th
+                            key={label}
+                            className="border border-gray-300 px-2 py-1"
+                          >
+                            {label}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(profilee?.permissions || {}).map(
+                        ([module, levels]) => (
+                          <tr key={module}>
+                            <td className="border border-gray-300 px-2 py-1 font-semibold">
+                              {module}
+                            </td>
+                            {Object.keys(PERMISSION_LABELS).map((permKey) => (
+                              <td
+                                key={permKey}
+                                className="border border-gray-300 px-2 py-1 text-center"
+                              >
+                                {levels.includes(Number(permKey)) ? "✅" : "-"}
+                              </td>
+                            ))}
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
-            {expanded && (
-              <div className="text-sm mt-3 overflow-x-auto">
-                <span className="font-semibold">Permissions:</span>
-                <table className="table-auto border-collapse border border-gray-300 mt-2 text-xs w-full">
-                  <thead>
-                    <tr>
-                      <th className="border border-gray-300 px-2 py-1 text-left">
-                        Module
-                      </th>
-                      {Object.values(PERMISSION_LABELS).map((label) => (
-                        <th
-                          key={label}
-                          className="border border-gray-300 px-2 py-1"
-                        >
-                          {label}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(profilee?.permissions || {}).map(
-                      ([module, levels]) => (
-                        <tr key={module}>
-                          <td className="border border-gray-300 px-2 py-1 font-semibold">
-                            {module}
-                          </td>
-                          {Object.keys(PERMISSION_LABELS).map((permKey) => (
-                            <td
-                              key={permKey}
-                              className="border border-gray-300 px-2 py-1 text-center"
-                            >
-                              {levels.includes(Number(permKey)) ? "✅" : "-"}
-                            </td>
-                          ))}
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          }
 
           {profile.role == "superadmin" &&
             <div className="my-2">

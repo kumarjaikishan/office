@@ -1,10 +1,11 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setPrimaryColor, toogleextendedonMobile } from "../../store/userSlice";
+import { setPrimaryColor, toogleextendedonMobile, toogleliveAttandence } from "../../store/userSlice";
 import { useState } from "react";
 
 const Settings = () => {
     const dispatch = useDispatch();
     const extendedMobile = useSelector((state) => state.user.extendedonMobile);
+    const liveAttandence = useSelector((state) => state.user.liveAttandence);
     const [color, setColor] = useState("#0d9488");
 
     const handleColorClick = (color) => {
@@ -22,7 +23,7 @@ const Settings = () => {
     ];
 
     return (
-        <div className="p-1 py-2 md:p-4">
+        <div className="p-1 py-2 md:p-4 flex flex-col gap-2">
             <h2 className="text-xl font-semibold mb-4">Settings</h2>
 
             <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow">
@@ -42,10 +43,27 @@ const Settings = () => {
                     </div>
                 </label>
             </div>
+            <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow">
+                <span className="text-gray-700">Enable Live Attendance Notification </span>
+                <label className="inline-flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={liveAttandence}
+                        onChange={() => dispatch(toogleliveAttandence())}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-teal-600 relative transition">
+                        <div
+                            className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition ${liveAttandence ? "translate-x-5" : ""
+                                }`}
+                        />
+                    </div>
+                </label>
+            </div>
             <div className="p-1 relative mt-6 md:p-4 rounded border border-dashed border-teal-800">
                 {/* Floating Label */}
                 <span className="absolute translate-y-[-50%] top-0 left-3 px-1 text-sm font-medium text-teal-800 bg-gray-100">
-                    Select Color
+                    Choose Primary Color
                 </span>
 
                 {/* Color Options */}

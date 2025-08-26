@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { RxReset } from "react-icons/rx";
 import { IoMdTime } from 'react-icons/io';
 import EmployeePerformanceCard from './empperformanceCard';
-import { customStyles } from '../../admin/attandence/attandencehelper';
+import { useCustomStyles } from '../../admin/attandence/attandencehelper';
 
 const EmpAttenPerformance = () => {
     const [attandence, setattandence] = useState([]);
@@ -316,7 +316,7 @@ const EmpAttenPerformance = () => {
                         columns={columns(setting)}
                         data={filteredData}
                         pagination
-                        customStyles={customStyles}
+                        customStyles={useCustomStyles()}
                         conditionalRowStyles={conditionalRowStyles}
                         highlightOnHover
                         noDataComponent={

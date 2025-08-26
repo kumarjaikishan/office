@@ -25,13 +25,14 @@ const checkPermission = (permissionName, key) => {
     return async (req, res, next) => {
         try {
             const userId = req.user.id;
-            
+
             if (req.user.role == 'superadmin') {
                 return next();
             }
 
             // 1. Try Redis cache first
             let cachedPermissions = await redisClient.get(`permissions:${userId}`);
+            //   console.log("cached permission check", cachedPermissions)
             let userPermissions;
 
             if (cachedPermissions) {

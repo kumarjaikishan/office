@@ -64,7 +64,7 @@ export default function OrganizationSettings() {
     };
 
     useEffect(() => {
-        // console.log(profile)
+        // console.log(branch)
         if (company) {
             setcompany(company)
         }
@@ -250,12 +250,13 @@ export default function OrganizationSettings() {
                         <div className="p-1 md:p-4 rounded overflow-auto  border-green-300 border-2 border-dashed mt-2 space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-md font-medium">Branch List</h3>
-                                <button
+
+                                <Button variant="contained"
                                     onClick={() => setopenviewmodal(true)}
-                                    className="bg-green-500 text-white px-3 py-1 rounded"
                                 >
                                     + Add Branch
-                                </button>
+                                </Button>
+
                             </div>
 
                             <table className="w-full capitalize text-[12px] md:text-sm border">
@@ -292,13 +293,22 @@ export default function OrganizationSettings() {
                                                         </div>
                                                     </td>
 
-                                                    <td className="p-2 border">
-                                                        <button
+                                                    <td className="p-2 border ">
+                                                    <div className='flex gap-2 w-[180px]'>
+                                                        <Button variant="contained"
+                                                            className='mr-2'
                                                             onClick={() => handleEditBranch(bran)}
-                                                            className="bg-blue-500 text-white px-3 py-1 rounded"
                                                         >
                                                             Edit
-                                                        </button>
+                                                        </Button>
+                                                        <Button variant="contained"
+                                                         className='ml-2'
+                                                            disabled
+                                                            onClick={() => handleEditBranch(bran)}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );
@@ -336,7 +346,7 @@ export default function OrganizationSettings() {
                         className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
                         onClick={() => toggleSection('admin')}
                     >
-                        <span className="font-semibold text-[16px] md:text-lg text-left">Admin</span>
+                        <span className="font-semibold text-[16px] md:text-lg text-left">Admin/Manager</span>
                         {openSection === 'admin' ? (
                             <MdExpandLess className="text-xl" />
                         ) : (

@@ -30,6 +30,7 @@ const userSlice = createSlice({
         status: 'idle',
         sidebar: false,
         extendedonMobile: false,
+        liveAttandence: true,
         primaryColor: '#115e59',
     },
     reducers: {
@@ -61,6 +62,9 @@ const userSlice = createSlice({
         toogleextendedonMobile(state, action) {
             state.extendedonMobile = !state.extendedonMobile;
         },
+        toogleliveAttandence(state, action) {
+            state.liveAttandence = !state.liveAttandence;
+        },
         
     },
     extraReducers: (builder) => {
@@ -83,5 +87,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout,updateAttendance,setPrimaryColor,setuser,tooglesidebar,toogleextendedonMobile } = userSlice.actions;
+export const { userlogout,updateAttendance,setPrimaryColor,toogleliveAttandence,setuser,tooglesidebar,toogleextendedonMobile } = userSlice.actions;
 export default userSlice.reducer;

@@ -6,7 +6,7 @@ import DataTable from 'react-data-table-component';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import Adminleavemodal from './adminleavemodal';
-import { customStyles } from '../attandence/attandencehelper';
+import { useCustomStyles } from '../attandence/attandencehelper';
 import { FaRegUser } from 'react-icons/fa';
 import CheckPermission from '../../../utils/CheckPermission';
 import { toast } from 'react-toastify';
@@ -101,7 +101,7 @@ const Adminleave = () => {
         <div>
             {/* <h2 className='font-semibold text-center text-xl' >Leave Application</h2> */}
             <DataTable
-                customStyles={customStyles}
+                customStyles={useCustomStyles()}
                 columns={columns}
                 data={leavelist}
                 pagination

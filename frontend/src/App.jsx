@@ -1,11 +1,14 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, Suspense, lazy } from 'react';
 import { FirstFetch } from '../store/userSlice';
 import { empFirstFetch } from '../store/employee';
 import ProtectedRoutes from './utils/protectedRoute';
 import { GoGear } from 'react-icons/go';
+import { connectSSE, closeSSE } from "./utils/sse";
+import { Avatar } from '@mui/material';
+import dayjs from 'dayjs';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -92,6 +95,7 @@ const routesByRole = {
       <Route path="leave" element={<Adminleave />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
+      <Route path="setting" element={<Setting />} />
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
@@ -104,6 +108,7 @@ const routesByRole = {
       <Route path="empattandence" element={<EmpAttenPerformance />} />
       <Route path="profile" element={<EmployeeProfile />} />
       <Route path="leave" element={<EmpLeave />} />
+      <Route path="setting" element={<Setting />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
@@ -121,6 +126,12 @@ function App() {
   const user = useSelector((state) => state.user);
   const navigate = useNavigate();
 
+  const primaryColor = useSelector((state) => state.user.primaryColor) || "#115e59";
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--color-primary", primaryColor);
+  }, [primaryColor]);
+
   useEffect(() => {
     if (!islogin) {
       navigate("/login");
@@ -136,6 +147,63 @@ function App() {
   }, [islogin, user?.profile?.role, dispatch]);
 
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
+
+  useEffect(() => {
+  if (user?.liveAttandence) {
+    const es = connectSSE((data) => {
+      if (data.type === "attendance_update") {
+        const emp = data.payload.data.employeeId;
+
+        if (data.payload.action === "checkin") {
+          toast(
+            <div className="flex items-center gap-2 pr-1">
+              <Avatar src={emp.profileimage} alt={emp.employeename}>
+                {!emp.profileimage && <FaRegUser />}
+              </Avatar>
+              <span className="text-[14px] ">
+                <span className="text-green-700 capitalize font-semibold">
+                  {emp.userid.name}
+                </span>{" "}
+                has Punched In at{" "}
+                <span className="text-green-700">
+                  {dayjs(data.payload.data.punchIn).format("hh:mm A")}
+                </span>
+              </span>
+            </div>,
+            { autoClose: 20000 }
+          );
+          dispatch(FirstFetch());
+        }
+
+        if (data.payload.action === "checkOut") {
+          toast(
+            <div className="flex items-center gap-2 pr-1">
+              <Avatar src={emp.profileimage} alt={emp.employeename}>
+                {!emp.profileimage && <FaRegUser />}
+              </Avatar>
+              <span className="text-[14px] ">
+                <span className="text-amber-700 capitalize font-semibold">
+                  {emp.userid.name}
+                </span>{" "}
+                has Punched Out at{" "}
+                <span className="text-amber-700">
+                  {dayjs(data.payload.data.punchOut).format("hh:mm A")}
+                </span>
+              </span>
+            </div>,
+            { autoClose: 20000 }
+          );
+          dispatch(FirstFetch());
+        }
+      }
+    });
+
+    return () => {
+      closeSSE();
+    };
+  }
+}, [user?.liveAttandence]);
+
 
 
   return (

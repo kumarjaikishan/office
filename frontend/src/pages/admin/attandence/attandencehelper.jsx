@@ -2,13 +2,13 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { FirstFetch } from "../../../../store/userSlice";
-
+import { useSelector } from "react-redux";
 
 
 export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) => {
   //  return console.log(inp)
   setisload(false);
-
+  
   const basePayload = {
     employeeId: inp.employeeId,
     date: dayjs(inp.date).toDate(),
@@ -133,57 +133,39 @@ export const columns = [
   },
 ]
 
-// export const customStyles = {
-//   headCells: {
-//     style: {
-//       backgroundColor: 'teal', // header background
-//       fontWeight: 'bold',         // font weight
-//       fontSize: '14px',
-//       color: 'white',             // header cell height
-//       padding: '0px 2px',
-//       border: '1px solid #ddd',
-//     },
-//   },
-//   headRow: {
-//     style: {
-//     },
-//   },
-//   rows: {
-//     style: {
-//       minHeight: '48px',          // height of each row
-//       padding: '0px 2px',
-//     },
-//   },
-// };
-export const customStyles = {
-  headCells: {
-    style: {
-      backgroundColor: 'teal',
-      fontWeight: 'bold',
-      fontSize: '14px',
-      color: 'white',
-      // border: '1px solid #ddd',
-      justifyContent: 'flex-start', // align text left
-      paddingLeft: '4px',           // small left padding
-      paddingRight: '4px',
+
+export const useCustomStyles = () => {
+  const primaryColor = useSelector((state) => state.user.primaryColor) || "teal";
+
+  return {
+    headCells: {
+      style: {
+        backgroundColor: primaryColor,
+        fontWeight: "bold",
+        fontSize: "14px",
+        color: "white",
+        justifyContent: "flex-start",
+        paddingLeft: "4px",
+        paddingRight: "4px",
+      },
     },
-  },
-  headRow: {
-    style: {
-      borderBottom: '2px solid #ccc',
+    headRow: {
+      style: {
+        borderBottom: "2px solid #ccc",
+      },
     },
-  },
-  rows: {
-    style: {
-      minHeight: '48px',
-      borderBottom: '1px solid #eee',
+    rows: {
+      style: {
+        minHeight: "48px",
+        borderBottom: "1px solid #eee",
+      },
     },
-  },
-  cells: {
-    style: {
-      justifyContent: 'flex-start', // align text left
-      paddingLeft: '4px',           // small padding like header
-      paddingRight: '4px',
+    cells: {
+      style: {
+        justifyContent: "flex-start",
+        paddingLeft: "4px",
+        paddingRight: "4px",
+      },
     },
-  },
+  };
 };

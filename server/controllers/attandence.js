@@ -158,13 +158,13 @@ const checkin = async (req, res, next) => {
       });
 
     // Notify clients
-    sendToClients({
-      type: 'attendance_update',
-      payload: {
-        action: 'checkin',
-        data: updatedRecord
-      }
-    });
+    sendToClients(
+      {
+        type: 'attendance_update',
+        payload: { action: 'checkin', data: updatedRecord}
+      },
+      attendanceData.companyId
+    );
 
     return res.status(200).json({ message: 'Punch-in recorded', attendance });
   } catch (error) {
@@ -582,8 +582,8 @@ const employeeAttandence = async (req, res, next) => {
     }
 
     const employeedetail = await employee.findOne({ userid }).populate({
-      path:'branchId',
-      select:'name defaultsetting setting'
+      path: 'branchId',
+      select: 'name defaultsetting setting'
     });
     const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: -1 });
 

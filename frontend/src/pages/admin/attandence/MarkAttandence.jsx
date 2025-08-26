@@ -20,7 +20,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
     const { department, employee } = useSelector((state) => state.user);
 
     useEffect(() => {
-        console.log("employee:", employee)
+        // console.log("employee:", employee)
     }, [department]);
 
 

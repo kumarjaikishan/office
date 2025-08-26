@@ -6,7 +6,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputAdornment from '@mui/material/InputAdornment';
 import DataTable from "react-data-table-component";
-import { columns, customStyles, deleteAttandence, submitAttandence } from "./attandencehelper";
+import { columns, deleteAttandence, submitAttandence } from "./attandencehelper";
+import { useCustomStyles } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MdClear, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -46,6 +47,7 @@ const Attandence = () => {
   const [selectedRows, setselectedRows] = useState([]);
   const [holidaydate, setholidaydate] = useState([]);
   const dispatch = useDispatch();
+  const customStyles = useCustomStyles();
 
 
   const init = {
@@ -204,9 +206,9 @@ const Attandence = () => {
   }, [holidays]);
 
   useEffect(() => {
-    console.log(company)
+    // console.log(company)
     // console.log(branch)
-    console.log(attandence)
+    // console.log(attandence)
 
     if (!attandence) return;
     const today = dayjs().startOf('day');
@@ -439,9 +441,9 @@ const Attandence = () => {
       {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
       <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
         <div className="flex justify-between items-center mb-4 flex-wrap">
-          <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-teal-600 text-white">
-            <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-teal-700  bg-white`}`}>View Attendance</p>
-            {canAdd && <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-teal-700  bg-white`}`}>Mark Attendance</p>}
+          <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-primary text-white">
+            <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-primary  bg-white`}`}>View Attendance</p>
+            {canAdd && <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-primary  bg-white`}`}>Mark Attendance</p>}
           </div>
 
           <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">

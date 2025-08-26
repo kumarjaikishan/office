@@ -110,7 +110,7 @@ const menu = [
     items: [
       { menu: "Dashboard", link: '/dashboard', icon: <VscDashboard />, roles: ['developer', 'admin', 'superadmin', 'manager', 'employee'] },
       { menu: "Organization", link: '/dashboard/organization', icon: <FaSitemap />, roles: ['superadmin', 'admin'] },
-      { menu: "Permission", link: '/developer-dashboard/permission', icon: <FaSitemap />, roles: ['developer'] },
+      { menu: "Permission", link: '/dashboard/permission', icon: <FaSitemap />, roles: ['developer'] },
       { menu: "Employees", link: '/dashboard/employe', icon: <FaUserTie />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/attandence', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/empattandence', icon: <TbReportAnalytics />, roles: ['employee'] },

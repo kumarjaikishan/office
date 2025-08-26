@@ -6,7 +6,7 @@ import { IoIosSend } from "react-icons/io";
 import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
 import { adddepartment, columns, delette, update } from './departmenthelper';
-import { customStyles } from '../attandence/attandencehelper';
+import { useCustomStyles } from '../attandence/attandencehelper';
 import { CiFilter } from 'react-icons/ci';
 import { useSelector } from 'react-redux';
 import Modalbox from '../../../components/custommodal/Modalbox';
@@ -125,10 +125,10 @@ const Department = () => {
     <div className='department pt-3'>
       <div className='head flex flex-wrap gap-1'>
         <div className='flex gap-2 w-full justify-around md:w-auto'>
-          <FormControl  className="w-[48%] md:w-[150px]" size="small">
+          <FormControl className="w-[48%] md:w-[150px]" size="small">
             <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
             <Select
-            
+
               value={filtere.branch}
               onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
               input={
@@ -158,7 +158,7 @@ const Department = () => {
       </div>
       <div className="list">
         <DataTable
-          customStyles={customStyles}
+          customStyles={useCustomStyles()}
           columns={columns}
           data={isFilterActive ? filterattandence : departmentlist}
           pagination
@@ -168,53 +168,56 @@ const Department = () => {
 
       <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
         <div className="membermodal">
-          <form onSubmit={adddepartcall}>
-            <h2>Add Department</h2>
-            <span className="modalcontent">
-              <FormControl sx={{ width: '98%' }} size="small">
-                <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
-                <Select
-                  value={inp.branchId}
-                  label="branch"
-                  onChange={(e) => handleChange(e, 'branchId')}
-                >
-                  {branch?.map((val) => {
-                    return <MenuItem key={val._id} value={val._id}>{val.name}</MenuItem>
-                  })}
-                </Select>
-              </FormControl>
-              <TextField sx={{ width: '98%' }} required value={inp.department} onChange={(e) => handleChange(e, 'department')} label="Department" size="small" />
-              <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
-              <div>
-                {!isupdate && <Button
-                  sx={{ mr: 2 }}
-                  loading={isload}
-                  loadingPosition="end"
-                  endIcon={<IoIosSend />}
-                  variant="contained"
-                  type="submit"
-                >
-                  Add
-                </Button>}
+          <div className='whole'>
+            <div className='modalhead'>Add Department</div>
+            <form onSubmit={adddepartcall}>
+              <span className="modalcontent">
+                <FormControl sx={{ width: '98%' }} size="small">
+                  <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
+                  <Select
+                    value={inp.branchId}
+                    label="branch"
+                    onChange={(e) => handleChange(e, 'branchId')}
+                  >
+                    {branch?.map((val) => {
+                      return <MenuItem key={val._id} value={val._id}>{val.name}</MenuItem>
+                    })}
+                  </Select>
+                </FormControl>
+                <TextField sx={{ width: '98%' }} required value={inp.department} onChange={(e) => handleChange(e, 'department')} label="Department" size="small" />
+                <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
 
-                {isupdate && <Button
-                  sx={{ mr: 2 }}
-                  loading={isload}
-                  loadingPosition="end"
-                  endIcon={<IoIosSend />}
-                  variant="contained"
-                  onClick={updatee}
-                >
-                  Update
-                </Button>}
-                <Button size="small"
-                  onClick={() => {
-                    setopenmodal(false); setisupdate(false); setInp(init)
-                  }}
-                  variant="outlined"> cancel</Button>
-              </div>
-            </span>
-          </form>
+              </span>
+            </form>
+            <div className='modalfooter'>
+              <Button size="small"
+                onClick={() => {
+                  setopenmodal(false); setisupdate(false); setInp(init)
+                }}
+                variant="outlined"> cancel</Button>
+              {!isupdate && <Button
+                sx={{ mr: 2 }}
+                loading={isload}
+                loadingPosition="end"
+                endIcon={<IoIosSend />}
+                variant="contained"
+                type="submit"
+              >
+                Add
+              </Button>}
+
+              {isupdate && <Button
+                sx={{ mr: 2 }}
+                loading={isload}
+                loadingPosition="end"
+                endIcon={<IoIosSend />}
+                variant="contained"
+                onClick={updatee}
+              >
+                Update
+              </Button>}
+            </div>
+          </div>
         </div>
       </Modalbox>
     </div>
