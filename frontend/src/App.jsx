@@ -147,63 +147,102 @@ function App() {
     }
   }, [islogin, user?.profile?.role, dispatch]);
 
+  useEffect(() => {
+    islogin && jwtcheck();
+  }, [islogin]);
+
+  const tokenErrors = {
+    "jwt expired": ['Session Expired', 'Your session has expired. Please log in again.'],
+    "Invalid Token": ['Invalid Token', 'You need to log in again.']
+  }
+
+  const jwtcheck = async () => {
+    try {
+      const token = localStorage.getItem('emstoken');
+      const responsee = await fetch(`${import.meta.env.VITE_API_ADDRESS}jwtcheck`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // console.log(responsee)
+      const data = await responsee.json();
+      console.log("jwt check", data);
+
+      if (tokenErrors[data.message]) {
+        const title = tokenErrors[data.message][0];
+        const text = tokenErrors[data.message][1];
+        swal({
+          title, text, icon: 'warning',
+          button: {
+            text: 'OK',
+          },
+        }).then(() => {
+          return navigate('/logout');
+        });
+      }
+    } catch (error) {
+      console.log("Token check:", error);
+    }
+  }
+
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
 
   useEffect(() => {
-  if (user?.liveAttandence) {
-    const es = connectSSE((data) => {
-      if (data.type === "attendance_update") {
-        const emp = data.payload.data.employeeId;
+    if (user?.liveAttandence) {
+      const es = connectSSE((data) => {
+        if (data.type === "attendance_update") {
+          const emp = data.payload.data.employeeId;
 
-        if (data.payload.action === "checkin") {
-          toast(
-            <div className="flex items-center gap-2 pr-1">
-              <Avatar src={emp.profileimage} alt={emp.employeename}>
-                {!emp.profileimage && <FaRegUser />}
-              </Avatar>
-              <span className="text-[14px] ">
-                <span className="text-green-700 capitalize font-semibold">
-                  {emp.userid.name}
-                </span>{" "}
-                has Punched In at{" "}
-                <span className="text-green-700">
-                  {dayjs(data.payload.data.punchIn).format("hh:mm A")}
+          if (data.payload.action === "checkin") {
+            toast(
+              <div className="flex items-center gap-2 pr-1">
+                <Avatar src={emp.profileimage} alt={emp.employeename}>
+                  {!emp.profileimage && <FaRegUser />}
+                </Avatar>
+                <span className="text-[14px] ">
+                  <span className="text-green-700 capitalize font-semibold">
+                    {emp.userid.name}
+                  </span>{" "}
+                  has Punched In at{" "}
+                  <span className="text-green-700">
+                    {dayjs(data.payload.data.punchIn).format("hh:mm A")}
+                  </span>
                 </span>
-              </span>
-            </div>,
-            { autoClose: 20000 }
-          );
-          dispatch(FirstFetch());
-        }
+              </div>,
+              { autoClose: 20000 }
+            );
+            dispatch(FirstFetch());
+          }
 
-        if (data.payload.action === "checkOut") {
-          toast(
-            <div className="flex items-center gap-2 pr-1">
-              <Avatar src={emp.profileimage} alt={emp.employeename}>
-                {!emp.profileimage && <FaRegUser />}
-              </Avatar>
-              <span className="text-[14px] ">
-                <span className="text-amber-700 capitalize font-semibold">
-                  {emp.userid.name}
-                </span>{" "}
-                has Punched Out at{" "}
-                <span className="text-amber-700">
-                  {dayjs(data.payload.data.punchOut).format("hh:mm A")}
+          if (data.payload.action === "checkOut") {
+            toast(
+              <div className="flex items-center gap-2 pr-1">
+                <Avatar src={emp.profileimage} alt={emp.employeename}>
+                  {!emp.profileimage && <FaRegUser />}
+                </Avatar>
+                <span className="text-[14px] ">
+                  <span className="text-amber-700 capitalize font-semibold">
+                    {emp.userid.name}
+                  </span>{" "}
+                  has Punched Out at{" "}
+                  <span className="text-amber-700">
+                    {dayjs(data.payload.data.punchOut).format("hh:mm A")}
+                  </span>
                 </span>
-              </span>
-            </div>,
-            { autoClose: 20000 }
-          );
-          dispatch(FirstFetch());
+              </div>,
+              { autoClose: 20000 }
+            );
+            dispatch(FirstFetch());
+          }
         }
-      }
-    });
+      });
 
-    return () => {
-      closeSSE();
-    };
-  }
-}, [user?.liveAttandence]);
+      return () => {
+        closeSSE();
+      };
+    }
+  }, [user?.liveAttandence]);
 
 
 

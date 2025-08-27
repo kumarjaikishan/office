@@ -13,6 +13,7 @@ const authmiddlewre = require('../middleware/auth_middleware');
 const authorizeRoles = require('../middleware/Role_middleware')
 const upload = require('../middleware/multer_middleware')
 const checkPermission = require('../middleware/checkpermission');
+const checkpermissionchange = require('../middleware/checkpermissionchange');
 const employeemiddlewre = require('../middleware/employee_middleware');
 
 router.route('/').get(async (req, res) => {
@@ -21,6 +22,11 @@ router.route('/').get(async (req, res) => {
   })
 });
 
+router.route('/jwtcheck').get(authmiddlewre, (req, res) => {
+  res.status(201).json({
+    message: "ok"
+  })
+});
 
 router.route('/signin').post(users.userLogin);
 router.route('/resetrequest').get(authmiddlewre,authorizeRoles('superadmin'),users.passreset);  
@@ -33,7 +39,7 @@ router.route('/updatedepartment').post(authmiddlewre, authorizeRoles('superadmin
 router.route('/deletedepartment').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("department", 4), admin.deletedepartment);
 router.route('/firstfetch').get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), admin.firstfetch);
 router.route('/leavehandle').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("leave", 3), admin.leavehandle);
-router.route('/addcompany').post(authmiddlewre, authorizeRoles('superadmin','superadmin'), admin.addcompany);
+// router.route('/addcompany').post(authmiddlewre, authorizeRoles('superadmin','superadmin'), admin.addcompany);
 router.route('/updateCompany').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('logo'), admin.updateCompany);
 router.route('/addBranch').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("branch", 2), admin.addBranch);
 router.route('/editBranch').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("branch", 3), admin.editBranch);

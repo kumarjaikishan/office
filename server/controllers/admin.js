@@ -648,7 +648,7 @@ const firstfetch = async (req, res, next) => {
 
             employees = await employeeModal.find({ companyId: compId })
                 .populate('department', 'department')
-                .populate('userid', 'email name ')
+                .populate('userid', 'email name role')
                 .sort({ employeename: 1 });
 
             attendance = await attendanceModal.find({ companyId: compId })

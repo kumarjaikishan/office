@@ -128,6 +128,7 @@ export default function SuperAdminDashboard() {
 
             resetForm();
             fetech(); // refresh list
+            dispatch(FirstFetch())
 
         } catch (error) {
             console.error(error);
@@ -211,6 +212,7 @@ export default function SuperAdminDashboard() {
                         autoClose: 1800,
                     });
                     fetech();
+                      dispatch(FirstFetch())
                 } catch (error) {
                     console.error(error);
                     toast.update(toastId, {

@@ -32,7 +32,12 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
     setting: {
       officeTime: { in: '10:00', out: '18:00', breakMinutes: 30 },
       gracePeriod: { lateEntryMinutes: 10, earlyExitMinutes: 10 },
-      workingMinutes: { fullDay: 480, halfDay: 240, shortDayThreshold: 360, overtimeAfterMinutes: 540 },
+      workingMinutes: {
+        fullDay: 480,
+        halfDay: 240,
+        shortDayThreshold: 270,
+        overtimeAfterMinutes: 480
+      },
       weeklyOffs: [0],
       attendanceRules: {
         considerEarlyEntryBefore: '09:50',
@@ -51,14 +56,15 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
 
   // Fetch companies and users
   useEffect(() => {
-    // console.log(editbranchdata)
-    setUsers(employee)
+    // console.log(employee)
+    // setUsers(employee)
     setBranch(prev => ({ ...prev, companyId: company._id }))
     // if (editbranch) setBranch(editbranchdata)
     if (editbranch) setBranch(prev => ({ ...prev, ...editbranchdata }))
   }, [company, editbranch]);
 
   useEffect(() => {
+    // console.log(adminManager)
     if (adminManager?.length > 0) {
       setUsers(adminManager.filter(e => e.role === 'manager'))
     }
