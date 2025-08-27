@@ -671,7 +671,7 @@ const firstfetch = async (req, res, next) => {
             ledger.map(async (ledger) => {
                 const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
                     .sort({ date: -1 });
-
+ 
                 return {
                     ...ledger.toObject(),
                     netBalance: lastEntry ? lastEntry.balance : 0
