@@ -377,7 +377,8 @@ const Attandence = () => {
       dangerMode: true,
     }).then((proceed) => {
       if (proceed) {
-        deleteAttandence({ attandanceId: [attanId], setisload, dispatch })
+        deleteAttandence({ attandanceId: [attanId], setisload, dispatch });
+        setselectedRows([]);
       }
     });
   }
@@ -590,7 +591,7 @@ const Attandence = () => {
           highlightOnHover
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
-              <BiMessageRoundedError className="text-xl" /> No records found matching your criteria.
+              <BiMessageRoundedError className="text-xl" /> No records found.
             </div>
           }
         />

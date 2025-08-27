@@ -77,6 +77,7 @@ router.route('/updatenotification').get(authmiddlewre, employee.updatenotificati
 router.route('/addAdmin').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.addAdmin);
 router.route('/getAdmin').get(authmiddlewre, authorizeRoles('superadmin'), admin.getAdmin);
 router.route('/editAdmin/:id').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.editAdmin);
+router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmin'), admin.deleteAdmin);
 
 router.route('/developerfetch').get(authmiddlewre, authorizeRoles('developer'), developer.allUser);
 router.route('/User').post(authmiddlewre, authorizeRoles('developer'), developer.addUser)

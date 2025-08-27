@@ -82,8 +82,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 const { key, ...rest } = props; // destructure key out
 
                                 return (
-                                    <Box
-                                        key={key} // pass key directly
+                                    <Box key={option._id} // pass key directly
                                         component="li"
                                         sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                                         {...rest} // spread the rest

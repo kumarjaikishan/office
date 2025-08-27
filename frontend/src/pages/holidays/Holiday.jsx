@@ -14,6 +14,7 @@ import { toast } from 'react-toastify';
 import swal from 'sweetalert';
 import { useCustomStyles } from '../admin/attandence/attandencehelper';
 import HolidayCalander from './holidayCalander';
+import { BiMessageRoundedError } from 'react-icons/bi';
 
 dayjs.extend(isSameOrBefore);
 
@@ -198,12 +199,12 @@ const HolidayForm = () => {
         </Box>
       </Box>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2  w-full md:w-fit my-4 ">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2  w-full md:w-[600px] my-4 ">
         {/* Year Filter */}
-        <FormControl className="md:max-w-[150px] col-span-1" size="small">
-          <InputLabel>Filter by Year</InputLabel>
+        <FormControl className=" md:max-w-[150px] col-span-1" size="small">
+          <InputLabel>Year</InputLabel>
           <Select
-            label="Filter by Year"
+            label="Year"
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
           >
@@ -218,9 +219,9 @@ const HolidayForm = () => {
 
         {/* Month Filter */}
         <FormControl className="md:max-w-[150px] col-span-1" size="small">
-          <InputLabel>Filter by Month</InputLabel>
+          <InputLabel> Month</InputLabel>
           <Select
-            label="Filter by Month"
+            label="Month"
             value={filterMonth}
             onChange={(e) => setFilterMonth(e.target.value)}
           >
@@ -235,7 +236,7 @@ const HolidayForm = () => {
 
         {/* Type Filter */}
         <FormControl className="md:max-w-[150px] col-span-1" size="small">
-          <InputLabel>Filter by Type</InputLabel>
+          <InputLabel>Type</InputLabel>
           <Select
             label="Filter by Type"
             value={filterType}
@@ -270,8 +271,13 @@ const HolidayForm = () => {
           columns={columns}
           data={filteredHolidays}
           pagination
-          selectableRows
+          // selectableRows
           customStyles={useCustomStyles()}
+          noDataComponent={
+            <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+              <BiMessageRoundedError className="text-xl" /> No records found.
+            </div>
+          }
           highlightOnHover
         />
       </div>

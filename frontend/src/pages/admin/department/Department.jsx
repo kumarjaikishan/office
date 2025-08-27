@@ -8,7 +8,7 @@ import DataTable from 'react-data-table-component';
 import { adddepartment, columns, delette, update } from './departmenthelper';
 import { useCustomStyles } from '../attandence/attandencehelper';
 import { CiFilter } from 'react-icons/ci';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Modalbox from '../../../components/custommodal/Modalbox';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
@@ -28,6 +28,7 @@ const Department = () => {
     filtere.branch !== 'all' ||
     filtere.department.trim() !== ''
   );
+  const dispatch = useDispatch();
 
 
   useEffect(() => {
@@ -63,9 +64,9 @@ const Department = () => {
         return {
           id: dep._id,
           sno: sno++,
-          branchid: dep.branchId._id,
-          branch: dep.branchId.name,
-          dep_name: dep.department,
+          branchid: dep?.branchId?._id,
+          branch: dep?.branchId?.name,
+          dep_name: dep?.department,
           action: (<div className="action">
             <span className="edit" title="Edit" onClick={() => edite(dep)}><MdOutlineModeEdit /></span>
             <span className="delete" onClick={() => deletee(dep._id)}><AiOutlineDelete /></span>
@@ -84,7 +85,7 @@ const Department = () => {
 
   const adddepartcall = (e) => {
     e.preventDefault();
-    adddepartment({ inp, setisload, setInp, setopenmodal, init })
+    adddepartment({ inp, setisload, setInp, setopenmodal, init, dispatch })
   }
 
 
@@ -104,21 +105,19 @@ const Department = () => {
     console.log("delete", id);
     swal({
       title: 'Are you sure?',
-      text: 'Once deleted, you will not be able to recover this',
+      text: 'Once deleted, All empoyee of this department deleted',
       icon: 'warning',
       buttons: true,
       dangerMode: true,
     }).then(async (willDelete) => {
       if (willDelete) {
-        delette({ departmentId: id, setisload });
-      } else {
-
+        delette({ departmentId: id, setisload, dispatch });
       }
     });
   }
   const updatee = () => {
-    console.log("updateee", inp)
-    update({ inp, setisload, setInp, setopenmodal, init })
+    // console.log("updateee", inp)
+    update({ inp, setisload, setInp, setopenmodal, init, dispatch })
   }
 
   return (
@@ -200,6 +199,7 @@ const Department = () => {
                 loading={isload}
                 loadingPosition="end"
                 endIcon={<IoIosSend />}
+                onClick={adddepartcall}
                 variant="contained"
                 type="submit"
               >

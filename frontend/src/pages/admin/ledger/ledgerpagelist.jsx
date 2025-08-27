@@ -97,7 +97,7 @@ const LedgerListPage = () => {
         formData.append("name", name);
 
         if (editLedgerImage instanceof File) {
-            let resizedfile = await handleImage(200, editLedgerImage);
+            let resizedfile = await handleImage(170, editLedgerImage);
             formData.append("image", resizedfile);
         }
 

@@ -1,11 +1,5 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { MdOutlineModeEdit } from "react-icons/md";
-import { AiOutlineDelete } from "react-icons/ai";
-import { IoEyeOutline } from "react-icons/io5";
-import { Avatar, Box, Typography } from "@mui/material";
-import { HiOutlineDocumentReport } from "react-icons/hi";
-import { FaRegUser } from "react-icons/fa";
 import { FirstFetch } from "../../../../store/userSlice";
 
 export const columns = [
@@ -34,7 +28,7 @@ export const columns = [
 ]
 
 
-export const addemployee = async ({ formData,dispatch, setisload, setInp, setopenmodal, init, resetPhoto }) => {
+export const addemployee = async ({ formData, dispatch, setisload, setInp, setopenmodal, init, resetPhoto }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -68,7 +62,7 @@ export const addemployee = async ({ formData,dispatch, setisload, setInp, setope
 };
 
 
-export const employeeupdate = async ({ formData,dispatch,  setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
+export const employeeupdate = async ({ formData, dispatch, setEmployeePhoto, setisload, setInp, setopenmodal, init }) => {
     const token = localStorage.getItem('emstoken');
     setisload(true);
 
@@ -103,7 +97,7 @@ export const employeeupdate = async ({ formData,dispatch,  setEmployeePhoto, set
     }
 };
 
-export const employeedelette = async ({ employeeId, setisload }) => {
+export const employeedelette = async ({ employeeId, setisload, dispatch }) => {
     if (!employeeId) {
         alert('All fileds are Required');
         return;
@@ -125,7 +119,8 @@ export const employeedelette = async ({ employeeId, setisload }) => {
             }
         );
 
-        console.log('Query:', res);
+        // console.log('Query:', res);
+        dispatch(FirstFetch())
         toast.success(res.data.message, { autoClose: 1200 });
     } catch (error) {
         console.log(error);

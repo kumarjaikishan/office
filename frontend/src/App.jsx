@@ -9,6 +9,7 @@ import { GoGear } from 'react-icons/go';
 import { connectSSE, closeSSE } from "./utils/sse";
 import { Avatar } from '@mui/material';
 import dayjs from 'dayjs';
+import { FaRegUser } from 'react-icons/fa';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports

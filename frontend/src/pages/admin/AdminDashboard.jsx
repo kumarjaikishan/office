@@ -79,7 +79,7 @@ const Main = () => {
       // console.log("see address", import.meta.env.VITE_SSE_ADDRESS)
       // eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events`);
       eventSource = new EventSource(`${import.meta.env.VITE_SSE_ADDRESS}events?token=${localStorage.getItem("emstoken")}`);
-      
+
 
 
       eventSource.onopen = () => {
@@ -167,17 +167,6 @@ const Main = () => {
     };
   }, []);
 
-  const notices = [
-    { title: 'Annual General Meeting on Sep 10', date: '2025-08-01' },
-    { title: 'New ID Cards to be issued by next week', date: '2025-07-30' },
-    { title: 'Office renovation starts next Monday', date: '2025-07-28' },
-    { title: 'Annual General Meeting on Sep 10', date: '2025-08-01' },
-    { title: 'New ID Cards to be issued by next week', date: '2025-07-30' },
-    { title: 'Office renovation starts next Monday', date: '2025-07-28' },
-    { title: 'Annual General Meeting on Sep 10', date: '2025-08-01' },
-    { title: 'New ID Cards to be issued by next week', date: '2025-07-30' },
-    { title: 'Office renovation starts next Monday', date: '2025-07-28' },
-  ];
 
   return (
     <div className='p-0  md:p-3'>
@@ -205,9 +194,11 @@ const Main = () => {
               onChange={(e) => setbranc(e.target.value)}
             >
               <MenuItem selected value={'all'}>All</MenuItem>
-              {branch?.map((list) => (
+              {branch.length > 1 ? branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
-              ))}
+              )) : 
+              <MenuItem disabled value={""}>No Branch Found</MenuItem>
+              }
             </Select>
           </FormControl>
           <FormControl sx={{ width: '160px' }} required size="small">
@@ -228,9 +219,11 @@ const Main = () => {
               onChange={(e) => setdepfilter(e.target.value)}
             >
               <MenuItem selected value={'all'}>All</MenuItem>
-              {department?.filter(e => e.branchId._id == branc)?.map((val) => {
+              {department?.length > 1 ? department.filter(e => e.branchId._id == branc)?.map((val) => {
                 return <MenuItem key={val._id} value={val._id}>{val.department}</MenuItem>
-              })}
+              })
+                : <MenuItem disabled value={''}>No Department Found</MenuItem>
+              }
 
             </Select>
           </FormControl>

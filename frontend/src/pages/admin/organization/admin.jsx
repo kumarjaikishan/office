@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { IoIosArrowDown } from "react-icons/io";
 import { Avatar, Button, TextField } from "@mui/material";
 import Modalbox from "../../../components/custommodal/Modalbox";
+import { useDispatch } from "react-redux";
+import { FirstFetch } from "../../../../store/userSlice";
 
 // Permission labels
 const PERMISSION_LABELS = {
@@ -55,6 +57,7 @@ export default function SuperAdminDashboard() {
         profilePreview: "",
         permissions: { ...adminPermission },
     });
+    const dispatch = useDispatch();
 
     useEffect(() => {
         fetech()
@@ -122,7 +125,7 @@ export default function SuperAdminDashboard() {
             });
 
             toast.success(res.data.message, { autoClose: 1200 });
-            // console.log(res.data)
+
             resetForm();
             fetech(); // refresh list
 
@@ -142,7 +145,7 @@ export default function SuperAdminDashboard() {
     const fetech = async () => {
         try {
             const token = localStorage.getItem("emstoken");
-            // setisload(true);
+            setisload(true);
 
             const res = await axios.get(
                 `${import.meta.env.VITE_API_ADDRESS}getAdmin`,
@@ -152,12 +155,8 @@ export default function SuperAdminDashboard() {
                     },
                 }
             );
-
-            // toast.success(res.data.message, { autoClose: 1200 });
-            console.log(res.data)
             setAdmins(res.data);
-            // resetForm();
-            // resetPhoto();
+
         } catch (error) {
             console.error(error);
             if (error.response) {
@@ -182,9 +181,51 @@ export default function SuperAdminDashboard() {
         setShowForm(true);
     };
 
-    const handleDelete = (index) => {
-        const updated = admins.filter((_, i) => i !== index);
-        setAdmins(updated);
+    const handleDelete = async (id) => {
+
+        swal({
+            title: `Are you sure to Delete?`,
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then(async (proceed) => {
+            if (proceed) {
+                let toastId;
+                try {
+                    const token = localStorage.getItem("emstoken");
+                    setisload(true);
+                    toastId = toast.loading("Deleting...");
+
+                    const res = await axios.delete(
+                        `${import.meta.env.VITE_API_ADDRESS}deleteAdmin/${id}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    toast.update(toastId, {
+                        render: res.data.message,
+                        type: "success",
+                        isLoading: false,
+                        autoClose: 1800,
+                    });
+                    fetech();
+                } catch (error) {
+                    console.error(error);
+                    toast.update(toastId, {
+                        render: error.response?.data?.message || 'Error',
+                        type: "warning",
+                        isLoading: false,
+                        autoClose: 2500,
+                    });
+                } finally {
+                    setisload(false);
+                }
+            }
+        });
+
+
     };
 
     const togglePermission = (module, level) => {
@@ -294,7 +335,7 @@ export default function SuperAdminDashboard() {
                                         </button>
                                         <button
                                             className="p-2 border rounded text-red-600 hover:bg-red-50"
-                                            onClick={() => handleDelete(index)}
+                                            onClick={() => handleDelete(admin._id)}
                                         >
                                             <MdDelete className="h-4 w-4" />
                                         </button>
@@ -350,8 +391,6 @@ export default function SuperAdminDashboard() {
                                         </div>
                                     )}
                                 </div>
-
-
                             </div>
                         ))}
                     </div>

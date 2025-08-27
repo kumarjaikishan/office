@@ -18,20 +18,27 @@ function eventsHandler(req, res) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_Key);
-    console.log("sse - ", decoded)
+    // console.log("sse - ", decoded)
     const companyId = decoded.companyId; // adjust based on your JWT payload
     const userId = decoded.id;
+    const branchId = decoded?.branchIds;
+    const role = decoded?.role;
 
-    const client = { res, companyId, userId };
+    const client = { res, companyId, userId, branchId, role };
     clients.push(client);
 
     const heartbeat = setInterval(() => {
       res.write(`: ping\n\n`); // comment-only ping keeps connection alive
     }, 25000); // 25 seconds is a good balance
 
+    // req.on('close', () => {
+    //   clearInterval(heartbeat);
+    //   clients = clients.filter(client => client !== res);
+    // });
+
     req.on('close', () => {
       clearInterval(heartbeat);
-      clients = clients.filter(client => client !== res);
+      clients = clients.filter(c => c.res !== res);
     });
 
   } catch (error) {
@@ -41,14 +48,20 @@ function eventsHandler(req, res) {
 }
 
 
-function sendToClients(data, companyId) {
+function sendToClients(data, companyId, branchId = '') {
   clients
-    .filter((c) => c.companyId === companyId) // send only to same company
+    .filter((c) => c.companyId === companyId)
     .forEach((client) => {
-      client.res.write(`data: ${JSON.stringify(data)}\n\n`);
+      // console.log(client.role, client.branchId, branchId)
+      if (client.role == "manager") {
+        if (client.branchId.includes(branchId.toString())) {
+          client.res.write(`data: ${JSON.stringify(data)}\n\n`);
+        }
+      } else {
+        client.res.write(`data: ${JSON.stringify(data)}\n\n`);
+      }
     });
 }
-
 
 module.exports = {
   eventsHandler,

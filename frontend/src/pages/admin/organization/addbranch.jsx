@@ -59,7 +59,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
   }, [company, editbranch]);
 
   useEffect(() => {
-    if (adminManager.length > 0) {
+    if (adminManager?.length > 0) {
       setUsers(adminManager.filter(e => e.role === 'manager'))
     }
   }, [adminManager]);
@@ -142,28 +142,37 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
             helperText="City, State or Address"
           />
 
-          <FormControl size='small' fullWidth>
+          <FormControl size="small" fullWidth>
             <InputLabel>Managers</InputLabel>
             <Select
               multiple
-              value={branch.managerIds}
-              onChange={e => handleFieldChange('managerIds', e.target.value)}
+              value={branch?.managerIds || []}   // ✅ safe fallback
+              onChange={(e) => handleFieldChange('managerIds', e.target.value)}
               input={<OutlinedInput label="Managers" />}
               renderValue={(selected) =>
-                selected.map(id => users.find(user => user._id === id)?.name).join(', ')
+                selected
+                  .map((id) => users.find((user) => user._id === id)?.name || "Unknown")
+                  .join(", ")
               }
             >
-              {users?.map(user => (
-                <MenuItem key={user._id} value={user?._id}>
-                  <Checkbox checked={branch?.managerIds?.includes(user._id)} />
-                  <Avatar src={user?.profileImage} alt={user?.name}>
-                    {!user.profileImage && <FaRegUser />}
-                  </Avatar>
-                  <ListItemText className='ml-2 capitalize' primary={user?.name} />
+              {users && users.length > 0 ? (
+                users.map((user) => (
+                  <MenuItem key={user._id} value={user._id}>
+                    <Checkbox checked={branch?.managerIds?.includes(user._id)} />
+                    <Avatar src={user?.profileImage} alt={user?.name}>
+                      {!user?.profileImage && <FaRegUser />}
+                    </Avatar>
+                    <ListItemText className="ml-2 capitalize" primary={user?.name} />
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled value="">
+                  <ListItemText className="ml-2 capitalize" primary="No Manager Found" />
                 </MenuItem>
-              ))}
+              )}
             </Select>
           </FormControl>
+
         </Grid>
 
         {/* Attendance Override */}
@@ -313,19 +322,19 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
         )}
       </span>
       <div className='modalfooter'>
-          <Button variant="outlined" onClick={cancele}>
-            Cancel
+        <Button variant="outlined" onClick={cancele}>
+          Cancel
+        </Button>
+        {editbranch ? (
+          <Button variant="contained" onClick={edite}>
+            Save
           </Button>
-          {editbranch ? (
-            <Button variant="contained" onClick={edite}>
-              Save
-            </Button>
-          ) : (
-            <Button variant="contained" onClick={handleSubmit}>
-              Add Branch
-            </Button>
-          )}
-        </div>
+        ) : (
+          <Button variant="contained" onClick={handleSubmit}>
+            Add Branch
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

@@ -163,7 +163,8 @@ const checkin = async (req, res, next) => {
         type: 'attendance_update',
         payload: { action: 'checkin', data: updatedRecord}
       },
-      attendanceData.companyId
+      attendanceData.companyId,
+      attendanceData?.branchId || null
     );
 
     return res.status(200).json({ message: 'Punch-in recorded', attendance });

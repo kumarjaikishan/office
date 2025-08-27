@@ -1,13 +1,12 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { MdOutlineModeEdit } from "react-icons/md";
-import { AiOutlineDelete } from "react-icons/ai";
+import { FirstFetch } from "../../../../store/userSlice";
 
 export const columns = [
     {
         name: "S.no",
         selector: (row) => row.sno,
-        width:'40px'
+        width: '40px'
     },
     {
         name: "Branch",
@@ -20,12 +19,12 @@ export const columns = [
     {
         name: "Action",
         selector: (row) => row.action,
-         width:'80px'
+        width: '80px'
     }
 ]
-export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) => {
+export const adddepartment = async ({ inp, setisload, setInp, setopenmodal, init, dispatch }) => {
     console.log(inp);
-    const {branchId, department, description } = inp;
+    const { branchId, department, description } = inp;
 
     if (!department) {
         alert('Please fill in both fields');
@@ -39,7 +38,7 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) =>
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}adddepartment`,
             {
-                department,branchId,
+                department, branchId,
                 description
             },
             {
@@ -49,7 +48,8 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) =>
             }
         );
 
-        console.log('Query:', res);
+        // console.log('Query:', res);
+        dispatch(FirstFetch());
         toast.success(res.data.message, { autoClose: 1200 });
         setInp(init);
         setopenmodal(false);
@@ -66,9 +66,9 @@ export const adddepartment = async ({inp,setisload,setInp,setopenmodal,init}) =>
         setisload(false);
     }
 };
-export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
+export const update = async ({ inp, setisload, setInp, setopenmodal, init, dispatch }) => {
 
-    const {departmentId, department, description } = inp;
+    const { departmentId, department, description } = inp;
 
     if (!department || !departmentId) {
         alert('All fileds are Required');
@@ -82,7 +82,7 @@ export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}updatedepartment`,
             {
-               departmentId, department, description
+                departmentId, department, description
             },
             {
                 headers: {
@@ -91,7 +91,8 @@ export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
             }
         );
 
-        console.log('Query:', res);
+        // console.log('Query:', res);
+        dispatch(FirstFetch());
         toast.success(res.data.message, { autoClose: 1200 });
         setInp(init);
         setopenmodal(false);
@@ -108,8 +109,8 @@ export const update = async ({inp,setisload,setInp,setopenmodal,init}) => {
         setisload(false);
     }
 };
-export const delette = async ({departmentId,setisload}) => {
 
+export const delette = async ({ departmentId, setisload, dispatch }) => {
     if (!departmentId) {
         alert('All fileds are Required');
         return;
@@ -122,7 +123,7 @@ export const delette = async ({departmentId,setisload}) => {
         const res = await axios.post(
             `${import.meta.env.VITE_API_ADDRESS}deletedepartment`,
             {
-               departmentId
+                departmentId
             },
             {
                 headers: {
@@ -130,8 +131,8 @@ export const delette = async ({departmentId,setisload}) => {
                 }
             }
         );
-
-        console.log('Query:', res);
+        dispatch(FirstFetch())
+        // console.log('Query:', res);
         toast.success(res.data.message, { autoClose: 1200 });
     } catch (error) {
         console.log(error);

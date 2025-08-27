@@ -10,13 +10,14 @@ import Modalbox from '../../../components/custommodal/Modalbox';
 import Addbranch from './addbranch';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCompany } from './helper';
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import { MdExpandLess, MdExpandMore, MdOutlineModeEdit } from "react-icons/md";
 import Department from '../department/Department';
 import { FaRegUser } from 'react-icons/fa';
-import { AiFillAmazonCircle } from "react-icons/ai";
+import { AiFillAmazonCircle, AiOutlineDelete } from "react-icons/ai";
 import useImageUpload from "../../../utils/imageresizer";
 import SuperAdminDashboard from './admin';
 import { FirstFetch } from '../../../../store/userSlice';
+import DataTable from 'react-data-table-component';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -118,6 +119,39 @@ export default function OrganizationSettings() {
         seteditbranchdata(dffg);
         setopenviewmodal(true);
     }
+    const primaryColor = useSelector((state) => state.user.primaryColor) || "teal";
+    const styles = {
+        headCells: {
+            style: {
+                backgroundColor: primaryColor,
+                fontWeight: "bold",
+                fontSize: "14px",
+                color: "white",
+                justifyContent: "flex-start",
+                paddingLeft: "4px",
+                paddingRight: "4px",
+            },
+        },
+        headRow: {
+            style: {
+                borderBottom: "2px solid #ccc",
+            },
+        },
+        rows: {
+            style: {
+                minHeight: "48px",
+                borderBottom: "1px solid #eee",
+            },
+        },
+        cells: {
+            style: {
+                justifyContent: "flex-start",
+                paddingLeft: "4px",
+                paddingRight: "4px",
+            },
+        },
+    };
+
 
     return (
         <div className="w-full mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
@@ -247,79 +281,70 @@ export default function OrganizationSettings() {
                         )}
                     </div>
                     {openSection === 'branches' && (
-                        <div className="p-1 md:p-4 rounded overflow-auto  border-green-300 border-2 border-dashed mt-2 space-y-4">
+                        <div className="p-1 md:p-4 rounded overflow-auto border-green-300 border-2 border-dashed mt-2 space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-md font-medium">Branch List</h3>
-
-                                <Button variant="contained"
+                                <Button
+                                    variant="contained"
                                     onClick={() => setopenviewmodal(true)}
                                 >
                                     + Add Branch
                                 </Button>
-
                             </div>
 
-                            <table className="w-full capitalize text-[12px] md:text-sm border">
-                                <thead className="bg-green-200">
-                                    <tr>
-                                        <th className="p-2 border">Name</th>
-                                        <th className="p-2 border">Location</th>
-                                        <th className="p-2 border">Manager(s)</th>
-                                        <th className="p-2 border">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {branch &&
-                                        branch.map((bran, ind) => {
-                                            return (
-                                                <tr key={ind}>
-                                                    <td className="p-2 border">{bran.name}</td>
-                                                    <td className="p-2 border">{bran.location}</td>
-
-                                                    <td className="p-2 border capitalize">
-                                                        <div className="flex flex-col gap-2">
-                                                            {bran?.managerIds?.map((manager, idx) => (
-                                                                <div
-                                                                    key={idx}
-                                                                    className="flex items-center gap-2 cursor-pointer"
-                                                                    onClick={() => setemployee(manager.userid)}
-                                                                >
-                                                                    <Avatar src={manager?.profileImage} alt={manager.name}>
-                                                                        {!manager?.profileImage && <FaRegUser />}
-                                                                    </Avatar>
-                                                                    <span>{manager.name}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </td>
-
-                                                    <td className="p-2 border ">
-                                                    <div className='flex gap-2 w-[180px]'>
-                                                        <Button variant="contained"
-                                                            className='mr-2'
-                                                            onClick={() => handleEditBranch(bran)}
-                                                        >
-                                                            Edit
-                                                        </Button>
-                                                        <Button variant="contained"
-                                                         className='ml-2'
-                                                            disabled
-                                                            onClick={() => handleEditBranch(bran)}
-                                                        >
-                                                            Delete
-                                                        </Button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    }
-                                    {!branch && <div>No branch Found</div>}
-                                </tbody>
-                            </table>
+                            <DataTable
+                                customStyles={styles}
+                                columns={[
+                                    {
+                                        name: "Name",
+                                        selector: row => row.name,
+                                        sortable: true
+                                    },
+                                    {
+                                        name: "Location",
+                                        selector: row => row.location,
+                                        sortable: true
+                                    },
+                                    {
+                                        name: "Manager(s)",
+                                        cell: row => (
+                                            <div className="flex flex-col gap-2">
+                                                {row?.managerIds?.map((manager, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className="flex items-center gap-2 cursor-pointer"
+                                                        onClick={() => setemployee(manager.userid)}
+                                                    >
+                                                        <Avatar src={manager?.profileImage} alt={manager.name}>
+                                                            {!manager?.profileImage && <FaRegUser />}
+                                                        </Avatar>
+                                                        <span>{manager.name}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )
+                                    },
+                                    {
+                                        name: "Actions",
+                                        width: "120px",
+                                        cell: row => (
+                                            <div className="action flex gap-2.5">
+                                                <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => handleEditBranch(row)}><MdOutlineModeEdit /></span>
+                                                <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => handleEditBranch(row)}><AiOutlineDelete /></span>
+                                            </div>
+                                        )
+                                    },
+                                ]}
+                                data={branch || []}
+                                pagination
+                                highlightOnHover
+                                noDataComponent="No branches found"
+                            />
                         </div>
                     )}
-                </div>}
+                </div>
+            }
+
 
             <div>
                 <div

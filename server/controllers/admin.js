@@ -317,10 +317,8 @@ const deleteemployee = async (req, res, next) => {
         await attendanceModal.deleteMany({ employeeId });
         await salaryModal.deleteMany({ employeeId });
 
-        if (employee.profileimage != "") {
-            let arraye = [];
-            arraye.push(employee.profileimage);
-            await removePhotoBySecureUrl(arraye);
+        if (employee?.profileimage) {
+            await removePhotoBySecureUrl([employee.profileimage]);
         }
 
         if (!employee) {
@@ -356,6 +354,8 @@ const employeelist = async (req, res, next) => {
 
 const addAdmin = async (req, res, next) => {
 
+    // console.log(req.body);
+    // return res.status(400).json({ message: "All fields are required" });
     const { name, email, role, password, permissions } = req.body;
 
     if (!name || !email || !role || !password) {
@@ -381,8 +381,11 @@ const addAdmin = async (req, res, next) => {
             companyId: req.user.companyId,
         };
 
-        if (permissions && typeof permissions === 'object') {
-            fields.permission = permissions; // note: `permission` matches schema
+         // Convert permissions if stringified
+        if (permissions && typeof permissions === 'string') {
+            fields.permissions = JSON.parse(permissions);
+        } else if (permissions && typeof permissions === 'object') {
+            fields.permissions = permissions;
         }
 
         let uploadResult = null;
@@ -441,6 +444,8 @@ const getAdmin = async (req, res, next) => {
 const editAdmin = async (req, res, next) => {
     const { name, email, role, password, permissions } = req.body;
     const { id } = req.params;
+    // console.log(req.body);
+    // return res.status(400).json({ message: "All fields are required" });
 
     if (!name || !email || !role) {
         return res.status(400).json({ message: "All fields are required" });
@@ -451,6 +456,11 @@ const editAdmin = async (req, res, next) => {
 
     try {
         const existingUser = await usermodal.findOne({ email }).session(session);
+
+        if (existingUser.companyId.toString() !== req.user.companyId.toString()) {
+            return res.status(403).json({ message: "Access denied: This user don't Belong to You" });
+        }
+
         if (existingUser && existingUser._id.toString() !== id) {
             await session.abortTransaction();
             session.endSession();
@@ -513,6 +523,50 @@ const editAdmin = async (req, res, next) => {
     }
 };
 
+const deleteAdmin = async (req, res, next) => {
+    const { id } = req.params;
+
+    try {
+        const adminmanager = await usermodal.findOne({
+            _id: id,
+            role: { $in: ['admin', 'manager'] }
+        });
+
+        if (!adminmanager) {
+            return res.status(400).json({ message: 'Wrong Id' });
+        }
+
+        if (!adminmanager.companyId.equals(req.user.companyId)) {
+            return res.status(403).json({ message: "Access denied: This user doesn't belong to you" });
+        }
+
+        await usermodal.deleteOne({ _id: id });
+
+        if (adminmanager.profileImage) {
+            await removePhotoBySecureUrl([adminmanager.profileImage]);
+        }
+
+        if (adminmanager.role === 'manager') {
+            for (const element of adminmanager.branchIds) {
+                let previousmanager = await branch.findById(element);
+                if (previousmanager) {
+                    previousmanager.managerIds = previousmanager.managerIds.filter(
+                        e => e.toString() !== adminmanager._id.toString()
+                    );
+                    await previousmanager.save();
+                }
+            }
+        }
+
+        res.status(200).json({
+            message: 'Admin deleted successfully',
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: error.message });
+    }
+};
 
 
 const firstfetch = async (req, res, next) => {
@@ -550,7 +604,7 @@ const firstfetch = async (req, res, next) => {
 
             employees = await employeeModal.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
                 .populate('department', 'department')
-                .populate('userid')
+                .populate('userid', 'email name ')
                 .sort({ employeename: 1 });
 
             const employeeIds = employees.map(emp => emp._id);
@@ -594,7 +648,7 @@ const firstfetch = async (req, res, next) => {
 
             employees = await employeeModal.find({ companyId: compId })
                 .populate('department', 'department')
-                .populate('userid')
+                .populate('userid', 'email name ')
                 .sort({ employeename: 1 });
 
             attendance = await attendanceModal.find({ companyId: compId })
@@ -972,6 +1026,6 @@ const leavehandle = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, getAdmin, editAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, getAdmin, editAdmin, deleteAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };
