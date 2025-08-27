@@ -194,7 +194,7 @@ const Main = () => {
               onChange={(e) => setbranc(e.target.value)}
             >
               <MenuItem selected value={'all'}>All</MenuItem>
-              {branch.length > 1 ? branch?.map((list) => (
+              {branch?.length > 1 ? branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
               )) : 
               <MenuItem disabled value={""}>No Branch Found</MenuItem>
@@ -229,7 +229,7 @@ const Main = () => {
           </FormControl>
         </div>
 
-        <div className='grid grid-cols-5 md:grid-cols-10 lg:grid-cols-15 gap-2 md:gap-4'>
+        <div className='px-1 md:px-3 grid grid-cols-5 md:grid-cols-10 lg:grid-cols-13 gap-2 md:gap-4'>
           {employeelist?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
             const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);

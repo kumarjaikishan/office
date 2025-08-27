@@ -1,0 +1,1 @@
+import{aG as n}from"./index-Yr5TVBX8.js";import{a as p}from"./useSlotProps-BKaa53Ma.js";function m(t){const{theme:e,name:o,props:r}=t;return!e||!e.components||!e.components[o]||!e.components[o].defaultProps?r:n(e.components[o].defaultProps,r)}function f({props:t,name:e,defaultTheme:o,themeId:r}){let s=p(o);return r&&(s=s[r]||s),m({theme:s,name:e,props:t})}export{m as g,f as u};

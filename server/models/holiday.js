@@ -14,7 +14,11 @@ const holidaySchema = new mongoose.Schema({
   name: { type: String, required: true },
   fromDate: { type: Date, required: true },
   toDate: { type: Date, required: true },
-  type: { type: String, default: "Public" }, 
+  type: {
+    type: String,
+    enum: ["National", "Religious","Public", "Other"],
+    default: "Other"
+  },
   description: { type: String, trim: true }
 });
 

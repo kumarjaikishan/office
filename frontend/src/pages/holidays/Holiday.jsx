@@ -19,7 +19,7 @@ import { BiMessageRoundedError } from 'react-icons/bi';
 dayjs.extend(isSameOrBefore);
 
 const HolidayForm = () => {
-  const [form, setForm] = useState({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' });
+  const [form, setForm] = useState({ name: '', type: '', fromDate: null, toDate: null, description: '' });
   const [holidayId, setHolidayId] = useState(null);
   const [holidays, setHolidays] = useState([]);
   const [holidaylist, setHolidayList] = useState([]);
@@ -101,7 +101,7 @@ const HolidayForm = () => {
     setHolidayId(holi._id);
     setForm({
       name: holi.name,
-      type: 'Public',
+      type: holi.type,
       fromDate: dayjs(holi.fromDate).toDate(),
       toDate: dayjs(holi.toDate).toDate(),
       description: holi.description || ''
@@ -185,18 +185,34 @@ const HolidayForm = () => {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box className="flex flex-col md:flex-row gap-4 p-1">
         <HolidayCalander highlightedDates={holidaylist.map(dateObj => ({ date: dayjs(dateObj.date).toDate(), name: dateObj.name }))} weeklyOffs={weeklyOffs} />
+        <form onSubmit={handleSave} className='rounded w-full max-w-md'>
+          <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
+            <TextField required inputRef={nameInputRef} label="Holiday Name" size="small" value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} fullWidth />
+            <DatePicker required label="From Date" format='dd/MM/yyyy' value={form.fromDate} onChange={(newValue) => setForm(prev => ({ ...prev, fromDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+            <DatePicker required label="To Date" format='dd/MM/yyyy' value={form.toDate} onChange={(newValue) => setForm(prev => ({ ...prev, toDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+            {/* Type Selector */}
+            <FormControl size="small" required fullWidth>
+              <InputLabel>Type</InputLabel>
+              <Select
+                value={form.type}
+                label="Type"
+                onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))}
+              >
+                <MenuItem  disabled value="">Select Type</MenuItem>
+                <MenuItem value="National">National</MenuItem>
+                <MenuItem value="Religious">Religious</MenuItem>
+                <MenuItem value="Public">Public</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
 
-        <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
-          <TextField inputRef={nameInputRef} label="Holiday Name" size="small" value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} fullWidth />
-          <DatePicker label="From Date" format='dd/MM/yyyy' value={form.fromDate} onChange={(newValue) => setForm(prev => ({ ...prev, fromDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
-          <DatePicker label="To Date" format='dd/MM/yyyy' value={form.toDate} onChange={(newValue) => setForm(prev => ({ ...prev, toDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
-          <TextField label="Type" size="small" value={form.type} onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))} fullWidth />
-          <TextField label="Description" multiline rows={2} size="small" value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} fullWidth />
-          <div className='flex justify-end gap-2'>
-            {isUpdate && <Button variant="outlined" onClick={() => { setIsUpdate(false); setForm({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' }); }}>Cancel</Button>}
-            <Button variant="contained" onClick={handleSave}>{isUpdate ? 'Update' : 'Add'} Holiday</Button>
-          </div>
-        </Box>
+            <TextField label="Description (optional)" multiline rows={2} size="small" value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} fullWidth />
+            <div className='flex justify-end gap-2'>
+              {isUpdate && <Button variant="outlined" onClick={() => { setIsUpdate(false); setForm({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' }); }}>Cancel</Button>}
+              <Button variant="contained" type='submit'>{isUpdate ? 'Update' : 'Add'} Holiday</Button>
+            </div>
+          </Box>
+        </form>
       </Box>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2  w-full md:w-[600px] my-4 ">

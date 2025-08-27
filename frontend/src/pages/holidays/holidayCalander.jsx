@@ -6,7 +6,7 @@ const HolidayCalander = ({ highlightedDates, weeklyOffs }) => {
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box className="bg-white shadow rounded p-1 w-full max-w-md">
-            <p className="font-bold text-center text-xl text-slate-600">Holiday Calendar</p>
+                <p className="font-bold text-center text-xl text-slate-600">Holiday Calendar</p>
                 <StaticDatePicker
                     displayStaticWrapperAs="desktop"
                     value={null}
@@ -32,7 +32,7 @@ const HolidayCalander = ({ highlightedDates, weeklyOffs }) => {
                                                 borderRadius: '50%',
                                                 color: 'white',
                                                 '&:hover': {
-                                                    backgroundColor: 'darkcyan', // darker teal on hover
+                                                    backgroundColor: 'darkcyan',
                                                     color: 'white',
                                                 },
                                             }),
@@ -41,7 +41,7 @@ const HolidayCalander = ({ highlightedDates, weeklyOffs }) => {
                                                 borderRadius: '50%',
                                                 color: 'white',
                                                 '&:hover': {
-                                                    backgroundColor: '#d97706', // darker teal on hover
+                                                    backgroundColor: '#b45309',
                                                     color: 'white',
                                                 },
                                             }),
@@ -49,12 +49,13 @@ const HolidayCalander = ({ highlightedDates, weeklyOffs }) => {
                                     />
                                 </Tooltip>
                             );
-                        }
+                        },
+                        actionBar: () => null // ✅ hides Cancel/OK buttons
                     }}
                 />
             </Box>
         </LocalizationProvider>
-    )
+    );
 }
 
-export default HolidayCalander
+export default HolidayCalander;
