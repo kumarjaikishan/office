@@ -337,6 +337,7 @@ const BulkMark = ({
                                                             onChange={(e) => handleStatusChange(emp._id, e.target.value)}
                                                         >
                                                             <MenuItem value={'present'}>Present</MenuItem>
+                                                            <MenuItem value={'leave'}>Leave</MenuItem>
                                                             <MenuItem value={'absent'}>Absent</MenuItem>
                                                             <MenuItem value={'half day'}>Half Day</MenuItem>
                                                         </Select>

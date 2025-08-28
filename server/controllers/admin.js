@@ -440,6 +440,42 @@ const getAdmin = async (req, res, next) => {
     }
 };
 
+const profileimage = async (req, res, next) => {
+    try {
+        const whichsuer = await usermodal.findById(req.user.id);
+        const oldprofile = whichsuer?.profileImage || undefined;
+        
+        let uploadResult;
+        if (req.file) {
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'ems/employee'
+            });
+            console.log("2")
+            if (uploadResult) {
+                fs.unlink(req.file.path, (err) => {
+                    if (err) console.error('Failed to delete local file:', err);
+                });
+            }
+        }
+        await usermodal.findByIdAndUpdate(req.user.id, { profileImage: uploadResult.secure_url });
+       
+
+        if (oldprofile) {
+            await removePhotoBySecureUrl([oldprofile]);
+        }
+
+        res.status(200).json({
+            message: 'Updated successfully',
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({
+            message: 'Server error',
+        });
+    }
+};
+
 
 const editAdmin = async (req, res, next) => {
     const { name, email, role, password, permissions } = req.body;
@@ -456,6 +492,7 @@ const editAdmin = async (req, res, next) => {
 
     try {
         const existingUser = await usermodal.findOne({ email }).session(session);
+        const oldprofile = existingUser.profileImage || undefined;
 
         if (existingUser.companyId.toString() !== req.user.companyId.toString()) {
             return res.status(403).json({ message: "Access denied: This user don't Belong to You" });
@@ -498,6 +535,9 @@ const editAdmin = async (req, res, next) => {
                 });
                 fields.profileImage = uploadResult.secure_url;
             }
+        }
+        if (oldprofile) {
+            await removePhotoBySecureUrl([oldprofile]);
         }
 
         const updatedUser = await usermodal.findByIdAndUpdate(
@@ -1025,9 +1065,24 @@ const leavehandle = async (req, res, next) => {
         return next({ status: 500, message: error.message });
     }
 }
+const deleteleave = async (req, res, next) => {
+    const { leaveid } = req.params;
+    try {
+        const query = await leavemodal.findByIdAndDelete(leaveid);
+
+        if (!query) return next({ status: 404, message: "Leave not found" });
+
+        return res.status(200).json({
+            message: 'Deleted Successfully'
+        })
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, getAdmin, editAdmin, deleteAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, profileimage, deleteleave, getAdmin, editAdmin, deleteAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };

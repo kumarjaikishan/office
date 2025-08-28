@@ -16,6 +16,8 @@ import { MdDelete, MdEdit } from 'react-icons/md';
 import { CiFilter } from 'react-icons/ci';
 import Modalbox from '../../../components/custommodal/Modalbox';
 import { useCustomStyles } from '../attandence/attandencehelper';
+import { GoGear } from 'react-icons/go';
+import Loader from '../../../utils/loader';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -36,6 +38,7 @@ const LedgerDetailPage = () => {
     const { id: ledgerId } = useParams();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     const ledgerName = searchParams.get('name');
     const profile = decodeURIComponent(searchParams.get("profileimage"));
@@ -87,6 +90,7 @@ const LedgerDetailPage = () => {
     }, [entries, filterYear, filterMonth, filterDate]);
 
     const fetchEnteries = async () => {
+        setLoading(true)
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}entries/${ledgerId}`, { headers });
             // setLedger(res.data?.ledgers.find(l => l._id === ledgerId));
@@ -95,14 +99,17 @@ const LedgerDetailPage = () => {
         } catch (err) {
             console.log(err);
             toast.error(err.response.data.message);
+        } finally {
+            setLoading(false)
         }
     };
 
     const resetFilters = () => {
-        setFilterYear('');
-        setFilterMonth('');
+        setFilterYear('all');
+        setFilterMonth('all');
         setFilterDate('');
     };
+
 
     const handleDeleteEntry = async (idx) => {
         swal({
@@ -152,11 +159,24 @@ const LedgerDetailPage = () => {
     };
 
     const saveEntry = async () => {
-        const debit = parseFloat(entry.debit || 0);
-        const credit = parseFloat(entry.credit || 0);
+        if (!entry.particular || entry.particular.trim() === '') {
+            toast.warn("Particular field can't be blank");
+            return;
+        }
+
+        const debitStr = entry.debit?.toString().trim();
+        const creditStr = entry.credit?.toString().trim();
+
+        if (debitStr === '' && creditStr === '') {
+            toast.warn("At least one value needed: Debit or Credit");
+            return;
+        }
+
+        const debit = parseFloat(debitStr || 0);
+        const credit = parseFloat(creditStr || 0);
 
         if (debit && credit) {
-            toast.warn("Only one of Debit or Credit allowed");
+            toast.warn("Only one of Debit or Credit is allowed");
             return;
         }
 
@@ -199,11 +219,10 @@ const LedgerDetailPage = () => {
         setOpen(true);
     };
 
-    // if (!ledger) return <div>Loading...</div>;
 
     return (
-        <div className="bg-white rounded shadow-md p-1 md:p-5 ">
-            {/* Header */}
+        <div className="bg-white rounded shadow-md p-1 md:p-5 relative ">
+
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
                     <div className="flex items-start md:items-center  gap-3">
@@ -212,18 +231,17 @@ const LedgerDetailPage = () => {
                     </div>
                     <Button className=' w-full md:w-auto' onClick={() => navigate(-1)} variant="contained">Ledger Page</Button>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <SummaryBox label="Total Debit" value={totalDebit} />
-                    <SummaryBox label="Total Credit" value={totalCredit} />
-                    <SummaryBox label="Net Balance" value={totalBalance.toFixed(2)} />
-                </div>
+                {loading ? <Loader /> :
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <SummaryBox label="Total Debit" value={totalDebit} />
+                        <SummaryBox label="Total Credit" value={totalCredit} />
+                        <SummaryBox label="Net Balance" value={totalBalance.toFixed(2)} />
+                    </div>}
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap items-center gap-3 mb-4">
-                <div className="p-1 md:p-2 rounded shadow mb-4 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-2 mt-1 w-full md:w-fit">
-
+            <div className="flex  flex-wrap items-center gap-3 mb-4">
+                <div className="p-1 md:p-2 rounded shadow mb-4 md:mb-0 grid grid-cols-2 md:grid-cols-none md:flex gap-3 md:gap-2 mt-1 w-full  md:w-fit">
                     <FormControl size="small" className="col-span-1 md:w-[120px]">
                         <InputLabel>Year</InputLabel>
                         <Select
@@ -272,7 +290,7 @@ const LedgerDetailPage = () => {
                     <TextField
                         size="small"
                         type="date"
-                        className="col-span-1 md:w-[120px]"
+                        className="col-span-1  md:w-[160px]"
                         value={filterDate}
                         onChange={e => setFilterDate(e.target.value)}
                         label="Date"
@@ -302,14 +320,14 @@ const LedgerDetailPage = () => {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
+            <div className=" overflow-x-auto">
                 <DataTable
                     columns={getLedgerColumns(handleEditEntry, handleDeleteEntry)}
                     data={filtered || []}
                     pagination
                     customStyles={useCustomStyles()}
                     highlightOnHover
-                    noDataComponent="No entries found for selected filters."
+                    noDataComponent="No entries found"
                     paginationPerPage={10}
                     paginationRowsPerPageOptions={
                         [10, 25, 50, 100, filtered.length > 100 ? filtered.length : null].filter(Boolean)
@@ -317,6 +335,8 @@ const LedgerDetailPage = () => {
                     paginationComponentOptions={{
                         rowsPerPageText: 'Rows per page:',
                     }}
+                    // fixedHeader
+                    // fixedHeaderScrollHeight="500px" // set the scroll height you want
                 />
             </div>
 
@@ -326,9 +346,9 @@ const LedgerDetailPage = () => {
                 <div className="membermodal w-[310px]">
                     <div className="whole" >
                         <div className="modalhead">{editIndex !== null ? "Edit Entry" : "Add Entry"}</div>
-                        <span className="modalcontent ">
-                            <Box display="flex" flexDirection="column" gap={2} mt={1}>
-                                <TextField type="date" label="Date" size="small" InputLabelProps={{ shrink: true }}
+                        <span className="modalcontent">
+                            <div className='flex  w-full flex-col gap-3'>
+                                <TextField fullWidth type="date" label="Date" size="small" InputLabelProps={{ shrink: true }}
                                     value={entry.date || ''} onChange={e => setEntry({ ...entry, date: e.target.value })}
                                 />
                                 <TextField multiline minRows={2} label="Particular" size="small" value={entry.particular || ''}
@@ -340,43 +360,21 @@ const LedgerDetailPage = () => {
                                 <TextField type="number" label="Credit" size="small" value={entry.credit || ''}
                                     onChange={e => setEntry({ ...entry, credit: e.target.value, debit: "" })}
                                 />
-                            </Box>
+                            </div>
                         </span>
                         <div className="modalfooter">
-                            <Button onClick={() => { setOpen(false); setEditIndex(null) }}>Cancel</Button>
+                            <Button variant='outlined' onClick={() => { setOpen(false); setEntry(init); setEditIndex(null) }}>Cancel</Button>
                             <Button variant="contained" onClick={saveEntry}>{editIndex !== null ? "Update" : "Add"}</Button>
 
                         </div>
                     </div>
                 </div>
             </Modalbox>
+
         </div>
     );
 };
 
 export default LedgerDetailPage;
 
-{/* <div className="flex gap-3">
-                        <div
-                            onClick={handleOpenLedgerDialog}
-                            className="group cursor-pointer bg-blue-600 text-white rounded-full transition-all duration-300 w-10 h-10 hover:w-36 flex items-center justify-center group-hover:justify-start px-2"
-                        >
-                            <div className="w-6 h-6 flex items-center justify-center">
-                                <MdEdit className="text-xl" />
-                            </div>
-                            <span className="group-hover:ml-2 w-0 overflow-hidden group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                                Edit Ledger
-                            </span>
-                        </div>
-                        <div
-                            onClick={deleteLedger}
-                            className="group cursor-pointer border border-red-600 text-red-600 rounded-full transition-all duration-300 w-10 h-10 hover:w-40 flex items-center justify-center group-hover:justify-start px-2"
-                        >
-                            <div className="w-6 h-6 flex items-center justify-center">
-                                <MdDelete className="text-xl" />
-                            </div>
-                            <span className="group-hover:ml-2 w-0 overflow-hidden group-hover:w-auto transition-all duration-300 whitespace-nowrap">
-                                Delete Ledger
-                            </span>
-                        </div>
-                    </div> */}
+

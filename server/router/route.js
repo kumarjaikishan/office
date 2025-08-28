@@ -39,6 +39,7 @@ router.route('/updatedepartment').post(authmiddlewre, authorizeRoles('superadmin
 router.route('/deletedepartment').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("department", 4), admin.deletedepartment);
 router.route('/firstfetch').get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), admin.firstfetch);
 router.route('/leavehandle').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("leave", 3), admin.leavehandle);
+router.route('/leavehandle/:leaveid').delete(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("leave", 4), admin.deleteleave);
 // router.route('/addcompany').post(authmiddlewre, authorizeRoles('superadmin','superadmin'), admin.addcompany);
 router.route('/updateCompany').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('logo'), admin.updateCompany);
 router.route('/addBranch').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("branch", 2), admin.addBranch);
@@ -81,6 +82,7 @@ router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), em
 router.route('/updatenotification').get(authmiddlewre, employee.updatenotification);
 
 router.route('/addAdmin').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.addAdmin);
+router.route('/profile-image').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('profileImage'), admin.profileimage);
 router.route('/getAdmin').get(authmiddlewre, authorizeRoles('superadmin'), admin.getAdmin);
 router.route('/editAdmin/:id').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.editAdmin);
 router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmin'), admin.deleteAdmin);

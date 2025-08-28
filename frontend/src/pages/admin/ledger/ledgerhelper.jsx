@@ -19,12 +19,12 @@ export const getLedgerColumns = (handleEdit, handleDelete) => [
     },
     {
         name: 'Debit',
-        selector: row => row.debit,
+        selector: row => (parseFloat(row.debit) === 0 ? "" : row.debit), //row.debit.toFixed(2)
         width: '90px'
     },
     {
         name: 'Credit',
-        selector: row => row.credit,
+        selector: row => (parseFloat(row.credit) === 0 ? "" : row.credit),
         width: '90px'
     },
     {

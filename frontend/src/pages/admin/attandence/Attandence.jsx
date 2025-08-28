@@ -375,9 +375,9 @@ const Attandence = () => {
       icon: "warning",
       buttons: true,
       dangerMode: true,
-    }).then((proceed) => {
+    }).then(async (proceed) => {
       if (proceed) {
-        deleteAttandence({ attandanceId: [attanId], setisload, dispatch });
+        await deleteAttandence({ attandanceId: [attanId], setisload, dispatch });
         setselectedRows([]);
       }
     });
@@ -389,9 +389,10 @@ const Attandence = () => {
       icon: "warning",
       buttons: true,
       dangerMode: true,
-    }).then((proceed) => {
+    }).then(async (proceed) => {
       if (proceed) {
-        deleteAttandence({ attandanceId: multideletearray, setisload, dispatch })
+        await deleteAttandence({ attandanceId: multideletearray, setisload, dispatch });
+        setselectedRows([]);
       }
     });
   }
@@ -416,7 +417,7 @@ const Attandence = () => {
       when: row => row.remarks,
       style: {
         backgroundColor: 'rgba(21, 233, 233, 0.1)',
-        color:'teal'
+        color: 'teal'
       },
     },
   ];

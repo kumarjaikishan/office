@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Modalbox from "../../../components/custommodal/Modalbox";
+import Loader from "../../../utils/loader";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
@@ -60,6 +61,7 @@ const LedgerListPage = () => {
     }, [searchQuery, ledgers]);
 
     const fetchLedgers = async () => {
+        setLoading(true);
         try {
             const res = await axios.get(
                 `${import.meta.env.VITE_API_ADDRESS}ledger`,
@@ -71,6 +73,8 @@ const LedgerListPage = () => {
         } catch (err) {
             console.log(err.response);
             toast.warning(err.response?.data?.message || "Failed to fetch ledgers");
+        } finally{
+            setLoading(false)
         }
     };
 
@@ -196,7 +200,8 @@ const LedgerListPage = () => {
                         Add Ledger
                     </Button>
                 </div>
-
+                
+                {loading ? <Loader /> : 
                 <div className="w-full p-1 md:p-3">
                     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                         {filteredLedgers.map((l, ind) => (
@@ -274,7 +279,7 @@ const LedgerListPage = () => {
                             No Ledger found
                         </div>}
                     </div>
-                </div>
+                </div>}
             </div>
 
             <Modalbox open={editOpen} onClose={() => {

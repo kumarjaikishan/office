@@ -22,7 +22,9 @@ const Adminleave = () => {
         branch: '',
         employeename: '',
         from: '',
+        showfrom: '',
         to: '',
+        showto: '',
         reason: '',
         status: ''
     }
@@ -87,25 +89,55 @@ const Adminleave = () => {
         }
     }
 
-    const deletee = () => {
+    const deletee = async (leaveid) => {
+        console.log(leaveid)
+        swal({
+            title: "Are you sure you want to Delete this record?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then(async (proceed) => {
+            if (proceed) {
+                const token = localStorage.getItem('emstoken');
+                try {
+                    const res = await axios.delete(`${import.meta.env.VITE_API_ADDRESS}leavehandle/${leaveid}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    );
+                    firstfetch();
+                    toast.success(res.data.message, { autoClose: 2000 })
+                } catch (err) {
+                    if (err.response) {
+                        toast.warning(err.response.data.message, { autoClose: 3000 })
+                    }
+                    console.error(err);
+                }
+            }
+        });
 
     }
+
     const edite = (data) => {
         // console.log(data)
         setInp({
             leaveid: data._id,
             branch: branch?.filter(e => e._id == data?.branchId)[0].name,
             employeename: data?.employeeId?.userid?.name,
-            from: dayjs(data.fromDate).format('DD MMM, YYYY'),
-            to: dayjs(data.toDate).format('DD MMM, YYYY'),
+            from: data.fromDate,
+            to: data.toDate,
+            showfrom: dayjs(data.fromDate).format('DD MMM, YYYY'),
+            showto: dayjs(data.toDate).format('DD MMM, YYYY'),
             reason: data?.reason,
             status: data?.status,
         })
         setopenmodal(true);
     }
+
     return (
         <div>
-            {/* <h2 className='font-semibold text-center text-xl' >Leave Application</h2> */}
             <DataTable
                 customStyles={useCustomStyles()}
                 columns={columns}

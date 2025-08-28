@@ -547,10 +547,6 @@ const Employe = () => {
               </div> */}
                 <div className="mt-1 gap-2 flex items-center relative">
                   <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
-
-                  {/* { <Avatar
-                    sx={{ width: 100, height: 100 }}
-                    alt={inp.employeeName} src={photoPreview} />} */}
                   {photoPreview ?
                     <img src={photoPreview} alt="Preview" className="mt-2 w-[100px] h-[100px] rounded-full object-cover" />
                     : <Avatar

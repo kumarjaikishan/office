@@ -73,7 +73,7 @@ export const deleteAttandence = async ({ attandanceId, setisload, dispatch }) =>
       }
     );
 
-    console.log('delete attandence Query:', res);
+    // console.log('delete attandence Query:', res);
     toast.success(res.data.message, { autoClose: 1800 });
     dispatch(FirstFetch());
     return true;
@@ -105,7 +105,7 @@ export const columns = [
   },
   {
     name: "Punch In",
-    selector: (row) => row.punchIn || '- : -'
+    selector: (row) => row.punchIn || '-'
   },
   {
     name: "Punch Out",

@@ -5,11 +5,12 @@ import { IoIosSend } from 'react-icons/io';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const Adminleavemodal = ({ firstfetch,inp, openmodal, isload, handleChange, setopenmodal, setInp, init }) => {
-   
+const Adminleavemodal = ({ firstfetch, inp, openmodal, isload, handleChange, setopenmodal, setInp, init }) => {
+
     const adddepartcall = async (e) => {
         e.preventDefault();
         // console.log(inp);
+        // return
         const token = localStorage.getItem('emstoken');
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}leavehandle`, {
@@ -26,8 +27,8 @@ const Adminleavemodal = ({ firstfetch,inp, openmodal, isload, handleChange, seto
             setInp(init);
             toast.success(res.data.message, { autoClose: 2000 })
         } catch (err) {
-            if(err.response){
-                  toast.warning(err.response.data.message, { autoClose: 3000 })
+            if (err.response) {
+                toast.warning(err.response.data.message, { autoClose: 3000 })
             }
             console.error(err);
         }
@@ -47,8 +48,8 @@ const Adminleavemodal = ({ firstfetch,inp, openmodal, isload, handleChange, seto
                         </Box>
 
                         <Box sx={{ width: '100%', gap: 2 }}>
-                            <TextField fullWidth value={inp.from} label="From" size="small" />
-                            <TextField fullWidth value={inp.to} label="To" size="small" />
+                            <TextField fullWidth value={inp.showfrom} label="From" size="small" />
+                            <TextField fullWidth value={inp.showto} label="To" size="small" />
                         </Box>
                         <TextField fullWidth multiline minRows={2} value={inp.reason} onChange={(e) => handleChange(e, 'reason')} label="Reason" size="small" />
 
@@ -59,10 +60,8 @@ const Adminleavemodal = ({ firstfetch,inp, openmodal, isload, handleChange, seto
                                 label="Status"
                                 onChange={(e) => handleChange(e, 'status')}
                             >
-                                <MenuItem value={'pending'}>Pending</MenuItem>
                                 <MenuItem value={'approved'}>Approve</MenuItem>
                                 <MenuItem value={'rejected'}>Reject</MenuItem>
-
                             </Select>
                         </FormControl>
 

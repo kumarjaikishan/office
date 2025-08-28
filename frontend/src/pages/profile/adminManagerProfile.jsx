@@ -1,13 +1,14 @@
-import { FaUser, FaEnvelope } from "react-icons/fa";
-import { FaCalendarAlt } from "react-icons/fa";
+import { FaEnvelope } from "react-icons/fa";
 import { GoGear } from "react-icons/go";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import dayjs from "dayjs";
+import { MdExpandLess, MdExpandMore, MdOutlineModeEdit } from "react-icons/md";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Avatar, Button } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import swal from "sweetalert";
+import useImageUpload from "../../utils/imageresizer";
+import { FirstFetch } from "../../../store/userSlice";
 
 const PERMISSION_LABELS = {
   1: "Read",
@@ -21,13 +22,55 @@ const AdminManagerProfile = () => {
   const [expanded, setExpanded] = useState(false);
   const { profile } = useSelector((state) => state.user);
   const [profilee, setprofile] = useState(null);
-  const [isLoading, setisloading] = useState(null);
+  const [isLoading, setisloading] = useState(false);
+  const { handleImage } = useImageUpload();
+  const dispatch = useDispatch();
+
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    // console.log("admins  ke profile me", profile);
+    // console.log(profile)
     if (profile) setprofile(profile);
   }, [profile]);
 
+  // ✅ Handle profile photo upload
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Show preview immediately
+    const previewUrl = URL.createObjectURL(file);
+    setprofile((prev) => ({ ...prev, profileImage: previewUrl }));
+
+    try {
+      const token = localStorage.getItem("emstoken");
+      const formData = new FormData();
+      let resizedfile = await handleImage(200, file);
+      formData.append("profileImage", resizedfile);
+
+      toast.loading("Uploading image...");
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_ADDRESS}profile-image`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.dismiss();
+      toast.success(res.data.message);
+      dispatch(FirstFetch())
+      // Update with backend URL
+      // setprofile((prev) => ({ ...prev, profileImage: res.data.imageUrl }));
+    } catch (err) {
+      toast.dismiss();
+      toast.error(err.response?.data?.message || "Upload failed");
+      console.error(err);
+    }
+  };
 
   const resetpassword = async () => {
     let id;
@@ -38,24 +81,14 @@ const AdminManagerProfile = () => {
 
       const res = await axios.get(
         `${import.meta.env.VITE_API_ADDRESS}resetrequest`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const data = res.data;
       setisloading(false);
+      swal({ title: res.data.extramessage, icon: "success" });
 
-      swal({
-        title: data.extramessage,
-        icon: "success",
-      });
-
-      setmessagesent(data.extramessage);
       toast.update(id, {
-        render: data.message,
+        render: res.data.message,
         type: "success",
         isLoading: false,
         autoClose: 2100,
@@ -68,10 +101,8 @@ const AdminManagerProfile = () => {
         isLoading: false,
         autoClose: 2200,
       });
-      console.log(error);
     }
   };
-
 
   return (
     <div className="p-0 md:p-4">
@@ -95,40 +126,54 @@ const AdminManagerProfile = () => {
         </div>
       ) : (
         <div className="w-full mx-auto bg-white overflow-auto shadow rounded-lg p-1 py-2 md:p-4">
-          <div className=" flex gap-3 justify-start md:justify-start">
-            {/* Avatar container */}
-            <div className="w-20 h-20 flex-shrink-0 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center">
+          <div className="flex gap-3 items-start">
+            {/* Avatar with edit overlay */}
+            <div className="relative">
               <Avatar
                 sx={{ width: 72, height: 72 }}
                 alt={profilee?.name}
                 src={profilee?.profileImage}
               />
+              <input
+                type="file"
+                ref={inputRef}
+                style={{ display: "none" }}
+                onChange={handlePhotoChange}
+                accept="image/*"
+              />
+              <span
+                onClick={() => inputRef.current.click()}
+                className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
+              >
+                <MdOutlineModeEdit size={18} />
+              </span>
             </div>
 
             {/* Details */}
-            <div className="">
+            <div>
               <h3 className="text-xl capitalize font-bold text-gray-800 break-words">
                 {profilee?.name}
               </h3>
               <p className="text-sm text-gray-600">{profilee?.role}</p>
-
               <div className="mt-3 space-y-1 text-sm text-gray-600">
                 <div className="flex items-center gap-2 break-words">
-                  <FaEnvelope className="text-gray-500" />{" "}
+                  <FaEnvelope className="text-gray-500" />
                   {profilee?.email || "N/A"}
                 </div>
               </div>
-
             </div>
           </div>
 
-          {profile?.role !== "superadmin" && profile?.role !== "developer" &&
+          {/* Permissions for non-superadmin/developer */}
+          {profile?.role !== "superadmin" && profile?.role !== "developer" && (
             <div className="mt-2">
               <div
                 className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-1 md:py-2 rounded-md"
                 onClick={() => setExpanded(!expanded)}
               >
-                <span className="font-semibold text-[16px] md:text-lg text-left"> {expanded ? "Hide Permissions" : "View Permissions"}</span>
+                <span className="font-semibold text-[16px] md:text-lg text-left">
+                  {expanded ? "Hide Permissions" : "View Permissions"}
+                </span>
                 {expanded ? (
                   <MdExpandLess className="text-xl" />
                 ) : (
@@ -177,18 +222,25 @@ const AdminManagerProfile = () => {
                 </div>
               )}
             </div>
-          }
+          )}
 
-          {profile.role == "superadmin" &&
+          {/* Reset password for superadmin */}
+          {profile?.role === "superadmin" && (
             <div className="my-2">
-              <Button onClick={resetpassword} disabled={isLoading} title='Send Password Reset Link' variant="contained" className='splbtn' >
+              <Button
+                onClick={resetpassword}
+                disabled={isLoading}
+                title="Send Password Reset Link"
+                variant="contained"
+                className="splbtn"
+              >
                 Send Password Reset Link
               </Button>
-            </div>}
+            </div>
+          )}
         </div>
       )}
     </div>
-
   );
 };
 
