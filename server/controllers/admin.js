@@ -381,7 +381,7 @@ const addAdmin = async (req, res, next) => {
             companyId: req.user.companyId,
         };
 
-         // Convert permissions if stringified
+        // Convert permissions if stringified
         if (permissions && typeof permissions === 'string') {
             fields.permissions = JSON.parse(permissions);
         } else if (permissions && typeof permissions === 'object') {
@@ -671,7 +671,7 @@ const firstfetch = async (req, res, next) => {
             ledger.map(async (ledger) => {
                 const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
                     .sort({ date: -1 });
- 
+
                 return {
                     ...ledger.toObject(),
                     netBalance: lastEntry ? lastEntry.balance : 0
@@ -959,10 +959,10 @@ const leavehandle = async (req, res, next) => {
     try {
         const query = await leavemodal.findByIdAndUpdate(leaveid, { status }).populate('employeeId', 'userid');
 
-        const userId = query.employeeId.userid;
-
 
         if (!query) return next({ status: 404, message: "Leave not found" });
+
+        const userId = query.employeeId.userid;
 
         let message = '';
         const options = { day: '2-digit', month: 'short', year: 'numeric' };
@@ -983,6 +983,7 @@ const leavehandle = async (req, res, next) => {
             toDate.setHours(0, 0, 0, 0);
 
             const employeeId = query.employeeId._id;
+            const branchId = query.branchId;
 
             // Iterate from fromDate to toDate
             for (let date = new Date(fromDate); date <= toDate; date.setDate(date.getDate() + 1)) {
@@ -1005,6 +1006,7 @@ const leavehandle = async (req, res, next) => {
                     const attendanceData = {
                         companyId: req.user.companyId,
                         employeeId,
+                        branchId,
                         date: currentDate,
                         status: 'leave',
                         leave: leaveid,

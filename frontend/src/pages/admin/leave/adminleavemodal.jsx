@@ -5,11 +5,11 @@ import { IoIosSend } from 'react-icons/io';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, setInp, init }) => {
+const Adminleavemodal = ({ firstfetch,inp, openmodal, isload, handleChange, setopenmodal, setInp, init }) => {
+   
     const adddepartcall = async (e) => {
         e.preventDefault();
-        console.log(inp);
-
+        // console.log(inp);
         const token = localStorage.getItem('emstoken');
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_ADDRESS}leavehandle`, {
@@ -21,6 +21,7 @@ const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, s
                     }
                 }
             );
+            firstfetch();
             setopenmodal(false);
             setInp(init);
             toast.success(res.data.message, { autoClose: 2000 })
@@ -41,7 +42,7 @@ const Adminleavemodal = ({ inp, openmodal, isload, handleChange, setopenmodal, s
                     <h2>Leave Management</h2>
                     <span className="modalcontent ">
                         <Box sx={{ width: '100%', gap: 2 }}>
-                            <TextField fullWidth value={inp.department} label="Department" size="small" />
+                            <TextField fullWidth value={inp.branch} label="Branch" size="small" />
                             <TextField fullWidth value={inp.employeename} label="Name" size="small" />
                         </Box>
 

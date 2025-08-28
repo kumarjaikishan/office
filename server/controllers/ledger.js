@@ -124,7 +124,8 @@ exports.ledger = async (req, res) => {
 
 exports.Entries = async (req, res) => {
   try {
-    const entries = await Entry.find({ ledgerId: req.params.id }).sort({ date: -1 });
+    const entries = await Entry.find({ ledgerId: req.params.id }).sort({ date: -1, _id: -1 });
+
     res.json({ entries });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch ledgers" });

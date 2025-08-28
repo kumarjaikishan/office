@@ -10,14 +10,16 @@ import { useCustomStyles } from '../attandence/attandencehelper';
 import { FaRegUser } from 'react-icons/fa';
 import CheckPermission from '../../../utils/CheckPermission';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
     const [openmodal, setopenmodal] = useState(false);
     const [isload, setisload] = useState(false);
+    const { department, branch } = useSelector((state) => state.user);
     const init = {
         leaveid: '',
-        department: '',
+        branch: '',
         employeename: '',
         from: '',
         to: '',
@@ -30,50 +32,8 @@ const Adminleave = () => {
     const canDelete = CheckPermission('leave', 4);
 
     useEffect(() => {
-        const firstfetch = async () => {
-            const token = localStorage.getItem('emstoken');
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}fetchleave`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-                let sno = 1;
-                const data = await res.data.leave.map((leave) => {
-                    return {
-                        id: leave._id,
-                        sno: sno++,
-                        name: (<div className="flex items-center gap-3 ">
-                            <Avatar src={leave?.employeeId?.profileimage} alt={leave?.employeeId?.employeename}>
-                                {!leave.employeeId?.profileimage && <FaRegUser />}
-                            </Avatar>
-                            <Box>
-                                <Typography variant="body2">{leave.employeeId?.employeename}</Typography>
-                                <Typography variant="body2">{leave.employeeId?.userid?.email}</Typography>
-                            </Box>
-                        </div>),
-                        from: dayjs(leave.fromDate).format('DD MMM, YYYY'),
-                        to: dayjs(leave.toDate).format('DD MMM, YYYY'),
-                        reason: leave.reason,
-                        status: <span className={`${leave.status == 'approved' ? 'bg-green-100 text-green-800' :
-                            (leave.status == 'rejected' ? "bg-red-100 text-red-800" :
-                                "bg-amber-100 text-amber-800")} px-3 py-1 rounded capitalize`}>
-                            {leave.status}
-                        </span>,
-                        action: (<div className="flex gap-2">
-                            {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>}
-                            {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>}
-                        </div>)
-                    }
-                })
-                setleavelist(data);
-            } catch (err) {
-                console.error(err);
-               toast.warning(err.response?.data?.message || "Error")
-            }
-        }
+        // console.log(department, branch)
+
         firstfetch();
     }, [])
 
@@ -81,19 +41,65 @@ const Adminleave = () => {
         setInp({ ...inp, [field]: e.target.value })
     }
 
+    const firstfetch = async () => {
+        const token = localStorage.getItem('emstoken');
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}fetchleave`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            // console.log(res.data)
+            let sno = 1;
+            const data = await res.data.leave.map((leave) => {
+                return {
+                    id: leave._id,
+                    sno: sno++,
+                    name: (<div className="flex items-center gap-3 ">
+                        <Avatar src={leave?.employeeId?.profileimage} alt={leave?.employeeId?.employeename}>
+                            {!leave.employeeId?.profileimage && <FaRegUser />}
+                        </Avatar>
+                        <Box>
+                            <Typography variant="body2">{leave.employeeId?.employeename}</Typography>
+                            <Typography variant="body2">{leave.employeeId?.userid?.email}</Typography>
+                        </Box>
+                    </div>),
+                    from: dayjs(leave.fromDate).format('DD MMM, YYYY'),
+                    to: dayjs(leave.toDate).format('DD MMM, YYYY'),
+                    reason: leave.reason,
+                    status: <span className={`${leave.status == 'approved' ? 'bg-green-100 text-green-800' :
+                        (leave.status == 'rejected' ? "bg-red-100 text-red-800" :
+                            "bg-amber-100 text-amber-800")} px-3 py-1 rounded capitalize`}>
+                        {leave.status}
+                    </span>,
+                    action: (<div className="flex gap-2">
+                        {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(leave)}><MdOutlineModeEdit /></span>}
+                        {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(leave._id)}><AiOutlineDelete /></span>}
+                    </div>)
+                }
+            })
+            setleavelist(data);
+        } catch (err) {
+            console.error(err);
+            toast.warning(err.response?.data?.message || "Error")
+        }
+    }
+
     const deletee = () => {
 
     }
     const edite = (data) => {
-        console.log(data)
+        // console.log(data)
         setInp({
             leaveid: data._id,
-            department: data.employeeId.userid.email,
-            employeename: data.employeeId.employeename,
+            branch: branch?.filter(e => e._id == data?.branchId)[0].name,
+            employeename: data?.employeeId?.userid?.name,
             from: dayjs(data.fromDate).format('DD MMM, YYYY'),
             to: dayjs(data.toDate).format('DD MMM, YYYY'),
-            reason: data.reason,
-            status: data.status,
+            reason: data?.reason,
+            status: data?.status,
         })
         setopenmodal(true);
     }
@@ -107,7 +113,7 @@ const Adminleave = () => {
                 pagination
                 highlightOnHover
             />
-            <Adminleavemodal handleChange={handleChange} inp={inp} isload={isload} init={init} setInp={setInp} openmodal={openmodal} setopenmodal={setopenmodal} />
+            <Adminleavemodal firstfetch={firstfetch} handleChange={handleChange} inp={inp} isload={isload} init={init} setInp={setInp} openmodal={openmodal} setopenmodal={setopenmodal} />
         </div>
     )
 }

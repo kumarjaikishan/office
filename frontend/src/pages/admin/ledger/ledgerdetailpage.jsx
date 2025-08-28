@@ -202,7 +202,7 @@ const LedgerDetailPage = () => {
     // if (!ledger) return <div>Loading...</div>;
 
     return (
-        <div className="bg-white rounded shadow-md p-1 md:p-5 rounded">
+        <div className="bg-white rounded shadow-md p-1 md:p-5 ">
             {/* Header */}
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
