@@ -19,22 +19,32 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const BulkMark = ({
-    openmodal, init, submitHandle, setopenmodal,
-    isUpdate, isload, inp, setinp, setisUpdate, dispatch
+    openmodal, init, setopenmodal,
+    isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-    const { department, branch, employee } = useSelector((state) => state.user);
+    const { department, branch, employee, attandence } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
     const [rowData, setRowData] = useState({});
     const [selectedBranch, setselectedBranch] = useState('all')
     const [selecteddepartment, setselecteddepartment] = useState('all');
     const [filteredEmployee, setFilteredEmployee] = useState([]);
     const [attandenceDate, setattandenceDate] = useState(dayjs());
+    const [alreadyAttendance, setalreadyAttendance] = useState([])
 
     useEffect(() => {
         // console.log(branch)
         // console.log(department)
-        // console.log(employee)
+        // console.log(attandence)
     }, [])
+
+    useEffect(() => {
+        const selectedDateAttendance = attandence.filter(e =>
+            dayjs(e.date).isSame(dayjs(attandenceDate), "day")
+        );
+        // console.log(selectedDateAttendance)
+        setalreadyAttendance(selectedDateAttendance)
+    }, [attandenceDate,attandence])
+
     useEffect(() => {
         const result = employee?.filter(e => {
             const matchBranch = selectedBranch !== "all" ? e.branchId == selectedBranch : true;
@@ -47,16 +57,37 @@ const BulkMark = ({
     useEffect(() => {
         if (employee?.length > 0) {
             const defaultData = {};
+            const checked = [];
+
             employee.forEach(emp => {
-                defaultData[emp._id] = {
-                    punchIn: null,
-                    punchOut: null,
-                    status: 'absent',
-                };
+                // find if this employee already has attendance for the selected date
+                const existing = alreadyAttendance.find(a => a.employeeId._id === emp._id);
+
+                if (existing) {
+                    // mark employee as checked
+                    checked.push(emp._id);
+
+                    // prefill with existing attendance
+                    defaultData[emp._id] = {
+                        punchIn: existing.punchIn ? dayjs(existing.punchIn).format("HH:mm") : null,
+                        punchOut: existing.punchOut ? dayjs(existing.punchOut).format("HH:mm") : null,
+                        status: existing.status || "absent",
+                    };
+                } else {
+                    // fallback if no record found
+                    defaultData[emp._id] = {
+                        punchIn: null,
+                        punchOut: null,
+                        status: "absent",
+                    };
+                }
             });
+
             setRowData(defaultData);
+            setcheckedemployee(checked);
         }
-    }, [employee]);
+    }, [employee, alreadyAttendance]);
+
 
     const handleCheckbox = (empId) => {
         if (checkedemployee.includes(empId)) {
@@ -115,7 +146,7 @@ const BulkMark = ({
 
         const selectedData = checkedemployee.map(empId => {
             const { punchIn, punchOut, status } = rowData[empId];
-            const branchId = employee.filter(e=> e._id == empId)[0].branchId;
+            const branchId = employee.filter(e => e._id == empId)[0].branchId;
             // console.log(branchid)
 
             const data = {
@@ -135,6 +166,8 @@ const BulkMark = ({
             return data;
         });
 
+        //  console.log(rowData)
+        // return console.log(selectedData)
         try {
             const token = localStorage.getItem('emstoken')
             setisUpdate(true); // Show loading state
@@ -247,7 +280,7 @@ const BulkMark = ({
                         </div>
 
                         {/* Attendance Table */}
-                        <div className='border border-dashed border-teal-400 rounded w-full h-[60vh]'>
+                        <div className='border border-dashed border-teal-400 rounded w-full '>
                             <TableContainer component={Paper}>
                                 <Table size="small">
                                     <TableHead>
@@ -317,28 +350,28 @@ const BulkMark = ({
                         </div>
                     </span>
                     <div className='modalfooter'>
-                            <Button
-                                size="small"
-                                onClick={() => {
-                                    setopenmodal(false);
-                                    setisUpdate(false);
-                                    setinp(init);
-                                }}
-                                variant="outlined"
-                            >
-                                Cancel
-                            </Button>
+                        <Button
+                            size="small"
+                            onClick={() => {
+                                setopenmodal(false);
+                                setisUpdate(false);
+                                setinp(init);
+                            }}
+                            variant="outlined"
+                        >
+                            Cancel
+                        </Button>
 
-                            <Button
-                                loading={isload}
-                                loadingPosition="end"
-                                endIcon={<IoIosSend />}
-                                variant="contained"
-                                type="submit"
-                            >
-                                {isUpdate ? 'Update' : 'Add'}
-                            </Button>
-                        </div>
+                        <Button
+                            loading={isload}
+                            loadingPosition="end"
+                            endIcon={<IoIosSend />}
+                            variant="contained"
+                            type="submit"
+                        >
+                            {isUpdate ? 'Update' : 'Add'}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </Modalbox>

@@ -9,8 +9,9 @@ import { CiFilter } from 'react-icons/ci'
 import { toast } from 'react-toastify'
 import Modalbox from '../../../components/custommodal/Modalbox'
 import { GoPlus } from 'react-icons/go'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useCustomStyles } from '../../admin/attandence/attandencehelper'
+import { empFirstFetch } from '../../../../store/employee'
 
 const EmpLeave = () => {
     const init = {
@@ -19,6 +20,7 @@ const EmpLeave = () => {
         toDate: null,
         reason: ''
     }
+    const dispatch = useDispatch();
     const [inp, setinp] = useState(init);
     const [leaverequest, setleaverequest] = useState([]);
     const { leave } = useSelector((state) => state.employee);
@@ -51,6 +53,7 @@ const EmpLeave = () => {
             );
 
             setopenmodal(false)
+            dispatch(empFirstFetch());
             setinp(init)
             toast.success(res.data.message, { autoClose: 2000 })
         } catch (err) {
@@ -60,6 +63,7 @@ const EmpLeave = () => {
             setLoading(false)
         }
     }
+
     return (
         <div className='employee p-2.5'>
             {/* <h2 className="text-2xl mb-4 font-bold text-slate-800">Manage Leaves</h2> */}

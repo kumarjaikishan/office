@@ -1,1 +1,0 @@
-import{aG as n}from"./index-BibUWqKW.js";import{a as p}from"./useSlotProps-DEnoR5oY.js";function m(t){const{theme:e,name:o,props:r}=t;return!e||!e.components||!e.components[o]||!e.components[o].defaultProps?r:n(e.components[o].defaultProps,r)}function f({props:t,name:e,defaultTheme:o,themeId:r}){let s=p(o);return r&&(s=s[r]||s),m({theme:s,name:e,props:t})}export{m as g,f as u};

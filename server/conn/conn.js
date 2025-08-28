@@ -6,3 +6,5 @@ mongo.connect(process.env.db).then(()=>{
 }).catch((e)=>{
     console.log(e)
 })
+
+

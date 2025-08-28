@@ -130,6 +130,7 @@ function App() {
   const primaryColor = useSelector((state) => state.user.primaryColor) || "#115e59";
 
   useEffect(() => {
+   
     document.documentElement.style.setProperty("--color-primary", primaryColor);
   }, [primaryColor]);
 
@@ -189,7 +190,7 @@ function App() {
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
 
   useEffect(() => {
-    if (user?.liveAttandence) {
+    if (islogin && user?.liveAttandence &&  ["superadmin", "admin", "manager"].includes(user?.profile?.role) ) {
       const es = connectSSE((data) => {
         if (data.type === "attendance_update") {
           const emp = data.payload.data.employeeId;
