@@ -3,12 +3,13 @@ import { GoGear } from "react-icons/go";
 import { MdExpandLess, MdExpandMore, MdOutlineModeEdit } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Avatar, Button } from "@mui/material";
+import { Avatar, Button, TextField } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-toastify";
 import swal from "sweetalert";
 import useImageUpload from "../../utils/imageresizer";
 import { FirstFetch } from "../../../store/userSlice";
+import Modalbox from "../../components/custommodal/Modalbox";
 
 const PERMISSION_LABELS = {
   1: "Read",
@@ -25,6 +26,9 @@ const AdminManagerProfile = () => {
   const [isLoading, setisloading] = useState(false);
   const { handleImage } = useImageUpload();
   const dispatch = useDispatch();
+  const [EditOpen, setEditOpen] = useState(false);
+  const [name, setname] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const inputRef = useRef(null);
 
@@ -33,43 +37,15 @@ const AdminManagerProfile = () => {
     if (profile) setprofile(profile);
   }, [profile]);
 
-  // ✅ Handle profile photo upload
-  const handlePhotoChange = async (e) => {
+  const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    setSelectedFile(file);
 
     // Show preview immediately
     const previewUrl = URL.createObjectURL(file);
     setprofile((prev) => ({ ...prev, profileImage: previewUrl }));
-
-    try {
-      const token = localStorage.getItem("emstoken");
-      const formData = new FormData();
-      let resizedfile = await handleImage(200, file);
-      formData.append("profileImage", resizedfile);
-
-      toast.loading("Uploading image...");
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_ADDRESS}profile-image`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      toast.dismiss();
-      toast.success(res.data.message);
-      dispatch(FirstFetch())
-      // Update with backend URL
-      // setprofile((prev) => ({ ...prev, profileImage: res.data.imageUrl }));
-    } catch (err) {
-      toast.dismiss();
-      toast.error(err.response?.data?.message || "Upload failed");
-      console.error(err);
-    }
   };
 
   const resetpassword = async () => {
@@ -103,6 +79,36 @@ const AdminManagerProfile = () => {
       });
     }
   };
+  const handlesave = async () => {
+    try {
+      setisloading(true);
+      const token = localStorage.getItem("emstoken");
+
+      const formData = new FormData();
+      formData.append("name", name);
+
+      if (selectedFile) {
+        const resizedFile = await handleImage(200, selectedFile); // resize if needed
+        formData.append("profileImage", resizedFile);
+      }
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_ADDRESS}update-profile`,
+        formData,
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+      );
+
+      toast.success(res.data.message);
+      dispatch(FirstFetch()); // Refresh profile
+      setSelectedFile(null);
+      setEditOpen(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update profile");
+      console.error(err);
+    } finally {
+      setisloading(false);
+    }
+  };
 
   return (
     <div className="p-0 md:p-4">
@@ -134,19 +140,6 @@ const AdminManagerProfile = () => {
                 alt={profilee?.name}
                 src={profilee?.profileImage}
               />
-              <input
-                type="file"
-                ref={inputRef}
-                style={{ display: "none" }}
-                onChange={handlePhotoChange}
-                accept="image/*"
-              />
-              <span
-                onClick={() => inputRef.current.click()}
-                className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
-              >
-                <MdOutlineModeEdit size={18} />
-              </span>
             </div>
 
             {/* Details */}
@@ -226,7 +219,16 @@ const AdminManagerProfile = () => {
 
           {/* Reset password for superadmin */}
           {profile?.role === "superadmin" && (
-            <div className="my-2">
+            <div className="my-2 flex gap-2">
+              <Button
+                onClick={() => { setname(profilee?.name); setEditOpen(true) }}
+                disabled={isLoading}
+                title="Send Password Reset Link"
+                variant="contained"
+                className="splbtn"
+              >
+                Edit profile
+              </Button>
               <Button
                 onClick={resetpassword}
                 disabled={isLoading}
@@ -240,6 +242,57 @@ const AdminManagerProfile = () => {
           )}
         </div>
       )}
+
+      <Modalbox open={EditOpen} onClose={() => {
+        setEditOpen(false);
+      }}>
+        <div className="membermodal w-[300px]">
+          <div className="whole" >
+            <div className="modalhead">Edit Profile</div>
+            <span className="modalcontent ">
+              <TextField
+                autoFocus
+                size="small"
+                fullWidth
+                margin="dense"
+                label="Ledger Name"
+                value={name}
+                onChange={(e) => setname(e.target.value)}
+              />
+
+              {/* Avatar + file input */}
+              <div className="relative">
+                <Avatar
+                  sx={{ width: 72, height: 72 }}
+                  alt={profilee?.name}
+                  src={profilee?.profileImage}
+                />
+                <input
+                  type="file"
+                  ref={inputRef}
+                  style={{ display: "none" }}
+                  onChange={handlePhotoChange}
+                  accept="image/*"
+                />
+                <span
+                  onClick={() => inputRef.current.click()}
+                  className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
+                >
+                  <MdOutlineModeEdit size={18} />
+                </span>
+              </div>
+
+
+            </span>
+            <div className="modalfooter">
+              <Button variant="outlined" onClick={() => setEditOpen(false)}>Cancel</Button>
+              <Button variant="contained" onClick={handlesave}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Modalbox>
     </div>
   );
 };

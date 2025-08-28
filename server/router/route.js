@@ -82,7 +82,7 @@ router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), em
 router.route('/updatenotification').get(authmiddlewre, employee.updatenotification);
 
 router.route('/addAdmin').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.addAdmin);
-router.route('/profile-image').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('profileImage'), admin.profileimage);
+router.route('/update-profile').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('profileImage'), admin.updateprofile);
 router.route('/getAdmin').get(authmiddlewre, authorizeRoles('superadmin'), admin.getAdmin);
 router.route('/editAdmin/:id').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.editAdmin);
 router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmin'), admin.deleteAdmin);

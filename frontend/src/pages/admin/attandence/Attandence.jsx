@@ -29,7 +29,6 @@ import { FaRegUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import MarkAttandenceedit from "./MarkAttandenceedit";
 import CheckPermission from "../../../utils/CheckPermission";
-import { color } from "framer-motion";
 
 dayjs.extend(isSameOrBefore);
 
@@ -439,174 +438,174 @@ const Attandence = () => {
   };
 
   return (
-    <div className='p-1'>
-      {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
-      <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
-        <div className="flex justify-between items-center mb-4 flex-wrap">
-          <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-primary text-white">
-            <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-primary  bg-white`}`}>View Attendance</p>
-            {canAdd && <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-primary  bg-white`}`}>Mark Attendance</p>}
+      <div className='p-1'>
+        {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
+        <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
+          <div className="flex justify-between items-center mb-4 flex-wrap">
+            <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-primary text-white">
+              <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-primary  bg-white`}`}>View Attendance</p>
+              {canAdd && <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-primary  bg-white`}`}>Mark Attendance</p>}
+            </div>
+
+            <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">
+              {selectedRows.length > 0 && <Button className="flex-1" variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
+              <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
+            </div>
           </div>
+          <div className="flex items-center gap-4 ">
+            {markattandence ?
+              <div className="flex p-1 items-center gap-2">
+                <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
+                <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
+              </div> :
+              <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-5 gap-2 mt-1 w-full md:w-fit">
+                {/* <CiFilter className="hidden md:block" size={24} color="teal" /> */}
 
-          <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">
-            {selectedRows.length > 0 && <Button className="flex-1" variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
-            <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 ">
-          {markattandence ?
-            <div className="flex p-1 items-center gap-2">
-              <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
-              <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
-            </div> :
-            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-5 gap-2 mt-1 w-full md:w-fit">
-              {/* <CiFilter className="hidden md:block" size={24} color="teal" /> */}
+                <TextField
+                  size="small"
+                  type="date"
+                  className="col-span-2 md:col-span-1 md:w-[150px]"
+                  value={filtere.date}
+                  onChange={(e) => setfiltere({ ...filtere, date: e.target.value })}
+                  label="Select Date"
+                  InputLabelProps={{ shrink: true }}
+                />
 
-              <TextField
-                size="small"
-                type="date"
-                className="col-span-2 md:col-span-1 md:w-[150px]"
-                value={filtere.date}
-                onChange={(e) => setfiltere({ ...filtere, date: e.target.value })}
-                label="Select Date"
-                InputLabelProps={{ shrink: true }}
-              />
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Branch</InputLabel>
-                <Select
-                  value={filtere.branch}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Branch"
-                    />
-                  }
-                  onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
-                >
-                  <MenuItem value="all">All</MenuItem>
-                  {branch?.map((val) => (
-                    <MenuItem key={val._id} value={val._id}>
-                      {val.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Department</InputLabel>
-                <Select
-                  value={filtere.departmente}
-                  disabled={filtere.branch === "all"}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Department"
-                    />
-                  }
-                  onChange={(e) => setfiltere({ ...filtere, departmente: e.target.value })}
-                >
-                  <MenuItem value="all">All</MenuItem>
-                  {department
-                    ?.filter((e) => e.branchId._id === filtere.branch)
-                    .map((val) => (
+                <FormControl size="small" className="col-span-1 md:w-[150px]">
+                  <InputLabel>Branch</InputLabel>
+                  <Select
+                    value={filtere.branch}
+                    input={
+                      <OutlinedInput
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <CiFilter fontSize="small" />
+                          </InputAdornment>
+                        }
+                        label="Branch"
+                      />
+                    }
+                    onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    {branch?.map((val) => (
                       <MenuItem key={val._id} value={val._id}>
-                        {val.department}
+                        {val.name}
                       </MenuItem>
                     ))}
-                </Select>
-              </FormControl>
+                  </Select>
+                </FormControl>
 
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filtere.status}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Status"
-                    />
-                  }
-                  onChange={(e) => setfiltere({ ...filtere, status: e.target.value })}
-                >
-                  <MenuItem value="all">All</MenuItem>
-                  <MenuItem value="present">Present</MenuItem>
-                  <MenuItem value="absent">Absent</MenuItem>
-                  <MenuItem value="leave">Leave</MenuItem>
-                  <MenuItem value="half day">Half Day</MenuItem>
-                </Select>
-              </FormControl>
+                <FormControl size="small" className="col-span-1 md:w-[150px]">
+                  <InputLabel>Department</InputLabel>
+                  <Select
+                    value={filtere.departmente}
+                    disabled={filtere.branch === "all"}
+                    input={
+                      <OutlinedInput
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <CiFilter fontSize="small" />
+                          </InputAdornment>
+                        }
+                        label="Department"
+                      />
+                    }
+                    onChange={(e) => setfiltere({ ...filtere, departmente: e.target.value })}
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    {department
+                      ?.filter((e) => e.branchId?._id === filtere.branch)
+                      .map((val) => (
+                        <MenuItem key={val._id} value={val._id}>
+                          {val.department}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
 
-              <TextField
-                size="small"
-                className="col-span-1 md:w-[150px]"
-                value={filtere.employee}
-                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IoSearch />
-                    </InputAdornment>
-                  ),
-                  endAdornment: filtere.employee && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setfiltere({ ...filtere, employee: "" })}
-                        edge="end"
-                        size="small"
-                      >
-                        <MdClear />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                label="Search Employee"
-              />
-            </div>
+                <FormControl size="small" className="col-span-1 md:w-[150px]">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={filtere.status}
+                    input={
+                      <OutlinedInput
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <CiFilter fontSize="small" />
+                          </InputAdornment>
+                        }
+                        label="Status"
+                      />
+                    }
+                    onChange={(e) => setfiltere({ ...filtere, status: e.target.value })}
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    <MenuItem value="present">Present</MenuItem>
+                    <MenuItem value="absent">Absent</MenuItem>
+                    <MenuItem value="leave">Leave</MenuItem>
+                    <MenuItem value="half day">Half Day</MenuItem>
+                  </Select>
+                </FormControl>
 
-          }
+                <TextField
+                  size="small"
+                  className="col-span-1 md:w-[150px]"
+                  value={filtere.employee}
+                  onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IoSearch />
+                      </InputAdornment>
+                    ),
+                    endAdornment: filtere.employee && (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setfiltere({ ...filtere, employee: "" })}
+                          edge="end"
+                          size="small"
+                        >
+                          <MdClear />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  label="Search Employee"
+                />
+              </div>
+
+            }
+          </div>
         </div>
-      </div>
 
-      <div className="capitalize">
-        <DataTable
-          columns={columns}
-          data={isFilterActive ? filterattandence : attandencelist}
-          pagination
-          selectableRows
-          customStyles={customStyles}
-          conditionalRowStyles={conditionalRowStyles}
-          onSelectedRowsChange={handleRowSelect}
-          highlightOnHover
-          noDataComponent={
-            <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
-              <BiMessageRoundedError className="text-xl" /> No records found.
-            </div>
-          }
+        <div className="capitalize">
+          <DataTable
+            columns={columns}
+            data={isFilterActive ? filterattandence : attandencelist}
+            pagination
+            selectableRows
+            customStyles={customStyles}
+            conditionalRowStyles={conditionalRowStyles}
+            onSelectedRowsChange={handleRowSelect}
+            highlightOnHover
+            noDataComponent={
+              <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+                <BiMessageRoundedError className="text-xl" /> No records found.
+              </div>
+            }
+          />
+        </div>
+        <MarkAttandence isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
+          setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
+        />
+        <MarkAttandenceedit dispatch={dispatch} setisload={setisload} submitHandle={submitHandle} init={init2} openmodal={atteneditmodal} inp={editinp} setinp={seteditinp}
+          setopenmodal={setatteneditmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
+        />
+        <BulkMark isPunchIn={isPunchIn} dispatch={dispatch} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={bullmodal} inp={inp} setinp={setinp}
+          setopenmodal={setbullmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
         />
       </div>
-      <MarkAttandence isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
-        setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
-      />
-      <MarkAttandenceedit dispatch={dispatch} setisload={setisload} submitHandle={submitHandle} init={init2} openmodal={atteneditmodal} inp={editinp} setinp={seteditinp}
-        setopenmodal={setatteneditmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
-      />
-      <BulkMark isPunchIn={isPunchIn} dispatch={dispatch} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={bullmodal} inp={inp} setinp={setinp}
-        setopenmodal={setbullmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
-      />
-    </div>
   )
 }
 

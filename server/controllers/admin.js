@@ -440,41 +440,49 @@ const getAdmin = async (req, res, next) => {
     }
 };
 
-const profileimage = async (req, res, next) => {
-    try {
-        const whichsuer = await usermodal.findById(req.user.id);
-        const oldprofile = whichsuer?.profileImage || undefined;
-        
-        let uploadResult;
-        if (req.file) {
-            uploadResult = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'ems/employee'
-            });
-            console.log("2")
-            if (uploadResult) {
-                fs.unlink(req.file.path, (err) => {
-                    if (err) console.error('Failed to delete local file:', err);
-                });
-            }
-        }
-        await usermodal.findByIdAndUpdate(req.user.id, { profileImage: uploadResult.secure_url });
-       
+const updateprofile = async (req, res, next) => {
+  try {
+    const whichuser = await usermodal.findById(req.user.id);
+    const oldprofile = whichuser?.profileImage || undefined;
 
-        if (oldprofile) {
-            await removePhotoBySecureUrl([oldprofile]);
-        }
+    let uploadResult;
+    if (req.file) {
+      // upload new image
+      uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: "ems/employee",
+      });
 
-        res.status(200).json({
-            message: 'Updated successfully',
+      if (uploadResult) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error("Failed to delete local file:", err);
         });
-
-    } catch (error) {
-        console.error(error.message);
-        return res.status(500).json({
-            message: 'Server error',
-        });
+      }
     }
+
+    // Build update object dynamically
+    const updateData = { name: req.body.name };
+    if (uploadResult?.secure_url) {
+      updateData.profileImage = uploadResult.secure_url;
+
+      // remove old image only if new one is uploaded
+      if (oldprofile) {
+        await removePhotoBySecureUrl([oldprofile]);
+      }
+    }
+
+    await usermodal.findByIdAndUpdate(req.user.id, updateData, { new: true });
+
+    return res.status(200).json({
+      message: "Updated successfully",
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
 };
+
 
 
 const editAdmin = async (req, res, next) => {
@@ -1083,6 +1091,6 @@ const deleteleave = async (req, res, next) => {
 
 
 module.exports = {
-    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, profileimage, deleteleave, getAdmin, editAdmin, deleteAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
+    addDepartment, addBranch, enrollFace, addAdmin, deleteBranch, updateprofile, deleteleave, getAdmin, editAdmin, deleteAdmin, deletefaceenroll, updatepassword, updateCompany, editBranch, firstfetch, getemployee, addcompany, departmentlist, leavehandle, updatedepartment, deletedepartment, employeelist, addemployee,
     updateemployee, deleteemployee
 };
