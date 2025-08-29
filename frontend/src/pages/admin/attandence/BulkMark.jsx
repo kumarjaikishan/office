@@ -35,6 +35,7 @@ const BulkMark = ({
         // console.log(branch)
         // console.log(department)
         // console.log(attandence)
+        // console.log(rowData)
     }, [])
 
     useEffect(() => {
@@ -185,7 +186,7 @@ const BulkMark = ({
             }
 
             const result = await response.json();
-            console.log('Bulk Attendance Response:', result);
+            // console.log('Bulk Attendance Response:', result);
 
             // Reset form
             // setinp(init);
@@ -273,10 +274,6 @@ const BulkMark = ({
                                     label="Select date"
                                 />
                             </LocalizationProvider>
-
-
-
-
                         </div>
 
                         {/* Attendance Table */}
