@@ -1,5 +1,5 @@
-import { FaPhone, FaEnvelope, FaBirthdayCake, FaMapMarkerAlt, FaUser } from 'react-icons/fa';
-import { MdContactEmergency } from 'react-icons/md';
+import { FaPhone, FaEnvelope, FaBirthdayCake, FaMapMarkerAlt, FaUser, FaIdCardAlt, FaUniversity, FaUserCircle, FaRegCreditCard } from 'react-icons/fa';
+import { MdAccountBalance, MdBadge, MdContactEmergency } from 'react-icons/md';
 import { BsDroplet } from "react-icons/bs";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -14,6 +14,8 @@ import { FaIdCard } from "react-icons/fa";
 import { MdCurrencyRupee } from "react-icons/md";
 import { GoGear } from "react-icons/go";
 import { useSelector } from 'react-redux';
+import { HiIdentification } from 'react-icons/hi';
+import { BiKey } from 'react-icons/bi';
 
 const EmployeeProfile = ({ viewEmployee }) => {
   const [isload, setisload] = useState(false);
@@ -37,7 +39,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             }
           }
         );
-        // console.log('employee fetch Query:', res.data);
+        console.log('employee fetch Query:', res.data);
         setemployee(res.data)
       } catch (error) {
         console.log(error);
@@ -97,7 +99,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="md:hidden mt-3 justify-start flex flex-wrap text-[12px] md:text-sm text-gray-600 space-y-1">
           <div className="flex w-1/2 items-center gap-2"><FaEnvelope className="text-gray-500 lowercase" /> {employee?.userid?.email}</div>
           <div className="flex w-1/2 items-center gap-2"><FaPhone className="text-gray-500" /> {employee?.phone || 'N/A'}</div>
@@ -141,6 +143,20 @@ const EmployeeProfile = ({ viewEmployee }) => {
                   <div>{employee?.bloodGroup || 'N/A'}</div>
                 </div>
               </div>
+              <div className="flex items-start gap-2">
+                <MdBadge className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">Adhaar No.</div>
+                  <div>{employee?.adhaar || 'N/A'}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <FaIdCardAlt className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">Pan No.</div>
+                  <div>{employee?.pan || 'N/A'}</div>
+                </div>
+              </div>
             </div>}
           {submenu == 2 &&
             <div className="mt-2 grid grid-cols-2 max-h-[300px] overflow-y-auto md:grid-cols-2 gap-4 text-[12px] md:text-sm text-gray-700">
@@ -163,6 +179,41 @@ const EmployeeProfile = ({ viewEmployee }) => {
                 <div>
                   <div className="font-semibold">Salary</div>
                   <div>{employee?.salary || 'N/A'}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <FaUniversity className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">Bank Name</div>
+                  <div>{employee?.bankName || 'N/A'}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <FaUserCircle className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">Account Holder</div>
+                  <div>{employee?.acHolderName || 'N/A'}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <MdAccountBalance className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">Branch</div>
+                  <div>{employee?.bankbranch || 'N/A'}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <FaRegCreditCard className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">A/C No.</div>
+                  <div>{employee?.acnumber || 'N/A'}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <BiKey className="mt-1 text-gray-500" />
+                <div>
+                  <div className="font-semibold">Ifsc Code</div>
+                  <div>{employee?.ifscCode || 'N/A'}</div>
                 </div>
               </div>
 

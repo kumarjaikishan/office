@@ -82,6 +82,14 @@ const Employe = () => {
     skills: [],
     maritalStatus: true,
     salary: 0,
+    acHolderName: "",
+    bankName: '',
+    bankbranch: '',
+    acnumber: '',
+    ifscCode: '',
+    adhaar: '',
+    pan: '',
+
     achievements: [
 
     ],
@@ -282,6 +290,14 @@ const Employe = () => {
       dob: employee?.dob,
       salary: employee?.salary,
 
+      acHolderName: employee?.acHolderName,
+      bankName: employee?.bankName,
+      bankbranch: employee?.bankbranch,
+      acnumber: employee?.acnumber,
+      ifscCode: employee?.ifscCode,
+      adhaar: employee?.adhaar,
+      pan: employee?.pan,
+
       designation: employee?.designation,
       phone: employee?.phone,
       address: employee?.address || '',
@@ -467,11 +483,11 @@ const Employe = () => {
           pagination
           customStyles={useCustomStyles()}
           highlightOnHover
-           noDataComponent={
-                        <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
-                          <BiMessageRoundedError className="text-xl" /> No Employee records found.
-                        </div>
-                      }
+          noDataComponent={
+            <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+              <BiMessageRoundedError className="text-xl" /> No Employee records found.
+            </div>
+          }
         />
       </div>
 
@@ -556,9 +572,11 @@ const Employe = () => {
                           gap: 2,
                         }}>
                           <TextField fullWidth value={inp.phone} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
-                          <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergencyphone" size="small" />
+                          <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergency/ Relative Phone" size="small" />
                           <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
                           <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
+                          <TextField fullWidth inputProps={{ maxLength: 12 }} value={inp.adhaar} onChange={(e) => handleChange(e, 'adhaar')} label="Adhaar No." size="small" />
+                          <TextField fullWidth inputProps={{ maxLength: 10 }} value={inp.pan} onChange={(e) => handleChange(e, 'pan')} label="Pan No." size="small" />
                           <TextField InputLabelProps={{ shrink: true }} fullWidth value={inp.dob} type="date" onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
                           <FormControl size="small">
                             <InputLabel>maritalStatus</InputLabel>
@@ -582,6 +600,29 @@ const Employe = () => {
                               <MenuItem selected value='female'>female</MenuItem>
                             </Select>
                           </FormControl>
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </div>
+                }
+
+                {isupdate &&
+                  <div className="border w-full rounded border-dashed border-slate-400">
+                    <Accordion sx={{ width: '100%' }} className="flex rounded  flex-col">
+                      <AccordionSummary expandIcon={<MdExpandMore />}>
+                        <Typography variant="subtitle1">Banking Details (optional)</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box sx={{
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: 2,
+                        }}>
+                          <TextField fullWidth value={inp.acHolderName} onChange={(e) => handleChange(e, 'acHolderName')} label="A/C Holder Name" size="small" />
+                          <TextField fullWidth value={inp.bankName} onChange={(e) => handleChange(e, 'bankName')} label="Bank Name" size="small" />
+                          <TextField fullWidth value={inp.bankbranch} onChange={(e) => handleChange(e, 'bankbranch')} label="Branch" size="small" />
+                          <TextField fullWidth value={inp.acnumber} onChange={(e) => handleChange(e, 'acnumber')} label="A/C No." size="small" />
+                          <TextField fullWidth value={inp.ifscCode} onChange={(e) => handleChange(e, 'ifscCode')} label="IFSC Code" size="small" />
                         </Box>
                       </AccordionDetails>
                     </Accordion>

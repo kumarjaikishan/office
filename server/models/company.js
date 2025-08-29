@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const companySchema = new mongoose.Schema({
     name: { type: String},
-    industry: String,
+    address: String,
+    contact: String,
     logo: String,
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
     officeTime: {

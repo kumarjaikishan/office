@@ -74,6 +74,27 @@ const employeeSchema = new mongoose.Schema({
     salary: {
         type: Number,
     },
+    acHolderName: {
+        type: String,
+    },
+    bankName: {
+        type: String,
+    },
+    bankbranch: {
+        type: String,
+    },
+    acnumber: {
+        type: String,
+    },
+    ifscCode: {
+        type: String,
+    },
+    adhaar: {
+        type: String,
+    },
+    pan: {
+        type: String,
+    },
     faceDescriptor: {
         type: [Number], // This will store the 128-length descriptor as an array of numbers
         default: null

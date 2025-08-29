@@ -184,7 +184,8 @@ const updateemployee = async (req, res, next) => {
         const possibleEmployeeFields = [
             'dob', 'designation', 'phone', 'address', 'gender', 'bloodGroup',
             'Emergencyphone', 'skills', 'department', 'maritalStatus', 'salary',
-            'achievements', 'education'
+            'achievements', 'education','acHolderName','bankName','bankbranch',
+            'acnumber','ifscCode','adhaar','pan'
         ];
 
         let updatedFields = {};
