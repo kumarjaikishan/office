@@ -73,9 +73,9 @@ const DeveloperDashboard = () => {
     const edite = (user) => {
         // console.log(user)
         setinp({
-            userid: user._id,
-            name: user.name,
-            email: user.email,
+            userid: user?._id,
+            name: user?.registeredName,
+            email: user?.email,
         })
         setisedit(true)
         setpassmodal(true)
@@ -115,7 +115,7 @@ const DeveloperDashboard = () => {
         try {
             const token = localStorage.getItem('emstoken')
             const res = await axios.put(`${import.meta.env.VITE_API_ADDRESS}User/${inp.userid}`,
-                { name:inp.name, email:inp.email },
+                { name: inp.name, email: inp.email },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -145,7 +145,7 @@ const DeveloperDashboard = () => {
         },
         {
             name: "Name",
-            selector: (row) => row.name,
+            selector: (row) => row?.registeredName ?? '',
         },
         {
             name: "Email",

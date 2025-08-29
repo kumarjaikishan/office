@@ -31,7 +31,7 @@ const Permission = () => {
         1: "Read", 2: "Create", 3: "Update", 4: "Delete",
     };
 
-    const colors = ["teal", "blue", "yellow", "red"];
+    const colors = ["teal",  "blue", "yellow", "red"];
 
     const fetche = async () => {
         try {
@@ -126,7 +126,6 @@ const Permission = () => {
 
     const saveedit = async () => {
         try {
-            // Only keep allowed modules and remove empties
             const cleanedModules = Object.fromEntries(
                 Object.entries(form.modules)
                     .filter(
@@ -182,8 +181,6 @@ const Permission = () => {
         setEditValue("");
     };
     const saveModule = async () => {
-        // console.log(modules)
-        // return
         try {
 
             const token = localStorage.getItem("emstoken");
@@ -208,7 +205,7 @@ const Permission = () => {
         <div>
             <div >
                 <div
-                    className={`flex w-full my-2 justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md`}
+                    className={`flex w-full my-2 justify-between items-center cursor-pointer border border-amber-400 bg-amber-100 px-4 py-2 rounded-md`}
                     onClick={() => toggleSection('module')}
                 >
                     <span className="font-semibold text-[16px] md:text-lg text-left">
@@ -287,11 +284,10 @@ const Permission = () => {
                 {permission?.map((per, ind) => (
                     <div key={per._id}>
                         <div
-                            className={`flex w-full my-2 justify-between items-center cursor-pointer bg-${colors[ind % colors.length]
-                                }-100 px-4 py-2 rounded-md`}
+                            className={`flex w-full my-2 justify-between items-center cursor-pointer border-dashed border border-${colors[ind]}-600 bg-${colors[ind]}-100 px-4 py-2 rounded-md`}
                             onClick={() => toggleSection(per.role)}
                         >
-                            <span className="font-semibold text-[16px] md:text-lg text-left">
+                            <span className="font-semibold capitalize text-[16px] md:text-lg text-left">
                                 {per.role}
                             </span>
                             {openSection === `${per.role}` ? (

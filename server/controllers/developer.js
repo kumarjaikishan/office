@@ -24,7 +24,7 @@ const addUser = async (req, res, next) => {
     const { name, email, password } = req.body;
 
     try {
-        const newuser = new user({ name, email, password, permissions: permission.superAdmin, role: "superadmin" });
+        const newuser = new user({ name, registeredName: name, email, password, permissions: permission.superAdmin, role: "superadmin" });
         const savedUser = await newuser.save();
 
         const newcompany = new company({ adminId: savedUser._id });
@@ -50,7 +50,7 @@ const editUser = async (req, res, next) => {
     try {
         const query = await user.findByIdAndUpdate(id, {
             $set: {
-                name, email
+               registeredName:name, email
             }
         });
 
@@ -98,7 +98,7 @@ const saveModule = async (req, res, next) => {
         const permission = await user.findByIdAndUpdate(req.user.id, { AllPermissionNames: req.body.modules });
 
         return res.status(200).json({
-           message:'Module Updated'
+            message: 'Module Updated'
         })
     } catch (error) {
         console.log(error.message)
@@ -111,7 +111,7 @@ const getdefaultpermission = async (req, res, next) => {
         const permissionnames = await user.findById(req.user.id).select('AllPermissionNames');
 
         return res.status(200).json({
-            permission,permissionnames
+            permission, permissionnames
         })
     } catch (error) {
         console.log(error.message)

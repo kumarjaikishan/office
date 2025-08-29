@@ -18,6 +18,7 @@ import useImageUpload from "../../../utils/imageresizer";
 import SuperAdminDashboard from './admin';
 import { FirstFetch } from '../../../../store/userSlice';
 import DataTable from 'react-data-table-component';
+import { useCustomStyles } from '../attandence/attandencehelper';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -119,47 +120,15 @@ export default function OrganizationSettings() {
         seteditbranchdata(dffg);
         setopenviewmodal(true);
     }
-    const primaryColor = useSelector((state) => state.user.primaryColor) || "teal";
-    const styles = {
-        headCells: {
-            style: {
-                backgroundColor: primaryColor,
-                fontWeight: "bold",
-                fontSize: "14px",
-                color: "white",
-                justifyContent: "flex-start",
-                paddingLeft: "4px",
-                paddingRight: "4px",
-            },
-        },
-        headRow: {
-            style: {
-                borderBottom: "2px solid #ccc",
-            },
-        },
-        rows: {
-            style: {
-                minHeight: "48px",
-                borderBottom: "1px solid #eee",
-            },
-        },
-        cells: {
-            style: {
-                justifyContent: "flex-start",
-                paddingLeft: "4px",
-                paddingRight: "4px",
-            },
-        },
-    };
-
+    const styles = useCustomStyles();
 
     return (
         <div className="w-full mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
             {/* Company Info */}
             {profile?.role == 'superadmin' &&
-                <div>
+                <div className='border-2 border-dashed border-blue-400 rounded-md'>
                     <div
-                        className="flex justify-between items-center cursor-pointer bg-blue-100 px-4 py-2 rounded-md"
+                        className="flex justify-between items-center cursor-pointer  bg-blue-100 px-4 py-2 rounded-md"
                         onClick={() => toggleSection('company')}
                     >
                         <span className="font-semibold text-[16px] md:text-lg text-left">Company Info</span>
@@ -171,7 +140,7 @@ export default function OrganizationSettings() {
                     </div>
 
                     {openSection === 'company' && (
-                        <div className="p-4 rounded flex flex-col md:flex-row items-center border-blue-300 border-2 border-dashed mt-2 space-y-4">
+                        <div className="p-4 rounded flex flex-col md:flex-row items-center  mt-2 space-y-4">
                             <div className="relative flex items-center mx-auto">
                                 <div className="relative w-30 h-30 mx-auto">
                                     <img
@@ -265,10 +234,12 @@ export default function OrganizationSettings() {
                             </div>
                         </div>
                     )}
-                </div>}
+
+                </div>
+            }
 
             {(profile?.role == 'superadmin' || profile?.role == 'admin') &&
-                <div>
+                <div className='border-2 border-dashed border-green-400 rounded-md'>
                     <div
                         className="flex justify-between items-center cursor-pointer bg-green-100 px-4 py-2 rounded-md"
                         onClick={() => toggleSection('branches')}
@@ -281,7 +252,7 @@ export default function OrganizationSettings() {
                         )}
                     </div>
                     {openSection === 'branches' && (
-                        <div className="p-1 md:p-4 rounded overflow-auto border-green-300 border-2 border-dashed mt-2 space-y-4">
+                        <div className="p-1 md:p-4 rounded overflow-auto mt-2 space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-md font-medium">Branch List</h3>
                                 <Button
@@ -346,7 +317,7 @@ export default function OrganizationSettings() {
             }
 
 
-            <div>
+            <div className='border-2 border-dashed border-teal-400 rounded-md'>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('department')}
@@ -359,16 +330,16 @@ export default function OrganizationSettings() {
                     )}
                 </div>
                 {openSection === 'department' && (
-                    <div className="p-1 rounded  border-teal-300 border-2 border-dashed mt-2 space-y-4">
+                    <div className="p-1 rounded mt-2 space-y-4">
                         <Department />
                     </div>
                 )}
             </div>
 
             {profile?.role == 'superadmin' &&
-                <div>
+                <div className='border-2 border-dashed border-slate-400 rounded-md'>
                     <div
-                        className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-2 rounded-md"
+                        className="flex justify-between items-center cursor-pointer bg-slate-100 px-4 py-2 rounded-md"
                         onClick={() => toggleSection('admin')}
                     >
                         <span className="font-semibold text-[16px] md:text-lg text-left">Admin/Manager</span>
@@ -379,13 +350,14 @@ export default function OrganizationSettings() {
                         )}
                     </div>
                     {openSection === 'admin' && (
-                        <div className="p-1 rounded  border-teal-300 border-2 border-dashed mt-2 ">
+                        <div className="p-1 rounde mt-2 ">
                             <SuperAdminDashboard />
                         </div>
                     )}
-                </div>}
+                </div>
+                }
 
-            <div>
+            <div className='border-2 border-dashed border-yellow-400 rounded-md'>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-yellow-100 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('attendance')}
@@ -398,7 +370,7 @@ export default function OrganizationSettings() {
                     )}
                 </div>
                 {(openSection === 'attendance' && company) && (
-                    <Box className=" border-yellow-300  border-2 border-dashed rounded mt-1 p-2 ">
+                    <Box className=" rounded mt-1 p-2 ">
                         <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-3 gap-5">
                             <TextField
                                 label="Office Time In"

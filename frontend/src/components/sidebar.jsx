@@ -49,7 +49,7 @@ const Sidebar = () => {
             <div className="rounded-full overflow-hidden w-10 h-10 md:h-14 md:w-14">
               <img
                 className="w-full h-full object-fill"
-                src={company.logo}
+                src={company?.logo}
                 alt="Company Logo"
               />
             </div>
@@ -58,7 +58,7 @@ const Sidebar = () => {
           )}
         </span>
         {showText && (
-          <span className="capitalize">{user?.company?.name || 'Company Name'}</span>
+          <span className="capitalize">{user?.company?.name || 'Company'}</span>
         )}
       </div>
 

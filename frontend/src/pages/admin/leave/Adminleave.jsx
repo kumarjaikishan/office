@@ -11,6 +11,7 @@ import { FaRegUser } from 'react-icons/fa';
 import CheckPermission from '../../../utils/CheckPermission';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
+import { BiMessageRoundedError } from 'react-icons/bi';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
@@ -144,6 +145,11 @@ const Adminleave = () => {
                 data={leavelist}
                 pagination
                 highlightOnHover
+                 noDataComponent={
+                              <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+                                <BiMessageRoundedError className="text-xl" /> No Leave Request found.
+                              </div>
+                            }
             />
             <Adminleavemodal firstfetch={firstfetch} handleChange={handleChange} inp={inp} isload={isload} init={init} setInp={setInp} openmodal={openmodal} setopenmodal={setopenmodal} />
         </div>

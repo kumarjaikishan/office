@@ -219,22 +219,24 @@ const AdminManagerProfile = () => {
 
           {/* Reset password for superadmin */}
           {profile?.role === "superadmin" && (
-            <div className="my-2 flex gap-2">
+            <div className="my-2 flex flex-wrap gap-2">
               <Button
+              
                 onClick={() => { setname(profilee?.name); setEditOpen(true) }}
                 disabled={isLoading}
                 title="Send Password Reset Link"
                 variant="contained"
-                className="splbtn"
+                className="w-full md:w-fit"
               >
                 Edit profile
               </Button>
+
               <Button
                 onClick={resetpassword}
                 disabled={isLoading}
                 title="Send Password Reset Link"
-                variant="contained"
-                className="splbtn"
+                variant="outlined"
+                className="w-full md:w-fit"
               >
                 Send Password Reset Link
               </Button>

@@ -104,10 +104,10 @@ const departmentlist = async (req, res, next) => {
 
 const addemployee = async (req, res, next) => {
 
-    const { employeeName, branchId, department, email, username, password, designation, salary } = req.body;
+    const { employeeName, branchId, department, email, password, designation, salary } = req.body;
 
-    if (!employeeName || !email || !password || !department || !designation || !salary || !username || !branchId) {
-        return res.status(400).json({ message: "All fields are required" });
+    if (!employeeName || !email || !department || !branchId) {
+        return res.status(400).json({ message: "Please Fill required Fields" });
     }
     const role = 'employee';
 
@@ -141,7 +141,7 @@ const addemployee = async (req, res, next) => {
 
         const query = new employeeModal({
             companyId: req.user.companyId,
-            userid: resulten._id, designation, salary, branchId, profileimage: uploadResult?.secure_url, username, department,
+            userid: resulten._id, designation, salary, branchId, profileimage: uploadResult?.secure_url, department,
         });
         const resulte = await query.save({ session });
 
@@ -441,46 +441,46 @@ const getAdmin = async (req, res, next) => {
 };
 
 const updateprofile = async (req, res, next) => {
-  try {
-    const whichuser = await usermodal.findById(req.user.id);
-    const oldprofile = whichuser?.profileImage || undefined;
+    try {
+        const whichuser = await usermodal.findById(req.user.id);
+        const oldprofile = whichuser?.profileImage || undefined;
 
-    let uploadResult;
-    if (req.file) {
-      // upload new image
-      uploadResult = await cloudinary.uploader.upload(req.file.path, {
-        folder: "ems/employee",
-      });
+        let uploadResult;
+        if (req.file) {
+            // upload new image
+            uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: "ems/employee",
+            });
 
-      if (uploadResult) {
-        fs.unlink(req.file.path, (err) => {
-          if (err) console.error("Failed to delete local file:", err);
+            if (uploadResult) {
+                fs.unlink(req.file.path, (err) => {
+                    if (err) console.error("Failed to delete local file:", err);
+                });
+            }
+        }
+
+        // Build update object dynamically
+        const updateData = { name: req.body.name };
+        if (uploadResult?.secure_url) {
+            updateData.profileImage = uploadResult.secure_url;
+
+            // remove old image only if new one is uploaded
+            if (oldprofile) {
+                await removePhotoBySecureUrl([oldprofile]);
+            }
+        }
+
+        await usermodal.findByIdAndUpdate(req.user.id, updateData, { new: true });
+
+        return res.status(200).json({
+            message: "Updated successfully",
         });
-      }
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({
+            message: "Server error",
+        });
     }
-
-    // Build update object dynamically
-    const updateData = { name: req.body.name };
-    if (uploadResult?.secure_url) {
-      updateData.profileImage = uploadResult.secure_url;
-
-      // remove old image only if new one is uploaded
-      if (oldprofile) {
-        await removePhotoBySecureUrl([oldprofile]);
-      }
-    }
-
-    await usermodal.findByIdAndUpdate(req.user.id, updateData, { new: true });
-
-    return res.status(200).json({
-      message: "Updated successfully",
-    });
-  } catch (error) {
-    console.error(error.message);
-    return res.status(500).json({
-      message: "Server error",
-    });
-  }
 };
 
 
@@ -630,8 +630,10 @@ const firstfetch = async (req, res, next) => {
         let attendance = [];
         let holidays = [];
         let ledger = [];
+        let user;
         // let permissionName=[];
         // let defaultRolePermission=[];
+        user = await usermodal.findById(req.user.id).select('name email profileImage role');
 
         if (req.user.role == 'manager') {
 
@@ -715,6 +717,7 @@ const firstfetch = async (req, res, next) => {
         }
 
         ledger = await Ledger.find({ userId: req.user.id });
+
         const ledgersWithBalance = await Promise.all(
             ledger.map(async (ledger) => {
                 const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
@@ -728,7 +731,7 @@ const firstfetch = async (req, res, next) => {
         );
 
         const response = {
-            user: req.user,
+            user: user,
             departmentlist,
             employee: employees,
             attendance,

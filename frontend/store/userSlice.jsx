@@ -21,9 +21,9 @@ const userSlice = createSlice({
         department: null,
         adminManager: null,
         employee: null,
-        company:null,
-        holidays:null,
-        branch:null,
+        company: null,
+        holidays: null,
+        branch: null,
         attandence: null,
         ledger: null,
         salary: null,
@@ -65,7 +65,7 @@ const userSlice = createSlice({
         toogleliveAttandence(state, action) {
             state.liveAttandence = !state.liveAttandence;
         },
-        
+
     },
     extraReducers: (builder) => {
         builder
@@ -87,5 +87,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout,updateAttendance,setPrimaryColor,toogleliveAttandence,setuser,tooglesidebar,toogleextendedonMobile } = userSlice.actions;
+export const { userlogout, updateAttendance, setPrimaryColor, toogleliveAttandence, setuser, tooglesidebar, toogleextendedonMobile } = userSlice.actions;
 export default userSlice.reducer;

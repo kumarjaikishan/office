@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    registeredName: {
+        type: String,
+    },
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company'
