@@ -1,4 +1,4 @@
-const salarymodal = require('../models/salary');
+const salarymodal = require('../models/payroll');
 
 const addsalary = async (req, res, next) => {
     try {

@@ -7,7 +7,6 @@ const Ledger = require("../models/ledger");
 const Entry = require("../models/entry");
 const notificationmodal = require('../models/notification')
 const attendanceModal = require('../models/attandence');
-const salaryModal = require('../models/salary')
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const { default: mongoose } = require('mongoose');
@@ -316,7 +315,6 @@ const deleteemployee = async (req, res, next) => {
         await usermodal.deleteMany({ employeeId });
         await leavemodal.deleteMany({ employeeId });
         await attendanceModal.deleteMany({ employeeId });
-        await salaryModal.deleteMany({ employeeId });
 
         if (employee?.profileimage) {
             await removePhotoBySecureUrl([employee.profileimage]);

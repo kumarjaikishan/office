@@ -95,6 +95,7 @@ export const columns = [
   {
     name: "Name",
     selector: (row) => row.name,
+    sortable: true,
     // width: '120px'
   },
   {
@@ -105,11 +106,11 @@ export const columns = [
   },
   {
     name: "Punch In",
-    selector: (row) => row.punchIn || '-'
+    selector: (row) => row.punchIn || '- : -'
   },
   {
     name: "Punch Out",
-    selector: (row) => row.punchOut || '-'
+    selector: (row) => row.punchOut || '- : -'
   },
   {
     name: "Status",

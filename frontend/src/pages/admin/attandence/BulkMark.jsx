@@ -44,7 +44,7 @@ const BulkMark = ({
         );
         // console.log(selectedDateAttendance)
         setalreadyAttendance(selectedDateAttendance)
-    }, [attandenceDate,attandence])
+    }, [attandenceDate, attandence])
 
     useEffect(() => {
         const result = employee?.filter(e => {
@@ -135,6 +135,13 @@ const BulkMark = ({
                 status: value
             }
         }));
+
+        setcheckedemployee(prev => {
+            if (!prev.includes(empId)) {
+                return [...prev, empId]; // Automatically check the row
+            }
+            return prev;
+        });
     };
 
     const handleSubmit = async (e) => {
