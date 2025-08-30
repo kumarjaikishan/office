@@ -23,7 +23,7 @@ export const columns = [
     {
         name: "Action",
         selector: (row) => row.action,
-        width: '160px'
+        width: '180px'
     }
 ]
 

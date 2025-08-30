@@ -9,28 +9,55 @@ const payrollSchema = new mongoose.Schema({
   month: { type: Number, required: true }, // 1-12
   year: { type: Number, required: true },
 
-  baseSalary: { type: Number, required: true }, // basic salary (fixed component)
+  baseSalary: { type: Number, required: true }, // fixed salary
 
+  // Allowances (HRA, Transport, etc.)
   allowances: [
     {
-      type: { type: String }, // e.g., "HRA", "Transport", "Medical"
+      type: { type: String },
       amount: { type: Number, default: 0 }
     }
   ],
 
+  // Bonuses (performance, festival, referral, etc.)
+  bonuses: [
+    {
+      type: { type: String },
+      amount: { type: Number, default: 0 }
+    }
+  ],
+
+  // Overtime payments
+  overtime: {
+    hours: { type: Number, default: 0 },
+    ratePerHour: { type: Number, default: 0 },
+    amount: { type: Number, default: 0 } // hours * rate
+  },
+
+  // Standard deductions (PF, Tax, etc.)
   deductions: [
     {
-      type: { type: String }, // e.g., "PF", "ProfessionalTax", "Loan"
+      type: { type: String },
       amount: { type: Number, default: 0 }
     }
   ],
 
-  leaveDays: { type: Number, default: 0 },   // unpaid leave days
-  absentDays: { type: Number, default: 0 },  // absent days
-  paidDays: { type: Number, default: 0 },    // total paid days in month
+  // Other deductions (loan repayment, fines, advances, etc.)
+  otherDeductions: [
+    {
+      reason: { type: String },
+      amount: { type: Number, default: 0 }
+    }
+  ],
 
-  grossSalary: { type: Number, default: 0 }, // base + allowances
-  totalDeductions: { type: Number, default: 0 },
+  // Leave & absence tracking
+  leaveDays: { type: Number, default: 0 },
+  absentDays: { type: Number, default: 0 },
+  paidDays: { type: Number, default: 0 },
+
+  // Final salary components
+  grossSalary: { type: Number, default: 0 }, // base + allowances + bonuses + overtime
+  totalDeductions: { type: Number, default: 0 }, // deductions + otherDeductions + absent/leave
   netSalary: { type: Number, default: 0 },   // final payable
 
   status: { type: String, enum: ['pending', 'processed', 'paid'], default: 'pending' },

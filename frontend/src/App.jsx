@@ -10,6 +10,8 @@ import { connectSSE, closeSSE } from "./utils/sse";
 import { Avatar } from '@mui/material';
 import dayjs from 'dayjs';
 import { FaRegUser } from 'react-icons/fa';
+import PayrollPage from './pages/payroll/payroll';
+import PayrollCreatePage from './pages/payroll/payrollCreating';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -65,6 +67,8 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
+      <Route path="payroll" element={<PayrollCreatePage />} />
+      <Route path="viewpayroll/:employeeId" element={<PayrollPage />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
@@ -84,6 +88,8 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
+       <Route path="payroll" element={<PayrollCreatePage />} />
+      <Route path="payroll/:employeeId" element={<PayrollPage />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
@@ -100,6 +106,8 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
+       <Route path="payroll" element={<PayrollCreatePage />} />
+      <Route path="payroll/:employeeId" element={<PayrollPage />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
@@ -130,7 +138,7 @@ function App() {
   const primaryColor = useSelector((state) => state.user.primaryColor) || "#115e59";
 
   useEffect(() => {
-   
+
     document.documentElement.style.setProperty("--color-primary", primaryColor);
   }, [primaryColor]);
 
@@ -190,7 +198,7 @@ function App() {
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
 
   useEffect(() => {
-    if (islogin && user?.liveAttandence &&  ["superadmin", "admin", "manager"].includes(user?.profile?.role) ) {
+    if (islogin && user?.liveAttandence && ["superadmin", "admin", "manager"].includes(user?.profile?.role)) {
       const es = connectSSE((data) => {
         if (data.type === "attendance_update") {
           const emp = data.payload.data.employeeId;
