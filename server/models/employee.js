@@ -89,6 +89,9 @@ const employeeSchema = new mongoose.Schema({
     ifscCode: {
         type: String,
     },
+    upi: {
+        type: String,
+    },
     adhaar: {
         type: String,
     },

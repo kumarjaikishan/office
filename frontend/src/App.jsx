@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { FaRegUser } from 'react-icons/fa';
 import PayrollPage from './pages/payroll/payroll';
 import PayrollCreatePage from './pages/payroll/payrollCreating';
+import AttendanceReport from './pages/report/attandenceReport';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -59,6 +60,7 @@ const routesByRole = {
       <Route path="department" element={<Department />} />
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
+      <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="holiday" element={<HolidayForm />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="setting" element={<Setting />} />
@@ -80,6 +82,7 @@ const routesByRole = {
       <Route path="department" element={<Department />} />
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
+      <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="holiday" element={<HolidayForm />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="setting" element={<Setting />} />
@@ -88,7 +91,7 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
-       <Route path="payroll" element={<PayrollCreatePage />} />
+      <Route path="payroll" element={<PayrollCreatePage />} />
       <Route path="payroll/:employeeId" element={<PayrollPage />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
@@ -99,6 +102,7 @@ const routesByRole = {
       <Route path="employe" element={<Employe />} />
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
+      <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
@@ -106,7 +110,7 @@ const routesByRole = {
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
-       <Route path="payroll" element={<PayrollCreatePage />} />
+      <Route path="payroll" element={<PayrollCreatePage />} />
       <Route path="payroll/:employeeId" element={<PayrollPage />} />
       <Route path="*" element={<Errorpage />} />
     </Route>

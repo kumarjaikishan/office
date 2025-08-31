@@ -113,6 +113,7 @@ const menu = [
       { menu: "Permission", link: '/dashboard/permission', icon: <FaSitemap />, roles: ['developer'] },
       { menu: "Employees", link: '/dashboard/employe', icon: <FaUserTie />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/attandence', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Attend Report", link: '/dashboard/attandence_Report', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/empattandence', icon: <TbReportAnalytics />, roles: ['employee'] },
       { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Holiday", link: '/dashboard/holiday', icon: <FaCalendarDay />, roles: ['superadmin', 'admin'] },

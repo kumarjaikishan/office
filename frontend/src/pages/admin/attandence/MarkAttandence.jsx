@@ -36,7 +36,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 labelId="demo-simple-select-helper-label"
                                 id="demo-simple-select-helper"
                                 value={isPunchIn}
-                                 label="Action"
+                                label="Action"
                                 required
                                 onChange={(e) => {
                                     setisPunchIn(e.target.value)
@@ -93,7 +93,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         <Box className=' capitalize'>
                                             <Typography variant="body2">{option.userid.name}</Typography>
                                             <Typography variant="caption" color="text.secondary">
-                                                 {(option.designation)}
+                                                {(option.designation)}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -150,7 +150,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         labelId="demo-simple-select-helper-label"
                                         id="demo-simple-select-helper"
                                         value={inp.status}
-                                         label= "Status"
+                                        label="Status"
                                         required
                                         onChange={(e) => {
                                             setinp({
@@ -162,6 +162,8 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                         <MenuItem value={'present'}>Present</MenuItem>
                                         <MenuItem value={'leave'}>Leave</MenuItem>
                                         <MenuItem value={'absent'}>Absent</MenuItem>
+                                        <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+                                        <MenuItem value={'holiday'}>Holiday</MenuItem>
                                         <MenuItem value={'half day'}>Half Day</MenuItem>
                                     </Select>
                                 </FormControl>}

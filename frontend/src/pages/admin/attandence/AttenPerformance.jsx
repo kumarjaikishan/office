@@ -145,6 +145,7 @@ const AttenPerformance = () => {
         filtered.forEach(element => {
             const date = dayjs(element.date).toDate();
             let fdfgfd = dayjs(element.date).format('DD/MM/YYYY');
+            const { punchIn, punchOut, workingMinutes } = element;
 
             const isHoliday = holidaydate.includes(fdfgfd);
 
@@ -153,12 +154,12 @@ const AttenPerformance = () => {
             const isleave = element.status == 'leave'
             const isabsent = element.status == 'absent'
 
-            if (isHoliday && !isleave && !isabsent) {
+            if (isHoliday && !isleave && !isabsent && workingMinutes) {
                 finaliiy.push({
                     ...element,
                     remarks: 'worked on holiday'
                 })
-            } else if (isWeeklyOff && !isleave && !isabsent) {
+            } else if (isWeeklyOff && !isleave && !isabsent && workingMinutes) {
                 finaliiy.push({
                     ...element,
                     remarks: 'worked on weekly off'
@@ -178,7 +179,7 @@ const AttenPerformance = () => {
 
             if (status !== 'present') return;
 
-            const { punchIn, punchOut, workingMinutes } = element;
+
             if (!punchIn || !punchOut || typeof workingMinutes !== 'number') return;
 
             if (isHoliday || isWeeklyOff) {
@@ -289,15 +290,15 @@ const AttenPerformance = () => {
             {loading && <p>Loading performance data...</p>}
 
             <div className="p-1 py-3 md:p-3 flex flex-wrap gap-1 md:gap-3 items-center justify-between rounded shadow bg-white mb-4">
-                <div className=' gap-3 md:gap-3 grid-col-2 '>
-                    <FormControl className='w-[90px]  md:w-[120px]' size="small">
+                <div className='gap-3 md:gap-3 flex'>
+                    <FormControl className='w-[90px]   md:w-[120px]' size="small">
                         <InputLabel>Year</InputLabel>
                         <Select value={selectedYear} label="Year" onChange={(e) => setSelectedYear(e.target.value)}>
                             {yearOptions.map((year) => <MenuItem key={year} value={year}>{year}</MenuItem>)}
                         </Select>
                     </FormControl>
 
-                    <FormControl size="small" className='w-[130px] flex-1 md:w-[160px]'>
+                    <FormControl size="small" className='w-[130px]  md:w-[160px]'>
                         <InputLabel>Month</InputLabel>
                         <Select value={selectedMonth} label="Month" onChange={(e) => setSelectedMonth(e.target.value)}>
                             <MenuItem value="all">All</MenuItem>
@@ -330,10 +331,12 @@ const AttenPerformance = () => {
                             <InputLabel>Status</InputLabel>
                             <Select value={statusFilter} label="Status" onChange={(e) => setStatusFilter(e.target.value)}>
                                 <MenuItem value="all">All</MenuItem>
-                                <MenuItem value='present'>Present</MenuItem>
-                                <MenuItem value='leave'>Leave</MenuItem>
-                                <MenuItem value='absent'>Absent</MenuItem>
-                                <MenuItem value='halfday'>Half Day</MenuItem>
+                                <MenuItem value={'present'}>Present</MenuItem>
+                                <MenuItem value={'leave'}>Leave</MenuItem>
+                                <MenuItem value={'absent'}>Absent</MenuItem>
+                                <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+                                <MenuItem value={'holiday'}>Holiday</MenuItem>
+                                <MenuItem value={'half day'}>Half Day</MenuItem>
                             </Select>
                         </FormControl>
 

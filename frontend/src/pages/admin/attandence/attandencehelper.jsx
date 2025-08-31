@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) => {
   //  return console.log(inp)
   setisload(false);
-  
+
   const basePayload = {
     employeeId: inp.employeeId,
     date: dayjs(inp.date).toDate(),
@@ -146,8 +146,8 @@ export const useCustomStyles = () => {
         fontSize: "14px",
         color: "white",
         justifyContent: "flex-start",
-        paddingLeft: "4px",
-        paddingRight: "4px",
+        paddingLeft: "8px",
+        paddingRight: "0px",
       },
     },
     headRow: {
@@ -164,8 +164,8 @@ export const useCustomStyles = () => {
     cells: {
       style: {
         justifyContent: "flex-start",
-        paddingLeft: "4px",
-        paddingRight: "4px",
+        paddingLeft: "8px",
+        paddingRight: "0px",
       },
     },
   };

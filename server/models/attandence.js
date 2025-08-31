@@ -13,7 +13,7 @@ const attendanceSchema = new mongoose.Schema({
   shortMinutes: { type: Number },  // hours short of 8
   status: {
     type: String,
-    enum: ['present', 'absent', 'leave', 'half day'],
+    enum: ['present', 'absent', 'leave', 'half day', 'weekly off', 'holiday'],
     required: true
   },
   leave: { type: mongoose.Schema.Types.ObjectId, ref: 'Leave' },

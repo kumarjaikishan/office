@@ -87,6 +87,7 @@ const Employe = () => {
     bankbranch: '',
     acnumber: '',
     ifscCode: '',
+    upi: '',
     adhaar: '',
     pan: '',
 
@@ -296,6 +297,7 @@ const Employe = () => {
       bankbranch: employee?.bankbranch,
       acnumber: employee?.acnumber,
       ifscCode: employee?.ifscCode,
+      upi: employee?.upi,
       adhaar: employee?.adhaar,
       pan: employee?.pan,
 
@@ -563,7 +565,13 @@ const Employe = () => {
                 {isupdate &&
                   <div className="border w-full rounded border-dashed border-slate-400">
                     <Accordion sx={{ width: '100%' }} className="flex rounded  flex-col">
-                      <AccordionSummary expandIcon={<MdExpandMore />}>
+                      <AccordionSummary 
+                        sx={{
+                          backgroundColor: '#334155',
+                        
+                          color: 'white',
+                        }}
+                      expandIcon={<MdExpandMore color="white" />}>
                         <Typography variant="subtitle1">Personal Details (optional)</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
@@ -610,8 +618,14 @@ const Employe = () => {
                 {isupdate &&
                   <div className="border w-full rounded border-dashed border-slate-400">
                     <Accordion sx={{ width: '100%' }} className="flex rounded  flex-col">
-                      <AccordionSummary expandIcon={<MdExpandMore />}>
-                        <Typography variant="subtitle1">Banking Details (optional)</Typography>
+                      <AccordionSummary
+                        sx={{
+                          backgroundColor: '#334155',
+
+                          color: 'white',
+                        }}
+                        expandIcon={<MdExpandMore color="white" />}>
+                        <Typography sx={{ margin: '0' }} variant="subtitle1">Banking Details (optional)</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
                         <Box sx={{
@@ -624,6 +638,7 @@ const Employe = () => {
                           <TextField fullWidth value={inp.bankbranch} onChange={(e) => handleChange(e, 'bankbranch')} label="Branch" size="small" />
                           <TextField fullWidth value={inp.acnumber} onChange={(e) => handleChange(e, 'acnumber')} label="A/C No." size="small" />
                           <TextField fullWidth value={inp.ifscCode} onChange={(e) => handleChange(e, 'ifscCode')} label="IFSC Code" size="small" />
+                          <TextField fullWidth value={inp.upi} onChange={(e) => handleChange(e, 'upi')} label="Upi Id/No." size="small" />
                         </Box>
                       </AccordionDetails>
                     </Accordion>
@@ -633,7 +648,13 @@ const Employe = () => {
                 {isupdate &&
                   <div className="border w-full rounded border-dashed border-slate-400">
                     <Accordion sx={{ width: '100%' }} className="flex flex-col">
-                      <AccordionSummary expandIcon={<MdExpandMore />}>
+                      <AccordionSummary 
+                        sx={{
+                          backgroundColor: '#334155',
+                        
+                          color: 'white',
+                        }}
+                      expandIcon={<MdExpandMore color="white" />}>
                         <Typography variant="subtitle1">Document & Skills (optional)</Typography>
                       </AccordionSummary>
 

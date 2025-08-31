@@ -22,7 +22,7 @@ const BulkMark = ({
     openmodal, init, setopenmodal,
     isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-    const { department, branch, employee, attandence } = useSelector((state) => state.user);
+    const { company, holidays, department, branch, employee, attandence } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
     const [rowData, setRowData] = useState({});
     const [selectedBranch, setselectedBranch] = useState('all')
@@ -32,19 +32,48 @@ const BulkMark = ({
     const [alreadyAttendance, setalreadyAttendance] = useState([])
 
     useEffect(() => {
-        // console.log(branch)
+        console.log(company?.weeklyOffs)
+        console.log(holidays)
         // console.log(department)
         // console.log(attandence)
         // console.log(rowData)
     }, [])
 
     useEffect(() => {
-        const selectedDateAttendance = attandence.filter(e =>
-            dayjs(e.date).isSame(dayjs(attandenceDate), "day")
-        );
-        // console.log(selectedDateAttendance)
-        setalreadyAttendance(selectedDateAttendance)
-    }, [attandenceDate, attandence])
+        if (!attandenceDate || !employee?.length) return;
+
+        const isHoliday = holidays.some(h => {
+            const from = dayjs(h.fromDate).startOf('day');
+            const to = dayjs(h.toDate).endOf('day');
+            return attandenceDate.isBetween(from, to, 'day', '[]'); // inclusive
+        });
+
+        const isWeeklyOff = company?.weeklyOffs?.includes(attandenceDate.day());
+
+        if (isHoliday || isWeeklyOff) {
+            const defaultData = {};
+            const checked = [];
+
+            employee.forEach(emp => {
+                defaultData[emp._id] = {
+                    punchIn: null,
+                    punchOut: null,
+                    status: isHoliday ? "holiday" : "weekly off",
+                };
+                checked.push(emp._id);
+            });
+
+            setRowData(defaultData);
+            setcheckedemployee(checked);
+
+            toast.info(
+                isHoliday
+                    ? "This day is a holiday. All employees marked as Holiday."
+                    : "This day is a weekly off. All employees marked as Weekly Off."
+            );
+        }
+    }, [attandenceDate, attandence, employee, holidays, company]);
+
 
     useEffect(() => {
         const result = employee?.filter(e => {
@@ -88,7 +117,6 @@ const BulkMark = ({
             setcheckedemployee(checked);
         }
     }, [employee, alreadyAttendance]);
-
 
     const handleCheckbox = (empId) => {
         if (checkedemployee.includes(empId)) {
@@ -343,6 +371,8 @@ const BulkMark = ({
                                                             <MenuItem value={'present'}>Present</MenuItem>
                                                             <MenuItem value={'leave'}>Leave</MenuItem>
                                                             <MenuItem value={'absent'}>Absent</MenuItem>
+                                                            <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+                                                            <MenuItem value={'holiday'}>Holiday</MenuItem>
                                                             <MenuItem value={'half day'}>Half Day</MenuItem>
                                                         </Select>
                                                     </FormControl>

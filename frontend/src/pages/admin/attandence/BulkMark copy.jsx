@@ -22,28 +22,31 @@ const BulkMark = ({
     openmodal, init, setopenmodal,
     isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-    const { department, branch, employee, attandence } = useSelector((state) => state.user);
+    const {company,holidays, department, branch, employee, attandence } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
     const [rowData, setRowData] = useState({});
     const [selectedBranch, setselectedBranch] = useState('all')
     const [selecteddepartment, setselecteddepartment] = useState('all');
     const [filteredEmployee, setFilteredEmployee] = useState([]);
     const [attandenceDate, setattandenceDate] = useState(dayjs());
-    const [alreadyAttendance,setalreadyAttendance]= useState([])
+    const [alreadyAttendance, setalreadyAttendance] = useState([])
 
     useEffect(() => {
-        // console.log(branch)
+        console.log(company?.weeklyOffs)
+        console.log(holidays)
         // console.log(department)
         // console.log(attandence)
+        // console.log(rowData)
     }, [])
 
     useEffect(() => {
+        console.log(attandenceDate)
         const selectedDateAttendance = attandence.filter(e =>
             dayjs(e.date).isSame(dayjs(attandenceDate), "day")
         );
         // console.log(selectedDateAttendance)
         setalreadyAttendance(selectedDateAttendance)
-    }, [attandenceDate])
+    }, [attandenceDate, attandence])
 
     useEffect(() => {
         const result = employee?.filter(e => {
@@ -57,16 +60,36 @@ const BulkMark = ({
     useEffect(() => {
         if (employee?.length > 0) {
             const defaultData = {};
+            const checked = [];
+
             employee.forEach(emp => {
-                defaultData[emp._id] = {
-                    punchIn: null,
-                    punchOut: null,
-                    status: 'absent',
-                };
+                // find if this employee already has attendance for the selected date
+                const existing = alreadyAttendance.find(a => a.employeeId._id === emp._id);
+
+                if (existing) {
+                    // mark employee as checked
+                    checked.push(emp._id);
+
+                    // prefill with existing attendance
+                    defaultData[emp._id] = {
+                        punchIn: existing.punchIn ? dayjs(existing.punchIn).format("HH:mm") : null,
+                        punchOut: existing.punchOut ? dayjs(existing.punchOut).format("HH:mm") : null,
+                        status: existing.status || "absent",
+                    };
+                } else {
+                    // fallback if no record found
+                    defaultData[emp._id] = {
+                        punchIn: null,
+                        punchOut: null,
+                        status: "absent",
+                    };
+                }
             });
+
             setRowData(defaultData);
+            setcheckedemployee(checked);
         }
-    }, [employee]);
+    }, [employee, alreadyAttendance]);
 
     const handleCheckbox = (empId) => {
         if (checkedemployee.includes(empId)) {
@@ -113,6 +136,13 @@ const BulkMark = ({
                 status: value
             }
         }));
+
+        setcheckedemployee(prev => {
+            if (!prev.includes(empId)) {
+                return [...prev, empId]; // Automatically check the row
+            }
+            return prev;
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -144,7 +174,7 @@ const BulkMark = ({
 
             return data;
         });
- 
+
         //  console.log(rowData)
         // return console.log(selectedData)
         try {
@@ -164,7 +194,7 @@ const BulkMark = ({
             }
 
             const result = await response.json();
-            console.log('Bulk Attendance Response:', result);
+            // console.log('Bulk Attendance Response:', result);
 
             // Reset form
             // setinp(init);
@@ -252,14 +282,10 @@ const BulkMark = ({
                                     label="Select date"
                                 />
                             </LocalizationProvider>
-
-
-
-
                         </div>
 
                         {/* Attendance Table */}
-                        <div className='border border-dashed border-teal-400 rounded w-full h-[60vh]'>
+                        <div className='border border-dashed border-teal-400 rounded w-full '>
                             <TableContainer component={Paper}>
                                 <Table size="small">
                                     <TableHead>
@@ -316,7 +342,10 @@ const BulkMark = ({
                                                             onChange={(e) => handleStatusChange(emp._id, e.target.value)}
                                                         >
                                                             <MenuItem value={'present'}>Present</MenuItem>
+                                                            <MenuItem value={'leave'}>Leave</MenuItem>
                                                             <MenuItem value={'absent'}>Absent</MenuItem>
+                                                            <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+                                                            <MenuItem value={'holiday'}>Holiday</MenuItem>
                                                             <MenuItem value={'half day'}>Half Day</MenuItem>
                                                         </Select>
                                                     </FormControl>

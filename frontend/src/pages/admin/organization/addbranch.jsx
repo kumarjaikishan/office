@@ -194,8 +194,8 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
         />
 
         {!branch.defaultsetting && (
-          <div className="border-yellow-300 border-2 grid grid-cols-2 gap-3 border-dashed rounded mt-3 p-3">
-            <Grid container spacing={2}>
+          <div className="border-yellow-300 border-2 border-dashed rounded mt-3 p-3">
+            <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-2 gap-5">
               <TextField
                 label="Office Time In"
                 type="time"
@@ -323,7 +323,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
                   />
                 );
               })}
-            </Grid>
+            </Box>
           </div>
         )}
       </span>

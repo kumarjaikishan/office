@@ -20,7 +20,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FirstFetch } from '../../../../store/userSlice';
 
-const MarkAttandenceedit = ({ openmodal,setisload,dispatch, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
+const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 
     const editattandence = async (e) => {
         e.preventDefault();
@@ -59,6 +59,12 @@ const MarkAttandenceedit = ({ openmodal,setisload,dispatch, isPunchIn, init, set
             setisload(false);
         }
     }
+
+    useEffect(()=>{
+      if(inp.punchIn || inp.punchOut){
+        setinp({...inp,status: 'present'})
+      }
+    },[inp])
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
@@ -128,7 +134,10 @@ const MarkAttandenceedit = ({ openmodal,setisload,dispatch, isPunchIn, init, set
                                     }}
                                 >
                                     <MenuItem value={'present'}>Present</MenuItem>
+                                    <MenuItem value={'leave'}>Leave</MenuItem>
                                     <MenuItem value={'absent'}>Absent</MenuItem>
+                                    <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+                                    <MenuItem value={'holiday'}>Holiday</MenuItem>
                                     <MenuItem value={'half day'}>Half Day</MenuItem>
                                 </Select>
                             </FormControl>
