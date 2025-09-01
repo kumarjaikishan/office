@@ -522,7 +522,7 @@ const editattandence = async (req, res, next) => {
     }
 
     // If status is not "present", reset times
-    if (status !== 'present') {
+    if (!['weekly off', 'holiday', 'present', 'half day'].includes(status)) {
       data.punchIn = null;
       data.punchOut = null;
       data.workingMinutes = null;

@@ -60,11 +60,14 @@ const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, s
         }
     }
 
-    useEffect(()=>{
-      if(inp.punchIn || inp.punchOut){
-        setinp({...inp,status: 'present'})
-      }
-    },[inp])
+    useEffect(() => {
+        if (!['weekly off', 'holiday','half day'].includes(inp.status)) {
+            if (inp.punchIn || inp.punchOut) {
+                setinp({ ...inp, status: 'present' })
+            }
+        }
+
+    }, [inp.punchIn])
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>

@@ -32,8 +32,8 @@ const BulkMark = ({
     const [alreadyAttendance, setalreadyAttendance] = useState([])
 
     useEffect(() => {
-        console.log(company?.weeklyOffs)
-        console.log(holidays)
+        // console.log(company?.weeklyOffs)
+        // console.log(holidays)
         // console.log(department)
         // console.log(attandence)
         // console.log(rowData)
@@ -50,7 +50,7 @@ const BulkMark = ({
 
         const isWeeklyOff = company?.weeklyOffs?.includes(attandenceDate.day());
 
-        if (isHoliday || isWeeklyOff) {
+        if ((isHoliday || isWeeklyOff) && openmodal) {
             const defaultData = {};
             const checked = [];
 
@@ -72,7 +72,7 @@ const BulkMark = ({
                     : "This day is a weekly off. All employees marked as Weekly Off."
             );
         }
-    }, [attandenceDate, attandence, employee, holidays, company]);
+    }, [attandenceDate, attandence, employee, holidays, company, openmodal]);
 
 
     useEffect(() => {
@@ -135,17 +135,33 @@ const BulkMark = ({
     };
 
     const handleTimeChange = (empId, field, value) => {
-        setRowData(prev => {
-            const updated = {
-                ...prev,
-                [empId]: {
-                    ...prev[empId],
-                    [field]: value,
-                    status: 'present' // Automatically set status to 'present'
-                }
-            };
-            return updated;
-        });
+        // if()
+        // console.log(rowData[empId])
+        if (['weekly off', 'holiday','half day'].includes(rowData[empId].status)) {
+            setRowData(prev => {
+                const updated = {
+                    ...prev,
+                    [empId]: {
+                        ...prev[empId],
+                        [field]: value,
+                    }
+                };
+                return updated;
+            });
+        } else {
+            setRowData(prev => {
+                const updated = {
+                    ...prev,
+                    [empId]: {
+                        ...prev[empId],
+                        [field]: value,
+                        status: 'present'
+                    }
+                };
+                return updated;
+            });
+        }
+
 
         setcheckedemployee(prev => {
             if (!prev.includes(empId)) {

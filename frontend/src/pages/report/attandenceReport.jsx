@@ -31,7 +31,7 @@ const AttendanceReport = () => {
     ];
 
 
-    const { department, branch, employee, attandence, holidays } = useSelector(e => e.user);
+    const { department, branch, employee, attandence, holidays, company } = useSelector(e => e.user);
     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp';
 
     // update department list when branch changes
@@ -44,12 +44,12 @@ const AttendanceReport = () => {
     }, [filters.branch, department]);
 
     // build report data
-  
-    const [basic,setbasic]= useState({
-        totalDays:0,
-        holidaysCount:0,
-        weeklyOff:0,
-        workingDays:0,
+
+    const [basic, setbasic] = useState({
+        totalDays: 0,
+        holidaysCount: 0,
+        weeklyOff: 0,
+        workingDays: 0,
     })
 
     useEffect(() => {
@@ -60,10 +60,41 @@ const AttendanceReport = () => {
         const monthEnd = isCurrentMonth ? dayjs() : monthStart.endOf("month");
         const totalDays = monthEnd.date();
 
-        // holidays for this month
-        const holidayDates = holidays
-            ?.filter(h => dayjs(h.date).isSame(monthStart, "month"))
-            ?.map(h => dayjs(h.date).format("YYYY-MM-DD")) || [];
+        // ✅ Weekly off calculation
+        let weeklyOffCount = 0;
+        for (let i = 1; i <= totalDays; i++) {
+            const currentDate = monthStart.date(i);
+            if (company?.weeklyOffs?.includes(currentDate.day())) {
+                weeklyOffCount++;
+            }
+        }
+
+        // ✅ Holidays calculation
+        let holidayCount = 0;
+        holidays?.forEach(h => {
+            const holidayStart = dayjs(h.fromDate);
+            const holidayEnd = dayjs(h.toDate);
+
+            for (let i = 1; i <= totalDays; i++) {
+                const currentDate = monthStart.date(i);
+
+                // only count holidays till today if current month
+                if (isCurrentMonth && currentDate.isAfter(dayjs(), "day")) break;
+
+                if (currentDate.isBetween(holidayStart, holidayEnd, "day", "[]")) {
+                    holidayCount++;
+                }
+            }
+        });
+
+        const totalworkingdays = totalDays - (weeklyOffCount + holidayCount);
+
+        setbasic({
+            totalDays,
+            workingDays: totalworkingdays,
+            weeklyOff: weeklyOffCount,
+            holidaysCount: holidayCount,
+        });
 
         // ✅ Pre-group attendance by employeeId
         const attendanceByEmp = {};
@@ -83,10 +114,6 @@ const AttendanceReport = () => {
             const present = empAttendance.filter(a => a.status === "present").length;
             const absent = empAttendance.filter(a => a.status === "absent").length;
             const leave = empAttendance.filter(a => a.status === "leave").length;
-            const weeklyOff = empAttendance.filter(a => a.status === "weekly off").length;
-            const holidaysCount = empAttendance.filter(a => a.status === "holiday").length;
-
-            const workingDays = totalDays - weeklyOff - holidaysCount;
 
             return {
                 id: emp._id,
@@ -101,10 +128,7 @@ const AttendanceReport = () => {
                         </Box>
                     </div>
                 ),
-                totalDays,
-                workingDays,
-                weeklyOff,
-                holidays: holidaysCount,
+                workingDays: totalworkingdays,
                 leave,
                 absent,
                 present
@@ -112,7 +136,8 @@ const AttendanceReport = () => {
         });
 
         setemployeelist(data);
-    }, [employee, attandence, holidays, filters.month, filters.year]);
+    }, [employee, attandence, holidays, filters.month, filters.year, company.weeklyoff]);
+
 
 
     // handle filters
@@ -139,13 +164,13 @@ const AttendanceReport = () => {
     const columns = [
         { name: "S.No", selector: row => row.sno, width: "50px" },
         { name: "Employee", selector: row => row.name, grow: 2 },
-        { name: "Total Days", selector: row => row.totalDays },
+        // { name: "Total Days", selector: row => row.totalDays },
         { name: "Working Days", selector: row => row.workingDays },
         { name: "Present", selector: row => row.present },
         { name: "Absent", selector: row => row.absent },
         { name: "Leave", selector: row => row.leave },
-        { name: "Weekly Off", selector: row => row.weeklyOff },
-        { name: "Holidays", selector: row => row.holidays }
+        // { name: "Weekly Off", selector: row => row.weeklyOff },
+        // { name: "Holidays", selector: row => row.holidays }
     ];
 
     return (
