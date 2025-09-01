@@ -50,7 +50,7 @@ const BulkMark = ({
 
         const isWeeklyOff = company?.weeklyOffs?.includes(attandenceDate.day());
 
-        if ((isHoliday || isWeeklyOff) && openmodal) {
+        if (isHoliday || isWeeklyOff) {
             const defaultData = {};
             const checked = [];
 
@@ -66,13 +66,13 @@ const BulkMark = ({
             setRowData(defaultData);
             setcheckedemployee(checked);
 
-            toast.info(
-                isHoliday
-                    ? "This day is a holiday. All employees marked as Holiday."
-                    : "This day is a weekly off. All employees marked as Weekly Off."
-            );
+            // toast.info(
+            //     isHoliday
+            //         ? "This day is a holiday. All employees marked as Holiday."
+            //         : "This day is a weekly off. All employees marked as Weekly Off."
+            // );
         }
-    }, [attandenceDate, attandence, employee, holidays, company, openmodal]);
+    }, [attandenceDate, attandence, employee, holidays, company]);
 
 
     useEffect(() => {
