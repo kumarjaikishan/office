@@ -96,14 +96,16 @@ export const columns = [
     name: "Name",
     selector: (row) => row.name,
     sortable: true,
-     sortFunction: (a, b) => a.rawname.localeCompare(b.rawname)
+    sortFunction: (a, b) => a.rawname.localeCompare(b.rawname),
     // width: '120px'
+     id: "rawname"
   },
   {
     name: "Date",
     selector: (row) => row.date,
     sortable: true,
-    width: '110px'
+    width: '110px',
+    id: "date"
   },
   {
     name: "Punch In",

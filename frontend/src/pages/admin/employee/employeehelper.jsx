@@ -18,7 +18,8 @@ export const columns = [
     },
     {
         name: "Department",
-        selector: (row) => row.department
+        selector: (row) => row.department,
+          width: '120px'
     },
     {
         name: "Action",

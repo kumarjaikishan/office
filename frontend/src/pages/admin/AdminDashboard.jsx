@@ -231,8 +231,8 @@ const Main = () => {
 
         <div className='px-1 md:px-3 grid grid-cols-5 md:grid-cols-10 lg:grid-cols-13 gap-2 md:gap-4'>
           {employeelist?.map((emp) => {
-            const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);
-            const todaypresente = todaypresent.find(att => att.employeeId._id === emp._id);
+            const isPresent = currentpresent.some(att => att.employeeId?._id === emp?._id);
+            const todaypresente = todaypresent.find(att => att.employeeId?._id === emp?._id);
             return (
               <Tooltip arrow enterDelay={800} key={emp._id} placement="top" title={<div className='flex flex-col '>
                 {/* <span className='flex border-b border-white mb-1'> {emp.userid.name} </span> */}
@@ -241,12 +241,12 @@ const Main = () => {
               </div>}>
                 <div key={emp._id} className='flex flex-col items-center'>
                   <span className={`${todaypresente ? (isPresent ? 'border-green-500' : 'border-amber-400') : 'border-gray-300'} p-[2px] border-3 rounded-full`}>
-                    <Avatar src={emp.profileimage} alt={emp.employeename}>
+                    <Avatar src={emp?.profileimage} alt={emp.employeename}>
                       {!emp.profileimage && <FaRegUser />}
                     </Avatar>
                   </span>
                   <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[14px]' : 'text-amber-700') : 'text-gray-500'} text-[12px] text-center transition-all duration-300 capitalize `}>
-                    {emp.userid.name}
+                    {emp?.userid?.name}
                   </p>
                 </div>
               </Tooltip>

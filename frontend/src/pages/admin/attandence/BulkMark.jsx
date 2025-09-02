@@ -78,9 +78,10 @@ const BulkMark = ({
 
     useEffect(() => {
         const result = employee?.filter(e => {
+            const isactive =  e?.status !== false ;
             const matchBranch = selectedBranch !== "all" ? e.branchId == selectedBranch : true;
             const matchDepartment = selecteddepartment !== "all" ? e.department.department == selecteddepartment : true;
-            return matchBranch && matchDepartment;
+            return matchBranch && matchDepartment && isactive;
         });
         setFilteredEmployee(result);
     }, [employee, selectedBranch, selecteddepartment]);

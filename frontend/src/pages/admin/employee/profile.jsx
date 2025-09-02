@@ -39,7 +39,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
             }
           }
         );
-        console.log('employee fetch Query:', res.data);
+        // console.log('employee fetch Query:', res.data);
         setemployee(res.data)
       } catch (error) {
         console.log(error);
@@ -84,11 +84,11 @@ const EmployeeProfile = ({ viewEmployee }) => {
 
           <div className="md:flex-1 w-auto">
             <h3 className="text-l md:text-xl capitalize font-bold text-gray-800">{employee?.userid?.name}</h3>
-            <p className="text-sm text-gray-600">{employee?.userid?.role}</p>
+            <p className="text-sm capitalize text-gray-600">{employee?.userid?.role}</p>
 
             <div className="flex gap-2 mt-2">
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">{employee?.department.department}</span>
-              <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">active</span>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">{employee?.department?.department}</span>
+              <span className={`px-2 py-0.5 ${employee?.status ? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'}  text-xs rounded`}>{employee?.status ? 'Active':'In Active'}</span>
             </div>
 
             <div className="hidden md:flex mt-3 justify-start flex-wrap text-sm text-gray-600 space-y-1">

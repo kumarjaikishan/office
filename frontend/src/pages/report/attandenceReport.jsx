@@ -206,8 +206,8 @@ const AttendanceReport = () => {
     return (
         <div className='employee p-2'>
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 items-center justify-between mb-3">
-                <div className="flex flex-wrap gap-3 items-center mb-3">
+            <div className="flex  flex-wrap gap-3 items-center justify-between mb-3">
+                <div className="flex  flex-wrap gap-3 items-center">
                     <TextField
                         size="small"
                         className='md:w-[160px] w-full'
@@ -303,7 +303,7 @@ const AttendanceReport = () => {
                         </Select>
                     </FormControl>
                 </div>
-                <div className="flex w-full md:w-fit  mt-1 md:mt-0  gap-2">
+                <div className=" w-full md:w-fit">
                     <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
                 </div>
             </div>

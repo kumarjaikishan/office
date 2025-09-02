@@ -20,7 +20,7 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "./profile";
 import { useDispatch, useSelector } from "react-redux";
-import { MdOutlineModeEdit } from "react-icons/md";
+import { MdCurrencyRupee, MdExpandLess, MdOutlineModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { MdExpandMore } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -42,6 +42,7 @@ const Employe = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [employeePhoto, setEmployeePhoto] = useState(null);
   const [viewEmployee, setviewEmployee] = useState(null);
+  const [openSection, setOpenSection] = useState(null);
   const { handleImage } = useImageUpload();
   const dispatch = useDispatch();
   const { department, branch, employee, profile } = useSelector(e => e.user);
@@ -77,6 +78,7 @@ const Employe = () => {
     address: '',
     gender: 'male',
     bloodGroup: '',
+    status: true,
     dob: '',
     Emergencyphone: '',
     skills: [],
@@ -157,7 +159,7 @@ const Employe = () => {
         action: (<div className="action flex gap-2.5">
           <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="View Profile" onClick={() => { setviewEmployee(emp._id); setopenviewmodal(true) }} ><IoEyeOutline /></span>
           <span className="eye edit text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
-          <span className="eye edit text-[18px] text-amber-500 cursor-pointer" title="Payroll" onClick={() => navigate(`/dashboard/viewpayroll/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
+          {/* <span className="eye edit text-[18px]  text-violet-500 cursor-pointer" title="Payroll" onClick={() => navigate(`/dashboard/viewpayroll/${emp.userid._id}`)} ><MdCurrencyRupee  /></span> */}
           {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
           {canEdit && <span className="eye edit text-[18px] text-green-500 cursor-pointer" title="Reset Password" onClick={() => { setpass({ ...pass, userid: emp.userid._id }); setpassmodal(true) }} ><TbPasswordUser /> </span>}
           {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>}
@@ -291,6 +293,7 @@ const Employe = () => {
       email: employee?.userid?.email,
       dob: employee?.dob,
       salary: employee?.salary,
+      status: employee?.status,
 
       acHolderName: employee?.acHolderName,
       bankName: employee?.bankName,
@@ -362,7 +365,9 @@ const Employe = () => {
     URL.revokeObjectURL(url);
   };
 
-
+  const toggleSection = (section) => {
+    setOpenSection((prev) => (prev === section ? null : section));
+  };
 
   return (
     <div className='employee p-1'>
@@ -486,7 +491,8 @@ const Employe = () => {
           pagination
           customStyles={useCustomStyles()}
           highlightOnHover
-           paginationRowsPerPageOptions={[10, 20, 50, 100]}
+          paginationPerPage={20} 
+          paginationRowsPerPageOptions={[20, 50, 100, 300]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
               <BiMessageRoundedError className="text-xl" /> No Employee records found.
@@ -537,6 +543,17 @@ const Employe = () => {
 
                   </Select>
                 </FormControl>
+                <FormControl disabled={!inp.branchId} fullWidth required size="small">
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={inp?.status}
+                    label="Status"
+                    onChange={(e) => handleChange(e, 'status')}
+                  >
+                    <MenuItem value={true}>Active</MenuItem>
+                    <MenuItem value={false}>Inactive</MenuItem>
+                  </Select>
+                </FormControl>
 
                 <Box sx={{ width: '100%', gap: 2 }}>
                   <TextField fullWidth required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
@@ -562,121 +579,123 @@ const Employe = () => {
                     <MdOutlineModeEdit size={18} />
                   </span>
                 </div>
-
                 {isupdate &&
-                  <div className="border w-full rounded border-dashed border-slate-400">
-                    <Accordion sx={{ width: '100%' }} className="flex rounded  flex-col">
-                      <AccordionSummary 
-                        sx={{
-                          backgroundColor: '#334155',
-                        
-                          color: 'white',
-                        }}
-                      expandIcon={<MdExpandMore color="white" />}>
-                        <Typography variant="subtitle1">Personal Details (optional)</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Box sx={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 1fr',
-                          gap: 2,
-                        }}>
-                          <TextField fullWidth value={inp.phone} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
-                          <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergency/ Relative Phone" size="small" />
-                          <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
-                          <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
-                          <TextField fullWidth inputProps={{ maxLength: 12 }} value={inp.adhaar} onChange={(e) => handleChange(e, 'adhaar')} label="Adhaar No." size="small" />
-                          <TextField fullWidth inputProps={{ maxLength: 10 }} value={inp.pan} onChange={(e) => handleChange(e, 'pan')} label="Pan No." size="small" />
-                          <TextField InputLabelProps={{ shrink: true }} fullWidth value={inp.dob} type="date" onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
-                          <FormControl size="small">
-                            <InputLabel>maritalStatus</InputLabel>
-                            <Select
-                              label="maritalStatus"
-                              value={inp.maritalStatus}
-                              onChange={(e) => handleChange(e, 'maritalStatus')}
-                            >
-                              <MenuItem selected value={true}>Married</MenuItem>
-                              <MenuItem selected value={false}>Unmarried</MenuItem>
-                            </Select>
-                          </FormControl>
-                          <FormControl size="small">
-                            <InputLabel>Gender</InputLabel>
-                            <Select
-                              label="Gender"
-                              value={inp.gender}
-                              onChange={(e) => handleChange(e, 'gender')}
-                            >
-                              <MenuItem selected value='male'>Male</MenuItem>
-                              <MenuItem selected value='female'>female</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
+                  <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
+                    <div
+                      className="flex justify-between items-center cursor-pointer bg-primary text-white px-4 py-2 rounded-md"
+                      onClick={() => toggleSection('personal')}
+                    >
+                      <span className="md:font-semibold text-[12px] md:text-sm text-left">Personal Deatils (Optional)</span>
+                      {openSection === 'personal' ? (
+                        <MdExpandLess className="text-xl" />
+                      ) : (
+                        <MdExpandMore className="text-xl" />
+                      )}
+                    </div>
+
+                    <div
+                      className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'personal' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                    >
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 2,
+                      }}>
+                        <TextField fullWidth value={inp.phone} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
+                        <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergency/ Relative Phone" size="small" />
+                        <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
+                        <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
+                        <TextField fullWidth inputProps={{ maxLength: 12 }} value={inp.adhaar} onChange={(e) => handleChange(e, 'adhaar')} label="Adhaar No." size="small" />
+                        <TextField fullWidth inputProps={{ maxLength: 10 }} value={inp.pan} onChange={(e) => handleChange(e, 'pan')} label="Pan No." size="small" />
+                        <TextField InputLabelProps={{ shrink: true }} fullWidth value={inp.dob} type="date" onChange={(e) => handleChange(e, 'dob')} label="Date of Birth" size="small" />
+                        <FormControl size="small">
+                          <InputLabel>Marital Status</InputLabel>
+                          <Select
+                            label="maritalStatus"
+                            value={inp.maritalStatus}
+                            onChange={(e) => handleChange(e, 'maritalStatus')}
+                          >
+                            <MenuItem selected value={true}>Married</MenuItem>
+                            <MenuItem selected value={false}>Unmarried</MenuItem>
+                          </Select>
+                        </FormControl>
+                        <FormControl size="small">
+                          <InputLabel>Gender</InputLabel>
+                          <Select
+                            label="Gender"
+                            value={inp.gender}
+                            onChange={(e) => handleChange(e, 'gender')}
+                          >
+                            <MenuItem selected value='male'>Male</MenuItem>
+                            <MenuItem selected value='female'>female</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    </div>
+
+                  </div>
+                }
+                {isupdate &&
+                  <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
+                    <div
+                      className="flex justify-between items-center cursor-pointer bg-primary text-white px-4 py-2 rounded-md"
+                      onClick={() => toggleSection('banking')}
+                    >
+                      <span className="md:font-semibold text-[12px] md:text-sm text-left">Banking Details (optional)</span>
+                      {openSection === 'banking' ? (
+                        <MdExpandLess className="text-xl" />
+                      ) : (
+                        <MdExpandMore className="text-xl" />
+                      )}
+                    </div>
+
+                    <div
+                      className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'banking' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                    >
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 2,
+                      }}>
+                        <TextField fullWidth value={inp.acHolderName} onChange={(e) => handleChange(e, 'acHolderName')} label="A/C Holder Name" size="small" />
+                        <TextField fullWidth value={inp.bankName} onChange={(e) => handleChange(e, 'bankName')} label="Bank Name" size="small" />
+                        <TextField fullWidth value={inp.bankbranch} onChange={(e) => handleChange(e, 'bankbranch')} label="Branch" size="small" />
+                        <TextField fullWidth value={inp.acnumber} onChange={(e) => handleChange(e, 'acnumber')} label="A/C No." size="small" />
+                        <TextField fullWidth value={inp.ifscCode} onChange={(e) => handleChange(e, 'ifscCode')} label="IFSC Code" size="small" />
+                        <TextField fullWidth value={inp.upi} onChange={(e) => handleChange(e, 'upi')} label="Upi Id/No." size="small" />
+                      </Box>
+                    </div>
+
                   </div>
                 }
 
                 {isupdate &&
-                  <div className="border w-full rounded border-dashed border-slate-400">
-                    <Accordion sx={{ width: '100%' }} className="flex rounded  flex-col">
-                      <AccordionSummary
-                        sx={{
-                          backgroundColor: '#334155',
+                  <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
+                    <div
+                      className="flex justify-between items-center cursor-pointer bg-primary text-white px-4 py-2 rounded-md"
+                      onClick={() => toggleSection('document')}
+                    >
+                      <span className="md:font-semibold text-[12px] md:text-sm text-left">Document & Skills (optional)</span>
+                      {openSection === 'document' ? (
+                        <MdExpandLess className="text-xl" />
+                      ) : (
+                        <MdExpandMore className="text-xl" />
+                      )}
+                    </div>
 
-                          color: 'white',
-                        }}
-                        expandIcon={<MdExpandMore color="white" />}>
-                        <Typography sx={{ margin: '0' }} variant="subtitle1">Banking Details (optional)</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Box sx={{
-                          display: 'grid',
-                          gridTemplateColumns: '1fr 1fr',
-                          gap: 2,
-                        }}>
-                          <TextField fullWidth value={inp.acHolderName} onChange={(e) => handleChange(e, 'acHolderName')} label="A/C Holder Name" size="small" />
-                          <TextField fullWidth value={inp.bankName} onChange={(e) => handleChange(e, 'bankName')} label="Bank Name" size="small" />
-                          <TextField fullWidth value={inp.bankbranch} onChange={(e) => handleChange(e, 'bankbranch')} label="Branch" size="small" />
-                          <TextField fullWidth value={inp.acnumber} onChange={(e) => handleChange(e, 'acnumber')} label="A/C No." size="small" />
-                          <TextField fullWidth value={inp.ifscCode} onChange={(e) => handleChange(e, 'ifscCode')} label="IFSC Code" size="small" />
-                          <TextField fullWidth value={inp.upi} onChange={(e) => handleChange(e, 'upi')} label="Upi Id/No." size="small" />
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  </div>
-                }
-
-                {isupdate &&
-                  <div className="border w-full rounded border-dashed border-slate-400">
-                    <Accordion sx={{ width: '100%' }} className="flex flex-col">
-                      <AccordionSummary 
-                        sx={{
-                          backgroundColor: '#334155',
-                        
-                          color: 'white',
-                        }}
-                      expandIcon={<MdExpandMore color="white" />}>
-                        <Typography variant="subtitle1">Document & Skills (optional)</Typography>
-                      </AccordionSummary>
-
-                      <AccordionDetails sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {/* Skills and Degree */}
-                        <Box
-                          sx={{
-                            display: 'grid',
-                            gridTemplateColumns: '1fr 1fr',
-                            gap: 2,
-                          }}
-                        >
-                          {/* <TextField fullWidth value={inp.skills} onChange={(e) => {
-                       let prev = inp.skills;
-                       prev
-                    }}
-                      helperText="Use commas to separate multiple skills"
-                      label="Skills" size="small" /> */}
-                        </Box>
-
-                        {/* Achievements Section */}
+                    <div
+                      className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear flex gap-6 flex-col
+                          ${openSection === 'document' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                    >
+                      <div className=" flex flex-col gap-2">
                         <Typography fontWeight="bold">Achievements</Typography>
                         {inp?.achievements?.map((ach, idx) => (
                           <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 2, alignItems: 'center' }}>
@@ -705,8 +724,9 @@ const Employe = () => {
                           </Box>
                         ))}
                         <Button onClick={() => addItem('achievements')} variant="outlined">Add Achievement</Button>
+                      </div>
 
-                        {/* Education Section */}
+                      <div className=" flex flex-col gap-2">
                         <Typography fontWeight="bold">Education</Typography>
                         {inp?.education?.map((edu, idx) => (
                           <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: 2, alignItems: 'center' }}>
@@ -735,8 +755,9 @@ const Employe = () => {
                           </Box>
                         ))}
                         <Button onClick={() => addItem('education')} variant="outlined">Add Education</Button>
-                      </AccordionDetails>
-                    </Accordion>
+                      </div>
+                    </div>
+
                   </div>
                 }
               </span>

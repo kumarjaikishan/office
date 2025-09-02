@@ -47,6 +47,7 @@ const Attandence = () => {
   const [holidaydate, setholidaydate] = useState([]);
   const dispatch = useDispatch();
   const customStyles = useCustomStyles();
+  const [sortedData, setSortedData] = useState([]);
 
 
   const init = {
@@ -255,12 +256,12 @@ const Attandence = () => {
         const isHoliday = holidaydate.includes(formatdate);
 
         return {
-          attenid: emp._id,
-          remarks: (isHoliday && emp.workingMinutes) ? "Worked on Holiday" : (isWeeklyOff && emp.workingMinutes) ? "Worked on Weekly Off" : undefined,
-          departmentId: emp.employeeId.department,
-          branchid: emp.branchId,
-          employeeId: emp.employeeId._id,
-          status: emp.status,
+          attenid: emp?._id,
+          remarks: (isHoliday && emp?.workingMinutes) ? "Worked on Holiday" : (isWeeklyOff && emp.workingMinutes) ? "Worked on Weekly Off" : undefined,
+          departmentId: emp?.employeeId?.department,
+          branchid: emp?.branchId,
+          employeeId: emp?.employeeId?._id,
+          status: emp?.status,
           stat: (
             <span
               className={`px-2 py-1 rounded
@@ -273,17 +274,17 @@ const Attandence = () => {
               {emp.status}
             </span>
           ),
-          rawname: emp.employeeId.userid.name,
+          rawname: emp?.employeeId?.userid?.name,
           rawpunchIn: emp?.punchIn ? dayjs(emp?.punchIn).format('hh:mm A') : '-',
           rawpunchOut: emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
           rawworkingHour: emp.workingMinutes || '-',
           name: (
             <div className="flex items-center gap-3">
-              <Avatar src={emp.employeeId.profileimage} alt={emp.employeeId.employeename}>
-                {!emp.employeeId.profileimage && <FaRegUser />}
+              <Avatar src={emp?.employeeId?.profileimage} alt={emp?.employeeId?.employeename}>
+                {!emp?.employeeId?.profileimage && <FaRegUser />}
               </Avatar>
               <Box>
-                <Typography variant="body2">{emp.employeeId.userid.name}</Typography>
+                <Typography variant="body2">{emp?.employeeId?.userid?.name}</Typography>
               </Box>
             </div>
           ),
@@ -448,11 +449,13 @@ const Attandence = () => {
   ];
 
   const exportCSV = () => {
-    // return console.log(attandencelist)
+    const dataset = sortedData.length > 0 ? sortedData : (isFilterActive ? filterattandence : attandencelist);
+
     const headers = ["S.no", "Name", "Date", "Punch In", "Punch Out", "Status", "Working Minutes"];
-    const rows = (isFilterActive ? filterattandence : attandencelist).map((e, idx) => [
+    const rows = dataset.map((e, idx) => [
       idx + 1, e.rawname, dayjs(e.date).format('YYYY-MM-DD'), e.rawpunchIn, e.rawpunchOut, e.status, e.rawworkingHour
     ]);
+
     const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -462,6 +465,22 @@ const Attandence = () => {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const handleSort = (column, sortDirection) => {
+    // console.log("sorting", column, sortDirection)
+    const data = [...(isFilterActive ? filterattandence : attandencelist)];
+
+    data.sort((a, b) => {
+      const aVal = a[column.id];
+      const bVal = b[column.id];
+
+      if (sortDirection === "asc") return aVal > bVal ? 1 : -1;
+      return aVal < bVal ? 1 : -1;
+    });
+
+    setSortedData(data);
+  };
+
 
   return (
     <div className='p-1'>
@@ -639,11 +658,13 @@ const Attandence = () => {
           columns={columns}
           data={isFilterActive ? filterattandence : attandencelist}
           pagination
+          onSort={handleSort}
           selectableRows
           customStyles={customStyles}
           conditionalRowStyles={conditionalRowStyles}
           onSelectedRowsChange={handleRowSelect}
           highlightOnHover
+           paginationPerPage={20} 
           paginationRowsPerPageOptions={[20, 50, 100, 300, `${isFilterActive ? filterattandence?.length : attandencelist?.length}`]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
