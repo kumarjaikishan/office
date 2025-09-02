@@ -45,45 +45,35 @@ const BulkMark = ({
         const selectedDateAttendance = attandence.filter(e =>
             dayjs(e.date).isSame(dayjs(attandenceDate), "day")
         );
-        if (selectedDateAttendance?.length > 0) {
-            setalreadyAttendance(selectedDateAttendance)
-        }
+        setalreadyAttendance(selectedDateAttendance)
 
-        const isHoliday = holidays.some(h => {
-            const from = dayjs(h.fromDate).startOf('day');
-            const to = dayjs(h.toDate).endOf('day');
-            return attandenceDate.isBetween(from, to, 'day', '[]'); // inclusive
-        });
+    }, [attandenceDate, attandence, employee]);
 
-        const isWeeklyOff = company?.weeklyOffs?.includes(attandenceDate.day());
 
-        if (isHoliday || isWeeklyOff) {
-            const defaultData = {};
-            const checked = [];
+    const [toall, settoall] = useState({
+        punchIn: null,
+        punchOut: null,
+        status: 'sel'
+    })
 
-            employee.forEach(emp => {
-                defaultData[emp._id] = {
-                    punchIn: null,
-                    punchOut: null,
-                    status: isHoliday ? "holiday" : "weekly off",
+    useEffect(() => {
+        if (!toall || Object.keys(toall).length === 0) return;
+
+        setRowData(prev => {
+            const updated = { ...prev };
+
+            Object.keys(updated).forEach(empId => {
+                updated[empId] = {
+                    ...updated[empId],
+                    ...(toall.punchIn && { punchIn: toall.punchIn }),
+                    ...(toall.punchOut && { punchOut: toall.punchOut }),
+                    ...(toall.status && { status: toall.status }),
                 };
-                checked.push(emp._id);
             });
 
-            setRowData(defaultData);
-            setcheckedemployee(checked);
-
-            // toast.info(
-            //     isHoliday
-            //         ? "This day is a holiday. All employees marked as Holiday."
-            //         : "This day is a weekly off. All employees marked as Weekly Off."
-            // );
-        }
-
-
-
-
-    }, [attandenceDate, attandence, employee, holidays, company]);
+            return updated;
+        });
+    }, [toall]);
 
 
     useEffect(() => {
@@ -267,8 +257,6 @@ const BulkMark = ({
     };
 
 
-
-
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
             <div className="membermodal w-[400px] md:w-[800px]">
@@ -337,6 +325,70 @@ const BulkMark = ({
                                 />
                             </LocalizationProvider>
                         </div>
+
+                        <div className="relative border-dashed border border-teal-500 rounded-md w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-2 pt-4">
+                            <span className="absolute top-0 left-3 -translate-y-1/2 bg-white px-2 text-sm font-medium text-teal-600">
+                                Apply To All Fields
+                            </span>
+
+                            {/* Punch In */}
+                            <div className="flex flex-col w-full">
+                                <label htmlFor="punchIn" className="text-sm font-medium text-gray-700 mb-1 text-left">
+                                    Punch In
+                                </label>
+                                <input
+                                    type="time"
+                                    id="punchIn"
+                                    name="punchIn"
+                                    className="w-full form-input outline-0 border border-teal-500 border-dashed p-2 rounded"
+                                    value={toall.punchIn || ""}
+                                    onChange={(e) => settoall({ ...toall, punchIn: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Punch Out */}
+                            <div className="flex flex-col w-full">
+                                <label htmlFor="punchOut" className="text-sm font-medium text-gray-700 mb-1 text-left">
+                                    Punch Out
+                                </label>
+                                <input
+                                    type="time"
+                                    id="punchOut"
+                                    name="punchOut"
+                                    className="w-full form-input outline-0 border border-teal-500 border-dashed p-2 rounded"
+                                    value={toall.punchOut || ""}
+                                    onChange={(e) => settoall({ ...toall, punchOut: e.target.value })}
+                                />
+                            </div>
+
+                            {/* Status */}
+                            <div className="flex flex-col w-full">
+                                <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-1 text-left">
+                                    Status
+                                </label>
+                                <FormControl size="small" className="w-full">
+                                    <Select
+                                        id="status"
+                                        name="status"
+                                        value={toall.status}
+                                        onChange={(e) => settoall({ ...toall, status: e.target.value })}
+                                        className="w-full"
+                                    >
+                                        <MenuItem value={"sel"} disabled>Select Status</MenuItem>
+                                        <MenuItem value={"present"}>Present</MenuItem>
+                                        <MenuItem value={"leave"}>Leave</MenuItem>
+                                        <MenuItem value={"absent"}>Absent</MenuItem>
+                                        <MenuItem value={"weekly off"}>Weekly Off</MenuItem>
+                                        <MenuItem value={"holiday"}>Holiday</MenuItem>
+                                        <MenuItem value={"half day"}>Half Day</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+                        </div>
+
+
+
+
 
                         {/* Attendance Table */}
                         <div className='border border-dashed border-teal-400 rounded w-full '>
