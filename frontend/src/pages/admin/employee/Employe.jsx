@@ -491,7 +491,7 @@ const Employe = () => {
           pagination
           customStyles={useCustomStyles()}
           highlightOnHover
-          paginationPerPage={20} 
+          paginationPerPage={20}
           paginationRowsPerPageOptions={[20, 50, 100, 300]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
@@ -521,39 +521,40 @@ const Employe = () => {
                     ))}
                   </Select>
                 </FormControl>
+                <Box sx={{ width: '100%', gap: 2 }}>
+                  <FormControl disabled={!inp.branchId} fullWidth required size="small">
+                    <InputLabel>Department</InputLabel>
+                    <Select
+                      value={inp.department}
+                      label="Department"
+                      onChange={(e) => handleChange(e, 'department')}
+                    >
+                      {department?.filter(e => e.branchId?._id === inp.branchId).length > 0 ? (
+                        department
+                          .filter(e => e.branchId._id === inp.branchId)
+                          .map((list) => (
+                            <MenuItem key={list._id} value={list._id}>
+                              {list.department}
+                            </MenuItem>
+                          ))
+                      ) : (
+                        <MenuItem disabled>No departments found</MenuItem>
+                      )}
 
-                <FormControl disabled={!inp.branchId} fullWidth required size="small">
-                  <InputLabel>Department</InputLabel>
-                  <Select
-                    value={inp.department}
-                    label="Department"
-                    onChange={(e) => handleChange(e, 'department')}
-                  >
-                    {department?.filter(e => e.branchId?._id === inp.branchId).length > 0 ? (
-                      department
-                        .filter(e => e.branchId._id === inp.branchId)
-                        .map((list) => (
-                          <MenuItem key={list._id} value={list._id}>
-                            {list.department}
-                          </MenuItem>
-                        ))
-                    ) : (
-                      <MenuItem disabled>No departments found</MenuItem>
-                    )}
-
-                  </Select>
-                </FormControl>
-                <FormControl disabled={!inp.branchId} fullWidth required size="small">
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={inp?.status}
-                    label="Status"
-                    onChange={(e) => handleChange(e, 'status')}
-                  >
-                    <MenuItem value={true}>Active</MenuItem>
-                    <MenuItem value={false}>Inactive</MenuItem>
-                  </Select>
-                </FormControl>
+                    </Select>
+                  </FormControl>
+                  <FormControl disabled={!inp.branchId} fullWidth required size="small">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={inp?.status}
+                      label="Status"
+                      onChange={(e) => handleChange(e, 'status')}
+                    >
+                      <MenuItem value={true}>Active</MenuItem>
+                      <MenuItem value={false}>Inactive</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
 
                 <Box sx={{ width: '100%', gap: 2 }}>
                   <TextField fullWidth required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
