@@ -10,9 +10,11 @@ import DataTable from 'react-data-table-component';
 import { BiMessageRoundedError } from "react-icons/bi";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
+import isBetween from 'dayjs/plugin/isBetween'
 import localeData from "dayjs/plugin/localeData";
 import { useCustomStyles } from "../admin/attandence/attandencehelper";
 dayjs.extend(localeData);
+dayjs.extend(isBetween);
 
 const AttendanceReport = () => {
     const [employeelist, setemployeelist] = useState([]);
@@ -163,12 +165,12 @@ const AttendanceReport = () => {
     // datatable columns
     const columns = [
         { name: "S.No", selector: row => row.sno, width: "50px" },
-        { name: "Employee", selector: row => row.name, grow: 2 },
+        { name: "Employee", selector: row => row.name },
         // { name: "Total Days", selector: row => row.totalDays },
-        { name: "Working Days", selector: row => row.workingDays },
-        { name: "Present", selector: row => row.present },
-        { name: "Absent", selector: row => row.absent },
-        { name: "Leave", selector: row => row.leave },
+        { name: "Working Days", selector: row => row.workingDays, width: '120px' },
+        { name: "Present", selector: row => row.present, width: '100px' },
+        { name: "Absent", selector: row => row.absent, width: '100px' },
+        { name: "Leave", selector: row => row.leave, width: '100px' },
         // { name: "Weekly Off", selector: row => row.weeklyOff },
         // { name: "Holidays", selector: row => row.holidays }
     ];
@@ -193,10 +195,19 @@ const AttendanceReport = () => {
                 <FormControl size="small" className="min-w-[160px]">
                     <InputLabel>Branch</InputLabel>
                     <Select
-
                         value={filters.branch}
                         onChange={(e) => handleFilterChange("branch", e.target.value)}
-                        input={<OutlinedInput startAdornment={<InputAdornment position="start"><CiFilter /></InputAdornment>} />}
+                        input={
+                            <OutlinedInput
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        <CiFilter fontSize="small" />
+                                    </InputAdornment>
+                                }
+                                label="Branch"
+                            />
+                        }
+
                     >
                         <MenuItem value="all">All</MenuItem>
                         {branch?.map((list) => (
@@ -211,6 +222,16 @@ const AttendanceReport = () => {
                     <Select
                         disabled={filters.branch === "all"}
                         value={filters.department}
+                        input={
+                            <OutlinedInput
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        <CiFilter fontSize="small" />
+                                    </InputAdornment>
+                                }
+                                label="Department"
+                            />
+                        }
                         onChange={(e) => handleFilterChange("department", e.target.value)}
                     >
                         <MenuItem value="all">All</MenuItem>
@@ -229,6 +250,7 @@ const AttendanceReport = () => {
                     <InputLabel>Month</InputLabel>
                     <Select
                         value={filters.month}
+                        label="Month"
                         onChange={(e) => handleFilterChange("month", e.target.value)}
                     >
                         {dayjs.months().map((m, idx) => (
@@ -242,6 +264,7 @@ const AttendanceReport = () => {
                     <InputLabel>Year</InputLabel>
                     <Select
                         value={filters.year}
+                        label="Year"
                         onChange={(e) => handleFilterChange("year", e.target.value)}
                     >
                         {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
@@ -266,6 +289,8 @@ const AttendanceReport = () => {
                 data={filteredEmployees}
                 pagination
                 customStyles={useCustomStyles()}
+                paginationPerPage={20} // default rows per page
+                paginationRowsPerPageOptions={[20, 50, 100]} // custom pager options
                 highlightOnHover
                 noDataComponent={
                     <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">

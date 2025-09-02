@@ -72,6 +72,12 @@ const BulkMark = ({
             //         : "This day is a weekly off. All employees marked as Weekly Off."
             // );
         }
+
+        const selectedDateAttendance = attandence.filter(e =>
+            dayjs(e.date).isSame(dayjs(attandenceDate), "day")
+        );
+        // console.log(selectedDateAttendance)
+        setalreadyAttendance(selectedDateAttendance)
     }, [attandenceDate, attandence, employee, holidays, company]);
 
 
@@ -137,7 +143,7 @@ const BulkMark = ({
     const handleTimeChange = (empId, field, value) => {
         // if()
         // console.log(rowData[empId])
-        if (['weekly off', 'holiday','half day'].includes(rowData[empId].status)) {
+        if (['weekly off', 'holiday', 'half day'].includes(rowData[empId].status)) {
             setRowData(prev => {
                 const updated = {
                     ...prev,
