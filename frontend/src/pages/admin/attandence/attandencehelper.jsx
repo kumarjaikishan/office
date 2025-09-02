@@ -96,6 +96,7 @@ export const columns = [
     name: "Name",
     selector: (row) => row.name,
     sortable: true,
+     sortFunction: (a, b) => a.rawname.localeCompare(b.rawname)
     // width: '120px'
   },
   {

@@ -83,8 +83,16 @@ const Attandence = () => {
     branch: 'all',
     departmente: 'all',
     employee: '',
-    status: 'all'
+    status: 'all',
+    month: 'all',
+    year: 'all',
   })
+
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
 
   useEffect(() => {
     // setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
@@ -94,6 +102,8 @@ const Attandence = () => {
     filtere.branch !== 'all' ||
     filtere.departmente !== 'all' ||
     filtere.status !== 'all' ||
+    filtere.month !== 'all' ||
+    filtere.year !== 'all' ||
     filtere.employee.trim() !== '' ||
     filtere.date !== null
   );
@@ -127,6 +137,13 @@ const Attandence = () => {
       const matchDate =
         !filtere.date || recordDate.isSame(filtere.date, 'day');
 
+      const matchMonth =
+        filtere.month === "all" || recordDate.month() === Number(filtere.month);
+
+      const matchYear =
+        filtere.year === "all" || recordDate.year() === Number(filtere.year);
+
+
       const matchbranch =
         filtere.branch === 'all' || val.branchid === filtere.branch;
 
@@ -140,7 +157,7 @@ const Attandence = () => {
         filtere.employee.trim() === '' ||
         val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
 
-      return matchDate && matchbranch && matchDept && matchStatus && matchEmployee;
+      return matchDate && matchbranch && matchDept && matchStatus && matchEmployee && matchMonth && matchYear;
     });
 
     setfilterattandence(fil);
@@ -467,7 +484,7 @@ const Attandence = () => {
               <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
               <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
             </div> :
-            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-5 gap-2 mt-1 w-full md:w-fit">
+            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-7 gap-2 mt-1 w-full md:w-fit">
               {/* <CiFilter className="hidden md:block" size={24} color="teal" /> */}
 
               <TextField
@@ -584,9 +601,36 @@ const Attandence = () => {
                 }}
                 label="Search Employee"
               />
-            </div>
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
+                <InputLabel>Month</InputLabel>
+                <Select
+                  value={filtere.month}
+                  label="Month"
+                  onChange={(e) => setfiltere({ ...filtere, month: e.target.value })}
+                >
+                  <MenuItem value='all'>All</MenuItem>
+                  {months.map((m, idx) => (
+                    <MenuItem key={idx} value={idx}>{m}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
+                <InputLabel>Year</InputLabel>
+                <Select
+                  value={filtere.year}
+                  label="Year"
+                  onChange={(e) => setfiltere({ ...filtere, year: e.target.value })}
+                >
+                  <MenuItem value='all'>All</MenuItem>
+                  {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
+                    <MenuItem key={y} value={y}>{y}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
           }
+
         </div>
       </div>
 

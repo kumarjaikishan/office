@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import {
     Avatar, Box, Typography, TextField,
     InputAdornment, FormControl, InputLabel, OutlinedInput,
-    Select, MenuItem
+    Select, MenuItem,
+    Button
 } from '@mui/material';
 import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
@@ -13,6 +14,9 @@ import dayjs from "dayjs";
 import isBetween from 'dayjs/plugin/isBetween'
 import localeData from "dayjs/plugin/localeData";
 import { useCustomStyles } from "../admin/attandence/attandencehelper";
+import { useNavigate } from 'react-router-dom';
+import { HiOutlineDocumentReport } from 'react-icons/hi';
+import { FiDownload } from 'react-icons/fi';
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
 
@@ -26,6 +30,7 @@ const AttendanceReport = () => {
         month: dayjs().month() + 1, // default current month
         year: dayjs().year()        // default current year
     });
+    let navigate = useNavigate();
 
     const months = [
         "January", "February", "March", "April", "May", "June",
@@ -130,14 +135,15 @@ const AttendanceReport = () => {
                         </Box>
                     </div>
                 ),
-                // workingDays: totalworkingdays,
+                totalDays: totalDays,
+                weeklyOff: weeklyOffCount,
+                holidayCount: holidayCount,
                 leave,
                 absent,
                 present,
                 action: (
                     <div className="action flex gap-2.5">
-                        {/* {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
-                        {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>} */}
+                        <span className="edit text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
                     </div>
                 )
             };
@@ -172,124 +178,144 @@ const AttendanceReport = () => {
     const columns = [
         { name: "S.No", selector: row => row.sno, width: "50px" },
         { name: "Employee", selector: row => row.name },
-        // { name: "Total Days", selector: row => row.totalDays },
-        // { name: "Working Days", selector: row => row.workingDays, width: '120px' },
+        { name: "Total Days", selector: row => row.totalDays, width: '100px' },
+        { name: "Weekly Off", selector: row => row.weeklyOff, width: '100px' },
+        { name: "Holidays", selector: row => row.holidayCount, width: '100px' },
         { name: "Present", selector: row => row.present, width: '100px' },
         { name: "Absent", selector: row => row.absent, width: '100px' },
         { name: "Leave", selector: row => row.leave, width: '100px' },
-        // { name: "Weekly Off", selector: row => row.weeklyOff },
-        // { name: "Holidays", selector: row => row.holidays }
+        { name: "Action", selector: row => row.action, width: '100px' },
     ];
+
+    const exportCSV = () => {
+        // return console.log(attandencelist)
+        const headers = ["S.No", "Employee", "Total Days", "Weekly Off", "Holidays", "Present", "Absent", "Leave"];
+        const rows = filteredEmployees.map((e, idx) => [
+            e.sno, e.rawname, e.totalDays, e.weeklyOff, e.holidayCount, e.present, e.absent, e.leave
+        ]);
+        const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `All Employee Attendance Report ${months[filters.month - 1]}-${filters.year}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div className='employee p-2'>
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 items-center mb-3">
-                <TextField
-                    size="small"
-                    value={filters.searchText}
-                    onChange={(e) => handleFilterChange("searchText", e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start"><IoSearch /></InputAdornment>
-                        ),
-                    }}
-                    label="Search Employee"
-                />
+            <div className="flex flex-wrap gap-3 items-center justify-between mb-3">
+                <div className="flex flex-wrap gap-3 items-center mb-3">
+                    <TextField
+                        size="small"
+                        className='md:w-[160px] w-full'
+                        value={filters.searchText}
+                        onChange={(e) => handleFilterChange("searchText", e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start"><IoSearch /></InputAdornment>
+                            ),
+                        }}
+                        label="Search Employee"
+                    />
 
-                {/* Branch */}
-                <FormControl size="small" className="min-w-[160px]">
-                    <InputLabel>Branch</InputLabel>
-                    <Select
-                        value={filters.branch}
-                        onChange={(e) => handleFilterChange("branch", e.target.value)}
-                        input={
-                            <OutlinedInput
-                                startAdornment={
-                                    <InputAdornment position="start">
-                                        <CiFilter fontSize="small" />
-                                    </InputAdornment>
-                                }
-                                label="Branch"
-                            />
-                        }
+                    {/* Branch */}
+                    <FormControl size="small" className="md:w-[140px] w-[47%]">
+                        <InputLabel>Branch</InputLabel>
+                        <Select
+                            value={filters.branch}
+                            onChange={(e) => handleFilterChange("branch", e.target.value)}
+                            input={
+                                <OutlinedInput
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <CiFilter fontSize="small" />
+                                        </InputAdornment>
+                                    }
+                                    label="Branch"
+                                />
+                            }
 
-                    >
-                        <MenuItem value="all">All</MenuItem>
-                        {branch?.map((list) => (
-                            <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                        >
+                            <MenuItem value="all">All</MenuItem>
+                            {branch?.map((list) => (
+                                <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
-                {/* Department */}
-                <FormControl size="small" className="min-w-[160px]">
-                    <InputLabel>Department</InputLabel>
-                    <Select
-                        disabled={filters.branch === "all"}
-                        value={filters.department}
-                        input={
-                            <OutlinedInput
-                                startAdornment={
-                                    <InputAdornment position="start">
-                                        <CiFilter fontSize="small" />
-                                    </InputAdornment>
-                                }
-                                label="Department"
-                            />
-                        }
-                        onChange={(e) => handleFilterChange("department", e.target.value)}
-                    >
-                        <MenuItem value="all">All</MenuItem>
-                        {departmentlist.length > 0 ? (
-                            departmentlist.map((list) => (
-                                <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
-                            ))
-                        ) : (
-                            <MenuItem disabled>No departments found</MenuItem>
-                        )}
-                    </Select>
-                </FormControl>
+                    {/* Department */}
+                    <FormControl size="small" className="md:w-[140px] w-[47%]">
+                        <InputLabel>Department</InputLabel>
+                        <Select
+                            disabled={filters.branch === "all"}
+                            value={filters.department}
+                            input={
+                                <OutlinedInput
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <CiFilter fontSize="small" />
+                                        </InputAdornment>
+                                    }
+                                    label="Department"
+                                />
+                            }
+                            onChange={(e) => handleFilterChange("department", e.target.value)}
+                        >
+                            <MenuItem value="all">All</MenuItem>
+                            {departmentlist.length > 0 ? (
+                                departmentlist.map((list) => (
+                                    <MenuItem key={list._id} value={list._id}>{list.department}</MenuItem>
+                                ))
+                            ) : (
+                                <MenuItem disabled>No departments found</MenuItem>
+                            )}
+                        </Select>
+                    </FormControl>
 
-                {/* Month */}
-                <FormControl size="small" className="min-w-[120px]">
-                    <InputLabel>Month</InputLabel>
-                    <Select
-                        value={filters.month}
-                        label="Month"
-                        onChange={(e) => handleFilterChange("month", e.target.value)}
-                    >
-                        {dayjs.months().map((m, idx) => (
-                            <MenuItem key={idx + 1} value={idx + 1}>{m}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                    {/* Month */}
+                    <FormControl size="small" className="md:w-[120px] w-[47%]">
+                        <InputLabel>Month</InputLabel>
+                        <Select
+                            value={filters.month}
+                            label="Month"
+                            onChange={(e) => handleFilterChange("month", e.target.value)}
+                        >
+                            {dayjs.months().map((m, idx) => (
+                                <MenuItem key={idx + 1} value={idx + 1}>{m}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
 
-                {/* Year */}
-                <FormControl size="small" className="min-w-[100px]">
-                    <InputLabel>Year</InputLabel>
-                    <Select
-                        value={filters.year}
-                        label="Year"
-                        onChange={(e) => handleFilterChange("year", e.target.value)}
-                    >
-                        {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
-                            <MenuItem key={y} value={y}>{y}</MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </div>
-
-            {/* Data Table */}
-            <div>
-                <div className="mb-4 flex gap-6 text-sm text-gray-700">
-                    <span>Total Days: {basic.totalDays}</span>
-                    <span>Working Days: {basic.workingDays}</span>
-                    <span>Weekly Offs: {basic.weeklyOff}</span>
-                    <span>Holidays: {basic.holidaysCount}</span>
+                    {/* Year */}
+                    <FormControl size="small" className="md:w-[100px] w-[47%]">
+                        <InputLabel>Year</InputLabel>
+                        <Select
+                            value={filters.year}
+                            label="Year"
+                            onChange={(e) => handleFilterChange("year", e.target.value)}
+                        >
+                            {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
+                                <MenuItem key={y} value={y}>{y}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </div>
-
+                <div className="flex w-full md:w-fit  mt-1 md:mt-0  gap-2">
+                    <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
+                </div>
             </div>
+
+
+            {/* <div className="mb-4 flex gap-6 text-sm text-gray-700">
+                <span>Total Days: {basic.totalDays}</span>
+                <span>Working Days: {basic.workingDays}</span>
+                <span>Weekly Offs: {basic.weeklyOff}</span>
+                <span>Holidays: {basic.holidaysCount}</span>
+            </div> */}
+
             <DataTable
                 columns={columns}
                 data={filteredEmployees}
