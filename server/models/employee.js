@@ -74,6 +74,10 @@ const employeeSchema = new mongoose.Schema({
     salary: {
         type: Number,
     },
+    status: {
+        type: Boolean,
+        default: true
+    },
     acHolderName: {
         type: String,
     },

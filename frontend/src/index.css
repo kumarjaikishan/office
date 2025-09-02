@@ -23,6 +23,9 @@
 .text-primary {
     color: var(--color-primary);
 }
+.border-primary {
+    border-color: var(--color-primary);
+}
 
 input[type="checkbox"] {
     accent-color: var(--color-primary);

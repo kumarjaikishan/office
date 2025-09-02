@@ -486,6 +486,7 @@ const Employe = () => {
           pagination
           customStyles={useCustomStyles()}
           highlightOnHover
+           paginationRowsPerPageOptions={[10, 20, 50, 100]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
               <BiMessageRoundedError className="text-xl" /> No Employee records found.

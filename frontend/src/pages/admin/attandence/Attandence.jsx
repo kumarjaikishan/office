@@ -644,7 +644,7 @@ const Attandence = () => {
           conditionalRowStyles={conditionalRowStyles}
           onSelectedRowsChange={handleRowSelect}
           highlightOnHover
-          paginationRowsPerPageOptions={[10, 50, 100, 300]}
+          paginationRowsPerPageOptions={[20, 50, 100, 300, `${isFilterActive ? filterattandence?.length : attandencelist?.length}`]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
               <BiMessageRoundedError className="text-xl" /> No records found.

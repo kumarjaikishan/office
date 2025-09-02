@@ -263,7 +263,7 @@ const BulkMark = ({
                 <form onSubmit={handleSubmit}>
                     <div className="modalhead">Bulk Mark Attendance</div>
                     <span className="modalcontent overflow-x-auto">
-                        {/* Top Filters */}
+
                         <div className='w w-full flex justify-between gap-2'>
                             <FormControl size="small" fullWidth>
                                 <InputLabel>Select Branch</InputLabel>
@@ -326,12 +326,12 @@ const BulkMark = ({
                             </LocalizationProvider>
                         </div>
 
-                        <div className="relative border-dashed border border-teal-500 rounded-md w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-2 pt-4">
-                            <span className="absolute top-0 left-3 -translate-y-1/2 bg-white px-2 text-sm font-medium text-teal-600">
+                        <div className="relative border-dashed border border-primary rounded-md w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-2 pt-4">
+                            <span className="absolute top-0 left-3 -translate-y-1/2 bg-white px-2 text-sm font-medium text-primary">
                                 Apply To All Fields
                             </span>
 
-                            {/* Punch In */}
+
                             <div className="flex flex-col w-full">
                                 <label htmlFor="punchIn" className="text-sm font-medium text-gray-700 mb-1 text-left">
                                     Punch In
@@ -340,13 +340,12 @@ const BulkMark = ({
                                     type="time"
                                     id="punchIn"
                                     name="punchIn"
-                                    className="w-full form-input outline-0 border border-teal-500 border-dashed p-2 rounded"
+                                    className="w-full form-input outline-0 border border-primary border-dashed p-2 rounded"
                                     value={toall.punchIn || ""}
                                     onChange={(e) => settoall({ ...toall, punchIn: e.target.value })}
                                 />
                             </div>
 
-                            {/* Punch Out */}
                             <div className="flex flex-col w-full">
                                 <label htmlFor="punchOut" className="text-sm font-medium text-gray-700 mb-1 text-left">
                                     Punch Out
@@ -355,13 +354,12 @@ const BulkMark = ({
                                     type="time"
                                     id="punchOut"
                                     name="punchOut"
-                                    className="w-full form-input outline-0 border border-teal-500 border-dashed p-2 rounded"
+                                    className="w-full form-input outline-0 border border-primary border-dashed p-2 rounded"
                                     value={toall.punchOut || ""}
                                     onChange={(e) => settoall({ ...toall, punchOut: e.target.value })}
                                 />
                             </div>
 
-                            {/* Status */}
                             <div className="flex flex-col w-full">
                                 <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-1 text-left">
                                     Status
@@ -386,12 +384,7 @@ const BulkMark = ({
                             </div>
                         </div>
 
-
-
-
-
-                        {/* Attendance Table */}
-                        <div className='border border-dashed border-teal-400 rounded w-full '>
+                        <div className='border border-dashed border-primary rounded w-full '>
                             <TableContainer component={Paper}>
                                 <Table size="small">
                                     <TableHead>
@@ -427,7 +420,7 @@ const BulkMark = ({
                                                 <TableCell>
                                                     <input
                                                         type="time"
-                                                        className="form-input outline-0 border-1 border-teal-500 border-dashed p-1 rounded"
+                                                        className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
                                                         value={rowData[emp._id]?.punchIn || ''}
                                                         onChange={(e) => handleTimeChange(emp._id, 'punchIn', e.target.value)}
                                                     />
@@ -436,7 +429,7 @@ const BulkMark = ({
                                                 <TableCell>
                                                     <input
                                                         type="time"
-                                                        className="form-input outline-0 border-1 border-teal-500 border-dashed p-1 rounded"
+                                                        className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
                                                         value={rowData[emp._id]?.punchOut || ''}
                                                         onChange={(e) => handleTimeChange(emp._id, 'punchOut', e.target.value)}
                                                     />
