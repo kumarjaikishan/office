@@ -42,6 +42,13 @@ const BulkMark = ({
     useEffect(() => {
         if (!attandenceDate || !employee?.length) return;
 
+        const selectedDateAttendance = attandence.filter(e =>
+            dayjs(e.date).isSame(dayjs(attandenceDate), "day")
+        );
+        if (selectedDateAttendance?.length > 0) {
+            setalreadyAttendance(selectedDateAttendance)
+        }
+
         const isHoliday = holidays.some(h => {
             const from = dayjs(h.fromDate).startOf('day');
             const to = dayjs(h.toDate).endOf('day');
@@ -73,11 +80,9 @@ const BulkMark = ({
             // );
         }
 
-        const selectedDateAttendance = attandence.filter(e =>
-            dayjs(e.date).isSame(dayjs(attandenceDate), "day")
-        );
-        // console.log(selectedDateAttendance)
-        setalreadyAttendance(selectedDateAttendance)
+
+
+
     }, [attandenceDate, attandence, employee, holidays, company]);
 
 

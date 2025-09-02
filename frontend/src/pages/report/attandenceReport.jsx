@@ -130,10 +130,16 @@ const AttendanceReport = () => {
                         </Box>
                     </div>
                 ),
-                workingDays: totalworkingdays,
+                // workingDays: totalworkingdays,
                 leave,
                 absent,
-                present
+                present,
+                action: (
+                    <div className="action flex gap-2.5">
+                        {/* {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
+                        {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>} */}
+                    </div>
+                )
             };
         });
 
@@ -167,7 +173,7 @@ const AttendanceReport = () => {
         { name: "S.No", selector: row => row.sno, width: "50px" },
         { name: "Employee", selector: row => row.name },
         // { name: "Total Days", selector: row => row.totalDays },
-        { name: "Working Days", selector: row => row.workingDays, width: '120px' },
+        // { name: "Working Days", selector: row => row.workingDays, width: '120px' },
         { name: "Present", selector: row => row.present, width: '100px' },
         { name: "Absent", selector: row => row.absent, width: '100px' },
         { name: "Leave", selector: row => row.leave, width: '100px' },
