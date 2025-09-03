@@ -15,11 +15,11 @@ const Settings = () => {
 
     const colors = [
         { name: "Teal", value: "#115e59" },    // teal-800
+        { name: "Blue", value: "#0a3d62" } ,  // purple-800
         { name: "Indigo", value: "#3730a3" },  // indigo-800
         { name: "Rose", value: "#9f1239" },    // rose-800
         { name: "Slate", value: "#1e293b" },   // slate-800
         { name: "Amber", value: "#92400e" },   // amber-800
-        { name: "Purple", value: "#581c87" }   // purple-800
     ];
 
     return (

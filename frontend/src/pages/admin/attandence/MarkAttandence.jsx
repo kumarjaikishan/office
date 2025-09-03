@@ -14,6 +14,7 @@ import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
 import { FaRegUser } from "react-icons/fa";
 import Modalbox from '../../../components/custommodal/Modalbox';
+import dayjs from 'dayjs';
 
 const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 
@@ -62,6 +63,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                 value={inp?.date}
                                 sx={{ width: '100%' }}
                                 label="Select date"
+                                maxDate={dayjs()}
                             />
                         </LocalizationProvider>
 

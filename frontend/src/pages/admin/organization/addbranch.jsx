@@ -128,7 +128,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
     <div className='whole'>
       <div className='modalhead'>{editbranch ? 'Edit Branch' : 'Add New Branch'}</div>
       <span className="modalcontent">
-        <Grid container spacing={2}>
+        <div className='flex flex-col gap-3 w-full'>
           <TextField
             label="Branch Name"
             fullWidth
@@ -179,7 +179,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
             </Select>
           </FormControl>
 
-        </Grid>
+        </div>
 
         {/* Attendance Override */}
         <FormControlLabel
@@ -194,7 +194,7 @@ const Addbranch = ({ setopenviewmodal, employee, company, editbranch, editbranch
         />
 
         {!branch.defaultsetting && (
-          <div className="border-yellow-300 border-2 border-dashed rounded mt-3 p-3">
+          <div className="border-primary border-2 border-dashed rounded mt-3 py-3 px-1">
             <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-2 gap-5">
               <TextField
                 label="Office Time In"

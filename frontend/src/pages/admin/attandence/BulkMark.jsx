@@ -331,6 +331,7 @@ const BulkMark = ({
                                     value={attandenceDate}
                                     sx={{ width: '100%' }}
                                     label="Select date"
+                                    maxDate={dayjs()}
                                 />
                             </LocalizationProvider>
                         </div>

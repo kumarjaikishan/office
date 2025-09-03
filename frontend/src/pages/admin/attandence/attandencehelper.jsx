@@ -98,7 +98,7 @@ export const columns = [
     sortable: true,
     sortFunction: (a, b) => a.rawname.localeCompare(b.rawname),
     // width: '120px'
-     id: "rawname"
+    id: "rawname"
   },
   {
     name: "Date",
@@ -109,11 +109,13 @@ export const columns = [
   },
   {
     name: "Punch In",
-    selector: (row) => row.punchIn || '- : -'
+    selector: (row) => row.punchIn || '- : -',
+    // width: '150px',
   },
   {
     name: "Punch Out",
-    selector: (row) => row.punchOut || '- : -'
+    selector: (row) => row.punchOut || '- : -',
+    // width: '150px',
   },
   {
     name: "Status",

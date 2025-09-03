@@ -212,7 +212,7 @@ export default function SuperAdminDashboard() {
                         autoClose: 1800,
                     });
                     fetech();
-                      dispatch(FirstFetch())
+                    dispatch(FirstFetch())
                 } catch (error) {
                     console.error(error);
                     toast.update(toastId, {
@@ -404,7 +404,7 @@ export default function SuperAdminDashboard() {
                     <form onSubmit={handleSave}>
                         <div className="modalhead"> {editingIndex !== null ? "Edit Admin" : "Add Admin"}</div>
                         <span className="modalcontent">
-                            <div className="space-y-3 pt-1 flex items-center gap-4 flex-col w-[100%] md:w-[500px]">
+                            <div className="space-y-3 pt-1 flex items-center gap-4 flex-col w-[100%] md:w-full">
                                 <div className="mt-1 items-center  w-fit relative">
                                     <input style={{ display: 'none' }} type="file" onChange={handleProfileImageChange} ref={inputref} accept="image/*" name="" id="fileInput" />
 
@@ -439,23 +439,25 @@ export default function SuperAdminDashboard() {
                                     label="Password" size="small"
                                 />
 
-                                <div className="w-full">
-                                    <label className="font-semibold block mb-1">Role</label>
-                                    <select
-                                        className="w-full border p-2 rounded"
-                                        value={form.role}
-                                        onChange={(e) => handleRoleChange(e.target.value)}
-                                    >
-                                        <option value="admin">Admin</option>
-                                        <option value="manager">Manager</option>
-                                    </select>
-                                </div>
+                                {editingIndex == null &&
+                                    <div className="w-full">
+                                        <label className="font-semibold block mb-1">Role</label>
+                                        <select
+                                            className="w-full border p-2 rounded"
+                                            value={form.role}
+                                            onChange={(e) => handleRoleChange(e.target.value)}
+                                        >
+                                            <option value="admin">Admin</option>
+                                            <option value="manager">Manager</option>
+                                        </select>
+                                    </div>
+                                }
 
                                 {/* Add Module (Manager only) */}
                                 {form.role === "manager" && (
-                                    <div className="flex w-full items-center gap-2">
+                                    <div className="flex w-full flex-wrap items-center gap-2">
                                         <select
-                                            className="border p-2 rounded w-full"
+                                            className="border p-2 flex-3 rounded "
                                             value={newModule}
                                             onChange={(e) => setNewModule(e.target.value)}
                                         >
@@ -469,6 +471,7 @@ export default function SuperAdminDashboard() {
 
                                         <Button variant="contained"
                                             onClick={handleAddModule}
+                                            className="flex-1"
                                         >
                                             Add Module
                                         </Button>

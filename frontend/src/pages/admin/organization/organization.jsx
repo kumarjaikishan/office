@@ -140,7 +140,12 @@ export default function OrganizationSettings() {
                         )}
                     </div>
 
-                    {openSection === 'company' && (
+                    <div
+                        className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'company' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                    >
                         <div className="p-4 rounded flex flex-col md:flex-row items-center  mt-2 space-y-4">
                             <div className="relative flex items-center mx-auto">
                                 <div className="relative w-30 h-30 mx-auto">
@@ -205,32 +210,34 @@ export default function OrganizationSettings() {
                             </div>
 
                             <div className="w-full md:w-[70%] flex flex-col gap-3">
-                                <div>
-                                    <label className="block">Company Name</label>
-                                    <input
-                                        type="text"
-                                        onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
-                                        value={companyinp?.name}
-                                        className="w-full border rounded px-3 py-2"
-                                    />
+                                <div className='flex flex-wrap gap-2'>
+                                    <div className='w-full md:flex-1'>
+                                        <label className="block">Company Name</label>
+                                        <input
+                                            type="text"
+                                            onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
+                                            value={companyinp?.name}
+                                            className="w-full border rounded px-3 py-2"
+                                        />
+                                    </div>
+
+                                    <div className='w-full md:flex-1'>
+                                        <label className="block">Contact</label>
+                                        <input
+                                            type="text"
+                                            onChange={(e) => setcompany({ ...companyinp, contact: e.target.value })}
+                                            value={companyinp?.contact}
+                                            className="w-full border rounded px-3 py-2"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div>
+                                <div >
                                     <label className="block">Address</label>
                                     <input
                                         type="text"
                                         onChange={(e) => setcompany({ ...companyinp, address: e.target.value })}
                                         value={companyinp?.address}
-                                        className="w-full border rounded px-3 py-2"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block">Contact</label>
-                                    <input
-                                        type="text"
-                                        onChange={(e) => setcompany({ ...companyinp, contact: e.target.value })}
-                                        value={companyinp?.contact}
                                         className="w-full border rounded px-3 py-2"
                                     />
                                 </div>
@@ -247,8 +254,7 @@ export default function OrganizationSettings() {
                                 )}
                             </div>
                         </div>
-                    )}
-
+                    </div>
                 </div>
             }
 
@@ -265,67 +271,72 @@ export default function OrganizationSettings() {
                             <MdExpandMore className="text-xl" />
                         )}
                     </div>
-                    {openSection === 'branches' && (
-                        <div className="p-1 md:p-2 rounded overflow-auto mt-2 space-y-2">
-                            <div className="flex justify-end items-center">
-                                <Button
-                                    variant="contained"
-                                    onClick={() => setopenviewmodal(true)}
-                                >
-                                    + Add Branch
-                                </Button>
-                            </div>
 
-                            <DataTable
-                                customStyles={styles}
-                                columns={[
-                                    {
-                                        name: "Name",
-                                        selector: row => row.name,
-                                        sortable: true
-                                    },
-                                    {
-                                        name: "Location",
-                                        selector: row => row.location,
-                                        sortable: true
-                                    },
-                                    {
-                                        name: "Manager(s)",
-                                        cell: row => (
-                                            <div className="flex flex-col gap-2">
-                                                {row?.managerIds?.map((manager, idx) => (
-                                                    <div
-                                                        key={idx}
-                                                        className="flex items-center gap-2 cursor-pointer"
-                                                        onClick={() => setemployee(manager.userid)}
-                                                    >
-                                                        <Avatar src={manager?.profileImage} alt={manager.name}>
-                                                            {!manager?.profileImage && <FaRegUser />}
-                                                        </Avatar>
-                                                        <span>{manager.name}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )
-                                    },
-                                    {
-                                        name: "Actions",
-                                        width: "120px",
-                                        cell: row => (
-                                            <div className="action flex gap-2.5">
-                                                <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => handleEditBranch(row)}><MdOutlineModeEdit /></span>
-                                                <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => handleEditBranch(row)}><AiOutlineDelete /></span>
-                                            </div>
-                                        )
-                                    },
-                                ]}
-                                data={branch || []}
-                                pagination
-                                highlightOnHover
-                                noDataComponent="No branches found"
-                            />
+                    <div
+                        className={`
+                          rounded space-y-1 overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'branches' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                    >
+                        <div className="flex justify-end items-center">
+                            <Button
+                                variant="contained"
+                                onClick={() => setopenviewmodal(true)}
+                            >
+                                + Add Branch
+                            </Button>
                         </div>
-                    )}
+
+                        <DataTable
+                            customStyles={styles}
+                            columns={[
+                                {
+                                    name: "Name",
+                                    selector: row => row.name,
+                                    sortable: true
+                                },
+                                {
+                                    name: "Location",
+                                    selector: row => row.location,
+                                    sortable: true
+                                },
+                                {
+                                    name: "Manager(s)",
+                                    cell: row => (
+                                        <div className="flex flex-col gap-2">
+                                            {row?.managerIds?.map((manager, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex items-center gap-2 cursor-pointer"
+                                                    onClick={() => setemployee(manager.userid)}
+                                                >
+                                                    <Avatar src={manager?.profileImage} alt={manager.name}>
+                                                        {!manager?.profileImage && <FaRegUser />}
+                                                    </Avatar>
+                                                    <span>{manager.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )
+                                },
+                                {
+                                    name: "Actions",
+                                    width: "120px",
+                                    cell: row => (
+                                        <div className="action flex gap-2.5">
+                                            <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => handleEditBranch(row)}><MdOutlineModeEdit /></span>
+                                            <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => handleEditBranch(row)}><AiOutlineDelete /></span>
+                                        </div>
+                                    )
+                                },
+                            ]}
+                            data={branch || []}
+                            pagination
+                            highlightOnHover
+                            noDataComponent="No branches found"
+                        />
+                    </div>
+
                 </div>
             }
 
@@ -342,11 +353,16 @@ export default function OrganizationSettings() {
                         <MdExpandMore className="text-xl" />
                     )}
                 </div>
-                {openSection === 'department' && (
-                    <div className="p-1 rounded mt-2 space-y-4">
-                        <Department />
-                    </div>
-                )}
+
+                <div
+                    className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'department' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                >
+                    <Department />
+                </div>
+
             </div>
 
             {profile?.role == 'superadmin' &&
@@ -362,11 +378,16 @@ export default function OrganizationSettings() {
                             <MdExpandMore className="text-xl" />
                         )}
                     </div>
-                    {openSection === 'admin' && (
-                        <div className="p-1 rounde mt-2 ">
-                            <SuperAdminDashboard />
-                        </div>
-                    )}
+
+                    <div
+                        className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'admin' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                    >
+                        <SuperAdminDashboard />
+                    </div>
+
                 </div>
             }
 
@@ -382,37 +403,42 @@ export default function OrganizationSettings() {
                         <MdExpandMore className="text-xl" />
                     )}
                 </div>
-                {(openSection === 'attendance' && company) && (
-                    <Box className=" rounded mt-1 p-2 ">
-                        <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <TextField
-                                label="Office Time In"
-                                fullWidth
-                                type="time"
-                                value={companyinp.officeTime.in}
-                                onChange={e => handleChange('officeTime', 'in', e.target.value)}
-                                helperText="Time when office hours begin"
-                            />
 
-                            <TextField
-                                label="Office Time Out"
-                                fullWidth
-                                type="time"
-                                value={companyinp.officeTime.out}
-                                onChange={e => handleChange('officeTime', 'out', e.target.value)}
-                                helperText="Time when office hours end"
-                            />
+                <Box
+                    className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear
+                          ${openSection === 'attendance' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                >
+                    <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <TextField
+                            label="Office Time In"
+                            fullWidth
+                            type="time"
+                            value={companyinp.officeTime.in}
+                            onChange={e => handleChange('officeTime', 'in', e.target.value)}
+                            helperText="Time when office hours begin"
+                        />
 
-                            <TextField
-                                label="Break Minutes"
-                                fullWidth
-                                type="number"
-                                value={companyinp.officeTime.breakMinutes}
-                                onChange={e => handleChange('officeTime', 'breakMinutes', Number(e.target.value))}
-                                helperText="Total break time allowed during the day"
-                            />
+                        <TextField
+                            label="Office Time Out"
+                            fullWidth
+                            type="time"
+                            value={companyinp.officeTime.out}
+                            onChange={e => handleChange('officeTime', 'out', e.target.value)}
+                            helperText="Time when office hours end"
+                        />
 
-                            {/* <TextField
+                        <TextField
+                            label="Break Minutes"
+                            fullWidth
+                            type="number"
+                            value={companyinp.officeTime.breakMinutes}
+                            onChange={e => handleChange('officeTime', 'breakMinutes', Number(e.target.value))}
+                            helperText="Total break time allowed during the day"
+                        />
+
+                        {/* <TextField
                                 label="Late Entry Grace (min)"
                                 fullWidth
                                 type="number"
@@ -430,92 +456,92 @@ export default function OrganizationSettings() {
                                 helperText="Allowed early leave before office end time"
                             /> */}
 
-                            <TextField
-                                label="Full Day Minutes"
-                                fullWidth
-                                type="number"
-                                value={companyinp.workingMinutes.fullDay}
-                                onChange={e => handleChange('workingMinutes', 'fullDay', Number(e.target.value))}
-                                helperText="Total working minutes required for a full day"
-                            />
+                        <TextField
+                            label="Full Day Minutes"
+                            fullWidth
+                            type="number"
+                            value={companyinp.workingMinutes.fullDay}
+                            onChange={e => handleChange('workingMinutes', 'fullDay', Number(e.target.value))}
+                            helperText="Total working minutes required for a full day"
+                        />
 
-                            <TextField
-                                label="Half Day Minutes"
-                                fullWidth
-                                type="number"
-                                value={companyinp.workingMinutes.halfDay}
-                                onChange={e => handleChange('workingMinutes', 'halfDay', Number(e.target.value))}
-                                helperText="Minimum minutes required for marking a half-day"
-                            />
+                        <TextField
+                            label="Half Day Minutes"
+                            fullWidth
+                            type="number"
+                            value={companyinp.workingMinutes.halfDay}
+                            onChange={e => handleChange('workingMinutes', 'halfDay', Number(e.target.value))}
+                            helperText="Minimum minutes required for marking a half-day"
+                        />
 
-                            <TextField
-                                label="Short Day Threshold (min)"
-                                fullWidth
-                                type="number"
-                                value={companyinp.workingMinutes.shortDayThreshold}
-                                onChange={e => handleChange('workingMinutes', 'shortDayThreshold', Number(e.target.value))}
-                                helperText="Below this time is considered a short day"
-                            />
+                        <TextField
+                            label="Short Day Threshold (min)"
+                            fullWidth
+                            type="number"
+                            value={companyinp.workingMinutes.shortDayThreshold}
+                            onChange={e => handleChange('workingMinutes', 'shortDayThreshold', Number(e.target.value))}
+                            helperText="Below this time is considered a short day"
+                        />
 
-                            <TextField
-                                label="Overtime After Minutes"
-                                fullWidth
-                                type="number"
-                                value={companyinp.workingMinutes.overtimeAfterMinutes}
-                                onChange={e => handleChange('workingMinutes', 'overtimeAfterMinutes', Number(e.target.value))}
-                                helperText="Time after which overtime calculation begins"
-                            />
+                        <TextField
+                            label="Overtime After Minutes"
+                            fullWidth
+                            type="number"
+                            value={companyinp.workingMinutes.overtimeAfterMinutes}
+                            onChange={e => handleChange('workingMinutes', 'overtimeAfterMinutes', Number(e.target.value))}
+                            helperText="Time after which overtime calculation begins"
+                        />
 
-                            <FormControl fullWidth>
-                                <InputLabel>Weekly Offs</InputLabel>
-                                <Select
-                                    multiple
-                                    value={companyinp.weeklyOffs}
-                                    onChange={e => setcompany({ ...companyinp, weeklyOffs: e.target.value })}
-                                    input={<OutlinedInput label="Weekly Offs" />}
-                                    renderValue={(selected) =>
-                                        selected.map(v => weekdays.find(w => w.value === v)?.label).join(', ')
-                                    }
-                                >
-                                    {weekdays.map(day => (
-                                        <MenuItem key={day.value} value={day.value}>
-                                            <Checkbox checked={companyinp.weeklyOffs.includes(day.value)} />
-                                            <ListItemText primary={day.label} />
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                        <FormControl fullWidth>
+                            <InputLabel>Weekly Offs</InputLabel>
+                            <Select
+                                multiple
+                                value={companyinp.weeklyOffs}
+                                onChange={e => setcompany({ ...companyinp, weeklyOffs: e.target.value })}
+                                input={<OutlinedInput label="Weekly Offs" />}
+                                renderValue={(selected) =>
+                                    selected.map(v => weekdays.find(w => w.value === v)?.label).join(', ')
+                                }
+                            >
+                                {weekdays.map(day => (
+                                    <MenuItem key={day.value} value={day.value}>
+                                        <Checkbox checked={companyinp.weeklyOffs.includes(day.value)} />
+                                        <ListItemText primary={day.label} />
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
-                            {Object.entries(companyinp.attendanceRules).map(([key, value]) => {
-                                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-                                const helperMap = {
-                                    considerEarlyEntryBefore: 'Considered early if punched before this time',
-                                    considerLateEntryAfter: 'Considered late if punched after this time',
-                                    considerEarlyExitBefore: 'Considered early exit if leaving before this time',
-                                    considerLateExitAfter: 'Considered late exit if leaving after this time',
-                                };
+                        {Object.entries(companyinp.attendanceRules).map(([key, value]) => {
+                            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                            const helperMap = {
+                                considerEarlyEntryBefore: 'Considered early if punched before this time',
+                                considerLateEntryAfter: 'Considered late if punched after this time',
+                                considerEarlyExitBefore: 'Considered early exit if leaving before this time',
+                                considerLateExitAfter: 'Considered late exit if leaving after this time',
+                            };
 
-                                return (
-                                    <TextField
-                                        key={key}
-                                        fullWidth
-                                        label={label}
-                                        type="time"
-                                        value={value}
-                                        onChange={e => handleChange('attendanceRules', key, e.target.value)}
-                                        helperText={helperMap[key]}
-                                    />
-                                );
-                            })}
-                        </Box>
-
-                        <Box sx={{ mt: 4, textAlign: 'right' }}>
-                            <Button variant="contained" onClick={handleSubmit}>
-                                Update Settings
-                            </Button>
-                        </Box>
+                            return (
+                                <TextField
+                                    key={key}
+                                    fullWidth
+                                    label={label}
+                                    type="time"
+                                    value={value}
+                                    onChange={e => handleChange('attendanceRules', key, e.target.value)}
+                                    helperText={helperMap[key]}
+                                />
+                            );
+                        })}
                     </Box>
-                )}
+
+                    <Box sx={{ mt: 4, textAlign: 'right' }}>
+                        <Button variant="contained" onClick={handleSubmit}>
+                            Update Settings
+                        </Button>
+                    </Box>
+                </Box>
+
             </div>
 
             <Modalbox open={openviewmodal} onClose={() => {
