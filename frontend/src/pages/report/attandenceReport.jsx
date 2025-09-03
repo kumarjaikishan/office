@@ -115,7 +115,7 @@ const AttendanceReport = () => {
                 attendanceByEmp[empId].push(a);
             });
 
-        const data = employee.map((emp, idx) => {
+        const data = employee.filter(e => e.status).map((emp, idx) => {
             const empAttendance = attendanceByEmp[emp._id] || [];
 
             const present = empAttendance.filter(a => a.status === "present").length;
@@ -135,7 +135,7 @@ const AttendanceReport = () => {
                         </Box>
                     </div>
                 ),
-                totalDays: totalDays,
+                totalDays: present + absent + leave + holidayCount + weeklyOffCount,
                 weeklyOff: weeklyOffCount,
                 holidayCount: holidayCount,
                 leave,
@@ -178,12 +178,12 @@ const AttendanceReport = () => {
     const columns = [
         { name: "S.No", selector: row => row.sno, width: "50px" },
         { name: "Employee", selector: row => row.name },
-        { name: "Total Days", selector: row => row.totalDays, width: '100px' },
-        { name: "Weekly Off", selector: row => row.weeklyOff, width: '100px' },
-        { name: "Holidays", selector: row => row.holidayCount, width: '100px' },
         { name: "Present", selector: row => row.present, width: '100px' },
         { name: "Absent", selector: row => row.absent, width: '100px' },
         { name: "Leave", selector: row => row.leave, width: '100px' },
+        { name: "Weekly Off", selector: row => row.weeklyOff, width: '100px' },
+        { name: "Holidays", selector: row => row.holidayCount, width: '100px' },
+        { name: "Total Days", selector: row => row.totalDays, width: '100px' },
         { name: "Action", selector: row => row.action, width: '100px' },
     ];
 

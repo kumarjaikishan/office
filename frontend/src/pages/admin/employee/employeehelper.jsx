@@ -12,13 +12,22 @@ export const columns = [
         name: "Name",
         selector: (row) => row.name
     },
+    // {
+    //     name: "Email",
+    //     selector: (row) => row.email
+    // },
     {
-        name: "Email",
-        selector: (row) => row.email
+        name: "Phone",
+        selector: (row) => row.phone
     },
     {
         name: "Department",
         selector: (row) => row.department,
+          width: '120px'
+    },
+    {
+        name: "Status",
+        selector: (row) => <span className={` ${row.status ? "bg-green-100 text-green-800":'bg-red-100 text-red-800'}  px-1 rounded`}>{row.status ? "Active":'In Active'}</span> ,
           width: '120px'
     },
     {

@@ -152,7 +152,9 @@ const Employe = () => {
             <p className="t text-[10px] text-gray-600">({emp?.designation})</p>
           </Box>
         </div>),
-        email: emp?.userid?.email,
+        phone: emp?.phone || '-',
+        // email: emp?.userid?.email || '-',
+        status: emp?.status,
         branch: emp?.branchId,
         department: emp?.department?.department,
         departmentid: emp?.department?._id,
@@ -605,8 +607,8 @@ const Employe = () => {
                         gridTemplateColumns: '1fr 1fr',
                         gap: 2,
                       }}>
-                        <TextField fullWidth value={inp.phone} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
-                        <TextField fullWidth value={inp.Emergencyphone} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergency/ Relative Phone" size="small" />
+                        <TextField fullWidth value={inp.phone} inputProps={{ maxLength: 10 }} onChange={(e) => handleChange(e, 'phone')} label="Phone" size="small" />
+                        <TextField fullWidth value={inp.Emergencyphone} inputProps={{ maxLength: 10 }} onChange={(e) => handleChange(e, 'Emergencyphone')} label="Emergency/ Relative Phone" size="small" />
                         <TextField fullWidth value={inp.address} onChange={(e) => handleChange(e, 'address')} label="Address" size="small" />
                         <TextField fullWidth value={inp.bloodGroup} onChange={(e) => handleChange(e, 'bloodGroup')} label="Blood Group" size="small" />
                         <TextField fullWidth inputProps={{ maxLength: 12 }} value={inp.adhaar} onChange={(e) => handleChange(e, 'adhaar')} label="Adhaar No." size="small" />

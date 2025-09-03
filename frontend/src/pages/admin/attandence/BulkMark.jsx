@@ -53,11 +53,12 @@ const BulkMark = ({
     const [toall, settoall] = useState({
         punchIn: null,
         punchOut: null,
-        status: 'sel'
+        status: 'absent'
     })
 
     useEffect(() => {
         if (!toall || Object.keys(toall).length === 0) return;
+        // console.log(filteredEmployee)
 
         setRowData(prev => {
             const updated = { ...prev };
@@ -73,12 +74,16 @@ const BulkMark = ({
 
             return updated;
         });
+
+
+        setcheckedemployee(filteredEmployee.map(e => e._id));
+
     }, [toall]);
 
 
     useEffect(() => {
         const result = employee?.filter(e => {
-            const isactive =  e?.status !== false ;
+            const isactive = e?.status !== false;
             const matchBranch = selectedBranch !== "all" ? e.branchId == selectedBranch : true;
             const matchDepartment = selecteddepartment !== "all" ? e.department.department == selecteddepartment : true;
             return matchBranch && matchDepartment && isactive;
@@ -116,6 +121,7 @@ const BulkMark = ({
             });
 
             setRowData(defaultData);
+            // console.log(checked)
             setcheckedemployee(checked);
         }
     }, [employee, alreadyAttendance]);
@@ -194,9 +200,11 @@ const BulkMark = ({
         e.preventDefault();
 
         if (checkedemployee.length === 0) {
-            alert("Please select at least one employee.");
+            toast.info("Please Mark at least one employee.");
             return;
         }
+        // console.log(checkedemployee)
+        // return;
 
         const selectedData = checkedemployee.map(empId => {
             const { punchIn, punchOut, status } = rowData[empId];
