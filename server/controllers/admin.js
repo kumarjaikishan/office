@@ -183,8 +183,8 @@ const updateemployee = async (req, res, next) => {
         const possibleEmployeeFields = [
             'dob', 'designation', 'phone', 'address', 'gender', 'bloodGroup',
             'Emergencyphone', 'skills', 'department', 'maritalStatus', 'salary',
-            'achievements', 'education','acHolderName','bankName','bankbranch',
-            'acnumber','ifscCode','adhaar','pan','status'
+            'achievements', 'education', 'acHolderName', 'bankName', 'bankbranch',
+            'acnumber', 'ifscCode', 'adhaar', 'pan', 'status'
         ];
 
         let updatedFields = {};
@@ -228,6 +228,12 @@ const updateemployee = async (req, res, next) => {
 
             // Set new photo URL
             updatedFields.profileimage = cloudinaryResult.secure_url;
+
+            if (existingEmployee.profileimage && existingEmployee.profileimage !== "") {
+                let arraye = [];
+                arraye.push(existingEmployee.profileimage);
+                await removePhotoBySecureUrl(arraye);
+            }
         }
 
         // Update employee
@@ -242,11 +248,6 @@ const updateemployee = async (req, res, next) => {
             { new: true }
         );
 
-        if (existingEmployee.profileimage && existingEmployee.profileimage !== "") {
-            let arraye = [];
-            arraye.push(existingEmployee.profileimage);
-            await removePhotoBySecureUrl(arraye);
-        }
 
         if (!updatedEmployee) {
             return next({ status: 400, message: "Something went wrong while updating" });

@@ -13,7 +13,7 @@ cloudinary.config({
  * @returns {Promise} A Promise that resolves with the result of the removal
  */
 const removePhotoBySecureUrl = async (secureUrlArray) => {
-    // console.log("clopudinary preious image url in utils",secureUrlArray )
+    console.log("clopudinary preious image url in utils for removal",secureUrlArray )
     try {
         const deletionPromises = secureUrlArray.map(async (url) => {
             const pathAfterUpload = url.split(/\/upload\/v[^/]+\//)[1];
