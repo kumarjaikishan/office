@@ -14,6 +14,10 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) 
     date: dayjs(inp.date).toDate(),
   }
 
+  if (inp.status == 'leave') {
+    basePayload.reason = inp.reason
+  }
+
   const payload = isPunchIn
     ? {
       ...basePayload,

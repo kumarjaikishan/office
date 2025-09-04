@@ -55,6 +55,7 @@ const Attandence = () => {
     punchIn: null,
     punchOut: null,
     status: "",
+    reason: '',
   };
 
   const init2 = {
@@ -64,6 +65,8 @@ const Attandence = () => {
     punchIn: null,
     punchOut: null,
     status: '',
+    leaveid: '',
+    leaveReason: ''
   }
 
   const [inp, setinp] = useState(init);
@@ -101,6 +104,7 @@ const Attandence = () => {
   // Transform raw attendance → display-ready list
   const attandencelist = useMemo(() => {
     if (!attandence) return [];
+    // console.log(attandence)
     const today = dayjs().startOf("day");
 
     return attandence
@@ -139,7 +143,7 @@ const Attandence = () => {
           employeeId: emp?.employeeId?._id,
           status: emp?.status,
           stat: (
-            <span
+            <span title={emp.status == 'leave' ? emp?.leave?.reason : ''}
               className={`px-2 py-1 rounded
                  ${absent ? 'bg-red-100 text-red-800'
                   : leave ? 'bg-amber-100 text-amber-800'
@@ -343,15 +347,25 @@ const Attandence = () => {
       date: dayjs(atten.date).format('DD MMM, YYYY'),
       punchIn: atten.punchIn ? dayjs(atten.punchIn) : null,
       punchOut: atten.punchOut ? dayjs(atten.punchOut) : null,
-      status: atten.status || ""
+      status: atten.status || "",
+      leaveid: atten?.leave?._id,
+      leaveReason: atten?.leave?.reason,
     });
-
     setatteneditmodal(true);
   };
 
   const deletee = async (id) => {
-    await deleteAttandence({ attandanceId: [id], setisload, dispatch });
-    setselectedRows([]);
+    swal({
+      title: "Are you sure you want to Delete this record?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then(async (proceed) => {
+      if (proceed) {
+        await deleteAttandence({ attandanceId: [id], setisload, dispatch });
+        setselectedRows([]);
+      }
+    });
   };
 
   const conditionalRowStyles = [

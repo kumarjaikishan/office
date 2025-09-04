@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useEffect } from 'react';
 import { motion } from "framer-motion";
 
-const Modalbox = ({ open, onClose, children, shadow = true }) => {
+const Modalbox = ({ open, onClose, children, shadow = true, outside = true }) => {
 
     useEffect(() => {
         if (open) {
@@ -26,11 +26,15 @@ const Modalbox = ({ open, onClose, children, shadow = true }) => {
             };
         }
     }, [open])
-    
+
+    const falsee = () => {
+
+    }
+
     return (
         <>
             {open && createPortal(
-                <div className='modalwrapper' onClick={onClose}>
+                <div className='modalwrapper' onClick={outside ? onClose : falsee}>
                     <motion.div className="modalbox"
                         onClick={(e) => {
                             e.stopPropagation();

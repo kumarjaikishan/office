@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
@@ -12,38 +12,75 @@ import {
   Grid,
   TextField,
   IconButton,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Avatar,
 } from "@mui/material";
 import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
-
-
+import { useSelector } from "react-redux";
+import { MdDelete } from "react-icons/md";
 
 export default function PayrollCreatePage() {
   const { employeeId } = useParams();
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(employeeId || "");
+  const [attendance, setAttendance] = useState(null);
+  const { department, branch, employee, attandence } = useSelector((state) => state.user);
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
 
-  // Payroll state
   const [form, setForm] = useState({
-    month: new Date().getMonth() + 1,
+    month: new Date().getMonth(),
     year: new Date().getFullYear(),
     baseSalary: "",
-    allowances: [],
-    bonuses: [],
+    allowances: [{ name: 'HRA', amount: 0 }, { name: 'DA', amount: 0 }],
+    bonuses: [{ name: 'Diwali', amount: 1200 }, { name: 'Performance', amount: 1200 }],
     overtime: { hours: 0, ratePerHour: 0 },
     deductions: [],
-    otherDeductions: [],
+    otherDeductions: [{ name: 'PF', amount: 1200 }, { name: 'ESI', amount: 1200 }],
     leaveDays: 0,
     absentDays: 0,
     paidDays: 0,
   });
 
-  // Handle input changes
+  // Predefined options
+  const allowanceTypes = ["HRA", "Travel", "Mobile", "Food"];
+  const deductionTypes = ["PF", "Tax", "ESI"];
+  const bonusTypes = ["Performance", "Festival", "Referral"];
+
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  useEffect(() => {
+    // console.log(employee)
+    setEmployees(employee)
+  }, [employee]);
+
+  useEffect(() => {
+    if (!attandence || !selectedEmployee) return;
+
+    let currentEmployeeAttendance = attandence.filter(e => e.employeeId._id == selectedEmployee)
+    console.log(currentEmployeeAttendance)
+  }, [selectedEmployee, attandence]);
+
+  const fetchAttendance = async (id) => {
+    const res = await axios.get(`/api/attendance/summary/${id}`);
+    setAttendance(res.data);
+    setForm((prev) => ({
+      ...prev,
+      leaveDays: res.data.leaveDays,
+      absentDays: res.data.absentDays,
+      paidDays: res.data.paidDays,
+    }));
+  };
+
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handle array changes (allowances, deductions etc.)
   const handleArrayChange = (field, index, key, value) => {
     const updated = [...form[field]];
     updated[index][key] = value;
@@ -62,15 +99,14 @@ export default function PayrollCreatePage() {
     });
   };
 
-  // Submit payroll
   const handleSubmit = async () => {
     try {
       setLoading(true);
       setError(null);
       setSuccess(null);
 
-      const res = await axios.post("/api/payroll/create", {
-        employeeId,
+      await axios.post("/api/payroll/create", {
+        employeeId: selectedEmployee,
         ...form,
       });
 
@@ -83,223 +119,394 @@ export default function PayrollCreatePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Card className="shadow-md rounded-2xl">
-        <CardHeader title="Create Payroll" className="bg-gray-100" />
+    <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-6 space-y-6">
+      {/* Employee Selection */}
+      <Card className="shadow-md col-span-2 p-4  rounded-2xl">
+        <Typography variant="h6" gutterBottom>
+          Select Employee
+        </Typography>
         <Divider />
-
-        <CardContent>
-          <Grid container spacing={2}>
-            {/* Base Salary */}
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Base Salary"
-                type="number"
-                value={form.baseSalary}
-                onChange={(e) => handleChange("baseSalary", e.target.value)}
-              />
-            </Grid>
-
-            {/* Attendance */}
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                label="Leave Days"
-                type="number"
-                value={form.leaveDays}
-                onChange={(e) => handleChange("leaveDays", e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                label="Absent Days"
-                type="number"
-                value={form.absentDays}
-                onChange={(e) => handleChange("absentDays", e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                label="Paid Days"
-                type="number"
-                value={form.paidDays}
-                onChange={(e) => handleChange("paidDays", e.target.value)}
-              />
-            </Grid>
-
-            {/* Allowances */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2">Allowances</Typography>
-              {form.allowances.map((a, i) => (
-                <Grid container spacing={1} key={i} alignItems="center">
-                  <Grid item xs={5}>
-                    <TextField
-                      fullWidth
-                      label="Type"
-                      value={a.type}
-                      onChange={(e) =>
-                        handleArrayChange("allowances", i, "type", e.target.value)
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={5}>
-                    <TextField
-                      fullWidth
-                      label="Amount"
-                      type="number"
-                      value={a.amount}
-                      onChange={(e) =>
-                        handleArrayChange("allowances", i, "amount", e.target.value)
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <IconButton onClick={() => removeArrayItem("allowances", i)}>
-                      <AiOutlineMinus />
-                    </IconButton>
-                  </Grid>
-                </Grid>
+        <div className="grid gap-4 grid-cols-2 mt-4">
+          <FormControl className="col-span-1" size="small">
+            <InputLabel>Select Month</InputLabel>
+            <Select
+              value={form.month}
+              label="Select Month"
+              onChange={(e) => {
+                setForm({ ...form, month: e.target.value })
+              }}
+            >
+              <MenuItem value='' selected disabled >  Select Month </MenuItem>
+              {months.map((month, ind) => (
+                <MenuItem key={ind} value={ind}>
+                  {month}
+                </MenuItem>
               ))}
-              <Button
-                startIcon={<AiOutlinePlus />}
-                onClick={() => addArrayItem("allowances", { type: "", amount: 0 })}
-              >
-                Add Allowance
-              </Button>
-            </Grid>
-
-            {/* Bonuses */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2">Bonuses</Typography>
-              {form.bonuses.map((b, i) => (
-                <Grid container spacing={1} key={i} alignItems="center">
-                  <Grid item xs={5}>
-                    <TextField
-                      fullWidth
-                      label="Type"
-                      value={b.type}
-                      onChange={(e) =>
-                        handleArrayChange("bonuses", i, "type", e.target.value)
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={5}>
-                    <TextField
-                      fullWidth
-                      label="Amount"
-                      type="number"
-                      value={b.amount}
-                      onChange={(e) =>
-                        handleArrayChange("bonuses", i, "amount", e.target.value)
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <IconButton onClick={() => removeArrayItem("bonuses", i)}>
-                      <AiOutlineMinus />
-                    </IconButton>
-                  </Grid>
-                </Grid>
+            </Select>
+          </FormControl>
+          <FormControl className="col-span-1" size="small">
+            <InputLabel>Select Year</InputLabel>
+            <Select
+              value={form.year}
+              label="Select Year"
+              onChange={(e) => {
+                setForm({ ...form, year: e.target.value })
+              }}
+            >
+              <MenuItem value='' selected disabled >  Select Year </MenuItem>
+              {['2025', '2026'].map((year, ind) => (
+                <MenuItem key={ind} value={year}>
+                  {year}
+                </MenuItem>
               ))}
-              <Button
-                startIcon={<AiOutlinePlus />}
-                onClick={() => addArrayItem("bonuses", { type: "", amount: 0 })}
-              >
-                Add Bonus
-              </Button>
-            </Grid>
-
-            {/* Overtime */}
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Overtime Hours"
-                type="number"
-                value={form.overtime.hours}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    overtime: { ...prev.overtime, hours: e.target.value },
-                  }))
-                }
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="Overtime Rate"
-                type="number"
-                value={form.overtime.ratePerHour}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    overtime: { ...prev.overtime, ratePerHour: e.target.value },
-                  }))
-                }
-              />
-            </Grid>
-
-            {/* Deductions */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2">Deductions</Typography>
-              {form.deductions.map((d, i) => (
-                <Grid container spacing={1} key={i} alignItems="center">
-                  <Grid item xs={5}>
-                    <TextField
-                      fullWidth
-                      label="Type"
-                      value={d.type}
-                      onChange={(e) =>
-                        handleArrayChange("deductions", i, "type", e.target.value)
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={5}>
-                    <TextField
-                      fullWidth
-                      label="Amount"
-                      type="number"
-                      value={d.amount}
-                      onChange={(e) =>
-                        handleArrayChange("deductions", i, "amount", e.target.value)
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={2}>
-                    <IconButton onClick={() => removeArrayItem("deductions", i)}>
-                      <AiOutlineMinus />
-                    </IconButton>
-                  </Grid>
-                </Grid>
+            </Select>
+          </FormControl>
+          <FormControl disabled={!form.month || !form.year} className="col-span-2" size="small">
+            <InputLabel>Employee</InputLabel>
+            <Select
+              value={selectedEmployee}
+              label="Employee"
+              onChange={(e) => {
+                setSelectedEmployee(e.target.value);
+                fetchAttendance(e.target.value);
+              }}
+            >
+              {employees.map((emp) => (
+                <MenuItem key={emp._id} value={emp._id}>
+                  <div className="flex items-center gap-2">
+                    <Avatar src={emp.profileimage} sx={{ width: 24, height: 24 }} />
+                    {emp.userid?.name}
+                  </div>
+                </MenuItem>
               ))}
-              <Button
-                startIcon={<AiOutlinePlus />}
-                onClick={() => addArrayItem("deductions", { type: "", amount: 0 })}
-              >
-                Add Deduction
-              </Button>
-            </Grid>
-          </Grid>
-        </CardContent>
-
-        <CardActions className="flex justify-end p-4">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? "Saving..." : "Save Payroll"}
-          </Button>
-        </CardActions>
+            </Select>
+          </FormControl>
+        </div>
       </Card>
 
-      {/* Feedback messages */}
+      {/* Attendance Summary */}
+      {attendance && (
+        <Card className="shadow-md col-span-2 rounded-2xl">
+          <CardHeader title="Attendance Summary" />
+          <Divider />
+          <CardContent>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Total Days"
+                  type="number"
+                  value={form.leaveDays}
+                  onChange={(e) => handleChange("leaveDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Weekly Off"
+                  type="number"
+                  value={form.leaveDays}
+                  onChange={(e) => handleChange("leaveDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Holidays"
+                  type="number"
+                  value={form.absentDays}
+                  onChange={(e) => handleChange("absentDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Working Days"
+                  type="number"
+                  value={form.paidDays}
+                  onChange={(e) => handleChange("paidDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Present"
+                  type="number"
+                  value={form.paidDays}
+                  onChange={(e) => handleChange("paidDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Absent"
+                  type="number"
+                  value={form.paidDays}
+                  onChange={(e) => handleChange("paidDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Leave"
+                  type="number"
+                  value={form.paidDays}
+                  onChange={(e) => handleChange("paidDays", e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  fullWidth
+                  label="Salary Days"
+                  type="number"
+                  value={form.paidDays}
+                  onChange={(e) => handleChange("paidDays", e.target.value)}
+                />
+              </Grid>
+            </Grid>
+          </CardContent>
+
+        </Card>
+      )}
+
+      {/* Salary Details */}
+      <Card className="shadow-md col-span-2 rounded-2xl">
+        <CardHeader title="Salary & Components" />
+        <Divider />
+        <div className="flex flex-wrap gap-4 p-4">
+          <TextField
+            label="Basic Salary"
+            type="number"
+            value={form.paidDays}
+            onChange={(e) => handleChange("paidDays", e.target.value)}
+          />
+          <TextField
+            label="Total Working Days"
+            type="number"
+            value={form.paidDays}
+            onChange={(e) => handleChange("paidDays", e.target.value)}
+          />
+          <TextField
+            label="Per day salary"
+            type="number"
+            value={form.paidDays}
+            onChange={(e) => handleChange("paidDays", e.target.value)}
+          />
+          <TextField
+            label="Overtime"
+            type="number"
+            value={form.paidDays}
+            onChange={(e) => handleChange("paidDays", e.target.value)}
+          />
+          <TextField
+            label="Total Salary"
+            type="number"
+            value={form.paidDays}
+            onChange={(e) => handleChange("paidDays", e.target.value)}
+          />
+        </div>
+      </Card>
+
+      {/* Allowances */}
+      <Card className="shadow-md h-fit col-span-1 rounded-2xl">
+        <CardHeader title="Allowances" />
+        <Divider />
+        <CardContent>
+          {form?.allowances.map((a, i) => (
+            <div className="flex gap-4 my-4" key={i}>
+
+              <TextField
+                className="flex-5"
+                size="small"
+                label="Allowance"
+                value={a.name}
+                onChange={(e) =>
+                  handleArrayChange("allowances", i, "amount", e.target.value)
+                }
+              />
+
+              <TextField
+                className="flex-5"
+                size="small"
+                label="Amount"
+                type="number"
+                value={a.amount}
+                onChange={(e) =>
+                  handleArrayChange("allowances", i, "amount", e.target.value)
+                }
+              />
+              <div className="flex-1">
+                <IconButton title="Delete this Allowance" onClick={() => removeArrayItem("allowances", i)}>
+                  <MdDelete />
+                </IconButton>
+              </div>
+
+            </div>
+          ))}
+          <Button
+            startIcon={<AiOutlinePlus />}
+            onClick={() => addArrayItem("allowances", { type: "", amount: 0 })}
+          >
+            Add Allowance
+          </Button>
+          <div className="flex gap-4 my-4" >
+
+            <div className="flex-5 text-xl font-bold text-end">
+              Total :
+            </div>
+            <TextField
+              className="flex-5"
+              size="small"
+              label="Total"
+              type="number"
+              value={12000}
+
+            />
+            <div className="flex-1">
+
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bonuses */}
+      <Card className="shadow-md h-fit col-span-1 rounded-2xl">
+        <CardHeader title="Bonuses" />
+        <Divider />
+        <CardContent>
+          {form?.bonuses.map((a, i) => (
+            <div className="flex gap-4 my-4" key={i}>
+
+              <TextField
+                className="flex-5"
+                size="small"
+                label="Allowance"
+                value={a.name}
+                onChange={(e) =>
+                  handleArrayChange("allowances", i, "amount", e.target.value)
+                }
+              />
+
+              <TextField
+                className="flex-5"
+                size="small"
+                label="Amount"
+                type="number"
+                value={a.amount}
+                onChange={(e) =>
+                  handleArrayChange("allowances", i, "amount", e.target.value)
+                }
+              />
+              <div className="flex-1">
+                <IconButton title="Delete this Allowance" onClick={() => removeArrayItem("allowances", i)}>
+                  <MdDelete />
+                </IconButton>
+              </div>
+
+            </div>
+          ))}
+          <Button
+            startIcon={<AiOutlinePlus />}
+            onClick={() => addArrayItem("allowances", { type: "", amount: 0 })}
+          >
+            Add Allowance
+          </Button>
+          <div className="flex gap-4 my-4" >
+
+            <div className="flex-5 text-xl font-bold text-end">
+              Total :
+            </div>
+            <TextField
+              className="flex-5"
+              size="small"
+              label="Total"
+              type="number"
+              value={12000}
+
+            />
+            <div className="flex-1">
+
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Deductions */}
+      <Card className="shadow-md h-fit col-span-1 rounded-2xl">
+        <CardHeader title="Deduction" />
+        <Divider />
+        <CardContent>
+          {form?.deductions.map((a, i) => (
+            <div className="flex gap-4 my-4" key={i}>
+
+              <TextField
+                className="flex-5"
+                size="small"
+                label="Allowance"
+                value={a.name}
+                onChange={(e) =>
+                  handleArrayChange("allowances", i, "amount", e.target.value)
+                }
+              />
+
+              <TextField
+                className="flex-5"
+                size="small"
+                label="Amount"
+                type="number"
+                value={a.amount}
+                onChange={(e) =>
+                  handleArrayChange("allowances", i, "amount", e.target.value)
+                }
+              />
+              <div className="flex-1">
+                <IconButton title="Delete this Allowance" onClick={() => removeArrayItem("allowances", i)}>
+                  <MdDelete />
+                </IconButton>
+              </div>
+
+            </div>
+          ))}
+          <Button
+            startIcon={<AiOutlinePlus />}
+            onClick={() => addArrayItem("allowances", { type: "", amount: 0 })}
+          >
+            Add Allowance
+          </Button>
+          <div className="flex gap-4 my-4" >
+
+            <div className="flex-5 text-xl font-bold text-end">
+              Total :
+            </div>
+            <TextField
+              className="flex-5"
+              size="small"
+              label="Total"
+              type="number"
+              value={12000}
+
+            />
+            <div className="flex-1">
+
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Submit */}
+      <div className="h-fit col-span-2 ">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={loading || !selectedEmployee}
+        >
+          {loading ? "Saving..." : "Save Payroll"}
+        </Button>
+      </div>
+
       {success && <p className="text-green-600 mt-2">{success}</p>}
       {error && <p className="text-red-600 mt-2">{error}</p>}
-    </div>
+    </div >
   );
 }

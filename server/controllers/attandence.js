@@ -132,7 +132,8 @@ const checkin = async (req, res, next) => {
       branchId: whichemployee.branchId,
       employeeId,
       date: dateObj,
-      status
+      status,
+      source: 'manual'
     };
 
     // Handle optional punchIn time
@@ -142,6 +143,18 @@ const checkin = async (req, res, next) => {
         return res.status(400).json({ message: 'Invalid punchIn time' });
       }
       attendanceData.punchIn = punchInTime;
+    }
+
+    if (status == "leave") {
+      let leavee = new Leave({
+        companyId: req.user.companyId,
+        branchId: whichemployee.branchId,
+        employeeId, type: 'casual', fromDate: dateObj,
+        toDate: dateObj, duration: 1, reason: req.body.reason, status: 'approved'
+      })
+      let finalleave = await leavee.save();
+
+      attendanceData.leave = finalleave._id;
     }
 
     const attendance = new Attendance(attendanceData);
@@ -463,6 +476,8 @@ const allAttandence = async (req, res, next) => {
 };
 
 const editattandence = async (req, res, next) => {
+  // console.log(req.body)
+  // return res.status(404).json({ message: "Attendance record not found" });
   try {
     const { id, punchIn, punchOut, status } = req.body;
 
@@ -527,6 +542,22 @@ const editattandence = async (req, res, next) => {
       data.punchOut = null;
       data.workingMinutes = null;
       data.shortMinutes = null;
+    }
+
+    if (status == "leave") {
+      let Exists = await Leave.findByIdAndUpdate(req.body.leaveid, { reason: req?.body?.leaveReason });
+      // console.log(Exists)
+      // console.log(data)
+      if (!Exists) {
+        let leavee = new Leave({
+          companyId: req.user.companyId,
+          branchId: data.branchId,
+          employeeId: data.employeeId, type: 'casual', fromDate: data.date,
+          toDate: data.date, duration: 1, reason: req?.body?.leaveReason, status: 'approved'
+        })
+        let finalleave = await leavee.save();
+        data.leave = finalleave._id
+      }
     }
 
     data.status = status;

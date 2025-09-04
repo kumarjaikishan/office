@@ -61,7 +61,7 @@ const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, s
     }
 
     useEffect(() => {
-        if (!['weekly off', 'holiday','half day'].includes(inp.status)) {
+        if (!['weekly off', 'holiday', 'half day'].includes(inp.status)) {
             if (inp.punchIn || inp.punchOut) {
                 setinp({ ...inp, status: 'present' })
             }
@@ -86,6 +86,7 @@ const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, s
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <TimePicker
                                     value={inp.punchIn}
+                                    disabled={["absent", 'leave'].includes(inp.status)}
                                     slotProps={{
                                         textField: {
                                             size: 'small',
@@ -105,6 +106,7 @@ const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, s
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <TimePicker
                                     value={inp.punchOut}
+                                    disabled={["absent", 'leave'].includes(inp.status)}
                                     slotProps={{
                                         textField: {
                                             size: 'small',
@@ -145,6 +147,17 @@ const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, s
                                 </Select>
                             </FormControl>
                         </Box>
+
+                        {inp.status == 'leave' &&
+                            <TextField fullWidth multiline required
+                                onChange={(e) => {
+                                    setinp({
+                                        ...inp,
+                                        leaveReason: e.target.value
+                                    });
+                                }}
+                                minRows={2} value={inp.leaveReason} label="Reason" size="small" />
+                        }
 
                         <div className='w-full flex gap-2'>
                             <Button size="small"

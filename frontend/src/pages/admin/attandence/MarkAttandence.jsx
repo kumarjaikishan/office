@@ -71,7 +71,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                             size="small"
                             fullWidth
                             value={employee?.find(emp => emp._id === inp.employeeId) || null}
-                            options={employee || []}
+                            options={employee.filter(e => e.status !== false) || []}
                             getOptionLabel={(option) => option.userid.name} // still needed for filtering
                             onChange={(event, newValue) => {
                                 // console.log(newValue)
@@ -111,6 +111,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                             {isPunchIn ?
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <TimePicker
+                                        disabled={["absent", 'leave'].includes(inp.status)}
                                         value={inp.punchIn}
                                         slotProps={{
                                             textField: {
@@ -170,6 +171,16 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                     </Select>
                                 </FormControl>}
                         </Box>
+                        {inp.status == 'leave' &&
+                            <TextField fullWidth required multiline
+                                onChange={(e) => {
+                                    setinp({
+                                        ...inp,
+                                        reason: e.target.value
+                                    });
+                                }}
+                                minRows={2} value={inp.reason} label="Reason" size="small" />
+                        }
 
                         <div className='w-full flex gap-2'>
                             <Button size="small"

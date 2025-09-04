@@ -22,7 +22,7 @@ const BulkMark = ({
     openmodal, init, setopenmodal,
     isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-    const { company, holidays, department, branch, employee, attandence } = useSelector((state) => state.user);
+    const {  department, branch, employee, attandence } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
     const [rowData, setRowData] = useState({});
     const [selectedBranch, setselectedBranch] = useState('all')
@@ -267,7 +267,7 @@ const BulkMark = ({
 
 
     return (
-        <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
+        <Modalbox open={openmodal} outside={false} onClose={() => setopenmodal(false)}>
             <div className="membermodal w-[400px] md:w-[800px]">
                 <form onSubmit={handleSubmit}>
                     <div className="modalhead">Bulk Mark Attendance</div>
@@ -400,7 +400,10 @@ const BulkMark = ({
                                     <TableHead>
                                         <TableRow>
                                             <TableCell padding="checkbox">
-                                                <Checkbox onChange={handleAllSelect} checked={checkedemployee?.length === employee?.length} />
+                                                <Checkbox
+                                                    onChange={handleAllSelect}
+                                                    checked={checkedemployee?.length === employee?.length}
+                                                />
                                             </TableCell>
                                             <TableCell>Employee Name</TableCell>
                                             <TableCell>Punch In</TableCell>
@@ -408,58 +411,89 @@ const BulkMark = ({
                                             <TableCell>Status</TableCell>
                                         </TableRow>
                                     </TableHead>
+
                                     <TableBody>
                                         {filteredEmployee?.map((emp) => (
-                                            <TableRow key={emp._id}>
-                                                <TableCell padding="checkbox">
-                                                    <Checkbox
-                                                        checked={checkedemployee.includes(emp._id)}
-                                                        onChange={() => handleCheckbox(emp._id)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className='flex items-center gap-2'>
-                                                        <Avatar
-                                                            alt={emp.userid.name}
-                                                            src={emp.profileimage}
-                                                            sx={{ width: 30, height: 30 }}
+                                            <React.Fragment key={emp._id}>
+                                                {/* Main Row */}
+                                                <TableRow>
+                                                    <TableCell padding="checkbox">
+                                                        <Checkbox
+                                                            checked={checkedemployee.includes(emp._id)}
+                                                            onChange={() => handleCheckbox(emp._id)}
                                                         />
-                                                        <Typography variant="body2">{emp.userid.name}</Typography>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <input
-                                                        type="time"
-                                                        className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
-                                                        value={rowData[emp._id]?.punchIn || ''}
-                                                        onChange={(e) => handleTimeChange(emp._id, 'punchIn', e.target.value)}
-                                                    />
+                                                    </TableCell>
 
-                                                </TableCell>
-                                                <TableCell>
-                                                    <input
-                                                        type="time"
-                                                        className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
-                                                        value={rowData[emp._id]?.punchOut || ''}
-                                                        onChange={(e) => handleTimeChange(emp._id, 'punchOut', e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <FormControl fullWidth size="small">
-                                                        <Select
-                                                            value={rowData[emp._id]?.status ?? false}
-                                                            onChange={(e) => handleStatusChange(emp._id, e.target.value)}
-                                                        >
-                                                            <MenuItem value={'present'}>Present</MenuItem>
-                                                            <MenuItem value={'leave'}>Leave</MenuItem>
-                                                            <MenuItem value={'absent'}>Absent</MenuItem>
-                                                            <MenuItem value={'weekly off'}>Weekly off</MenuItem>
-                                                            <MenuItem value={'holiday'}>Holiday</MenuItem>
-                                                            <MenuItem value={'half day'}>Half Day</MenuItem>
-                                                        </Select>
-                                                    </FormControl>
-                                                </TableCell>
-                                            </TableRow>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <Avatar
+                                                                alt={emp.userid.name}
+                                                                src={emp.profileimage}
+                                                                sx={{ width: 30, height: 30 }}
+                                                            />
+                                                            <Typography variant="body2">{emp.userid.name}</Typography>
+                                                        </div>
+                                                    </TableCell>
+
+                                                    <TableCell>
+                                                        <input
+                                                            type="time"
+                                                            className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
+                                                            value={rowData[emp._id]?.punchIn || ""}
+                                                            onChange={(e) =>
+                                                                handleTimeChange(emp._id, "punchIn", e.target.value)
+                                                            }
+                                                        />
+                                                    </TableCell>
+
+                                                    <TableCell>
+                                                        <input
+                                                            type="time"
+                                                            className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
+                                                            value={rowData[emp._id]?.punchOut || ""}
+                                                            onChange={(e) =>
+                                                                handleTimeChange(emp._id, "punchOut", e.target.value)
+                                                            }
+                                                        />
+                                                    </TableCell>
+
+                                                    <TableCell>
+                                                        <FormControl fullWidth size="small">
+                                                            <Select
+                                                                value={rowData[emp._id]?.status ?? ""}
+                                                                onChange={(e) => handleStatusChange(emp._id, e.target.value)}
+                                                            >
+                                                                <MenuItem value="present">Present</MenuItem>
+                                                                <MenuItem value="leave">Leave</MenuItem>
+                                                                <MenuItem value="absent">Absent</MenuItem>
+                                                                <MenuItem value="weekly off">Weekly off</MenuItem>
+                                                                <MenuItem value="holiday">Holiday</MenuItem>
+                                                                <MenuItem value="half day">Half Day</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    </TableCell>
+                                                </TableRow>
+
+                                                {/* Extra Row for Reason if Leave */}
+                                                {/* {rowData[emp._id]?.status === "leave" && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={5}>
+                                                            <TextField
+                                                                fullWidth
+                                                                required
+                                                                multiline
+                                                                minRows={2}
+                                                                label="Reason"
+                                                                size="small"
+                                                                value={rowData[emp._id]?.reason || ""}
+                                                                onChange={(e) =>
+                                                                    handleStatusChange(emp._id, "reason", e.target.value)
+                                                                }
+                                                            />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )} */}
+                                            </React.Fragment>
                                         ))}
                                     </TableBody>
                                 </Table>
