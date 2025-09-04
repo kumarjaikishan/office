@@ -108,8 +108,9 @@ export const columns = [
     name: "Date",
     selector: (row) => row.date,
     sortable: true,
+    sortFunction: (a, b) => a.rawdate.localeCompare(b.rawdate),
     width: '110px',
-    id: "date"
+    id: "rawdate"
   },
   {
     name: "Punch In",

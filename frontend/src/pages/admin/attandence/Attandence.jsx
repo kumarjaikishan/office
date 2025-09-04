@@ -173,6 +173,7 @@ const Attandence = () => {
             </div>
           ),
           date: dayjs(emp.date).format("DD MMM, YYYY"),
+          rawdate: emp?.date,
           punchIn: emp.punchIn && (() => {
             const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
             const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);

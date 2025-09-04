@@ -94,6 +94,9 @@ body {
     padding-top: var(--navbarheight);
     background: rgb(240, 242, 246);
 }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 
 .membermodal {
     width: 680px;

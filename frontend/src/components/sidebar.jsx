@@ -41,7 +41,7 @@ const Sidebar = () => {
     : sidebarOpen;            // 💻 show text if sidebarOpen is true
 
   return (
-    <div className="w-full h-full px-1 md:px-2">
+    <div className="w-full h-full scrollbar-hide overflow-y-auto scroll-m-0 px-1 md:px-2">
       {/* Logo */}
       <div className="h-[60px] flex items-center gap-4">
         <span className="text-3xl">
@@ -115,7 +115,7 @@ const menu = [
       { menu: "Attendance", link: '/dashboard/attandence', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/empattandence', icon: <TbReportAnalytics />, roles: ['employee'] },
       { menu: "Attend Report", link: '/dashboard/attandence_Report', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
-      { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
+      // { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Holiday", link: '/dashboard/holiday', icon: <FaCalendarDay />, roles: ['superadmin', 'admin'] },
       { menu: "Leave", link: '/dashboard/leave', icon: <FaUmbrellaBeach />, roles: ['employee', 'admin', 'superadmin', 'manager'] },
       { menu: "Ledger", link: '/dashboard/ledger', icon: <FaBook />, roles: ['admin', 'superadmin', 'manager'] },
