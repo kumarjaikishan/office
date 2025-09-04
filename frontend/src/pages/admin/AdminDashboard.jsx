@@ -230,7 +230,7 @@ const Main = () => {
         </div>
 
         <div className='px-1 md:px-3 grid grid-cols-5 md:grid-cols-10 lg:grid-cols-13 gap-2 md:gap-4'>
-          {employeelist?.map((emp) => {
+          {employeelist?.filter(e=> e.status !== false).map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId?._id === emp?._id);
             const todaypresente = todaypresent.find(att => att.employeeId?._id === emp?._id);
             return (

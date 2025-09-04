@@ -336,6 +336,16 @@ const Attandence = () => {
   }, []);
 
   const edite = (atten) => {
+    // console.log(atten)
+    seteditinp({
+      id: atten._id,
+      employeeName: atten?.employeeId?.userid?.name || "",
+      date: dayjs(atten.date).format('DD MMM, YYYY'),
+      punchIn: atten.punchIn ? dayjs(atten.punchIn) : null,
+      punchOut: atten.punchOut ? dayjs(atten.punchOut) : null,
+      status: atten.status || ""
+    });
+
     setatteneditmodal(true);
   };
 

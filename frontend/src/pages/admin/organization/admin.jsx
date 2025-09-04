@@ -8,6 +8,7 @@ import { Avatar, Button, TextField } from "@mui/material";
 import Modalbox from "../../../components/custommodal/Modalbox";
 import { useDispatch } from "react-redux";
 import { FirstFetch } from "../../../../store/userSlice";
+import { TbPasswordUser } from "react-icons/tb";
 
 // Permission labels
 const PERMISSION_LABELS = {
@@ -68,6 +69,7 @@ export default function SuperAdminDashboard() {
     const [editingIndex, setEditingIndex] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [newModule, setNewModule] = useState("");
+    const [passmodal, setpassmodal] = useState(false);
     const [expandedIndex, setExpandedIndex] = useState(null);
 
     const toggleExpand = (index) => {
@@ -88,6 +90,11 @@ export default function SuperAdminDashboard() {
         setEditingIndex(null);
         setShowForm(false);
     };
+
+    const [pass, setpass] = useState({
+        userid: '',
+        pass: ''
+    })
 
     const handleSave = async () => {
         const newEntry = { ...form };
@@ -170,9 +177,9 @@ export default function SuperAdminDashboard() {
         }
     }
 
-
     const handleEdit = (index) => {
         const current = admins[index];
+        console.log(current)
         setForm({
             ...current,
             profilePreview: current.profileImage || "",
@@ -181,6 +188,41 @@ export default function SuperAdminDashboard() {
         setEditingIndex(index);
         setShowForm(true);
     };
+
+    const updatePassword = async (e) => {
+        e.preventDefault();
+        // return console.log(pass)
+        try {
+            const token = localStorage.getItem('emstoken');
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_ADDRESS}updatepassword`,
+                {
+                    pass
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            setpass({
+                userid: '',
+                pass: ''
+            })
+            setpassmodal(false);
+            // console.log('Query:', res);
+            toast.success(res.data.message, { autoClose: 1200 });
+        } catch (error) {
+            console.log(error);
+            if (error.response) {
+                toast.warn(error.response.data.message, { autoClose: 1200 });
+            } else if (error.request) {
+                console.error('No response from server:', error.request);
+            } else {
+                console.error('Error:', error.message);
+            }
+        }
+    }
 
     const handleDelete = async (id) => {
 
@@ -292,7 +334,7 @@ export default function SuperAdminDashboard() {
     return (
         <div className="p-1 w-full">
             {/* Admin List */}
-            <div className="bg-white shadow-md rounded-lg p-2">
+            <div className="bg-white shadow-md rounded-lg p-1">
                 <div className="flex justify-between flex-wrap items-center mb-4">
                     <h2 className="text-[16px] mb-2 md:mb-0 md:text-xl font-semibold">Admin/Manager Management</h2>
 
@@ -330,12 +372,23 @@ export default function SuperAdminDashboard() {
 
                                     <div className="flex gap-2 mt-2">
                                         <button
+                                            title="Edit"
                                             className="p-2 border rounded hover:bg-gray-100"
                                             onClick={() => handleEdit(index)}
                                         >
                                             <MdEdit className="h-4 w-4" />
                                         </button>
+
                                         <button
+                                            title="Password Reset"
+                                            className="p-2 border rounded hover:bg-gray-100 text-green-500"
+                                            onClick={() => { setpass({ ...pass, userid: admin._id }); setpassmodal(true) }}
+                                        >
+                                            <TbPasswordUser className="h-4 w-4 border" />
+                                        </button>
+
+                                        <button
+                                            title="Delete"
                                             className="p-2 border rounded text-red-600 hover:bg-red-50"
                                             onClick={() => handleDelete(admin._id)}
                                         >
@@ -432,25 +485,28 @@ export default function SuperAdminDashboard() {
                                     helperText="*Note - you can also use companyname as mail handler, e.g. xyz@companyname.com"
                                 />
 
-                                <TextField fullWidth required
-                                    value={form.password}
-                                    type="password"
-                                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                                    label="Password" size="small"
-                                />
+
 
                                 {editingIndex == null &&
-                                    <div className="w-full">
-                                        <label className="font-semibold block mb-1">Role</label>
-                                        <select
-                                            className="w-full border p-2 rounded"
-                                            value={form.role}
-                                            onChange={(e) => handleRoleChange(e.target.value)}
-                                        >
-                                            <option value="admin">Admin</option>
-                                            <option value="manager">Manager</option>
-                                        </select>
-                                    </div>
+                                    <>
+                                        <TextField fullWidth required
+                                            value={form.password}
+                                            type="password"
+                                            onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                            label="Password" size="small"
+                                        />
+                                        <div className="w-full">
+                                            <label className="font-semibold block mb-1">Role</label>
+                                            <select
+                                                className="w-full border p-2 rounded"
+                                                value={form.role}
+                                                onChange={(e) => handleRoleChange(e.target.value)}
+                                            >
+                                                <option value="admin">Admin</option>
+                                                <option value="manager">Manager</option>
+                                            </select>
+                                        </div>
+                                    </>
                                 }
 
                                 {/* Add Module (Manager only) */}
@@ -530,6 +586,20 @@ export default function SuperAdminDashboard() {
 
 
                         </div>
+                    </form>
+                </div>
+            </Modalbox>
+
+            <Modalbox open={passmodal} onClose={() => {
+                setpassmodal(false);
+            }}>
+                <div className="membermodal" >
+                    <form onSubmit={updatePassword}>
+                        <h2>Reset Passowrd</h2>
+                        <span className="modalcontent ">
+                            <TextField fullWidth inputProps={{ minLength: 3, maxLength: 10 }} required value={pass.pass} onChange={(e) => setpass({ ...pass, pass: e.target.value })} label="Passowrd" size="small" />
+                            <Button variant="contained" sx={{ mr: 2 }} type="submit" >Reset Password</Button>
+                        </span>
                     </form>
                 </div>
             </Modalbox>

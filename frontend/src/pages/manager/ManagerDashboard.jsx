@@ -208,7 +208,7 @@ const ManagerDashboard = () => {
               onChange={(e) => setbranc(e.target.value)}
             >
               <MenuItem selected value={'all'}>All</MenuItem>
-              {branch?.filter(e => profile?.branchIds.includes(e._id))?.map((list) => (
+              {branch?.filter(e => profile?.branchIds?.includes(e._id))?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
               ))}
             </Select>

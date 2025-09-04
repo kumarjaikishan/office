@@ -486,7 +486,7 @@ const updateprofile = async (req, res, next) => {
 
 
 const editAdmin = async (req, res, next) => {
-    const { name, email, role, password, permissions } = req.body;
+    const { name, email, role, permissions } = req.body;
     const { id } = req.params;
     // console.log(req.body);
     // return res.status(400).json({ message: "All fields are required" });
@@ -519,11 +519,6 @@ const editAdmin = async (req, res, next) => {
             companyId: req.user.companyId
         };
 
-        // Only update password if provided
-        if (password) {
-            fields.password = password;
-        }
-
         // Convert permissions if stringified
         if (permissions && typeof permissions === 'string') {
             fields.permissions = JSON.parse(permissions);
@@ -543,9 +538,10 @@ const editAdmin = async (req, res, next) => {
                 });
                 fields.profileImage = uploadResult.secure_url;
             }
-        }
-        if (oldprofile) {
-            await removePhotoBySecureUrl([oldprofile]);
+
+            if (oldprofile) {
+                await removePhotoBySecureUrl([oldprofile]);
+            }
         }
 
         const updatedUser = await usermodal.findByIdAndUpdate(
@@ -985,20 +981,27 @@ const updatepassword = async (req, res, next) => {
     const { userid, pass } = req.body.pass;
 
     if (!userid || !pass) {
-        return next({ status: 400, message: "User ID and password are required" });
+        if (!user) {
+            return res.status(400).json({ message: 'User ID and password are required' });
+        }
     }
+
     try {
         const user = await usermodal.findById(userid);
         if (!user) {
-            return next({ status: 404, message: "User not found" });
+            return res.status(400).json({ message: 'User not Found' });
         }
+        if (user?.companyId?.toString() !== req.user?.companyId) {
+            return res.status(403).json({ message: 'You are not Authorised' });
+        }
+
         user.password = pass;
         await user.save()
 
         return res.status(200).json({ message: 'Password updated successfully' });
     } catch (error) {
         console.error(error.message);
-        return next({ status: 500, message: 'Internal Server Error' });
+        return next({ status: 500, message: error.message });
     }
 };
 

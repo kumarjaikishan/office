@@ -142,8 +142,8 @@ export default function OrganizationSettings() {
 
                     <div
                         className={`
-                          rounded overflow-hidden transition-all duration-300 ease-linear
-                          ${openSection === 'company' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          rounded overflow-hidden transition-all duration-300 
+                          ${openSection === 'company' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                     >
                         <div className="p-4 rounded flex flex-col md:flex-row items-center  mt-2 space-y-4">
@@ -274,8 +274,8 @@ export default function OrganizationSettings() {
 
                     <div
                         className={`
-                          rounded space-y-1 overflow-hidden transition-all duration-300 ease-linear
-                          ${openSection === 'branches' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          rounded space-y-1 overflow-hidden transition-all duration-300
+                          ${openSection === 'branches' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                     >
                         <div className="flex justify-end items-center">
@@ -356,8 +356,8 @@ export default function OrganizationSettings() {
 
                 <div
                     className={`
-                          rounded overflow-hidden transition-all duration-300 ease-linear
-                          ${openSection === 'department' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          rounded overflow-hidden transition-all duration-300
+                          ${openSection === 'department' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                 >
                     <Department />
@@ -381,8 +381,8 @@ export default function OrganizationSettings() {
 
                     <div
                         className={`
-                          rounded overflow-hidden transition-all duration-300 ease-linear
-                          ${openSection === 'admin' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          rounded overflow-hidden transition-all duration-300 
+                          ${openSection === 'admin' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                     >
                         <SuperAdminDashboard />
@@ -404,10 +404,10 @@ export default function OrganizationSettings() {
                     )}
                 </div>
 
-                <Box
+                <div
                     className={`
-                          rounded overflow-hidden transition-all duration-300 ease-linear
-                          ${openSection === 'attendance' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          rounded overflow-hidden transition-all duration-300 
+                          ${openSection === 'attendance' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                 >
                     <Box className="mt-1 p-2 grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -540,7 +540,7 @@ export default function OrganizationSettings() {
                             Update Settings
                         </Button>
                     </Box>
-                </Box>
+                </div>
 
             </div>
 
