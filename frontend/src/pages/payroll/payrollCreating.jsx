@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardActions,
   Typography,
   Divider,
   Button,
@@ -18,23 +17,33 @@ import {
   InputLabel,
   Avatar,
   InputAdornment,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
-import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
+import { AiOutlinePlus } from "react-icons/ai";
 import { useSelector } from "react-redux";
 import { MdDelete } from "react-icons/md";
 import dayjs from "dayjs";
-import isBetween from 'dayjs/plugin/isBetween'
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isBetween from "dayjs/plugin/isBetween";
 import localeData from "dayjs/plugin/localeData";
+
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
+dayjs.extend(isSameOrBefore);
 
 export default function PayrollCreatePage() {
   const { employeeId } = useParams();
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(employeeId || "");
-  const [selectedEmployeedetail, setSelectedEmployeedetail] = useState(employeeId || "");
-  const [attendance, setAttendance] = useState(null);
-  const { department, branch, holidays, company, employee, attandence } = useSelector((state) => state.user);
+  const [selectedEmployeedetail, setSelectedEmployeedetail] = useState(null);
+  const [perminuteRate, setminuteRate] = useState(0)
+  const [holidaydate, setholidaydate] = useState([]);
+  const [perdDyRate, setPerDayRate] = useState(0)
+
+  const { holidays, company, employee, attandence } = useSelector(
+    (state) => state.user
+  );
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -43,140 +52,228 @@ export default function PayrollCreatePage() {
   const [form, setForm] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
-    baseSalary: "",
-    allowances: [{ name: 'HRA', amount: 0 }, { name: 'DA', amount: 0 }],
-    bonuses: [{ name: 'Diwali', amount: 1200 }, { name: 'Performance', amount: 1200 }],
-    overtime: { hours: 0, ratePerHour: 0 },
-    deductions: [],
-    otherDeductions: [{ name: 'PF', amount: 1200 }, { name: 'ESI', amount: 1200 }],
+    calculationBasis: "monthDays", // ✅ new: monthDays | workingDays
+    allowances: [{ name: "HRA", amount: 0 }],
+    bonuses: [{ name: "Performance", amount: 0 }],
+    deductions: [{ name: "Tax", amount: 0 }],
     leaveDays: 0,
     absentDays: 0,
     presentDays: 0,
     paidDays: 0,
+    adjustPaidLeave: false, // ✅ toggle for paid leave adjustment
   });
 
-  // Predefined options
-  const allowanceTypes = ["HRA", "Travel", "Mobile", "Food"];
-  const deductionTypes = ["PF", "Tax", "ESI"];
-  const bonusTypes = ["Performance", "Festival", "Referral"];
-
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-  const [basic, setbasic] = useState({
+  const [basic, setBasic] = useState({
     totalDays: 0,
     holidaysCount: 0,
     weeklyOff: 0,
     workingDays: 0,
-    shortTime: 0,
     overtime: 0,
-  })
+    shortmin: 0,
+  });
 
+  const [options, setOptions] = useState({
+    addOvertime: false,
+    deductShortTime: false,
+    deductAbsent: false,
+    adjustLeave: false,
+    adjustedLeaveCount: 0, // how many leaves user wants to adjust
+  });
+
+  // Assume each employee has a paid leave balance (mock if not in DB)
+  const availablePaidLeaves = selectedEmployeedetail?.leaveBalance || 3;
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+
+  // Load employees
   useEffect(() => {
-    // console.log(employee)
-    setEmployees(employee)
+    setEmployees(employee || []);
   }, [employee]);
-  useEffect(() => {
-    console.log(selectedEmployeedetail)
-  }, [selectedEmployeedetail]);
 
   useEffect(() => {
-  if (!attandence || !selectedEmployee) return;
+    if (!selectedEmployeedetail || !basic?.totalDays || !company?.workingMinutes) return;
 
-  // ✅ get selected employee detail
-  const selected = employees?.find(e => e._id === selectedEmployee);
-  if (selected) setSelectedEmployeedetail(selected);
+    let divisor =
+      form.calculationBasis === "monthDays"
+        ? basic.totalDays
+        : basic.totalDays - (basic.holidaysCount + basic.weeklyOff) || 1;
 
-  // ✅ filter attendance for employee + month in one pass
-  const monthStart = dayjs(`${form.year}-${String(form.month).padStart(2,"0")}-01`);
-  const isCurrentMonth = monthStart.isSame(dayjs(), "month");
-  const monthEnd = isCurrentMonth ? dayjs() : monthStart.endOf("month");
-  const totalDays = monthEnd.date();
+    const perDay = selectedEmployeedetail.salary / divisor;
+    const perMinute = perDay / company.workingMinutes.fullDay;
 
-  const filteredAttendance = attandence.filter(e =>
-    e.employeeId._id === selectedEmployee &&
-    dayjs(e.date).isSame(monthStart, "month")
-  );
+    // console.log(selectedEmployeedetail.salary, divisor, perMinute)
 
-  // ✅ aggregate attendance stats in one reduce pass
-  const { present, absent, leaves, overtime, shorttime } = filteredAttendance.reduce(
-    (acc, atten) => {
-      if (atten.status === "present") acc.present++;
-      if (atten.status === "absent") acc.absent++;
-      if (atten.status === "leave") acc.leaves++;
-      acc.shorttime += atten.shortMinutes || 0;
+    setminuteRate(perMinute.toFixed(2));
+    setPerDayRate(perDay.toFixed(2));
+  }, [form.calculationBasis, basic, selectedEmployeedetail, company]);
 
-      if (company?.workingMinutes?.fullDay > atten.workingMinutes) {
-        acc.overtime += company.workingMinutes.fullDay - atten.workingMinutes;
+  const overtimePay = useMemo(() => {
+    const rate = 345; // or from company config
+    return (basic.overtime / 60) * rate; // assuming overtime is in minutes
+  }, [basic.overtime]);
+
+
+  useEffect(() => {
+    if (!holidays) return;
+    // console.log(holidays)
+
+    const dateObjects = [];
+    holidays.forEach(holiday => {
+      let current = dayjs(holiday.fromDate);
+      const end = holiday.toDate ? dayjs(holiday.toDate) : current;
+
+      while (current.isSameOrBefore(end, 'day')) {
+        dateObjects.push(current.format('DD/MM/YYYY'));
+        current = current.add(1, 'day');
       }
 
-      return acc;
-    },
-    { present: 0, absent: 0, leaves: 0, overtime: 0, shorttime: 0 }
-  );
+    });
+    setholidaydate(dateObjects);
+  }, [holidays]);
 
-  // ✅ Update form (use functional update to avoid stale form)
-  setForm(prev => ({
-    ...prev,
-    leaveDays: leaves,
-    absentDays: absent,
-    presentDays: present,
-    paidDays: present,
-  }));
+  // Compute attendance
+  useEffect(() => {
+    if (!attandence || !selectedEmployee) return;
 
-  // ✅ Weekly offs
-  let weeklyOffCount = 0;
-  for (let i = 1; i <= totalDays; i++) {
-    const currentDate = monthStart.date(i);
-    if (company?.weeklyOffs?.includes(currentDate.day())) {
-      weeklyOffCount++;
-    }
-  }
+    const selected = employees.find((e) => e._id === selectedEmployee);
+    setSelectedEmployeedetail(selected);
 
-  // ✅ Holidays
-  let holidayCount = 0;
-  holidays?.forEach(h => {
-    const holidayStart = dayjs(h.fromDate);
-    const holidayEnd = dayjs(h.toDate);
-
-    for (let i = 1; i <= totalDays; i++) {
-      const currentDate = monthStart.date(i);
-      if (isCurrentMonth && currentDate.isAfter(dayjs(), "day")) break;
-
-      if (currentDate.isBetween(holidayStart, holidayEnd, "day", "[]")) {
-        holidayCount++;
-      }
-    }
-  });
-
-  const totalWorkingDays = totalDays - (weeklyOffCount + holidayCount);
-
-  // ✅ Set summary state
-  setbasic({
-    totalDays,
-    workingDays: totalWorkingDays,
-    weeklyOff: weeklyOffCount,
-    holidaysCount: holidayCount,
-    shortTime: shorttime,
-    overtime,
-  });
-}, [selectedEmployee, attandence, form.month, form.year, employees, company, holidays]);
+    const monthStart = dayjs(`${form.year}-${String(form.month).padStart(2, "0")}-01`);
+    const isCurrentMonth = monthStart.isSame(dayjs(), "month");
+    const monthEnd = monthStart.endOf("month");
+    const totalDays = monthEnd.date();
 
 
+    const filteredAttendance = attandence.filter(
+      (e) =>
+        e.employeeId._id === selectedEmployee &&
+        dayjs(e.date).isSame(monthStart, "month")
+    );
 
-  const fetchAttendance = async (id) => {
-    const res = await axios.get(`/api/attendance/summary/${id}`);
-    setAttendance(res.data);
+    const { present, absent, leaves, overtime, shortmin } = filteredAttendance.reduce(
+      (acc, atten) => {
+        if (atten.status === "present") acc.present++;
+        if (atten.status === "absent") acc.absent++;
+        if (atten.status === "leave") acc.leaves++;
+
+        const dateStr = dayjs(atten.date).format("DD/MM/YYYY");
+        const { workingMinutes } = atten;
+        const day = dayjs(atten.date).startOf("day").day();
+
+        const isHoliday = holidaydate.includes(dateStr);
+        const isWeeklyOff = company?.weeklyOffs.includes(day);
+
+        if (isHoliday || isWeeklyOff) {
+          acc.overtime += workingMinutes;
+        } else if (atten.status === "present") {
+          if (workingMinutes < company?.workingMinutes?.fullDay) {
+            acc.shortmin += company.workingMinutes.fullDay - workingMinutes;
+          } else if (workingMinutes > company?.workingMinutes?.fullDay) {
+            acc.overtime += workingMinutes - company.workingMinutes.fullDay;
+          }
+        }
+        return acc;
+      },
+      { present: 0, absent: 0, leaves: 0, overtime: 0, shortmin: 0 }
+    );
+
     setForm((prev) => ({
       ...prev,
-      leaveDays: res.data.leaveDays,
-      absentDays: res.data.absentDays,
-      paidDays: res.data.paidDays,
+      leaveDays: leaves,
+      absentDays: absent,
+      presentDays: present,
+      paidDays: present,
     }));
-  };
 
-  const handleChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
+    // Weekly offs
+    let weeklyOffCount = 0;
+    for (let i = 1; i <= totalDays; i++) {
+      const currentDate = monthStart.date(i);
+      if (company?.weeklyOffs?.includes(currentDate.day())) {
+        weeklyOffCount++;
+      }
+    }
+
+    // Holidays
+    let holidayCount = 0;
+    holidays?.forEach((h) => {
+      const holidayStart = dayjs(h.fromDate);
+      const holidayEnd = dayjs(h.toDate);
+      for (let i = 1; i <= totalDays; i++) {
+        const currentDate = monthStart.date(i);
+        if (isCurrentMonth && currentDate.isAfter(dayjs(), "day")) break;
+        if (currentDate.isBetween(holidayStart, holidayEnd, "day", "[]")) {
+          holidayCount++;
+        }
+      }
+    });
+
+    setBasic({
+      // monthDays,
+      totalDays,
+      workingDays: totalDays - (weeklyOffCount + holidayCount),
+      weeklyOff: weeklyOffCount,
+      holidaysCount: holidayCount,
+      overtime,
+      shortmin,
+    });
+  }, [selectedEmployee, attandence, form.month, form.year, employees, company, holidays]);
+
+  // Salary calculations
+  const perDaySalary = useMemo(() => {
+    if (!selectedEmployeedetail?.salary) return 0;
+    const divisor =
+      form.calculationBasis === "workingDays"
+        ? basic.workingDays || 1
+        : basic.totalDays || 1;
+    let hey = selectedEmployeedetail.salary / divisor;
+    console.log(hey)
+    return hey
+  }, [selectedEmployeedetail, basic, form.calculationBasis]);
+
+  // ✅ Leave deduction logic
+  const effectiveLeaveDays = useMemo(() => {
+    if (form.adjustPaidLeave) {
+      // Leaves covered by available paid leaves
+      return Math.max(form.leaveDays - availablePaidLeaves, 0);
+    }
+    return form.leaveDays;
+  }, [form.leaveDays, form.adjustPaidLeave, availablePaidLeaves]);
+
+  const leaveDeduction = useMemo(() => {
+    return effectiveLeaveDays * perDaySalary;
+  }, [effectiveLeaveDays, perDaySalary]);
+
+  const totalAllowances = useMemo(
+    () => form.allowances.reduce((acc, e) => acc + Number(e.amount), 0),
+    [form.allowances]
+  );
+
+  const totalBonuses = useMemo(
+    () => form.bonuses.reduce((acc, e) => acc + Number(e.amount), 0),
+    [form.bonuses]
+  );
+
+  const totalDeductions = useMemo(
+    () => form.deductions.reduce((acc, e) => acc + Number(e.amount), 0),
+    [form.deductions, leaveDeduction]
+  );
+
+  const grossSalary = useMemo(() => {
+    return (
+      (perDaySalary * form.paidDays || 0) +
+      totalAllowances +
+      totalBonuses +
+      overtimePay
+    );
+  }, [perDaySalary, form.paidDays, totalAllowances, totalBonuses, overtimePay]);
+
+  const netSalary = useMemo(() => {
+    return selectedEmployeedetail?.salary - totalDeductions;
+  }, [grossSalary, totalDeductions]);
 
   const handleArrayChange = (field, index, key, value) => {
     const updated = [...form[field]];
@@ -184,17 +281,58 @@ export default function PayrollCreatePage() {
     setForm((prev) => ({ ...prev, [field]: updated }));
   };
 
-  const addArrayItem = (field, item) => {
-    setForm((prev) => ({ ...prev, [field]: [...prev[field], item] }));
-  };
+  useEffect(() => {
+    let updatedBonuses = [...form.bonuses];
+    let updatedDeductions = [...form.deductions];
 
-  const removeArrayItem = (field, index) => {
+    // OVERTIME
+    updatedBonuses = updatedBonuses.filter(b => b.name !== "Overtime");
+    if (options.addOvertime && overtimePay > 0) {
+      updatedBonuses.push({ name: "Overtime", amount: overtimePay.toFixed(2) });
+    }
+
+    // SHORT TIME
+    updatedDeductions = updatedDeductions.filter(d => d.name !== "Short Time");
+    if (options.deductShortTime && basic.shortmin > 0) {
+      const shortTimeDeduction = (basic.shortmin / 60) * perDaySalary;
+      updatedDeductions.push({ name: "Short Time", amount: shortTimeDeduction.toFixed(2) });
+    }
+
+    // ABSENT
+    updatedDeductions = updatedDeductions.filter(d => d.name !== "Absent");
+    if (options.deductAbsent && form.absentDays > 0) {
+      updatedDeductions.push({ name: "Absent", amount: (form.absentDays * perDaySalary).toFixed(2) });
+    }
+
+    // LEAVE ADJUSTMENT
+    updatedDeductions = updatedDeductions.filter(
+      d => d.name !== "Paid Leave Adjustment" && d.name !== "Unpaid Leave"
+    );
+    if (options.adjustLeave && form.leaveDays > 0) {
+      const adjusted = Math.min(options.adjustedLeaveCount, availablePaidLeaves, form.leaveDays);
+      const unadjusted = form.leaveDays - adjusted;
+
+      if (adjusted > 0) {
+        updatedDeductions.push({ name: "Paid Leave Adjustment", amount: 0 });
+      }
+      if (unadjusted > 0) {
+        updatedDeductions.push({ name: "Unpaid Leave", amount: (unadjusted * perDaySalary).toFixed(2) });
+      }
+    }
+
+    setForm(prev => ({ ...prev, bonuses: updatedBonuses, deductions: updatedDeductions }));
+  }, [options, overtimePay, perDaySalary, form.leaveDays, form.absentDays, basic.shortmin]);
+
+
+  const addArrayItem = (field, item) =>
+    setForm((prev) => ({ ...prev, [field]: [...prev[field], item] }));
+
+  const removeArrayItem = (field, index) =>
     setForm((prev) => {
       const updated = [...prev[field]];
       updated.splice(index, 1);
       return { ...prev, [field]: updated };
     });
-  };
 
   const handleSubmit = async () => {
     try {
@@ -205,6 +343,7 @@ export default function PayrollCreatePage() {
       await axios.post("/api/payroll/create", {
         employeeId: selectedEmployee,
         ...form,
+        netSalary,
       });
 
       setSuccess("Payroll created successfully!");
@@ -215,38 +354,21 @@ export default function PayrollCreatePage() {
     }
   };
 
-  const totalAllowances = useMemo(() => {
-    return form?.allowances?.reduce((acc, e) => acc + Number(e.amount), 0) ?? 0;
-  }, [form?.allowances]); // keep it simple
-
-  const totalBonuses = useMemo(() => {
-    return form?.bonuses?.reduce((acc, e) => acc + Number(e.amount), 0) ?? 0;
-  }, [form?.allowances]); // keep it simple
-
-  const totalDeductions = useMemo(() => {
-    return form?.deductions?.reduce((acc, e) => acc + Number(e.amount), 0) ?? 0;
-  }, [form?.allowances]); // keep it simple
-
-
   return (
     <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-6 space-y-6">
       {/* Employee Selection */}
-      <Card className="shadow-md col-span-2 p-4  rounded-2xl">
+      <Card className="shadow-md col-span-2 p-4 rounded-2xl">
         <Typography variant="h6" gutterBottom>
           Select Employee
         </Typography>
         <Divider />
         <div className="grid gap-4 grid-cols-2 mt-4">
-          <FormControl className="col-span-1" size="small">
-            <InputLabel>Select Month</InputLabel>
+          <FormControl size="small">
+            <InputLabel>Month</InputLabel>
             <Select
               value={form.month}
-              label="Select Month"
-              onChange={(e) => {
-                setForm({ ...form, month: e.target.value })
-              }}
+              onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
             >
-              <MenuItem value='' selected disabled >  Select Month </MenuItem>
               {months.map((month, ind) => (
                 <MenuItem key={ind} value={ind + 1}>
                   {month}
@@ -254,32 +376,43 @@ export default function PayrollCreatePage() {
               ))}
             </Select>
           </FormControl>
-          <FormControl className="col-span-1" size="small">
-            <InputLabel>Select Year</InputLabel>
+
+          <FormControl size="small">
+            <InputLabel>Year</InputLabel>
             <Select
               value={form.year}
-              label="Select Year"
-              onChange={(e) => {
-                setForm({ ...form, year: e.target.value })
-              }}
+              onChange={(e) => setForm((prev) => ({ ...prev, year: e.target.value }))}
             >
-              <MenuItem value='' selected disabled >  Select Year </MenuItem>
-              {['2025', '2026'].map((year, ind) => (
-                <MenuItem key={ind} value={year}>
+              {["2024", "2025", "2026"].map((year) => (
+                <MenuItem key={year} value={year}>
                   {year}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          <FormControl disabled={!form.month || !form.year} className="col-span-2" size="small">
+
+          <FormControl size="small">
+            <InputLabel>Calc. Basis</InputLabel>
+            <Select
+              value={form.calculationBasis}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, calculationBasis: e.target.value }))
+              }
+            >
+              <MenuItem value="monthDays">Month Days</MenuItem>
+              <MenuItem value="workingDays">Working Days</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl
+            disabled={!form.month || !form.year}
+            className="col-span-1"
+            size="small"
+          >
             <InputLabel>Employee</InputLabel>
             <Select
               value={selectedEmployee}
-              label="Employee"
-              onChange={(e) => {
-                setSelectedEmployee(e.target.value);
-                fetchAttendance(e.target.value);
-              }}
+              onChange={(e) => setSelectedEmployee(e.target.value)}
             >
               {employees.map((emp) => (
                 <MenuItem key={emp._id} value={emp._id}>
@@ -294,295 +427,235 @@ export default function PayrollCreatePage() {
         </div>
       </Card>
 
-      {/* Attendance Summary */}
-      {attendance && (
-        <Card className="shadow-md col-span-2 rounded-2xl">
-          <CardHeader title="Attendance Summary" />
+      {/* Paid Leave Info */}
+      {selectedEmployeedetail &&
+        <Card className="shadow-md col-span-2 p-4 rounded-2xl">
+          <Typography variant="h6">Adjustments</Typography>
           <Divider />
-          <CardContent>
-            <Grid container spacing={2}>
-              <Grid item xs={4}>
+          <div className="flex flex-col gap-2 mt-3">
+            <FormControlLabel
+              control={<Checkbox checked={options.addOvertime} onChange={(e) => setOptions(p => ({ ...p, addOvertime: e.target.checked }))} />}
+              label="Add Overtime as Bonus"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={options.deductShortTime} onChange={(e) => setOptions(p => ({ ...p, deductShortTime: e.target.checked }))} />}
+              label="Deduct Short Time"
+            />
+            <FormControlLabel
+              control={<Checkbox checked={options.deductAbsent} onChange={(e) => setOptions(p => ({ ...p, deductAbsent: e.target.checked }))} />}
+              label="Deduct Absent Days"
+            />
+            <div className="flex items-center gap-4">
+              <FormControlLabel
+                control={<Checkbox checked={options.adjustLeave} onChange={(e) => setOptions(p => ({ ...p, adjustLeave: e.target.checked }))} />}
+                label="Adjust Paid Leaves"
+              />
+              {options.adjustLeave && (
                 <TextField
-                  fullWidth
-                  label="Total Days"
                   type="number"
-                  value={basic.totalDays}
+                  size="small"
+                  label="Adjust Count"
+                  inputProps={{ min: 0, max: form.leaveDays }}
+                  value={options.adjustedLeaveCount}
+                  onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}
                 />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Weekly Off"
-                  value={basic.weeklyOff}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Holidays"
-                  value={basic.holidaysCount}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Working Days"
-                  value={basic.workingDays}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Present"
-                  value={form.presentDays}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Absent"
-                  value={form.absentDays}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Leave"
-                  value={form.leaveDays}
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  label="Salary Days"
-                  value={form.paidDays}
-                />
-              </Grid>
-            </Grid>
-          </CardContent>
+              )}
+            </div>
+          </div>
+        </Card>}
 
-        </Card>
-      )}
-
-      {/* Salary Details */}
-      <div className="shadow-md h-fit col-span-2 rounded-lg bg-white p-4 pt-0">
-        <p className="text-xl py-2 font-semibold">Salary Detail</p>
-        <Divider />
-        <div className="flex flex-wrap gap-4 p-4">
-          <TextField
-            size="small"
-            label="Basic Salary"
-            value={selectedEmployeedetail?.salary}
-          />
-          <TextField
-            label="Total Working Days"
-            size="small"
-            value={form.paidDays}
-          />
-          <TextField
-            label="Per day salary"
-            size="small"
-            value={(selectedEmployeedetail?.salary / 31).toFixed(2)}
-          />
-          <TextField
-            label="Overtime (In Hour)"
-            size="small"
-            value={basic.overtime}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  @ 345 per hour
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            label="Total Salary"
-            size="small"
-            value={form.paidDays}
-            onChange={(e) => handleChange("paidDays", e.target.value)}
-          />
-        </div>
-      </div>
+      {/* Attendance Summary */}
+      {selectedEmployeedetail &&
+        <Card className="shadow-md col-span-1 p-4 rounded-2xl">
+          <Typography variant="h6">Attendance Summary</Typography>
+          <Divider />
+          <div className="flex flex-col gap-2 mt-3 text-sm">
+            <p>Total Days: {basic.totalDays}</p>
+            <p>Holidays: {basic.holidaysCount}</p>
+            <p>Weekly Offs: {basic.weeklyOff}</p>
+            <p>Working Days: {basic.workingDays}</p>
+            <p>Present Days: {form.presentDays}</p>
+            <p>Leave Days: {form.leaveDays} @ {perDaySalary}</p>
+            <p>Absent Days: {form.absentDays}</p>
+            <p>Overtime (minutes): {basic.overtime} min @{perminuteRate}</p>
+            <p>ShortTime (minutes): {basic.shortmin} min @{perminuteRate}</p>
+          </div>
+        </Card>}
 
       {/* Allowances */}
-      <div className="shadow-md h-fit col-span-1 rounded-lg bg-white p-4 pt-0">
-        <p className="text-xl py-2 font-semibold">Allowances - {totalAllowances}₹ </p>
-
-        <Divider />
-        <div>
-          {form && form?.allowances.map((a, i) => (
-            <div className="flex gap-4 my-4" key={i}>
+      {selectedEmployeedetail &&
+        <Card className="shadow-md col-span-1 p-4 rounded-2xl">
+          <Typography variant="h6">Allowances</Typography>
+          <Divider />
+          {form.allowances.map((allowance, index) => (
+            <div key={index} className="flex gap-2 items-center mt-2">
               <TextField
-                className="flex-5"
                 size="small"
-                label="Allowance"
-                value={a.name}
-                onChange={(e) =>
-                  handleArrayChange("allowances", i, "name", e.target.value)
-                }
+                label="Name"
+                value={allowance.name}
+                onChange={(e) => handleArrayChange("allowances", index, "name", e.target.value)}
               />
-
               <TextField
-                className="flex-5"
                 size="small"
+                type="number"
                 label="Amount"
-                value={a.amount}
-                onChange={(e) =>
-                  handleArrayChange("allowances", i, "amount", e.target.value)
-                }
+                value={allowance.amount}
+                onChange={(e) => handleArrayChange("allowances", index, "amount", e.target.value)}
               />
-              <div className="flex-1">
-                <IconButton title="Delete this Allowance" onClick={() => removeArrayItem("allowances", i)}>
-                  <MdDelete />
-                </IconButton>
-              </div>
-
+              <IconButton onClick={() => removeArrayItem("allowances", index)}>
+                <MdDelete />
+              </IconButton>
             </div>
           ))}
           <Button
             startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("allowances", { type: "", amount: 0 })}
+            onClick={() => addArrayItem("allowances", { name: "", amount: 0 })}
+            className="mt-2"
           >
             Add Allowance
           </Button>
-
-        </div>
-      </div>
+          <Divider />
+          <p className="font-bold text-xl text-end">Total Allowances - {totalAllowances}</p>
+        </Card>}
 
       {/* Bonuses */}
-      <div className="shadow-md h-fit col-span-1 rounded-lg bg-white p-4 pt-0">
-        <p className="text-xl py-2 font-semibold">Bonuses - {totalBonuses}₹ </p>
-        <Divider />
-        <div>
-          {form?.bonuses.map((a, i) => (
-            <div className="flex gap-4 my-4" key={i}>
-
+      {selectedEmployeedetail &&
+        <Card className="shadow-md col-span-1 p-4 rounded-2xl">
+          <Typography variant="h6">Bonuses</Typography>
+          <Divider />
+          {form.bonuses.map((bonus, index) => (
+            <div key={index} className="flex gap-2 items-center mt-2">
               <TextField
-                className="flex-5"
                 size="small"
-                label="Bonuses"
-                value={a.name}
-                onChange={(e) =>
-                  handleArrayChange("bonuses", i, "name", e.target.value)
-                }
+                label="Name"
+                value={bonus.name}
+                onChange={(e) => handleArrayChange("bonuses", index, "name", e.target.value)}
               />
-
               <TextField
-                className="flex-5"
                 size="small"
+                type="number"
                 label="Amount"
-                value={a.amount}
-                onChange={(e) =>
-                  handleArrayChange("bonuses", i, "amount", e.target.value)
-                }
+                value={bonus.amount}
+                onChange={(e) => handleArrayChange("bonuses", index, "amount", e.target.value)}
               />
-              <div className="flex-1">
-                <IconButton title="Delete this bonus" onClick={() => removeArrayItem("bonuses", i)}>
-                  <MdDelete />
-                </IconButton>
-              </div>
-
+              <IconButton onClick={() => removeArrayItem("bonuses", index)}>
+                <MdDelete />
+              </IconButton>
             </div>
           ))}
           <Button
             startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("bonuses", { type: "", amount: 0 })}
+            onClick={() => addArrayItem("bonuses", { name: "", amount: 0 })}
+            className="mt-2"
           >
-            Add Bonuses
+            Add Bonus
           </Button>
+          <Divider />
+          <p className="font-bold text-xl text-end">Total Bonuses - {totalBonuses}</p>
 
-        </div>
-      </div>
+        </Card>}
 
       {/* Deductions */}
-      <div className="shadow-md h-fit col-span-1 rounded-lg bg-white p-4 pt-0">
-        <p className="text-xl py-2 font-semibold">Deduction - {totalDeductions}₹ </p>
-        <Divider />
-        <div>
-          {form?.deductions.map((a, i) => (
-            <div className="flex gap-4 my-4" key={i}>
-
+      {selectedEmployeedetail &&
+        <Card className="shadow-md col-span-1 p-4 rounded-2xl">
+          <Typography variant="h6">Deductions</Typography>
+          <Divider />
+          {form.deductions.map((deduction, index) => (
+            <div key={index} className="flex gap-2 items-center mt-2">
               <TextField
-                className="flex-5"
                 size="small"
-                label="Deduction"
-                value={a.name}
-                onChange={(e) =>
-                  handleArrayChange("deductions", i, "name", e.target.value)
-                }
+                label="Name"
+                value={deduction.name}
+                onChange={(e) => handleArrayChange("deductions", index, "name", e.target.value)}
               />
-
               <TextField
-                className="flex-5"
                 size="small"
+                type="number"
                 label="Amount"
-                value={a.amount}
-                onChange={(e) =>
-                  handleArrayChange("deductions", i, "amount", e.target.value)
-                }
+                value={deduction.amount}
+                onChange={(e) => handleArrayChange("deductions", index, "amount", e.target.value)}
               />
-              <div className="flex-1">
-                <IconButton title="Delete this deduction" onClick={() => removeArrayItem("deductions", i)}>
-                  <MdDelete />
-                </IconButton>
-              </div>
-
+              <IconButton onClick={() => removeArrayItem("deductions", index)}>
+                <MdDelete />
+              </IconButton>
             </div>
           ))}
           <Button
             startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("deductions", { type: "", amount: 0 })}
+            onClick={() => addArrayItem("deductions", { name: "", amount: 0 })}
+            className="mt-2"
           >
             Add Deduction
           </Button>
-
-        </div>
-      </div>
-
-      {/* final */}
-      <div className="shadow-md h-fit col-span-2 rounded-lg bg-white p-4 pt-0">
-        <p className="text-xl py-2 font-semibold">Final Detail</p>
-        <Divider />
-        <div className="flex flex-col gap-1 p-4">
-          <div className=" flex justify-end gap-3">
-            <p>Base Salary :</p>
-            <p className="w-[60px] ">₹ {selectedEmployeedetail.salary}</p>
-          </div>
-          <div className=" flex justify-end gap-3">
-            <p>Allowances :</p>
-            <p className="w-[60px] ">₹ {totalAllowances}</p>
-          </div>
-          <div className=" flex justify-end gap-3">
-            <p>Bonus :</p>
-            <p className="w-[60px] ">₹ {totalBonuses}</p>
-          </div>
-          <div className=" flex justify-end gap-3">
-            <p>Deduction :</p>
-            <p className="w-[60px] ">-₹ {totalDeductions}</p>
-          </div>
           <Divider />
-          <div className=" flex justify-end gap-3">
-            <p>Total :</p>
-            <p className="w-[60px] ">₹ {selectedEmployeedetail?.salary + totalAllowances + totalBonuses - totalDeductions}</p>
-          </div>
+          <p className="font-bold text-xl text-end">Total Deductions - {totalDeductions}</p>
+
+        </Card>}
+
+      {/* Salary Summary */}
+      {/* <Card className="shadow-md col-span-1 p-4 rounded-2xl">
+        <Typography variant="h6">Salary Summary</Typography>
+        <Divider />
+        <div className="flex flex-col gap-2 mt-3 text-sm">
+          <p>Per Day Salary ({form.calculationBasis}): ₹{perDaySalary.toFixed(2)}</p>
+          <p>Paid Days: {form.paidDays}</p>
+          <p>Gross Salary: ₹{grossSalary.toFixed(2)}</p>
+          <p>Overtime Pay: +₹{overtimePay.toFixed(2)}</p>
+          <p>Leave Deduction: -₹{leaveDeduction.toFixed(2)}</p>
+          <p>Other Deductions: -₹{form.deductions.reduce((a, e) => a + Number(e.amount), 0)}</p>
+          <Divider />
+          <p className="font-bold text-lg">Net Salary: ₹{netSalary.toFixed(2)}</p>
         </div>
-      </div>
+      </Card> */}
+
+      {/* Salary Summary */}
+      {selectedEmployeedetail &&
+        <Card className="shadow-md col-span-2 p-4 rounded-2xl">
+          <Typography variant="h6">Salary Summary</Typography>
+          <Divider />
+          <div className="flex flex-col gap-2 text-right mt-3">
+            <div className=" flex justify-end">
+              <div>Base Salary :</div>
+              <div className="w-[100px] font-semibold">₹{selectedEmployeedetail?.salary || 0}</div>
+            </div>
+            <div className=" flex justify-end">
+              <div>Allowances :</div>
+              <div className="w-[100px] font-semibold">+₹{totalAllowances}</div>
+            </div>
+            <div className=" flex justify-end">
+              <div>Bonuses :</div>
+              <div className="w-[100px] font-semibold">+₹{totalBonuses}</div>
+            </div>
+            <div className=" flex justify-end">
+              <div>Deductions :</div>
+              <div className="w-[100px] font-semibold">-₹{totalDeductions.toFixed(2)}</div>
+            </div>
+
+            <Divider />
+            <div className=" flex justify-end font-bold">
+              <div>Net Salary :</div>
+              <div className="w-[100px]">₹{netSalary.toFixed(2)}</div>
+            </div>
+            {/* <p className="font-bold text-lg">Net Salary: ₹{netSalary.toFixed(2)}</p> */}
+          </div>
+        </Card>
+      }
 
       {/* Submit */}
-      <div className="h-fit col-span-2 ">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={loading || !selectedEmployee}
-        >
-          {loading ? "Saving..." : "Save Payroll"}
-        </Button>
-      </div>
+      {selectedEmployeedetail &&
+        <div className="col-span-2">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={loading || !selectedEmployee}
+          >
+            {loading ? "Saving..." : "Save Payroll"}
+          </Button>
+        </div>}
 
       {success && <p className="text-green-600 mt-2">{success}</p>}
       {error && <p className="text-red-600 mt-2">{error}</p>}
-    </div >
+    </div>
   );
 }
