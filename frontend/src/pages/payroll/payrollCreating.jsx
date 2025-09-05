@@ -49,6 +49,15 @@ export default function PayrollCreatePage() {
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
 
+  function formatRupee(amount) {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  }
+
   const [form, setForm] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
@@ -264,16 +273,27 @@ export default function PayrollCreatePage() {
 
   const grossSalary = useMemo(() => {
     return (
-      (perDaySalary * form.paidDays || 0) +
+      // perDaySalary * form.paidDays || 0) +
+      selectedEmployeedetail?.salary +
       totalAllowances +
-      totalBonuses +
-      overtimePay
+      totalBonuses -
+      totalDeductions
     );
-  }, [perDaySalary, form.paidDays, totalAllowances, totalBonuses, overtimePay]);
+  }, [perDaySalary, form.paidDays, totalAllowances, totalDeductions, totalBonuses, overtimePay]);
+
+  const tax = useMemo(() => {
+    let taxrate = 10;
+    return (
+      ((grossSalary * taxrate) / 100).toFixed(2)
+    );
+  }, [grossSalary]);
 
   const netSalary = useMemo(() => {
-    return selectedEmployeedetail?.salary - totalDeductions;
-  }, [grossSalary, totalDeductions]);
+    return grossSalary - tax;
+  }, [grossSalary, tax]);
+  // const netSalary = useMemo(() => {
+  //   return selectedEmployeedetail?.salary - totalDeductions;
+  // }, [grossSalary, totalDeductions]);
 
   const handleArrayChange = (field, index, key, value) => {
     const updated = [...form[field]];
@@ -288,13 +308,14 @@ export default function PayrollCreatePage() {
     // OVERTIME
     updatedBonuses = updatedBonuses.filter(b => b.name !== "Overtime");
     if (options.addOvertime && overtimePay > 0) {
-      updatedBonuses.push({ name: "Overtime", amount: overtimePay.toFixed(2) });
+      const OvertTimeBonus = basic.overtime * perminuteRate;
+      updatedBonuses.push({ name: "Overtime", amount: OvertTimeBonus.toFixed(2) });
     }
 
     // SHORT TIME
     updatedDeductions = updatedDeductions.filter(d => d.name !== "Short Time");
     if (options.deductShortTime && basic.shortmin > 0) {
-      const shortTimeDeduction = (basic.shortmin / 60) * perDaySalary;
+      const shortTimeDeduction = basic.shortmin * perminuteRate;
       updatedDeductions.push({ name: "Short Time", amount: shortTimeDeduction.toFixed(2) });
     }
 
@@ -355,7 +376,7 @@ export default function PayrollCreatePage() {
   };
 
   return (
-    <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-6 space-y-6">
+    <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-6 space-y-1">
       {/* Employee Selection */}
       <Card className="shadow-md col-span-2 p-4 rounded-2xl">
         <Typography variant="h6" gutterBottom>
@@ -366,6 +387,7 @@ export default function PayrollCreatePage() {
           <FormControl size="small">
             <InputLabel>Month</InputLabel>
             <Select
+            label="Month"
               value={form.month}
               onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
             >
@@ -380,6 +402,7 @@ export default function PayrollCreatePage() {
           <FormControl size="small">
             <InputLabel>Year</InputLabel>
             <Select
+              label="year"
               value={form.year}
               onChange={(e) => setForm((prev) => ({ ...prev, year: e.target.value }))}
             >
@@ -394,6 +417,7 @@ export default function PayrollCreatePage() {
           <FormControl size="small">
             <InputLabel>Calc. Basis</InputLabel>
             <Select
+              label="Calc. Basis"
               value={form.calculationBasis}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, calculationBasis: e.target.value }))
@@ -409,8 +433,9 @@ export default function PayrollCreatePage() {
             className="col-span-1"
             size="small"
           >
-            <InputLabel>Employee</InputLabel>
+            <InputLabel>Select Employee</InputLabel>
             <Select
+              label="Select Employee"
               value={selectedEmployee}
               onChange={(e) => setSelectedEmployee(e.target.value)}
             >
@@ -432,19 +457,28 @@ export default function PayrollCreatePage() {
         <Card className="shadow-md col-span-2 p-4 rounded-2xl">
           <Typography variant="h6">Adjustments</Typography>
           <Divider />
-          <div className="flex flex-col gap-2 mt-3">
-            <FormControlLabel
-              control={<Checkbox checked={options.addOvertime} onChange={(e) => setOptions(p => ({ ...p, addOvertime: e.target.checked }))} />}
-              label="Add Overtime as Bonus"
-            />
-            <FormControlLabel
-              control={<Checkbox checked={options.deductShortTime} onChange={(e) => setOptions(p => ({ ...p, deductShortTime: e.target.checked }))} />}
-              label="Deduct Short Time"
-            />
-            <FormControlLabel
-              control={<Checkbox checked={options.deductAbsent} onChange={(e) => setOptions(p => ({ ...p, deductAbsent: e.target.checked }))} />}
-              label="Deduct Absent Days"
-            />
+          <div className="flex flex-col gap-2 mt-4">
+            {basic?.overtime ?
+              <FormControlLabel
+                control={<Checkbox checked={options.addOvertime} onChange={(e) => setOptions(p => ({ ...p, addOvertime: e.target.checked }))} />}
+                label="Add Overtime as Bonus"
+              /> : ''
+            }
+
+            {basic?.shortmin ?
+              <FormControlLabel
+                control={<Checkbox checked={options.deductShortTime} onChange={(e) => setOptions(p => ({ ...p, deductShortTime: e.target.checked }))} />}
+                label="Deduct Short Time"
+              /> : ''
+            }
+
+            {form?.absentDays ?
+              <FormControlLabel
+                control={<Checkbox checked={options.deductAbsent} onChange={(e) => setOptions(p => ({ ...p, deductAbsent: e.target.checked }))} />}
+                label="Deduct Absent Days"
+              /> : ''
+            }
+
             <div className="flex items-center gap-4">
               <FormControlLabel
                 control={<Checkbox checked={options.adjustLeave} onChange={(e) => setOptions(p => ({ ...p, adjustLeave: e.target.checked }))} />}
@@ -466,29 +500,89 @@ export default function PayrollCreatePage() {
 
       {/* Attendance Summary */}
       {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-1 p-4 rounded-2xl">
+        <Card className="shadow-md col-span-2 p-4 rounded-2xl">
           <Typography variant="h6">Attendance Summary</Typography>
           <Divider />
-          <div className="flex flex-col gap-2 mt-3 text-sm">
-            <p>Total Days: {basic.totalDays}</p>
-            <p>Holidays: {basic.holidaysCount}</p>
-            <p>Weekly Offs: {basic.weeklyOff}</p>
-            <p>Working Days: {basic.workingDays}</p>
-            <p>Present Days: {form.presentDays}</p>
-            <p>Leave Days: {form.leaveDays} @ {perDaySalary}</p>
-            <p>Absent Days: {form.absentDays}</p>
-            <p>Overtime (minutes): {basic.overtime} min @{perminuteRate}</p>
-            <p>ShortTime (minutes): {basic.shortmin} min @{perminuteRate}</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2 mt-4 text-sm">
+              {/* <p>Total Days: {basic.totalDays}</p> */}
+              <TextField
+                size="small"
+                label="Total Days"
+                value={basic.totalDays}
+              />
+              <TextField
+                size="small"
+                label="Holidays"
+                value={basic.holidaysCount}
+              />
+              <TextField
+                size="small"
+                label="Weekly Offs"
+                value={basic.weeklyOff}
+              />
+              <TextField
+                size="small"
+                label="Working Days"
+                value={basic.workingDays}
+              />
+              <TextField
+                size="small"
+                label="Present Days"
+                value={form.presentDays || 0}
+              />
+              <TextField
+                size="small"
+                label="Leave Days"
+                value={form.leaveDays || 0} //{perDaySalary}
+              />
+              <TextField
+                size="small"
+                label="Absent Days"
+                value={form.absentDays || 0} //{perDaySalary}
+              />
+            </div>
+            <Divider />
+            <div className="flex gap-2">
+              <TextField
+                size="small"
+                label="OverTime Minutes"
+                value={basic.overtime || 0}
+              />
+              <TextField
+                size="small"
+                label="ShortTime Minutes"
+                value={basic.shortmin || 0}
+              />
+              <TextField
+                size="small"
+                label="Per day Salary"
+                value={formatRupee(perDaySalary)}
+                helperText="For Leave/Absent Calculations"
+              />
+              <TextField
+                size="small"
+                label="Per minute Salary"
+                value={formatRupee(perminuteRate)}
+                helperText="For OverTime/ShortTime Calculations"
+              />
+
+              {/* <p>Overtime (minutes): {basic.overtime} min @{perminuteRate}</p>
+              <p>ShortTime (minutes): {basic.shortmin} min @{perminuteRate}</p> */}
+            </div>
           </div>
         </Card>}
 
       {/* Allowances */}
       {selectedEmployeedetail &&
         <Card className="shadow-md col-span-1 p-4 rounded-2xl">
-          <Typography variant="h6">Allowances</Typography>
+          <div className="flex justify-between">
+            <Typography variant="h6">Allowances</Typography>
+            <Typography variant="h6">{formatRupee(totalAllowances)}</Typography>
+          </div>
           <Divider />
           {form.allowances.map((allowance, index) => (
-            <div key={index} className="flex gap-2 items-center mt-2">
+            <div key={index} className="flex gap-2 items-center mt-4">
               <TextField
                 size="small"
                 label="Name"
@@ -514,17 +608,18 @@ export default function PayrollCreatePage() {
           >
             Add Allowance
           </Button>
-          <Divider />
-          <p className="font-bold text-xl text-end">Total Allowances - {totalAllowances}</p>
         </Card>}
 
       {/* Bonuses */}
       {selectedEmployeedetail &&
         <Card className="shadow-md col-span-1 p-4 rounded-2xl">
-          <Typography variant="h6">Bonuses</Typography>
+          <div className="flex justify-between">
+            <Typography variant="h6">Bonuses</Typography>
+            <Typography variant="h6">{formatRupee(totalBonuses)}</Typography>
+          </div>
           <Divider />
           {form.bonuses.map((bonus, index) => (
-            <div key={index} className="flex gap-2 items-center mt-2">
+            <div key={index} className="flex gap-2 items-center mt-4">
               <TextField
                 size="small"
                 label="Name"
@@ -550,18 +645,18 @@ export default function PayrollCreatePage() {
           >
             Add Bonus
           </Button>
-          <Divider />
-          <p className="font-bold text-xl text-end">Total Bonuses - {totalBonuses}</p>
-
         </Card>}
 
       {/* Deductions */}
       {selectedEmployeedetail &&
         <Card className="shadow-md col-span-1 p-4 rounded-2xl">
-          <Typography variant="h6">Deductions</Typography>
+          <div className="flex justify-between">
+            <Typography variant="h6">Deductions</Typography>
+            <Typography variant="h6">{formatRupee(totalDeductions)}</Typography>
+          </div>
           <Divider />
           {form.deductions.map((deduction, index) => (
-            <div key={index} className="flex gap-2 items-center mt-2">
+            <div key={index} className="flex gap-2 items-center mt-4">
               <TextField
                 size="small"
                 label="Name"
@@ -587,10 +682,7 @@ export default function PayrollCreatePage() {
           >
             Add Deduction
           </Button>
-          <Divider />
-          <p className="font-bold text-xl text-end">Total Deductions - {totalDeductions}</p>
-
-        </Card>}
+         </Card>}
 
       {/* Salary Summary */}
       {/* <Card className="shadow-md col-span-1 p-4 rounded-2xl">
@@ -610,33 +702,42 @@ export default function PayrollCreatePage() {
 
       {/* Salary Summary */}
       {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-2 p-4 rounded-2xl">
+        <Card className="shadow-md col-span-1 p-4 rounded-2xl">
           <Typography variant="h6">Salary Summary</Typography>
           <Divider />
           <div className="flex flex-col gap-2 text-right mt-3">
             <div className=" flex justify-end">
               <div>Base Salary :</div>
-              <div className="w-[100px] font-semibold">₹{selectedEmployeedetail?.salary || 0}</div>
+              {/* <div className="w-[100px] font-semibold">₹{selectedEmployeedetail?.salary || 0}</div> */}
+              <div className="w-[100px] font-semibold">{formatRupee(selectedEmployeedetail?.salary || 0)}</div>
             </div>
             <div className=" flex justify-end">
               <div>Allowances :</div>
-              <div className="w-[100px] font-semibold">+₹{totalAllowances}</div>
+              <div className="w-[100px] font-semibold">+{formatRupee(totalAllowances)}</div>
             </div>
             <div className=" flex justify-end">
               <div>Bonuses :</div>
-              <div className="w-[100px] font-semibold">+₹{totalBonuses}</div>
+              <div className="w-[100px] font-semibold">+{formatRupee(totalBonuses)}</div>
             </div>
             <div className=" flex justify-end">
               <div>Deductions :</div>
-              <div className="w-[100px] font-semibold">-₹{totalDeductions.toFixed(2)}</div>
+              <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
             </div>
 
             <Divider />
             <div className=" flex justify-end font-bold">
-              <div>Net Salary :</div>
-              <div className="w-[100px]">₹{netSalary.toFixed(2)}</div>
+              <div>Gross Salary :</div>
+              <div className="w-[100px]">{formatRupee(grossSalary)}</div>
             </div>
-            {/* <p className="font-bold text-lg">Net Salary: ₹{netSalary.toFixed(2)}</p> */}
+            <div className=" flex justify-end">
+              <div>Tax :</div>
+              <div className="w-[100px]">{formatRupee(tax)}</div>
+            </div>
+            <Divider />
+            <div className=" flex justify-end font-bold">
+              <div>Net Salary :</div>
+              <div className="w-[100px]">{formatRupee(netSalary)}</div>
+            </div>
           </div>
         </Card>
       }
