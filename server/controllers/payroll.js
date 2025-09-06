@@ -39,7 +39,7 @@ exports.createPayroll = async (req, res, next) => {
       department,
       salary = 0,
       designation,
-      avaiableLeaves = 0,
+      availableLeaves = 0,
       advance = 0,
     } = whichEmployee;
 
@@ -87,9 +87,15 @@ exports.createPayroll = async (req, res, next) => {
 
     // 🔹 Update employee leaves & advance
     if (options.adjustLeave) {
-      whichEmployee.avaiableLeaves = avaiableLeaves - options.adjustedLeaveCount;
+      if (options.adjustedLeaveCount > availableLeaves) {
+        return next({ status: 400, message: "Adjusted Leave can't be more than available leaves" });
+      }
+      whichEmployee.availableLeaves = availableLeaves - options.adjustedLeaveCount;
     }
     if (options.adjustAdvance) {
+       if (options.adjustedAdvance > advance) {
+        return next({ status: 400, message: "Adjusted Advance can't be more than Advance Balance" });
+      }
       whichEmployee.advance = advance - options.adjustedAdvance;
     }
 

@@ -79,7 +79,7 @@ const employeeSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    avaiableLeaves: {
+    availableLeaves: {
         type: Number,
         default: 0
     },

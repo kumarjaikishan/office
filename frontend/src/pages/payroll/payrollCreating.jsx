@@ -97,8 +97,9 @@ export default function PayrollCreatePage() {
   const [options, setOptions] = useState(optionsinit);
 
   // Assume each employee has a paid leave balance (mock if not in DB)
-  const availablePaidLeaves = selectedEmployeedetail?.avaiableLeaves;
-  const advance = selectedEmployeedetail?.advance ;
+  const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
+  // const availablePaidLeaves = 1;
+  const advance = selectedEmployeedetail?.advance;
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -387,7 +388,7 @@ export default function PayrollCreatePage() {
     // console.log(options)
     // console.log(selectedEmployeedetail)
     // return
-    return toast.info('This service is not Enabled Yet')
+    // return toast.info('This service is not Enabled Yet')
     const fields = {
       employeeId: selectedEmployeedetail._id,
       calculationBasis: form.calculationBasis,
@@ -423,7 +424,8 @@ export default function PayrollCreatePage() {
           }
         }
       );
-
+      console.log(res)
+      toast.success(res.data.message)
       setSuccess("Payroll created successfully!");
 
     } catch (error) {
@@ -527,36 +529,43 @@ export default function PayrollCreatePage() {
             <div className="grid grid-cols-2 gap-2 mt-4 text-sm md:flex md:flex-wrap">
               {/* <p>Total Days: {basic.totalDays}</p> */}
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Total Days"
                 value={basic.totalDays}
               />
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Holidays"
                 value={basic.holidaysCount}
               />
               <TextField
                 size="small"
+                className="m max-w-full md:max-w-[120px]"
                 label="Weekly Offs"
                 value={basic.weeklyOff}
               />
               <TextField
                 size="small"
+                className="m max-w-full md:max-w-[120px]"
                 label="Working Days"
                 value={basic.workingDays}
               />
               <TextField
                 size="small"
+                className="m max-w-full md:max-w-[120px]"
                 label="Present Days"
                 value={form.presentDays || 0}
               />
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Leave Days"
                 value={form.leaveDays || 0} //{perDayRate}
               />
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Absent Days"
                 value={form.absentDays || 0} //{perDayRate}
@@ -634,7 +643,7 @@ export default function PayrollCreatePage() {
                     size="small"
                     className="w-full md:w-[120px]"
                     label="Adjust Count"
-                    inputProps={{ min: 0, max: form.leaveDays }}
+                    inputProps={{ min: 0, max: availablePaidLeaves }}
                     value={options.adjustedLeaveCount}
                     onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}
                   />
