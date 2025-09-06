@@ -84,7 +84,7 @@ export default function PayrollCreatePage() {
     shortmin: 0,
   });
 
-  const [options, setOptions] = useState({
+  const optionsinit = {
     addOvertime: false,
     deductShortTime: false,
     deductAbsent: false,
@@ -92,11 +92,13 @@ export default function PayrollCreatePage() {
     adjustAdvance: false,
     adjustedLeaveCount: 0, // how many leaves user wants to adjust
     adjustedAdvance: 0, // how many leaves user wants to adjust
-  });
+  }
+
+  const [options, setOptions] = useState(optionsinit);
 
   // Assume each employee has a paid leave balance (mock if not in DB)
-  const availablePaidLeaves = selectedEmployeedetail?.avaiableLeaves || 3;
-  const advance = selectedEmployeedetail?.advance || 1500;
+  const availablePaidLeaves = selectedEmployeedetail?.avaiableLeaves;
+  const advance = selectedEmployeedetail?.advance ;
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -155,6 +157,7 @@ export default function PayrollCreatePage() {
     if (!attandence || !selectedEmployee) return;
 
     const selected = employees.find((e) => e._id === selectedEmployee);
+    setOptions(optionsinit)
     setSelectedEmployeedetail(selected);
 
     const monthStart = dayjs(`${form.year}-${String(form.month).padStart(2, "0")}-01`);
