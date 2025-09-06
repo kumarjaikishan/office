@@ -88,7 +88,13 @@ router.route('/getAdmin').get(authmiddlewre, authorizeRoles('superadmin'), admin
 router.route('/editAdmin/:id').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.editAdmin);
 router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmin'), admin.deleteAdmin);
 
-router.route('/addpayroll').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), payroll.createPayroll);
+router.route('/payroll')
+.post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), payroll.createPayroll)
+.get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), payroll.allPayroll)
+
+router.route('/payroll/:id')
+.get(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), payroll.getPayroll)
+
 
 router.route('/developerfetch').get(authmiddlewre, authorizeRoles('developer'), developer.allUser);
 router.route('/User').post(authmiddlewre, authorizeRoles('developer'), developer.addUser)

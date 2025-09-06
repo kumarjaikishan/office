@@ -13,6 +13,7 @@ import { FaRegUser } from 'react-icons/fa';
 import PayrollPage from './pages/payroll/payroll';
 import PayrollCreatePage from './pages/payroll/payrollCreating';
 import AttendanceReport from './pages/report/attandenceReport';
+import PayrollPrint from './pages/payroll/payrollprint';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -70,7 +71,8 @@ const routesByRole = {
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
       <Route path="payroll" element={<PayrollCreatePage />} />
-      <Route path="viewpayroll/:employeeId" element={<PayrollPage />} />
+      <Route path="payrolle" element={<PayrollPage />} />
+      <Route path="payrollPrint/:id" element={<PayrollPrint />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
@@ -92,7 +94,8 @@ const routesByRole = {
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
       <Route path="payroll" element={<PayrollCreatePage />} />
-      <Route path="payroll/:employeeId" element={<PayrollPage />} />
+      <Route path="payrolle" element={<PayrollPage />} />
+      <Route path="payrollPrint/:id" element={<PayrollPrint />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
@@ -111,7 +114,8 @@ const routesByRole = {
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
       <Route path="performance/:userid" element={<AttenPerformance />} />
       <Route path="payroll" element={<PayrollCreatePage />} />
-      <Route path="payroll/:employeeId" element={<PayrollPage />} />
+      <Route path="payrolle" element={<PayrollPage />} />
+      <Route path="payrollPrint/:id" element={<PayrollPrint />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),

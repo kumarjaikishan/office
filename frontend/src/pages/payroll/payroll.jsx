@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useNavigation, useParams } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -11,137 +11,90 @@ import {
   Button,
   Grid,
 } from "@mui/material";
+import { toast } from "react-toastify";
+import DataTable from "react-data-table-component";
+import { useCustomStyles } from "../admin/attandence/attandencehelper";
+import { BiMessageRoundedError } from "react-icons/bi";
+import dayjs from "dayjs";
+import { payrollColumns } from "./payrollhelper";
 
 export default function PayrollPage() {
   const { employeeId } = useParams();
   const [loading, setLoading] = useState(true);
   const [payroll, setPayroll] = useState(null);
   const [error, setError] = useState(null);
+  let navigate = useNavigate();
 
   useEffect(() => {
     const fetchPayroll = async () => {
       try {
         setLoading(true);
-        const res = await axios.post("/api/payroll/process", {
-          employeeId,
-          month: new Date().getMonth() + 1,
-          year: new Date().getFullYear(),
-        });
-        setPayroll(res.data.payroll);
-      } catch (err) {
-        setError(err.response?.data?.message || "Something went wrong");
+        setError(null);
+
+        const token = localStorage.getItem('emstoken');
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_ADDRESS}payroll`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        console.log(res.data.payrolls)
+        setPayroll(res?.data?.payrolls)
+
+      } catch (error) {
+        console.log(error);
+        if (error.response) {
+          setError(error.response?.data?.message || "Failed to create payroll");
+          toast.warn(error.response.data.message, { autoClose: 1200 });
+        } else if (error.request) {
+          console.error('No response from server:', error.request);
+        } else {
+          console.error('Error:', error.message);
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchPayroll();
-  }, [employeeId]);
+  }, []);
 
-//   if (loading) return <p className="p-4 text-gray-500">Calculating payroll...</p>;
-//   if (error) return <p className="p-4 text-red-500">{error}</p>;
-//   if (!payroll) return <p className="p-4 text-gray-500">No payroll data found</p>;
+  const handleView = (row) => {
+    console.log("Viewing", row);
+    navigate(`/dashboard/payrollPrint/${row._id}`)
+  };
+
+  const handleEdit = (row) => {
+    console.log("Editing", row);
+  };
+
+  const handleDelete = (row) => {
+    console.log("Deleting", row);
+  };
+  //   if (loading) return <p className="p-4 text-gray-500">Calculating payroll...</p>;
+  //   if (error) return <p className="p-4 text-red-500">{error}</p>;
+  if (!payroll) return <p className="p-4 text-gray-500">No payroll data found</p>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <Card className="shadow-md rounded-2xl">
-        <CardHeader
-          title={`Payroll for ${payroll?.month}/${payroll?.year}`}
-          className="bg-gray-100 rounded-t-2xl"
+
+      <div>
+        <DataTable
+          columns={payrollColumns(handleView, handleEdit, handleDelete)}
+          data={payroll}
+          pagination
+          // customStyles={useCustomStyles()}
+          highlightOnHover
+          paginationPerPage={20}
+          paginationRowsPerPageOptions={[20, 50, 100, 300]}
+          noDataComponent={
+            <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+              <BiMessageRoundedError className="text-xl" /> No Employee records found.
+            </div>
+          }
         />
-        <Divider />
-
-        <CardContent>
-          <Grid container spacing={2}>
-            {/* Base / Gross */}
-            <Grid item xs={6}>
-              <Typography variant="body1">
-                <strong>Base Salary:</strong> ₹{payroll.baseSalary}
-              </Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body1">
-                <strong>Gross Salary:</strong> ₹{payroll.grossSalary}
-              </Typography>
-            </Grid>
-
-            {/* Allowances */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" className="text-gray-600">Allowances</Typography>
-              {payroll.allowances.map((a, i) => (
-                <Typography key={i}>+ {a.type}: ₹{a.amount}</Typography>
-              ))}
-            </Grid>
-
-            {/* Bonuses */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" className="text-gray-600">Bonuses</Typography>
-              {payroll.bonuses?.length > 0 ? (
-                payroll.bonuses.map((b, i) => (
-                  <Typography key={i}>+ {b.type}: ₹{b.amount}</Typography>
-                ))
-              ) : (
-                <Typography className="text-sm text-gray-500">None</Typography>
-              )}
-            </Grid>
-
-            {/* Overtime */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" className="text-gray-600">Overtime</Typography>
-              {payroll.overtime?.hours > 0 ? (
-                <Typography>
-                  {payroll.overtime.hours} hrs × ₹{payroll.overtime.ratePerHour} = ₹{payroll.overtime.amount}
-                </Typography>
-              ) : (
-                <Typography className="text-sm text-gray-500">None</Typography>
-              )}
-            </Grid>
-
-            {/* Deductions */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" className="text-gray-600">Deductions</Typography>
-              {payroll.deductions.length > 0 ? (
-                payroll.deductions.map((d, i) => (
-                  <Typography key={i}>- {d.type}: ₹{d.amount}</Typography>
-                ))
-              ) : (
-                <Typography className="text-sm text-gray-500">None</Typography>
-              )}
-            </Grid>
-
-            {/* Other Deductions */}
-            <Grid item xs={12}>
-              <Typography variant="subtitle2" className="text-gray-600">Other Deductions</Typography>
-              {payroll.otherDeductions?.length > 0 ? (
-                payroll.otherDeductions.map((d, i) => (
-                  <Typography key={i}>- {d.reason}: ₹{d.amount}</Typography>
-                ))
-              ) : (
-                <Typography className="text-sm text-gray-500">None</Typography>
-              )}
-            </Grid>
-
-            {/* Attendance */}
-            <Grid item xs={4}><Typography>Leave Days: {payroll.leaveDays}</Typography></Grid>
-            <Grid item xs={4}><Typography>Absent Days: {payroll.absentDays}</Typography></Grid>
-            <Grid item xs={4}><Typography>Paid Days: {payroll.paidDays}</Typography></Grid>
-
-            {/* Totals */}
-            <Grid item xs={12}>
-              <Divider className="my-3" />
-              <Typography><strong>Total Deductions:</strong> ₹{payroll.totalDeductions}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h6" className="text-green-700 font-bold">
-                Net Salary: ₹{payroll.netSalary}
-              </Typography>
-            </Grid>
-          </Grid>
-        </CardContent>
-
-        <CardActions className="flex justify-end p-4">
-          <Button variant="contained" color="primary">Generate Payslip</Button>
-        </CardActions>
-      </Card>
+      </div>
     </div>
   );
 }

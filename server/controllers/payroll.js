@@ -93,7 +93,7 @@ exports.createPayroll = async (req, res, next) => {
       whichEmployee.availableLeaves = availableLeaves - options.adjustedLeaveCount;
     }
     if (options.adjustAdvance) {
-       if (options.adjustedAdvance > advance) {
+      if (options.adjustedAdvance > advance) {
         return next({ status: 400, message: "Adjusted Advance can't be more than Advance Balance" });
       }
       whichEmployee.advance = advance - options.adjustedAdvance;
@@ -113,3 +113,47 @@ exports.createPayroll = async (req, res, next) => {
     return next({ status: 500, message: error.message });
   }
 };
+
+exports.allPayroll = async (req, res, next) => {
+  try {
+    // 🔹 Find employee
+    let payrolls;
+
+    if (req.user.role == 'manager') {
+      payrolls = await Payroll.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
+        .select('branchId companyId department employeeId month year name status')
+    } else {
+      payrolls = await Payroll.find({ companyId: req.user.companyId })
+        .select('branchId companyId department employeeId month year name status')
+    }
+
+    return res.status(201).json({ payrolls });
+  } catch (error) {
+    console.error(error);
+    return next({ status: 500, message: error.message });
+  }
+};
+
+exports.getPayroll = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const payroll = await Payroll.findById(id);
+
+    if (!payroll) {
+      return next({ status: 404, message: "Payroll not found" });
+    }
+
+    // Manager role restriction
+    if (req.user.role === "manager") {
+      if (!req.user.branchIds.includes(payroll?.branchId?.toString())) {
+        return next({ status: 403, message: "You are not authorized" });
+      }
+    }
+
+    return res.status(200).json({ payroll });
+  } catch (error) {
+    console.error(error);
+    return next({ status: 500, message: "Internal Server Error" });
+  }
+};
+

@@ -416,7 +416,7 @@ export default function PayrollCreatePage() {
 
       const token = localStorage.getItem('emstoken');
       const res = await axios.post(
-        `${import.meta.env.VITE_API_ADDRESS}addpayroll`,
+        `${import.meta.env.VITE_API_ADDRESS}payroll`,
         { ...fields },
         {
           headers: {
