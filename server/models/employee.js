@@ -73,6 +73,15 @@ const employeeSchema = new mongoose.Schema({
     },
     salary: {
         type: Number,
+        default: 0
+    },
+    advance: {
+        type: Number,
+        default: 0
+    },
+    avaiableLeaves: {
+        type: Number,
+        default: 0
     },
     status: {
         type: Boolean,

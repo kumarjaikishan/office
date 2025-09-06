@@ -3,6 +3,7 @@ const app = express();
 const router = express.Router();
 const users = require('../controllers/user');
 const admin = require('../controllers/admin');
+const payroll = require('../controllers/payroll');
 const salary = require('../controllers/salary');
 const ledger = require("../controllers/ledger");
 const attendance = require('../controllers/attandence');
@@ -72,7 +73,7 @@ router.route('/deleteattandence').post(authmiddlewre, authorizeRoles('superadmin
 router.route('/getholidays').get(authmiddlewre, holiday.getholidays);
 router.route('/addholiday').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("holiday", 2), holiday.addholiday);
 router.route('/updateholiday').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("holiday", 3), holiday.updateholiday);
-router.route('/deleteholiday').post(authmiddlewre, authorizeRoles('superadmin','admine', 'manager'), checkPermission("holiday", 4), holiday.deleteholiday);
+router.route('/deleteholiday').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), checkPermission("holiday", 4), holiday.deleteholiday);
 
 router.route('/addleave').post(authmiddlewre, authorizeRoles('employee'), employee.addleave);
 router.route('/getleave').get(authmiddlewre, employee.getleave);
@@ -86,6 +87,8 @@ router.route('/update-profile').post(authmiddlewre, authorizeRoles('superadmin')
 router.route('/getAdmin').get(authmiddlewre, authorizeRoles('superadmin'), admin.getAdmin);
 router.route('/editAdmin/:id').post(authmiddlewre, authorizeRoles('superadmin'), upload.single('photo'), admin.editAdmin);
 router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmin'), admin.deleteAdmin);
+
+router.route('/addpayroll').post(authmiddlewre, authorizeRoles('superadmin','admin', 'manager'), payroll.createPayroll);
 
 router.route('/developerfetch').get(authmiddlewre, authorizeRoles('developer'), developer.allUser);
 router.route('/User').post(authmiddlewre, authorizeRoles('developer'), developer.addUser)
