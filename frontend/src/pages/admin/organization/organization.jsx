@@ -42,6 +42,7 @@ export default function OrganizationSettings() {
         name: '',
         address: '',
         contact: '',
+        fullname: '',
         officeTime: { in: '10:00', out: '18:00', breakMinutes: 30 },
         gracePeriod: { lateEntryMinutes: 10, earlyExitMinutes: 10 },
         workingMinutes: {
@@ -212,33 +213,56 @@ export default function OrganizationSettings() {
                             <div className="w-full md:w-[70%] flex flex-col gap-3">
                                 <div className='flex flex-wrap gap-2'>
                                     <div className='w-full md:flex-1'>
-                                        <label className="block">Company Name</label>
-                                        <input
-                                            type="text"
+                                        <TextField
+                                            label="Company Name"
+                                            variant="outlined"
+                                            fullWidth
+                                            value={companyinp?.name || ""}
                                             onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
-                                            value={companyinp?.name}
-                                            className="w-full border rounded px-3 py-2"
                                         />
                                     </div>
 
                                     <div className='w-full md:flex-1'>
-                                        <label className="block">Contact</label>
-                                        <input
-                                            type="text"
-                                            onChange={(e) => setcompany({ ...companyinp, contact: e.target.value })}
-                                            value={companyinp?.contact}
-                                            className="w-full border rounded px-3 py-2"
+                                        <TextField
+                                            label="Contact"
+                                            type='tel'
+                                            variant="outlined"
+                                            fullWidth
+                                            value={companyinp?.contact || ""}
+                                            inputProps={{
+                                                maxLength: 10,          // limit to 10 characters
+                                                inputMode: "numeric",   // mobile keyboards show numbers
+                                                pattern: "[0-9]*"       // restrict to numbers
+                                            }}
+                                            onChange={(e) =>
+                                                setcompany({
+                                                    ...companyinp,
+                                                    contact: e.target.value.replace(/\D/g, "") // remove non-digits
+                                                })
+                                            }
                                         />
                                     </div>
                                 </div>
 
                                 <div >
-                                    <label className="block">Address</label>
-                                    <input
-                                        type="text"
+                                    <TextField
+                                        label="Company Full Name"
+                                        variant="outlined"
+                                        fullWidth
+                                        
+                                        value={companyinp?.fullname || ""}
+                                        onChange={(e) => setcompany({ ...companyinp, fullname: e.target.value })}
+                                    />
+                                </div>
+                                <div >
+                                    <TextField
+                                        label="Address"
+                                        variant="outlined"
+                                        fullWidth
+                                        multiline
+                                        minRows={2}
+                                        value={companyinp?.address || ""}
                                         onChange={(e) => setcompany({ ...companyinp, address: e.target.value })}
-                                        value={companyinp?.address}
-                                        className="w-full border rounded px-3 py-2"
                                     />
                                 </div>
 

@@ -393,13 +393,12 @@ export default function PayrollCreatePage() {
       employeeId: selectedEmployeedetail._id,
       calculationBasis: form.calculationBasis,
       options,
+      basic,
       month: form.month,
       year: form.year,
       present: form.presentDays,
       leave: form.leaveDays,
       absent: form.absentDays,
-      overtime: basic.overtime,
-      shortTime: basic.shortmin,
       allowances: form.allowances,
       bonuses: form.bonuses,
       deductions: form.deductions,
@@ -643,7 +642,10 @@ export default function PayrollCreatePage() {
                     size="small"
                     className="w-full md:w-[120px]"
                     label="Adjust Count"
-                    inputProps={{ min: 0, max: availablePaidLeaves }}
+                    inputProps={{
+                      min: 0,
+                      max: Math.min(availablePaidLeaves, form.leaveDays)
+                    }}
                     value={options.adjustedLeaveCount}
                     onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}
                   />

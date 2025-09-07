@@ -9,9 +9,21 @@ const payrollSchema = new mongoose.Schema({
   year: { type: Number, required: true },
 
   name: { type: String, required: true },
+  profileimage: { type: String, default: '' },
+  phone: { type: String, default: '' },
+  address: { type: String, default: '' },
+
+  guardian: {
+    realtion: { type: String, },
+    name: { type: String },
+  },
   department: { type: String, required: true },
   designation: { type: String, required: true },
 
+  monthDays: { type: Number, required: true },
+  holidays: { type: Number, default: 0 },
+  weekOffs: { type: Number, default: 0 },
+  workingDays: { type: Number, default: 0 },
   present: { type: Number, default: 0 },
   leave: { type: Number, default: 0 },
   absent: { type: Number, default: 0 },
@@ -20,22 +32,25 @@ const payrollSchema = new mongoose.Schema({
 
   baseSalary: { type: Number, required: true },
 
-  allowances: [{
-    type: { type: String },
-    amount: { type: Number, default: 0 }
-  }],
   options: {
     type: Object,
     required: true
   },
 
+  allowances: [{
+    name: { type: String },
+    amount: { type: Number, default: 0 },
+    extraInfo: { type: String, default: '' },
+  }],
+
   bonuses: [{
-    type: { type: String },
-    amount: { type: Number, default: 0 }
+    name: { type: String },
+    amount: { type: Number, default: 0 },
+    extraInfo: { type: String, default: '' },
   }],
 
   deductions: [{
-    type: { type: String },
+    name: { type: String },
     amount: { type: Number, default: 0 },
     extraInfo: { type: String, default: '' },
   }],

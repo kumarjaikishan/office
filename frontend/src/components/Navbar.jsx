@@ -128,7 +128,7 @@ const Navbar = () => {
   const isMobile = window.innerWidth < 600;
 
   return (
-    <div className='navbar h-[50px] w-full bg-white flex items-center justify-between px-1 md:px-4 py-2'>
+    <div className='navbar no-print h-[50px] w-full bg-white flex items-center justify-between px-1 md:px-4 py-2'>
       <div className='flex ml-1 md:ml-0 items-center gap-2'>
         <FaBarsStaggered onClick={() => dispatch(tooglesidebar())} className='cur cursor-pointer' size={25} />
         <p className='font-semibold text-[14px] md:text-xl'>{pageTitle}</p>

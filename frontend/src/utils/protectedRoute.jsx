@@ -41,18 +41,10 @@ const ProtectedRoutes = ({ allowedRoles = [] }) => {
       ? "w-[180px]"
       : "w-[70px]";
 
-  // const sidebarWidth = isMobile
-  //   ? sidebarOpen
-  //     ? "w-[60px]"   // 📱 mobile open → 60px
-  //     : "w-0"        // 📱 mobile closed → 0px
-  //   : sidebarOpen
-  //     ? "w-[180px]"  // 💻 desktop open → 180px
-  //     : "w-[70px]";  // 💻 desktop closed → 70px
-
   return isAllowed ? (
     <div className="h-screen w-full flex bg-amber-200">
       {/* Sidebar */}
-      <div className={`${sidebarWidth} bg-white shadow-xl transition-all duration-300 overflow-hidden`}>
+      <div className={`${sidebarWidth} no-print bg-white shadow-xl transition-all duration-300 overflow-hidden`}>
         <Sidebar />
       </div>
 

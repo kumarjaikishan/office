@@ -23,6 +23,7 @@
 .text-primary {
     color: var(--color-primary);
 }
+
 .border-primary {
     border-color: var(--color-primary);
 }
@@ -94,82 +95,94 @@ body {
     padding-top: var(--navbarheight);
     background: rgb(240, 242, 246);
 }
+
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .membermodal {
     width: 680px;
     max-width: 100%;
-    height: max-content;
     max-height: 95vh;
-    overflow: hidden;
-    overflow-y: auto;
     border-radius: 10px 10px 5px 5px;
     background: teal;
+    overflow: hidden;
 
     form,
     .whole {
         width: 100%;
         height: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        display: block;
         background: var(--color-primary);
 
+        /* Header */
         h2,
         .modalhead {
-            width: 100%;
-            padding: 5px 0;
+            height: 45px;
+            line-height: 45px;
             text-align: center;
             letter-spacing: 1px;
             color: white;
             font-size: 22px;
             font-weight: 600;
+            width: 100%;
         }
 
+        /* Body */
         .modalcontent {
+            max-height: calc(95vh - 45px - 55px);
+            overflow-y: auto;
             background: white;
             border-radius: 20px 20px 0 0;
             width: 100%;
-            height: 100%;
-            max-height: 500px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            padding: 20px 10px;
-            padding-bottom: 10px;
-            /* border: 1px solid red; */
-
-            &>div {
-                display: flex;
-                justify-content: end;
-            }
-
-            &>section {
-                width: 100%;
-                display: flex;
-                justify-content: space-between;
-            }
+            display: block;
+            padding: 20px 10px 10px;
         }
 
+        /* Footer */
         .btn,
         .modalfooter {
+            height: 55px;
+            line-height: 55px;
             display: flex;
+            justify-content: flex-end;
+            align-items: center;
             gap: 5px;
-            justify-content: end;
+            padding: 0 10px;
             background: white;
-            padding: 10px 4px;
             width: 100%;
         }
     }
 }
 
+
 .MuiChartsLegend-root.MuiChartsLegend-vertical {
     display: none;
 }
+
+/* global.css or index.css */
+@media print {
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .material {
+        width: 100%;
+        padding-left: 0 !important;
+        min-height: 100vh !important;
+        height: 100vh !important;
+        padding-top: 0 !important;
+        background: transparent !important;
+        /* background: red !important; */
+    }
+}
+
 
 @media (max-width: 600px) {
     .membermodal {
@@ -179,13 +192,12 @@ body {
         .whole {
 
             .modalcontent {
-                max-height: 500px;
+                max-height: calc(90vh - 45px - 55px);
                 gap: 15px;
                 padding: 20px 10px;
                 padding-bottom: 10px;
 
             }
-
         }
     }
 }

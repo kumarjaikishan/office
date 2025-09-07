@@ -40,7 +40,7 @@ export default function PayrollPage() {
             }
           }
         );
-        console.log(res.data.payrolls)
+        // console.log(res.data.payrolls)
         setPayroll(res?.data?.payrolls)
 
       } catch (error) {
@@ -61,16 +61,17 @@ export default function PayrollPage() {
   }, []);
 
   const handleView = (row) => {
-    console.log("Viewing", row);
-    navigate(`/dashboard/payrollPrint/${row._id}`)
+    // console.log("Viewing", row);
+    navigate(`/dashboard/payroll/print/${row._id}`)
   };
 
   const handleEdit = (row) => {
-    console.log("Editing", row);
+    // console.log("Editing", row);
+     navigate(`/dashboard/payroll/edit/${row._id}`)
   };
 
   const handleDelete = (row) => {
-    console.log("Deleting", row);
+    // console.log("Deleting", row);
   };
   //   if (loading) return <p className="p-4 text-gray-500">Calculating payroll...</p>;
   //   if (error) return <p className="p-4 text-red-500">{error}</p>;
@@ -78,7 +79,11 @@ export default function PayrollPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-
+      <Button size="small"
+        onClick={() => {
+         navigate('/dashboard/payroll/add')
+        }}
+        variant="outlined"> Add Payroll</Button>
       <div>
         <DataTable
           columns={payrollColumns(handleView, handleEdit, handleDelete)}

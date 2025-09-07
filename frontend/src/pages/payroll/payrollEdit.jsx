@@ -27,20 +27,23 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isBetween from "dayjs/plugin/isBetween";
 import localeData from "dayjs/plugin/localeData";
+import numberToWords from "../../utils/numToWord";
+import { toast } from "react-toastify";
 
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
 
-export default function PayrollCreatePage() {
-  const { employeeId } = useParams();
+export default function PayrollEdit() {
+  const { id } = useParams();
   const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(employeeId || "");
+  const [selectedEmployee, setSelectedEmployee] = useState('');
   const [selectedEmployeedetail, setSelectedEmployeedetail] = useState(null);
   const [perminuteRate, setminuteRate] = useState(0)
   const [perDayRate, setPerDayRate] = useState(0)
   const [holidaydate, setholidaydate] = useState([]);
   const [taxrate, settaxrate] = useState(0)
+  const [data, setdata] = useState(null)
 
   const { holidays, company, employee, attandence } = useSelector(
     (state) => state.user
@@ -59,13 +62,76 @@ export default function PayrollCreatePage() {
     }).format(amount);
   }
 
+  useEffect(() => {
+    const fetchPayroll = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("emstoken");
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_ADDRESS}payroll/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log(res?.data?.payroll);
+        setdata(res?.data?.payroll);
+      } catch (error) {
+        console.error(error);
+        setError(error.response?.data?.message || "Failed to fetch payroll");
+        toast.warn("Using dummy payroll data for testing", { autoClose: 1500 });
+        setPayroll(employee); // fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayroll();
+  }, [id]);
+
+  const optionsinit = {
+    addOvertime: false,
+    deductShortTime: false,
+    deductAbsent: false,
+    adjustLeave: false,
+    adjustAdvance: false,
+    adjustedLeaveCount: 0, // how many leaves user wants to adjust
+    adjustedAdvance: 0, // how many leaves user wants to adjust
+  }
+
+  const [options, setOptions] = useState(optionsinit);
+
+  useEffect(() => {
+    if (!data) return;
+    setForm({
+      month: data.month,
+      year: data.year,
+      calculationBasis: "monthDays", // ✅ new: monthDays | workingDays
+      allowances: data.allowances,
+      bonuses: data.bonuses,
+      deductions: data.deductions,
+      leaveDays: data.leave,
+      absentDays: data.absent,
+      presentDays: data.present,
+      paidDays: 0,
+      adjustPaidLeave: false,
+    })
+    setOptions(data?.options);
+    // console.log(data?.options)
+    setSelectedEmployeedetail(employee?.filter(e => e._id == data.employeeId)[0]);
+    setSelectedEmployee(data.employeeId)
+  }, [data])
+
   const [form, setForm] = useState({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     calculationBasis: "monthDays", // ✅ new: monthDays | workingDays
     allowances: [{ name: "HRA", amount: 0, extraInfo: '' }],
     bonuses: [{ name: "Performance", amount: 0, extraInfo: '' }],
-    deductions: [{ name: "Advance", amount: 0, extraInfo: '' }],
+    deductions: [{ name: "PF", amount: 0, extraInfo: '' }],
     leaveDays: 0,
     absentDays: 0,
     presentDays: 0,
@@ -82,19 +148,12 @@ export default function PayrollCreatePage() {
     shortmin: 0,
   });
 
-  const [options, setOptions] = useState({
-    addOvertime: false,
-    deductShortTime: false,
-    deductAbsent: false,
-    adjustLeave: false,
-    adjustAdvance: false,
-    adjustedLeaveCount: 0, // how many leaves user wants to adjust
-    adjustedAdvance: 0, // how many leaves user wants to adjust
-  });
+
 
   // Assume each employee has a paid leave balance (mock if not in DB)
-  const availablePaidLeaves = selectedEmployeedetail?.avaiableLeaves || 3;
-  const advance = selectedEmployeedetail?.advance || 1500;
+  const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
+  // const availablePaidLeaves = 1;
+  const advance = selectedEmployeedetail?.advance;
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -121,7 +180,7 @@ export default function PayrollCreatePage() {
 
     setminuteRate(perMinute.toFixed(2));
     setPerDayRate(perDay.toFixed(2));
-  }, [form.calculationBasis, basic, selectedEmployeedetail, company]);
+  }, [form.calculationBasis, basic, selectedEmployeedetail, company, data]);
 
 
   const overtimePay = useMemo(() => {
@@ -153,6 +212,7 @@ export default function PayrollCreatePage() {
     if (!attandence || !selectedEmployee) return;
 
     const selected = employees.find((e) => e._id === selectedEmployee);
+    // setOptions(optionsinit)
     setSelectedEmployeedetail(selected);
 
     const monthStart = dayjs(`${form.year}-${String(form.month).padStart(2, "0")}-01`);
@@ -282,8 +342,10 @@ export default function PayrollCreatePage() {
   }, [grossSalary, taxrate]);
 
   const netSalary = useMemo(() => {
-    return grossSalary - tax;
+    // return grossSalary - tax;
+    return Math.floor(grossSalary - tax);
   }, [grossSalary, tax]);
+
   // const netSalary = useMemo(() => {
   //   return selectedEmployeedetail?.salary - totalDeductions;
   // }, [grossSalary, totalDeductions]);
@@ -375,24 +437,60 @@ export default function PayrollCreatePage() {
     });
 
   const handleSubmit = async () => {
-    console.log(basic)
-    console.log(form)
-    console.log(options)
-    return;
+    // console.log(basic)
+    // console.log(form)
+    // console.log(options)
+    // console.log(selectedEmployeedetail)
+    // return
+    // return toast.info('This service is not Enabled Yet')
+    const fields = {
+      employeeId: selectedEmployeedetail._id,
+      calculationBasis: form.calculationBasis,
+      options,
+      basic,
+      month: form.month,
+      year: form.year,
+      present: form.presentDays,
+      leave: form.leaveDays,
+      absent: form.absentDays,
+      allowances: form.allowances,
+      bonuses: form.bonuses,
+      deductions: form.deductions,
+      taxRate: taxrate,
+      name: selectedEmployeedetail?.userid?.name,
+    }
+    // console.log(fields)
+    // return;
+
     try {
       setLoading(true);
       setError(null);
       setSuccess(null);
 
-      await axios.post("/api/payroll/create", {
-        employeeId: selectedEmployee,
-        ...form,
-        netSalary,
-      });
-
+      const token = localStorage.getItem('emstoken');
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_ADDRESS}payroll`,
+        { ...fields },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      console.log(res)
+      toast.success(res.data.message)
       setSuccess("Payroll created successfully!");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to create payroll");
+
+    } catch (error) {
+      console.log(error);
+      if (error.response) {
+        setError(error.response?.data?.message || "Failed to create payroll");
+        toast.warn(error.response.data.message, { autoClose: 1200 });
+      } else if (error.request) {
+        console.error('No response from server:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -411,8 +509,8 @@ export default function PayrollCreatePage() {
             <InputLabel>Month</InputLabel>
             <Select
               label="Month"
+              disabled
               value={form.month}
-              onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
             >
               {months.map((month, ind) => (
                 <MenuItem key={ind} value={ind + 1}>
@@ -426,8 +524,8 @@ export default function PayrollCreatePage() {
             <InputLabel>Year</InputLabel>
             <Select
               label="year"
+              disabled
               value={form.year}
-              onChange={(e) => setForm((prev) => ({ ...prev, year: e.target.value }))}
             >
               {["2024", "2025", "2026"].map((year) => (
                 <MenuItem key={year} value={year}>
@@ -460,7 +558,7 @@ export default function PayrollCreatePage() {
             <Select
               label="Select Employee"
               value={selectedEmployee}
-              onChange={(e) => setSelectedEmployee(e.target.value)}
+              disabled
             >
               {employees.map((emp) => (
                 <MenuItem key={emp._id} value={emp._id}>
@@ -484,36 +582,43 @@ export default function PayrollCreatePage() {
             <div className="grid grid-cols-2 gap-2 mt-4 text-sm md:flex md:flex-wrap">
               {/* <p>Total Days: {basic.totalDays}</p> */}
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Total Days"
                 value={basic.totalDays}
               />
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Holidays"
                 value={basic.holidaysCount}
               />
               <TextField
                 size="small"
+                className="m max-w-full md:max-w-[120px]"
                 label="Weekly Offs"
                 value={basic.weeklyOff}
               />
               <TextField
                 size="small"
+                className="m max-w-full md:max-w-[120px]"
                 label="Working Days"
                 value={basic.workingDays}
               />
               <TextField
                 size="small"
+                className="m max-w-full md:max-w-[120px]"
                 label="Present Days"
                 value={form.presentDays || 0}
               />
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Leave Days"
                 value={form.leaveDays || 0} //{perDayRate}
               />
               <TextField
+                className="m max-w-full md:max-w-[120px]"
                 size="small"
                 label="Absent Days"
                 value={form.absentDays || 0} //{perDayRate}
@@ -558,7 +663,7 @@ export default function PayrollCreatePage() {
           <div className="flex flex-col gap-2 mt-4">
             {basic?.overtime ?
               <FormControlLabel
-                // className="border"
+                className=" w-fit"
                 control={<Checkbox checked={options.addOvertime} onChange={(e) => setOptions(p => ({ ...p, addOvertime: e.target.checked }))} />}
                 label="Add Overtime as Bonus"
               /> : ''
@@ -566,6 +671,7 @@ export default function PayrollCreatePage() {
 
             {basic?.shortmin ?
               <FormControlLabel
+                className=" w-fit"
                 control={<Checkbox checked={options.deductShortTime} onChange={(e) => setOptions(p => ({ ...p, deductShortTime: e.target.checked }))} />}
                 label="Deduct Short Time"
               /> : ''
@@ -573,6 +679,7 @@ export default function PayrollCreatePage() {
 
             {form?.absentDays ?
               <FormControlLabel
+                className=" w-fit"
                 control={<Checkbox checked={options.deductAbsent} onChange={(e) => setOptions(p => ({ ...p, deductAbsent: e.target.checked }))} />}
                 label="Deduct Absent Days"
               /> : ''
@@ -591,7 +698,10 @@ export default function PayrollCreatePage() {
                     size="small"
                     className="w-full md:w-[120px]"
                     label="Adjust Count"
-                    inputProps={{ min: 0, max: form.leaveDays }}
+                    inputProps={{
+                      min: 0,
+                      max: Math.min(availablePaidLeaves, form.leaveDays)
+                    }}
                     value={options.adjustedLeaveCount}
                     onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}
                   />
@@ -808,6 +918,7 @@ export default function PayrollCreatePage() {
               <div> Net Salary </div>
               <div className="w-[100px]">{formatRupee(netSalary)}</div>
             </div>
+            <div className="capitalize text-xs"> In Words:- {numberToWords(netSalary)} </div>
           </div>
         </Card>
       }
