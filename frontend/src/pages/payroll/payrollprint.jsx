@@ -224,7 +224,7 @@ export default function PayslipPrintPage() {
                     <div>
                       <span>{e.name}</span>
                       {e?.extraInfo && (
-                        <p className="text-gray-500 md:text-[10px] text-[12px]">{e.extraInfo}</p>
+                        <p className="text-gray-500 text-[10px] md:text-[12px]">{e.extraInfo}</p>
                       )}
                     </div>
                     <span className="font-medium">{formatRupee(e.amount)}</span>
@@ -236,7 +236,7 @@ export default function PayslipPrintPage() {
                     <div>
                       <span>{e.name}</span>
                       {e?.extraInfo && (
-                        <p className="text-gray-500 md:text-[10px] text-[12px]">{e.extraInfo}</p>
+                        <p className="text-gray-500 text-[10px] md:text-[12px]">{e.extraInfo}</p>
                       )}
                     </div>
                     <span className="font-medium">{formatRupee(e.amount)}</span>
@@ -257,13 +257,13 @@ export default function PayslipPrintPage() {
             {/* Deductions */}
             <div className="bg-white shadow-none md:shadow-md overflow-hidden rounded-lg border border-gray-400">
               <h4 className="font-semibold px-4 py-2 border-b border-gray-400 bg-gray-50 text-gray-700">Deductions</h4>
-              <ul className="divide-y divide-gray-200 text-sm">
+              <ul className="divide-y divide-gray-200 text-xs md:text-sm">
                 {payroll?.deductions.map((d, i) => (
                   <li key={i} className="flex justify-between px-4 py-1">
                     <div>
                       <span>{d.name}</span>
                       {d?.extraInfo && (
-                        <p className="text-gray-500 md:text-[10px] text-[12px]">{d.extraInfo}</p>
+                        <p className="text-gray-500 text-[10px] md:text-[12px]">{d.extraInfo}</p>
                       )}
                     </div>
                     <span className="font-medium">{formatRupee(d.amount)}</span>

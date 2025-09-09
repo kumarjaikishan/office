@@ -44,14 +44,25 @@ export default function PayrollEdit() {
   const [holidaydate, setholidaydate] = useState([]);
   const [taxrate, settaxrate] = useState(0)
   const [data, setdata] = useState(null)
+  const [employeeleavebal, setemployeeleavebal] = useState(0);
 
-  const { holidays, company, employee, attandence } = useSelector(
+  const { holidays, company, employee, attandence, leaveBalance } = useSelector(
     (state) => state.user
   );
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+  const optionsinit = {
+    addOvertime: false,
+    deductShortTime: false,
+    deductAbsent: false,
+    adjustLeave: false,
+    adjustAdvance: false,
+    adjustedLeaveCount: 0, // how many leaves user wants to adjust
+    adjustedAdvance: 0, // how many leaves user wants to adjust
+  }
+  const [options, setOptions] = useState(optionsinit);
 
   function formatRupee(amount) {
     return new Intl.NumberFormat("en-IN", {
@@ -61,6 +72,8 @@ export default function PayrollEdit() {
       maximumFractionDigits: 2,
     }).format(amount);
   }
+
+
 
   useEffect(() => {
     const fetchPayroll = async () => {
@@ -92,17 +105,19 @@ export default function PayrollEdit() {
     fetchPayroll();
   }, [id]);
 
-  const optionsinit = {
-    addOvertime: false,
-    deductShortTime: false,
-    deductAbsent: false,
-    adjustLeave: false,
-    adjustAdvance: false,
-    adjustedLeaveCount: 0, // how many leaves user wants to adjust
-    adjustedAdvance: 0, // how many leaves user wants to adjust
-  }
 
-  const [options, setOptions] = useState(optionsinit);
+  useEffect(() => {
+    if (!selectedEmployeedetail || !leaveBalance) return;
+
+    const latest = leaveBalance
+      .filter(e => e.employeeId?._id?.toString() === selectedEmployeedetail._id?.toString())
+      .slice() // clone so sort doesn’t mutate original
+      .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
+
+    console.log("Latest Leave Balance:", latest);
+    console.log("this payroll used leave", options);
+    setemployeeleavebal(latest?.balance + options?.adjustedLeaveCount)
+  }, [leaveBalance, selectedEmployeedetail, options]);
 
   useEffect(() => {
     if (!data) return;
@@ -148,11 +163,6 @@ export default function PayrollEdit() {
     shortmin: 0,
   });
 
-
-
-  // Assume each employee has a paid leave balance (mock if not in DB)
-  const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
-  // const availablePaidLeaves = 1;
   const advance = selectedEmployeedetail?.advance;
 
   const months = [
@@ -301,10 +311,10 @@ export default function PayrollEdit() {
   const effectiveLeaveDays = useMemo(() => {
     if (form.adjustPaidLeave) {
       // Leaves covered by available paid leaves
-      return Math.max(form.leaveDays - availablePaidLeaves, 0);
+      return Math.max(form.leaveDays - employeeleavebal, 0);
     }
     return form.leaveDays;
-  }, [form.leaveDays, form.adjustPaidLeave, availablePaidLeaves]);
+  }, [form.leaveDays, form.adjustPaidLeave, employeeleavebal]);
 
   const leaveDeduction = useMemo(() => {
     return effectiveLeaveDays * perDayRate;
@@ -404,13 +414,13 @@ export default function PayrollEdit() {
       d => d.name !== "Paid Leave Adjustment" && d.name !== "Unpaid Leave"
     );
     if (options.adjustLeave && form.leaveDays > 0) {
-      const adjusted = Math.min(options.adjustedLeaveCount, availablePaidLeaves, form.leaveDays);
+      const adjusted = Math.min(options.adjustedLeaveCount, employeeleavebal, form.leaveDays);
       const unadjusted = form.leaveDays - adjusted;
 
       if (adjusted > 0) {
         updatedDeductions.push({
           name: "Paid Leave Adjustment", amount: 0,
-          extraInfo: `${adjusted} Leaves adjusted, Remaining Leaves: ${availablePaidLeaves - adjusted}`
+          extraInfo: `${adjusted} Leaves adjusted, Remaining Leaves: ${employeeleavebal - adjusted}`
         });
       }
       if (unadjusted > 0) {
@@ -468,8 +478,8 @@ export default function PayrollEdit() {
       setSuccess(null);
 
       const token = localStorage.getItem('emstoken');
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_ADDRESS}payroll`,
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_ADDRESS}payroll/${id}`,
         { ...fields },
         {
           headers: {
@@ -479,7 +489,7 @@ export default function PayrollEdit() {
       );
       console.log(res)
       toast.success(res.data.message)
-      setSuccess("Payroll created successfully!");
+      setSuccess("Payroll updated successfully!");
 
     } catch (error) {
       console.log(error);
@@ -691,7 +701,7 @@ export default function PayrollEdit() {
                   control={<Checkbox checked={options.adjustLeave} onChange={(e) => setOptions(p => ({ ...p, adjustLeave: e.target.checked }))} />}
                   label="Adjust Paid Leaves"
                 />
-                <p className="w-full md:w-fit">Available Paid leaves: {availablePaidLeaves}</p>
+                <p className="w-full md:w-fit">Available Paid leaves: {employeeleavebal}</p>
                 {options.adjustLeave && (
                   <TextField
                     type="number"
@@ -700,7 +710,7 @@ export default function PayrollEdit() {
                     label="Adjust Count"
                     inputProps={{
                       min: 0,
-                      max: Math.min(availablePaidLeaves, form.leaveDays)
+                      max: Math.min(employeeleavebal, form.leaveDays)
                     }}
                     value={options.adjustedLeaveCount}
                     onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}

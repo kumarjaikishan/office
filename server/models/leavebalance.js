@@ -1,26 +1,24 @@
+const mongoose = require('mongoose');
+
 const leaveBalanceSchema = new mongoose.Schema({
-  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
+  employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "employee", required: true },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
+  branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
+  
+  date: { type: Date, default: Date.now },
 
-  year: { type: Number, required: true },
+  // Transaction type (credit = add leaves, debit = reduce leaves)
+  type: { type: String, enum: ["credit", "debit"], required: true },
 
-  // Different leave types (CL = casual leave, SL = sick leave, PL = paid leave, etc.)
-  balances: {
-    casual: { type: Number, default: 0 },
-    sick: { type: Number, default: 0 },
-    paid: { type: Number, default: 0 }
-  },
+  // Value of this transaction
+  amount: { type: Number, required: true },
 
-  // Track transactions (like a passbook)
-  transactions: [
-    {
-      date: { type: Date, default: Date.now },
-      type: { type: String, enum: ["credit", "debit"], required: true },
-      leaveType: { type: String, enum: ["casual", "sick", "paid"], required: true },
-      days: { type: Number, required: true },
-      reason: { type: String },
-      payrollId: { type: mongoose.Schema.Types.ObjectId, ref: "Payroll" }
-    }
-  ]
+  // Running balance after this transaction
+  balance: { type: Number, required: true },
+
+  remarks: { type: String },
+
+  payrollId: { type: mongoose.Schema.Types.ObjectId, ref: "Payroll" }
 }, { timestamps: true });
 
 module.exports = mongoose.model("LeaveBalance", leaveBalanceSchema);

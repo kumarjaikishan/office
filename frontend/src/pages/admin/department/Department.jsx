@@ -170,22 +170,23 @@ const Department = () => {
           <div className='whole'>
             <div className='modalhead'>Add Department</div>
             <form onSubmit={adddepartcall}>
-              <span className="modalcontent">
-                <FormControl sx={{ width: '98%' }} size="small">
-                  <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
-                  <Select
-                    value={inp.branchId}
-                    label="branch"
-                    onChange={(e) => handleChange(e, 'branchId')}
-                  >
-                    {branch?.map((val) => {
-                      return <MenuItem key={val._id} value={val._id}>{val.name}</MenuItem>
-                    })}
-                  </Select>
-                </FormControl>
-                <TextField sx={{ width: '98%' }} required value={inp.department} onChange={(e) => handleChange(e, 'department')} label="Department" size="small" />
-                <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
-
+              <span className="modalcontent ">
+                <div className='flex flex-col gap-3 w-full'>
+                  <FormControl sx={{ width: '98%' }} size="small">
+                    <InputLabel id="demo-simple-select-helper-label">Branch</InputLabel>
+                    <Select
+                      value={inp.branchId}
+                      label="branch"
+                      onChange={(e) => handleChange(e, 'branchId')}
+                    >
+                      {branch?.map((val) => {
+                        return <MenuItem key={val._id} value={val._id}>{val.name}</MenuItem>
+                      })}
+                    </Select>
+                  </FormControl>
+                  <TextField sx={{ width: '98%' }} required value={inp.department} onChange={(e) => handleChange(e, 'department')} label="Department" size="small" />
+                  <TextField multiline rows={4} onChange={(e) => handleChange(e, 'description')} value={inp.description} sx={{ width: '98%' }} label="Description" size="small" />
+                </div>
               </span>
             </form>
             <div className='modalfooter'>

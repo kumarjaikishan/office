@@ -118,6 +118,7 @@ const menu = [
       { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Holiday", link: '/dashboard/holiday', icon: <FaCalendarDay />, roles: ['superadmin', 'admin'] },
       { menu: "Leave", link: '/dashboard/leave', icon: <FaUmbrellaBeach />, roles: ['employee', 'admin', 'superadmin', 'manager'] },
+      { menu: "Leavebal", link: '/dashboard/leavebal', icon: <FaUmbrellaBeach />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Ledger", link: '/dashboard/ledger', icon: <FaBook />, roles: ['admin', 'superadmin', 'manager'] },
     ]
   },

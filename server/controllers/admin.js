@@ -3,6 +3,7 @@ const employeeModal = require('../models/employee');
 const usermodal = require('../models/user');
 const leavemodal = require('../models/leave')
 const holidaymodal = require('../models/holiday')
+const LeaveBalance = require('../models/leavebalance')
 const Ledger = require("../models/ledger");
 const Entry = require("../models/entry");
 const notificationmodal = require('../models/notification')
@@ -21,6 +22,32 @@ cloudinary.config({
     api_key: '214119961949842',
     api_secret: "kAFLEVAA5twalyNYte001m_zFno"
 });
+
+async function generateNextEmpId(companyId, prefix = "EMP", padding = 3) {
+    try {
+        // Find the latest employee for the company, sorted by empId descending
+        const lastEmployee = await employeeModal.findOne({ companyId })
+            .sort({ empId: -1 })
+            .lean();
+
+        let nextNumber = 1;
+
+        if (lastEmployee && lastEmployee.empId) {
+            // Extract numeric part from empId
+            const match = lastEmployee.empId.match(/\d+$/);
+            if (match) {
+                nextNumber = parseInt(match[0], 10) + 1;
+            }
+        }
+
+        // Pad number with leading zeros
+        const nextEmpId = prefix + String(nextNumber).padStart(padding, "0");
+        return nextEmpId;
+    } catch (err) {
+        console.error("Error generating next empId:", err);
+        throw new Error("Failed to generate employee ID");
+    }
+}
 
 const addDepartment = async (req, res, next) => {
     try {
@@ -137,10 +164,11 @@ const addemployee = async (req, res, next) => {
                 });
             }
         }
+        const empId = await generateNextEmpId(req.user.companyId);
 
         const query = new employeeModal({
             companyId: req.user.companyId,
-            userid: resulten._id, designation, salary, branchId, profileimage: uploadResult?.secure_url, department,
+            userid: resulten._id, designation, salary, empId, employeeName, branchId, profileimage: uploadResult?.secure_url, department,
         });
         const resulte = await query.save({ session });
 
@@ -184,7 +212,7 @@ const updateemployee = async (req, res, next) => {
             'dob', 'designation', 'phone', 'address', 'gender', 'bloodGroup',
             'Emergencyphone', 'skills', 'department', 'maritalStatus', 'salary',
             'achievements', 'education', 'acHolderName', 'bankName', 'bankbranch',
-            'acnumber', 'ifscCode', 'adhaar', 'pan', 'status'
+            'acnumber', 'ifscCode', 'adhaar', 'pan', 'status','employeeName'
         ];
 
         let updatedFields = {};
@@ -627,6 +655,7 @@ const firstfetch = async (req, res, next) => {
         let holidays = [];
         let ledger = [];
         let user;
+        let leaveBalance = [];
         // let permissionName=[];
         // let defaultRolePermission=[];
         user = await usermodal.findById(req.user.id).select('name email profileImage role');
@@ -671,6 +700,14 @@ const firstfetch = async (req, res, next) => {
                     select: 'reason',
                 });
             holidays = await holidaymodal.find({ companyId: req.user.companyId });
+            leaveBalance = await LeaveBalance.find({
+                companyId: req.user.companyId,
+                branchId: { $in: req.user.branchIds }
+            }).populate({
+                path: "employeeId",
+                select: "userid",
+                populate: { path: "userid", select: "name", },
+            }).sort({ date: -1, createdAt: -1 });
         }
 
         if ((req.user.role == 'superadmin' || req.user.role == 'admin') && companye) {
@@ -710,6 +747,11 @@ const firstfetch = async (req, res, next) => {
                 });
             holidays = await holidaymodal.find({ companyId: compId });
             // await usermodal.find({})
+            leaveBalance = await LeaveBalance.find({ companyId: compId, }).populate({
+                path: "employeeId",
+                select: "userid",
+                populate: { path: "userid", select: "name", },
+            }).sort({ date: -1, createdAt: -1 });
         }
 
         ledger = await Ledger.find({ userId: req.user.id });
@@ -732,7 +774,8 @@ const firstfetch = async (req, res, next) => {
             employee: employees,
             attendance,
             holidays,
-            ledger: ledgersWithBalance
+            ledger: ledgersWithBalance,
+            leaveBalance
         }
         if (company?.length) response.company = companye;
         if (branches?.length) response.branch = branches;

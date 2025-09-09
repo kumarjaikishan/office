@@ -18,6 +18,8 @@ const employeeSchema = new mongoose.Schema({
         ref: 'Branch',
         required: true
     },
+    empId: { type: String },
+    employeeName: { type: String },
     department: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'department',

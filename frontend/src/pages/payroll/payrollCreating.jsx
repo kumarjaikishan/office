@@ -42,15 +42,30 @@ export default function PayrollCreatePage() {
   const [perminuteRate, setminuteRate] = useState(0)
   const [perDayRate, setPerDayRate] = useState(0)
   const [holidaydate, setholidaydate] = useState([]);
-  const [taxrate, settaxrate] = useState(0)
+  const [taxrate, settaxrate] = useState(0);
+  const [employeeleavebal, setemployeeleavebal] = useState(0);
 
-  const { holidays, company, employee, attandence } = useSelector(
+
+  const { holidays, company, employee, attandence, leaveBalance } = useSelector(
     (state) => state.user
   );
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!selectedEmployeedetail || !leaveBalance) return;
+
+    const latest = leaveBalance
+      .filter(e => e.employeeId?._id?.toString() === selectedEmployeedetail._id?.toString())
+      .slice() // clone so sort doesn’t mutate original
+      .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
+
+    console.log("Latest Leave Balance:", latest);
+    setemployeeleavebal(latest?.balance)
+  }, [leaveBalance, selectedEmployeedetail]);
+
 
   function formatRupee(amount) {
     return new Intl.NumberFormat("en-IN", {
@@ -97,7 +112,8 @@ export default function PayrollCreatePage() {
   const [options, setOptions] = useState(optionsinit);
 
   // Assume each employee has a paid leave balance (mock if not in DB)
-  const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
+  // const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
+  // const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
   // const availablePaidLeaves = 1;
   const advance = selectedEmployeedetail?.advance;
 
@@ -247,10 +263,10 @@ export default function PayrollCreatePage() {
   const effectiveLeaveDays = useMemo(() => {
     if (form.adjustPaidLeave) {
       // Leaves covered by available paid leaves
-      return Math.max(form.leaveDays - availablePaidLeaves, 0);
+      return Math.max(form.leaveDays - employeeleavebal, 0);
     }
     return form.leaveDays;
-  }, [form.leaveDays, form.adjustPaidLeave, availablePaidLeaves]);
+  }, [form.leaveDays, form.adjustPaidLeave, employeeleavebal]);
 
   const leaveDeduction = useMemo(() => {
     return effectiveLeaveDays * perDayRate;
@@ -350,13 +366,13 @@ export default function PayrollCreatePage() {
       d => d.name !== "Paid Leave Adjustment" && d.name !== "Unpaid Leave"
     );
     if (options.adjustLeave && form.leaveDays > 0) {
-      const adjusted = Math.min(options.adjustedLeaveCount, availablePaidLeaves, form.leaveDays);
+      const adjusted = Math.min(options.adjustedLeaveCount, employeeleavebal, form.leaveDays);
       const unadjusted = form.leaveDays - adjusted;
 
       if (adjusted > 0) {
         updatedDeductions.push({
           name: "Paid Leave Adjustment", amount: 0,
-          extraInfo: `${adjusted} Leaves adjusted, Remaining Leaves: ${availablePaidLeaves - adjusted}`
+          extraInfo: `${adjusted} Leaves adjusted, Remaining Leaves: ${employeeleavebal - adjusted}`
         });
       }
       if (unadjusted > 0) {
@@ -635,7 +651,7 @@ export default function PayrollCreatePage() {
                   control={<Checkbox checked={options.adjustLeave} onChange={(e) => setOptions(p => ({ ...p, adjustLeave: e.target.checked }))} />}
                   label="Adjust Paid Leaves"
                 />
-                <p className="w-full md:w-fit">Available Paid leaves: {availablePaidLeaves}</p>
+                <p className="w-full md:w-fit">Available Paid leaves: {employeeleavebal}</p>
                 {options.adjustLeave && (
                   <TextField
                     type="number"
@@ -644,7 +660,7 @@ export default function PayrollCreatePage() {
                     label="Adjust Count"
                     inputProps={{
                       min: 0,
-                      max: Math.min(availablePaidLeaves, form.leaveDays)
+                      max: Math.min(employeeleavebal, form.leaveDays)
                     }}
                     value={options.adjustedLeaveCount}
                     onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}
