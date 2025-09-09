@@ -47,7 +47,7 @@ const employeeSchema = new mongoose.Schema({
         type: String,
     },
     guardian: {
-        realtion: { type: String, },
+        relation: { type: String, },
         name: { type: String },
     },
     achievements: [

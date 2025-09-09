@@ -5,7 +5,7 @@ import { FirstFetch } from "../../../../store/userSlice";
 export const columns = [
     {
         name: "S.no",
-        selector: (row) => row.sno,
+        selector: (row, index) => index + 1,
         width: '40px'
     },
     {
@@ -17,18 +17,25 @@ export const columns = [
     //     selector: (row) => row.email
     // },
     {
+        name: "Emp Id",
+        selector: (row) => row.empId,
+        sortable: true,
+        width: '80px'
+    },
+    {
         name: "Phone",
-        selector: (row) => row.phone
+        selector: (row) => row.phone,
+        width: '90px'
     },
     {
         name: "Department",
         selector: (row) => row.department,
-          width: '120px'
+        width: '120px'
     },
     {
         name: "Status",
-        selector: (row) => <span className={` ${row.status ? "bg-green-100 text-green-800":'bg-red-100 text-red-800'}  px-1 rounded`}>{row.status ? "Active":'In Active'}</span> ,
-          width: '120px'
+        selector: (row) => <span className={` ${row.status ? "bg-green-100 text-green-800" : 'bg-red-100 text-red-800'}  px-1 rounded`}>{row.status ? "Active" : 'In Active'}</span>,
+        width: '120px'
     },
     {
         name: "Action",

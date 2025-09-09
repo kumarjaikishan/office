@@ -72,6 +72,11 @@ const Employe = () => {
     branchId: '',
     department: "",
     employeeName: "",
+    empId: "",
+    guardian: {
+      relation: 'S/o',
+      name: ''
+    },
     email: "",
     designation: '',
     phone: '',
@@ -137,12 +142,11 @@ const Employe = () => {
     // console.log(employee)
     if (employee?.length < 1) return;
 
-    let sno = 1;
     const data = employee?.map((emp) => {
       return {
         id: emp._id,
-        sno: sno++,
         rawname: emp?.userid?.name,
+        empId: emp?.empId,
         name: (<div className="flex items-center capitalize gap-3 ">
           <Avatar src={emp.profileimage || employepic} alt={emp.employeename}>
             {!emp.profileimage && employepic}
@@ -296,6 +300,9 @@ const Employe = () => {
       dob: employee?.dob,
       salary: employee?.salary,
       status: employee?.status,
+
+      empId: Number(employee?.empId?.split('EMP')[1]),
+      guardian: employee?.guardian,
 
       acHolderName: employee?.acHolderName,
       bankName: employee?.bankName,
@@ -524,7 +531,7 @@ const Employe = () => {
                       ))}
                     </Select>
                   </FormControl>
-                  <Box sx={{ width: '100%', gap: 2 }}>
+                  <div className="flex gap-2">
                     <FormControl disabled={!inp.branchId} fullWidth required size="small">
                       <InputLabel>Department</InputLabel>
                       <Select
@@ -557,31 +564,88 @@ const Employe = () => {
                         <MenuItem value={false}>Inactive</MenuItem>
                       </Select>
                     </FormControl>
-                  </Box>
+                  </div>
 
-                  <Box sx={{ width: '100%', gap: 2 }}>
+                  <div className="flex gap-2">
                     <TextField fullWidth required value={inp.employeeName} onChange={(e) => handleChange(e, 'employeeName')} label="Name" size="small" />
                     <TextField fullWidth required value={inp.email} onChange={(e) => handleChange(e, 'email')} label="Email" size="small" />
-                  </Box>
+                  </div>
 
-                  <Box sx={{ width: '100%', gap: 2 }}>
+                  <div className="flex gap-2">
                     <TextField fullWidth value={inp.designation} onChange={(e) => handleChange(e, 'designation')} label="Designation" size="small" />
                     <TextField fullWidth value={inp.salary} onChange={(e) => handleChange(e, 'salary')} label="Salary" size="small" />
-                  </Box>
+                  </div>
 
-                  <div className="mt-1 gap-2 flex items-center relative">
-                    <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
-                    {photoPreview ?
-                      <img src={photoPreview} alt="Preview" className="mt-2 w-[100px] h-[100px] rounded-full object-cover" />
-                      : <Avatar
-                        sx={{ width: 100, height: 100 }}
-                        alt={inp.employeeName} src="/static/images/avatar/1.jpg" />
-                    }
-                    <span onClick={() => inputref.current.click()}
-                      className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
-                    >
-                      <MdOutlineModeEdit size={18} />
-                    </span>
+
+                  <div className="flex gap-2">
+                    {/* Employee ID with EMP prefix */}
+                    <TextField
+                      fullWidth
+                      type="number"
+                      value={inp.empId}
+                      onChange={(e) => handleChange(e, "empId")}
+                      label="Employee ID"
+                      size="small"
+                      helperText={`ID - EMP${String(inp?.empId || '').padStart(3, '0')}`}
+                      InputProps={{
+                        startAdornment: <InputAdornment position="start">EMP</InputAdornment>,
+                      }}
+                    />
+
+                    {/* Guardian Name with prefix dropdown */}
+                    <TextField
+                      fullWidth
+                      value={inp?.guardian?.name}
+                      onChange={(e) =>
+                        setInp((prev) => ({
+                          ...prev,
+                          guardian: { ...prev.guardian, name: e.target.value },
+                        }))
+                      }
+                      label="Guardian Name"
+                      size="small"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start" sx={{ minWidth: 80 }}>
+                            <Select
+                              variant="standard"
+                              disableUnderline
+                              value={inp?.guardian?.relation || "S/o"}
+                              onChange={(e) =>
+                                setInp((prev) => ({
+                                  ...prev,
+                                  guardian: { ...prev.guardian, relation: e.target.value },
+                                }))
+                              }
+                            >
+                              <MenuItem value="S/o">S/o</MenuItem>
+                              <MenuItem value="D/o">D/o</MenuItem>
+                              <MenuItem value="H/o">H/o</MenuItem>
+                              <MenuItem value="W/o">W/o</MenuItem>
+                            </Select>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </div>
+
+
+                  <div className="w-full  flex justify-center">
+                    <div className="mt-1 w-fit text-center gap-2  relative">
+                      <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
+                      {photoPreview ?
+                        <img src={photoPreview} alt="Preview" className="mt-2 w-[100px] h-[100px] rounded-full object-cover" />
+                        : <Avatar
+                          sx={{ width: 100, height: 100 }}
+                          alt={inp.employeeName} src="/static/images/avatar/1.jpg" />
+                      }
+                      <span onClick={() => inputref.current.click()}
+                        className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1"
+                      >
+                        <MdOutlineModeEdit size={18} />
+                      </span>
+
+                    </div>
                   </div>
                   {isupdate &&
                     <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>

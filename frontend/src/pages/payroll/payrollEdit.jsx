@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
@@ -91,7 +91,7 @@ export default function PayrollEdit() {
           }
         );
 
-        console.log(res?.data?.payroll);
+        // console.log(res?.data?.payroll);
         setdata(res?.data?.payroll);
       } catch (error) {
         console.error(error);
@@ -114,10 +114,10 @@ export default function PayrollEdit() {
       .slice() // clone so sort doesn’t mutate original
       .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
 
-    console.log("Latest Leave Balance:", latest);
-    console.log("this payroll used leave", options);
+    // console.log("Latest Leave Balance:", latest);
+    // console.log("this payroll used leave", options);
     setemployeeleavebal(latest?.balance + options?.adjustedLeaveCount)
-  }, [leaveBalance, selectedEmployeedetail, options]);
+  }, [leaveBalance, selectedEmployeedetail]);
 
   useEffect(() => {
     if (!data) return;
@@ -191,13 +191,6 @@ export default function PayrollEdit() {
     setminuteRate(perMinute.toFixed(2));
     setPerDayRate(perDay.toFixed(2));
   }, [form.calculationBasis, basic, selectedEmployeedetail, company, data]);
-
-
-  const overtimePay = useMemo(() => {
-    const rate = 345; // or from company config
-    return (basic.overtime / 60) * rate; // assuming overtime is in minutes
-  }, [basic.overtime]);
-
 
   useEffect(() => {
     if (!holidays) return;
@@ -340,10 +333,9 @@ export default function PayrollEdit() {
       // perDayRate * form.paidDays || 0) +
       selectedEmployeedetail?.salary +
       totalAllowances +
-      totalBonuses -
-      totalDeductions
+      totalBonuses
     );
-  }, [perDayRate, form.paidDays, totalAllowances, totalDeductions, totalBonuses, overtimePay]);
+  }, [perDayRate, form.paidDays, totalAllowances, totalBonuses]);
 
   const tax = useMemo(() => {
     return (
@@ -353,8 +345,14 @@ export default function PayrollEdit() {
 
   const netSalary = useMemo(() => {
     // return grossSalary - tax;
-    return Math.floor(grossSalary - tax);
-  }, [grossSalary, tax]);
+    return Math.floor(grossSalary - totalDeductions);
+  }, [grossSalary, totalDeductions]);
+
+  const minutesinhours = useCallback((minutes) => {
+    const hour = Math.floor(minutes / 60);
+    const minute = minutes % 60;
+    return `${hour}h ${minute}m`;
+  }, []);
 
   // const netSalary = useMemo(() => {
   //   return selectedEmployeedetail?.salary - totalDeductions;
@@ -372,11 +370,12 @@ export default function PayrollEdit() {
 
     // OVERTIME
     updatedBonuses = updatedBonuses.filter(b => b.name !== "Overtime");
-    if (options.addOvertime && overtimePay > 0) {
+    if (options.addOvertime) {
       const OvertTimeBonus = basic.overtime * perminuteRate;
       updatedBonuses.push({
         name: "Overtime", amount: OvertTimeBonus.toFixed(2),
-        extraInfo: `${basic.overtime} Min @ ${perminuteRate}`
+        extraInfo: `${basic.overtime} Min @ ₹${perminuteRate} per min.`
+        // extraInfo: `${minutesinhours(basic?.overtime)} || ${basic.overtime} Min @ ₹${perminuteRate} per min.`
       });
     }
 
@@ -386,7 +385,7 @@ export default function PayrollEdit() {
       const shortTimeDeduction = basic.shortmin * perminuteRate;
       updatedDeductions.push({
         name: "Short Time", amount: shortTimeDeduction.toFixed(2),
-        extraInfo: `${basic.shortmin} min @ ${perminuteRate}`
+        extraInfo: `${basic.shortmin} min @ ₹${perminuteRate} per min.`
       });
     }
 
@@ -395,7 +394,7 @@ export default function PayrollEdit() {
     if (options.deductAbsent && form.absentDays > 0) {
       updatedDeductions.push({
         name: "Absent", amount: (form.absentDays * perDayRate).toFixed(2),
-        extraInfo: `${form.absentDays} Absent @ ${perDayRate}`
+        extraInfo: `${form.absentDays} Absent @ ₹${perDayRate} per day`
       });
     }
 
@@ -433,7 +432,7 @@ export default function PayrollEdit() {
     // console.log(updatedDeductions)
 
     setForm(prev => ({ ...prev, bonuses: updatedBonuses, deductions: updatedDeductions }));
-  }, [options, overtimePay, perDayRate, form.leaveDays, form.absentDays, basic.shortmin]);
+  }, [options, perDayRate, form.leaveDays, form.absentDays, basic.shortmin]);
 
 
   const addArrayItem = (field, item) =>
@@ -882,17 +881,17 @@ export default function PayrollEdit() {
               <div>Bonuses :</div>
               <div className="w-[100px] font-semibold">+{formatRupee(totalBonuses)}</div>
             </div>
-            <div className=" flex justify-end">
+            {/* <div className=" flex justify-end">
               <div>Deductions :</div>
               <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
-            </div>
+            </div> */}
 
             <Divider />
             <div className=" flex justify-end font-bold">
               <div>Gross Salary :</div>
               <div className="w-[100px]">{formatRupee(grossSalary)}</div>
             </div>
-            <div className=" flex justify-end items-center">
+            {/* <div className=" flex justify-end items-center">
               <div className="flex items-center">
                 Tax :
                 <div className="flex items-center border mx-1 rounded px-2 w-[80px] h-6 text-sm">
@@ -921,6 +920,10 @@ export default function PayrollEdit() {
                 </div> :
               </div>
               <div className="w-[100px]">{formatRupee(tax)}</div>
+            </div> */}
+            <div className=" flex justify-end">
+              <div>Deductions :</div>
+              <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
             </div>
             <Divider />
 

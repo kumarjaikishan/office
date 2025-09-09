@@ -7,6 +7,8 @@ import { useParams } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
 import numberToWords from "../../utils/numToWord";
+import { FaCalendarAlt, FaCalendarWeek, FaUmbrellaBeach, FaBriefcase, FaUserCheck, FaUserTimes, FaUserClock } from "react-icons/fa";
+
 
 export default function PayslipPrintPage() {
   const printRef = useRef(null);
@@ -176,7 +178,7 @@ export default function PayslipPrintPage() {
 
 
           {/* Attendance Info */}
-          <div className="grid grid-cols-7 gap-4 my-6 text-sm">
+          {/* <div className="grid grid-cols-7 gap-4 my-6 text-sm">
             <div className=" rounded-lg p-1 text-center shadow-none md:shadow-sm">
               <p className="font-semibold  text-gray-700 whitespace-nowrap">Month Days</p>
               <p className="text-blue-600 font-bold text-sm md:text-lg">{payroll?.monthDays || 0}</p>
@@ -206,13 +208,64 @@ export default function PayslipPrintPage() {
               <p className="font-semibold text-gray-700">Leave</p>
               <p className="text-yellow-600 font-bold text-sm md:text-lg">{payroll?.leave}</p>
             </div>
+          </div> */}
+          <div className="grid grid-cols-7 gap-4 my-6 text-sm">
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700 whitespace-nowrap">Month Days</p>
+              <p className="flex items-center justify-center gap-2 text-blue-600 font-bold text-sm md:text-lg">
+                <FaCalendarAlt className="text-blue-500" /> {payroll?.monthDays || 0}
+              </p>
+            </div>
+
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700 whitespace-nowrap">Weekly Offs</p>
+              <p className="flex items-center justify-center gap-2 text-blue-600 font-bold text-sm md:text-lg">
+                <FaCalendarWeek className="text-purple-500" /> {payroll?.weekOffs}
+              </p>
+            </div>
+
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700">Holidays</p>
+              <p className="flex items-center justify-center gap-2 text-blue-600 font-bold text-sm md:text-lg">
+                <FaUmbrellaBeach className="text-orange-500" /> {payroll?.holidays}
+              </p>
+            </div>
+
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700 whitespace-nowrap">Working Day</p>
+              <p className="flex items-center justify-center gap-2 text-blue-600 font-bold text-sm md:text-lg">
+                <FaBriefcase className="text-indigo-500" /> {payroll?.workingDays}
+              </p>
+            </div>
+
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700">Present</p>
+              <p className="flex items-center justify-center gap-2 text-green-600 font-bold text-sm md:text-lg">
+                <FaUserCheck className="text-green-500" /> {payroll?.present}
+              </p>
+            </div>
+
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700">Absent</p>
+              <p className="flex items-center justify-center gap-2 text-red-600 font-bold text-sm md:text-lg">
+                <FaUserTimes className="text-red-500" /> {payroll?.absent}
+              </p>
+            </div>
+
+            <div className="rounded-lg p-2 text-center shadow-none md:shadow-sm">
+              <p className="font-semibold text-gray-700">Leave</p>
+              <p className="flex items-center justify-center gap-2 text-yellow-600 font-bold text-sm md:text-lg">
+                <FaUserClock className="text-yellow-500" /> {payroll?.leave}
+              </p>
+            </div>
           </div>
+
 
           {/* Salary Tables */}
           <div className="grid grid-cols-2  md:grid-cols-2 gap-2 md:gap-6">
             {/* Earnings */}
             <div className="bg-white shadow-none md:shadow-md overflow-hidden rounded-lg border border-gray-400">
-              <h4 className="font-semibold px-4 py-2 border-b border-gray-400 bg-gray-50  text-gray-700">Earnings</h4>
+              <h4 className="font-semibold px-4 py-2 print:py-1 border-b border-gray-400 bg-gray-50  text-gray-700">Earnings</h4>
               <ul className="divide-y divide-gray-200 text-xs md:text-sm">
                 <li className="flex justify-between px-4 py-1">
                   <span>Basic Salary</span>
@@ -256,7 +309,7 @@ export default function PayslipPrintPage() {
 
             {/* Deductions */}
             <div className="bg-white shadow-none md:shadow-md overflow-hidden rounded-lg border border-gray-400">
-              <h4 className="font-semibold px-4 py-2 border-b border-gray-400 bg-gray-50 text-gray-700">Deductions</h4>
+              <h4 className="font-semibold px-4  py-2 border-b border-gray-400 bg-gray-50 text-gray-700">Deductions</h4>
               <ul className="divide-y divide-gray-200 text-xs md:text-sm">
                 {payroll?.deductions.map((d, i) => (
                   <li key={i} className="flex justify-between px-4 py-1">

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Payroll = require("../models/payroll");
 const Employee = require("../models/employee");
 const LeaveBalance = require("../models/leavebalance");
-const { recalculateLeaveBalances } = require("./leave");
+const { recalculateLeaveBalances } = require("./leaveBalance");
 
 exports.createPayroll = async (req, res, next) => {
 

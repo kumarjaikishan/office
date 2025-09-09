@@ -22,7 +22,7 @@ const BulkMark = ({
     openmodal, init, setopenmodal,
     isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-    const {  department, branch, employee, attandence } = useSelector((state) => state.user);
+    const { department, branch, employee, attandence } = useSelector((state) => state.user);
     const [checkedemployee, setcheckedemployee] = useState([]);
     const [rowData, setRowData] = useState({});
     const [selectedBranch, setselectedBranch] = useState('all')
@@ -87,7 +87,9 @@ const BulkMark = ({
             const matchBranch = selectedBranch !== "all" ? e.branchId == selectedBranch : true;
             const matchDepartment = selecteddepartment !== "all" ? e.department.department == selecteddepartment : true;
             return matchBranch && matchDepartment && isactive;
-        });
+        })
+
+        // console.log(result)
         setFilteredEmployee(result);
     }, [employee, selectedBranch, selecteddepartment]);
 
@@ -272,43 +274,43 @@ const BulkMark = ({
                 <form onSubmit={handleSubmit}>
                     <div className="modalhead">Bulk Mark Attendance</div>
                     <span className="modalcontent overflow-x-auto">
+                        <div className='flex flex-col gap-4'>
+                            <div className='w w-full flex justify-between gap-2'>
+                                <FormControl size="small" fullWidth>
+                                    <InputLabel>Select Branch</InputLabel>
+                                    <Select
+                                        label="Select Branch"
+                                        value={selectedBranch}
+                                        onChange={(e) => setselectedBranch(e.target.value)}
+                                    >
+                                        <MenuItem value="all"><em>All</em></MenuItem>
+                                        {branch?.map((b, i) => (
+                                            <MenuItem key={i} value={b._id}>{b.name}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
 
-                        <div className='w w-full flex justify-between gap-2'>
-                            <FormControl size="small" fullWidth>
-                                <InputLabel>Select Branch</InputLabel>
-                                <Select
-                                    label="Select Branch"
-                                    value={selectedBranch}
-                                    onChange={(e) => setselectedBranch(e.target.value)}
-                                >
-                                    <MenuItem value="all"><em>All</em></MenuItem>
-                                    {branch?.map((b, i) => (
-                                        <MenuItem key={i} value={b._id}>{b.name}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                                <FormControl size="small" disabled={selectedBranch == 'all'} fullWidth>
+                                    <InputLabel>Select Department</InputLabel>
+                                    <Select
+                                        label="Select Department"
+                                        value={selecteddepartment}
+                                        onChange={(e) => setselecteddepartment(e.target.value)}
+                                    >
+                                        <MenuItem value="all"><em>All</em></MenuItem>
+                                        {
+                                            (selectedBranch !== 'all'
+                                                ? department.filter(i => i.branchId._id === selectedBranch)
+                                                : department
+                                            )?.map((d, i) => (
+                                                <MenuItem key={i} value={d._id}>{d.department}</MenuItem>
+                                            ))
+                                        }
 
-                            <FormControl size="small" disabled={selectedBranch == 'all'} fullWidth>
-                                <InputLabel>Select Department</InputLabel>
-                                <Select
-                                    label="Select Department"
-                                    value={selecteddepartment}
-                                    onChange={(e) => setselecteddepartment(e.target.value)}
-                                >
-                                    <MenuItem value="all"><em>All</em></MenuItem>
-                                    {
-                                        (selectedBranch !== 'all'
-                                            ? department.filter(i => i.branchId._id === selectedBranch)
-                                            : department
-                                        )?.map((d, i) => (
-                                            <MenuItem key={i} value={d._id}>{d.department}</MenuItem>
-                                        ))
-                                    }
+                                    </Select>
+                                </FormControl>
 
-                                </Select>
-                            </FormControl>
-
-                            {/* <TextField
+                                {/* <TextField
                                 size="small"
                                 fullWidth
                                 type="date"
@@ -317,165 +319,165 @@ const BulkMark = ({
                                 onChange={(e) => setattandenceDate(dayjs(e.target.value))}
                                 InputLabelProps={{ shrink: true }}
                             /> */}
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    slotProps={{
-                                        textField: {
-                                            size: 'small',
-                                        },
-                                    }}
-                                    onChange={(newValue) => {
-                                        setattandenceDate(newValue)
-                                    }}
-                                    format="DD-MM-YYYY"
-                                    value={attandenceDate}
-                                    sx={{ width: '100%' }}
-                                    label="Select date"
-                                    maxDate={dayjs()}
-                                />
-                            </LocalizationProvider>
-                        </div>
-
-                        <div className="relative border-dashed border border-primary rounded-md w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-2 pt-4">
-                            <span className="absolute top-0 left-3 -translate-y-1/2 bg-white px-2 text-sm font-medium text-primary">
-                                Apply To All Fields
-                            </span>
-
-
-                            <div className="flex flex-col w-full">
-                                <label htmlFor="punchIn" className="text-sm font-medium text-gray-700 mb-1 text-left">
-                                    Punch In
-                                </label>
-                                <input
-                                    type="time"
-                                    id="punchIn"
-                                    name="punchIn"
-                                    className="w-full form-input outline-0 border border-primary border-dashed p-2 rounded"
-                                    value={toall.punchIn || ""}
-                                    onChange={(e) => settoall({ ...toall, punchIn: e.target.value })}
-                                />
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        slotProps={{
+                                            textField: {
+                                                size: 'small',
+                                            },
+                                        }}
+                                        onChange={(newValue) => {
+                                            setattandenceDate(newValue)
+                                        }}
+                                        format="DD-MM-YYYY"
+                                        value={attandenceDate}
+                                        sx={{ width: '100%' }}
+                                        label="Select date"
+                                        maxDate={dayjs()}
+                                    />
+                                </LocalizationProvider>
                             </div>
 
-                            <div className="flex flex-col w-full">
-                                <label htmlFor="punchOut" className="text-sm font-medium text-gray-700 mb-1 text-left">
-                                    Punch Out
-                                </label>
-                                <input
-                                    type="time"
-                                    id="punchOut"
-                                    name="punchOut"
-                                    className="w-full form-input outline-0 border border-primary border-dashed p-2 rounded"
-                                    value={toall.punchOut || ""}
-                                    onChange={(e) => settoall({ ...toall, punchOut: e.target.value })}
-                                />
+                            <div className="relative border-dashed border border-primary rounded-md w-full grid grid-cols-1 md:grid-cols-3 gap-4 p-2 pt-4">
+                                <span className="absolute top-0 left-3 -translate-y-1/2 bg-white px-2 text-sm font-medium text-primary">
+                                    Apply To All Fields
+                                </span>
+
+
+                                <div className="flex flex-col w-full">
+                                    <label htmlFor="punchIn" className="text-sm font-medium text-gray-700 mb-1 text-left">
+                                        Punch In
+                                    </label>
+                                    <input
+                                        type="time"
+                                        id="punchIn"
+                                        name="punchIn"
+                                        className="w-full form-input outline-0 border border-primary border-dashed p-2 rounded"
+                                        value={toall.punchIn || ""}
+                                        onChange={(e) => settoall({ ...toall, punchIn: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col w-full">
+                                    <label htmlFor="punchOut" className="text-sm font-medium text-gray-700 mb-1 text-left">
+                                        Punch Out
+                                    </label>
+                                    <input
+                                        type="time"
+                                        id="punchOut"
+                                        name="punchOut"
+                                        className="w-full form-input outline-0 border border-primary border-dashed p-2 rounded"
+                                        value={toall.punchOut || ""}
+                                        onChange={(e) => settoall({ ...toall, punchOut: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="flex flex-col w-full">
+                                    <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-1 text-left">
+                                        Status
+                                    </label>
+                                    <FormControl size="small" className="w-full">
+                                        <Select
+                                            id="status"
+                                            name="status"
+                                            value={toall.status}
+                                            onChange={(e) => settoall({ ...toall, status: e.target.value })}
+                                            className="w-full"
+                                        >
+                                            <MenuItem value={"sel"} disabled>Select Status</MenuItem>
+                                            <MenuItem value={"present"}>Present</MenuItem>
+                                            <MenuItem value={"leave"}>Leave</MenuItem>
+                                            <MenuItem value={"absent"}>Absent</MenuItem>
+                                            <MenuItem value={"weekly off"}>Weekly Off</MenuItem>
+                                            <MenuItem value={"holiday"}>Holiday</MenuItem>
+                                            <MenuItem value={"half day"}>Half Day</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </div>
                             </div>
 
-                            <div className="flex flex-col w-full">
-                                <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-1 text-left">
-                                    Status
-                                </label>
-                                <FormControl size="small" className="w-full">
-                                    <Select
-                                        id="status"
-                                        name="status"
-                                        value={toall.status}
-                                        onChange={(e) => settoall({ ...toall, status: e.target.value })}
-                                        className="w-full"
-                                    >
-                                        <MenuItem value={"sel"} disabled>Select Status</MenuItem>
-                                        <MenuItem value={"present"}>Present</MenuItem>
-                                        <MenuItem value={"leave"}>Leave</MenuItem>
-                                        <MenuItem value={"absent"}>Absent</MenuItem>
-                                        <MenuItem value={"weekly off"}>Weekly Off</MenuItem>
-                                        <MenuItem value={"holiday"}>Holiday</MenuItem>
-                                        <MenuItem value={"half day"}>Half Day</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </div>
-                        </div>
+                            <div className='border border-dashed border-primary rounded w-full '>
+                                <TableContainer component={Paper}>
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell padding="checkbox">
+                                                    <Checkbox
+                                                        onChange={handleAllSelect}
+                                                        checked={checkedemployee?.length === employee?.length}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>Employee Name</TableCell>
+                                                <TableCell>Punch In</TableCell>
+                                                <TableCell>Punch Out</TableCell>
+                                                <TableCell>Status</TableCell>
+                                            </TableRow>
+                                        </TableHead>
 
-                        <div className='border border-dashed border-primary rounded w-full '>
-                            <TableContainer component={Paper}>
-                                <Table size="small">
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    onChange={handleAllSelect}
-                                                    checked={checkedemployee?.length === employee?.length}
-                                                />
-                                            </TableCell>
-                                            <TableCell>Employee Name</TableCell>
-                                            <TableCell>Punch In</TableCell>
-                                            <TableCell>Punch Out</TableCell>
-                                            <TableCell>Status</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-
-                                    <TableBody>
-                                        {filteredEmployee?.map((emp) => (
-                                            <React.Fragment key={emp._id}>
-                                                {/* Main Row */}
-                                                <TableRow>
-                                                    <TableCell padding="checkbox">
-                                                        <Checkbox
-                                                            checked={checkedemployee.includes(emp._id)}
-                                                            onChange={() => handleCheckbox(emp._id)}
-                                                        />
-                                                    </TableCell>
-
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-2">
-                                                            <Avatar
-                                                                alt={emp.userid.name}
-                                                                src={emp.profileimage}
-                                                                sx={{ width: 30, height: 30 }}
+                                        <TableBody>
+                                            {filteredEmployee?.map((emp) => (
+                                                <React.Fragment key={emp._id}>
+                                                    {/* Main Row */}
+                                                    <TableRow>
+                                                        <TableCell padding="checkbox">
+                                                            <Checkbox
+                                                                checked={checkedemployee.includes(emp._id)}
+                                                                onChange={() => handleCheckbox(emp._id)}
                                                             />
-                                                            <Typography variant="body2">{emp.userid.name}</Typography>
-                                                        </div>
-                                                    </TableCell>
+                                                        </TableCell>
 
-                                                    <TableCell>
-                                                        <input
-                                                            type="time"
-                                                            className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
-                                                            value={rowData[emp._id]?.punchIn || ""}
-                                                            onChange={(e) =>
-                                                                handleTimeChange(emp._id, "punchIn", e.target.value)
-                                                            }
-                                                        />
-                                                    </TableCell>
+                                                        <TableCell>
+                                                            <div className="flex items-center gap-2">
+                                                                <Avatar
+                                                                    alt={emp.userid.name}
+                                                                    src={emp.profileimage}
+                                                                    sx={{ width: 30, height: 30 }}
+                                                                />
+                                                                <Typography variant="body2">{emp.userid.name}</Typography>
+                                                            </div>
+                                                        </TableCell>
 
-                                                    <TableCell>
-                                                        <input
-                                                            type="time"
-                                                            className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
-                                                            value={rowData[emp._id]?.punchOut || ""}
-                                                            onChange={(e) =>
-                                                                handleTimeChange(emp._id, "punchOut", e.target.value)
-                                                            }
-                                                        />
-                                                    </TableCell>
+                                                        <TableCell>
+                                                            <input
+                                                                type="time"
+                                                                className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
+                                                                value={rowData[emp._id]?.punchIn || ""}
+                                                                onChange={(e) =>
+                                                                    handleTimeChange(emp._id, "punchIn", e.target.value)
+                                                                }
+                                                            />
+                                                        </TableCell>
 
-                                                    <TableCell>
-                                                        <FormControl fullWidth size="small">
-                                                            <Select
-                                                                value={rowData[emp._id]?.status ?? ""}
-                                                                onChange={(e) => handleStatusChange(emp._id, e.target.value)}
-                                                            >
-                                                                <MenuItem value="present">Present</MenuItem>
-                                                                <MenuItem value="leave">Leave</MenuItem>
-                                                                <MenuItem value="absent">Absent</MenuItem>
-                                                                <MenuItem value="weekly off">Weekly off</MenuItem>
-                                                                <MenuItem value="holiday">Holiday</MenuItem>
-                                                                <MenuItem value="half day">Half Day</MenuItem>
-                                                            </Select>
-                                                        </FormControl>
-                                                    </TableCell>
-                                                </TableRow>
+                                                        <TableCell>
+                                                            <input
+                                                                type="time"
+                                                                className="form-input outline-0 border-1 border-primary border-dashed p-1 rounded"
+                                                                value={rowData[emp._id]?.punchOut || ""}
+                                                                onChange={(e) =>
+                                                                    handleTimeChange(emp._id, "punchOut", e.target.value)
+                                                                }
+                                                            />
+                                                        </TableCell>
 
-                                                {/* Extra Row for Reason if Leave */}
-                                                {/* {rowData[emp._id]?.status === "leave" && (
+                                                        <TableCell>
+                                                            <FormControl fullWidth size="small">
+                                                                <Select
+                                                                    value={rowData[emp._id]?.status ?? ""}
+                                                                    onChange={(e) => handleStatusChange(emp._id, e.target.value)}
+                                                                >
+                                                                    <MenuItem value="present">Present</MenuItem>
+                                                                    <MenuItem value="leave">Leave</MenuItem>
+                                                                    <MenuItem value="absent">Absent</MenuItem>
+                                                                    <MenuItem value="weekly off">Weekly off</MenuItem>
+                                                                    <MenuItem value="holiday">Holiday</MenuItem>
+                                                                    <MenuItem value="half day">Half Day</MenuItem>
+                                                                </Select>
+                                                            </FormControl>
+                                                        </TableCell>
+                                                    </TableRow>
+
+                                                    {/* Extra Row for Reason if Leave */}
+                                                    {/* {rowData[emp._id]?.status === "leave" && (
                                                     <TableRow>
                                                         <TableCell colSpan={5}>
                                                             <TextField
@@ -493,11 +495,12 @@ const BulkMark = ({
                                                         </TableCell>
                                                     </TableRow>
                                                 )} */}
-                                            </React.Fragment>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                                                </React.Fragment>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </div>
                         </div>
                     </span>
                     <div className='modalfooter'>

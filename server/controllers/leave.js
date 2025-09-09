@@ -1,176 +1,131 @@
-const LeaveBalance = require("../models/leavebalance");
 
-// 🔄 Recalculate balances for all entries of one employee
-exports.recalculateLeaveBalances = async (employeeId, companyId) => {
-  const entries = await LeaveBalance.find({ employeeId, companyId })
-    .sort({ date: 1, _id: 1 });
+const employee = require('../models/employee');
+const Leave = require('../models/leave');
+const notificationmodal = require('../models/notification')
+const attendanceModal = require('../models/attandence');
+const companySchema = require('../models/company')
+const holidayschema = require('../models/holiday')
 
-  let runningBalance = 0;
 
-  for (let entry of entries) {
-    if (entry.type === "credit") {
-      runningBalance += entry.amount;   // use transaction amount
-    } else if (entry.type === "debit") {
-      runningBalance -= entry.amount;
-    }
-    entry.balance = runningBalance; // save running total
-    await entry.save();
+const addleave = async (req, res, next) => {
+  let { type, fromDate, toDate, reason } = req.body;
+
+  if (!fromDate || !reason) {
+    return res.status(400).json({ message: 'Fields are required' });
   }
-};
 
-// ➕ Add new leave balance
-exports.addleavebalance = async (req, res) => {
+  // If toDate is not provided, treat it as a single-day leave
+  if (!toDate) {
+    toDate = fromDate;
+  }
+
   try {
-    const { employeeId, companyId, branchId, type, amount, remarks } = req.body;
+    const whichemployee = await employee.findOne({ userid: req.user.id });
 
-    // Normalize date (set to 00:00:00)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Calculate duration in days (inclusive)
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    const timeDiff = to.getTime() - from.getTime();
+    const duration = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
 
-    const newLeave = await LeaveBalance.create({
-      employeeId,
-      companyId,
-      branchId,
+    const leave = new Leave({
+      companyId: whichemployee.companyId,
+      branchId: whichemployee.branchId,
+      employeeId: whichemployee._id,
       type,
-      amount,   // transaction value
-      balance: 0, // temporary, will be recalculated
-      remarks,
-      date: today,
+      fromDate,
+      toDate,
+      duration,
+      reason,
     });
-
-    // Recalculate after adding
-    await recalculateLeaveBalances(employeeId, companyId);
-
-    res.status(201).json({
-      success: true,
-      message: "Leave Balance Added",
-      data: newLeave,
-    });
-  } catch (err) {
-    console.error("Error adding leave balance:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: err.message,
-    });
-  }
-};
-
-// 📑 Get all leave balances
-exports.getallleavebalnce = async (req, res) => {
-  try {
-    let leaveBalances;
-
-    if (req.user.role === "manager") {
-      leaveBalances = await LeaveBalance.find({
-        companyId: req.user.companyId,
-        branchId: { $in: req.user.branchIds },
-      })
-        .populate({
-          path: "employeeId",
-          select: "userid",
-          populate: {
-            path: "userid",
-            select: "name",
-          },
-        })
-        .sort({ date: -1, createdAt: -1 });
-    } else {
-      leaveBalances = await LeaveBalance.find({
-        companyId: req.user.companyId,
-      })
-        .populate({
-          path: "employeeId",
-          select: "userid",
-          populate: {
-            path: "userid",
-            select: "name",
-          },
-        })
-        .sort({ date: -1, createdAt: -1 });
-    }
-
-    res.status(200).json({
-      count: leaveBalances.length,
-      data: leaveBalances,
-    });
-  } catch (err) {
-    console.error("Error fetching leave balances:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: err.message,
-    });
-  }
-};
-
-// ✏️ Edit leave balance
-exports.editleavebalance = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const leave = await LeaveBalance.findById(id);
-    if (!leave) {
-      return res.status(404).json({
-        success: false,
-        message: "Leave balance not found",
-      });
-    }
-
-    // Update fields (only safe ones)
-    leave.type = req.body.type || leave.type;
-    leave.amount = req.body.amount || leave.amount;
-    leave.remarks = req.body.remarks || leave.remarks;
-    leave.date = req.body.date ? new Date(req.body.date) : leave.date;
 
     await leave.save();
+    return res.json({ message: 'Record Added Successfully' });
 
-    // Recalculate after edit
-    await recalculateLeaveBalances(leave.employeeId, leave.companyId);
-
-    res.status(200).json({
-      success: true,
-      message: "Leave balance updated",
-      data: leave,
-    });
-  } catch (err) {
-    console.error("Error editing leave balance:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: err.message,
-    });
+  } catch (error) {
+    console.error("Leave error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// ❌ Delete leave balance
-exports.deleteleavebalance = async (req, res) => {
+const getleave = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const whichemployee = await employee.findOne({ userid: req.user.id })
+    const leaves = await Leave.find({ employeeId: whichemployee._id }).sort({ createdAt: -1 })
 
-    const leave = await LeaveBalance.findById(id);
-    if (!leave) {
-      return res.status(404).json({
-        success: false,
-        message: "Leave balance not found",
+    return res.status(200).json(leaves);
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+const fetchleave = async (req, res, next) => {
+  try {
+    let leave;
+    if (req.user.role == 'manager') {
+      leave = await Leave.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } }).populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name email'
+        }
+      });
+    } else {
+      leave = await Leave.find({ companyId: req.user.companyId }).populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name email'
+        }
       });
     }
+    return res.json({ leave });
 
-    await leave.deleteOne();
-
-    // Recalculate after delete
-    await recalculateLeaveBalances(leave.employeeId, leave.companyId);
-
-    res.status(200).json({
-      success: true,
-      message: "Leave balance deleted",
-    });
-  } catch (err) {
-    console.error("Error deleting leave balance:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: err.message,
-    });
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+const employeefetch = async (req, res, next) => {
+  try {
+    const notification = await notificationmodal.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const attendance = await attendanceModal.find({ employeeId: req.user.employeeId }).sort({ date: -1 });
+    const leave = await Leave.find({ employeeId: req.user.employeeId });
+    const employeeee = await employee.findById(req.user.employeeId)
+      .populate('branchId')
+      .populate('department')
+      .populate('userid');
+
+    const holiday = await holidayschema.find({ companyId: employeeee.branchId.companyId });
+    const companySetting = await companySchema.findById(employeeee.branchId.companyId);
+
+    return res.status(200).json({ profile: employeeee, holiday, notification, leave, attendance, companySetting });
+
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+const updatenotification = async (req, res, next) => {
+
+  try {
+    await notificationmodal.updateMany(
+      { userId: req.user.id }, // condition
+      { $set: { read: true } } // update
+    );
+
+
+    return res.status(200).json({ message: "Marked Read" });
+
+  } catch (error) {
+    console.error("Attendance error:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+
+
+module.exports = { employeefetch, addleave, fetchleave, updatenotification, getleave };

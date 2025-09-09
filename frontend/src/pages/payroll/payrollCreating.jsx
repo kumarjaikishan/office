@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
@@ -145,12 +145,6 @@ export default function PayrollCreatePage() {
   }, [form.calculationBasis, basic, selectedEmployeedetail, company]);
 
 
-  const overtimePay = useMemo(() => {
-    const rate = 345; // or from company config
-    return (basic.overtime / 60) * rate; // assuming overtime is in minutes
-  }, [basic.overtime]);
-
-
   useEffect(() => {
     if (!holidays) return;
     // console.log(holidays)
@@ -292,10 +286,9 @@ export default function PayrollCreatePage() {
       // perDayRate * form.paidDays || 0) +
       selectedEmployeedetail?.salary +
       totalAllowances +
-      totalBonuses -
-      totalDeductions
+      totalBonuses
     );
-  }, [perDayRate, form.paidDays, totalAllowances, totalDeductions, totalBonuses, overtimePay]);
+  }, [perDayRate, form.paidDays, totalAllowances, totalBonuses]);
 
   const tax = useMemo(() => {
     return (
@@ -303,10 +296,17 @@ export default function PayrollCreatePage() {
     );
   }, [grossSalary, taxrate]);
 
+  const minutesinhours = useCallback((minutes) => {
+    const hour = Math.floor(minutes / 60);
+    const minute = minutes % 60;
+    return `${hour}h ${minute}m`;
+  }, []);
+
   const netSalary = useMemo(() => {
     // return grossSalary - tax;
-    return Math.floor(grossSalary - tax);
-  }, [grossSalary, tax]);
+    // return Math.floor(grossSalary - tax);
+    return Math.floor(grossSalary - totalDeductions);
+  }, [grossSalary, totalDeductions]);
 
   // const netSalary = useMemo(() => {
   //   return selectedEmployeedetail?.salary - totalDeductions;
@@ -324,11 +324,11 @@ export default function PayrollCreatePage() {
 
     // OVERTIME
     updatedBonuses = updatedBonuses.filter(b => b.name !== "Overtime");
-    if (options.addOvertime && overtimePay > 0) {
+    if (options.addOvertime) {
       const OvertTimeBonus = basic.overtime * perminuteRate;
       updatedBonuses.push({
         name: "Overtime", amount: OvertTimeBonus.toFixed(2),
-        extraInfo: `${basic.overtime} Min @ ${perminuteRate}`
+        extraInfo: `${basic.overtime} Min @ ₹${perminuteRate} per min.`
       });
     }
 
@@ -338,7 +338,7 @@ export default function PayrollCreatePage() {
       const shortTimeDeduction = basic.shortmin * perminuteRate;
       updatedDeductions.push({
         name: "Short Time", amount: shortTimeDeduction.toFixed(2),
-        extraInfo: `${basic.shortmin} min @ ${perminuteRate}`
+        extraInfo: `${basic.shortmin} min @ ₹${perminuteRate} per min.`
       });
     }
 
@@ -347,7 +347,7 @@ export default function PayrollCreatePage() {
     if (options.deductAbsent && form.absentDays > 0) {
       updatedDeductions.push({
         name: "Absent", amount: (form.absentDays * perDayRate).toFixed(2),
-        extraInfo: `${form.absentDays} Absent @ ${perDayRate}`
+        extraInfo: `${form.absentDays} Absent @ ₹${perDayRate} per day`
       });
     }
 
@@ -385,7 +385,7 @@ export default function PayrollCreatePage() {
     // console.log(updatedDeductions)
 
     setForm(prev => ({ ...prev, bonuses: updatedBonuses, deductions: updatedDeductions }));
-  }, [options, overtimePay, perDayRate, form.leaveDays, form.absentDays, basic.shortmin]);
+  }, [options, perDayRate, form.leaveDays, form.absentDays, basic.shortmin]);
 
 
   const addArrayItem = (field, item) =>
@@ -832,17 +832,17 @@ export default function PayrollCreatePage() {
               <div>Bonuses :</div>
               <div className="w-[100px] font-semibold">+{formatRupee(totalBonuses)}</div>
             </div>
-            <div className=" flex justify-end">
+            {/* <div className=" flex justify-end">
               <div>Deductions :</div>
               <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
-            </div>
+            </div> */}
 
             <Divider />
             <div className=" flex justify-end font-bold">
               <div>Gross Salary :</div>
               <div className="w-[100px]">{formatRupee(grossSalary)}</div>
             </div>
-            <div className=" flex justify-end items-center">
+            {/* <div className=" flex justify-end items-center">
               <div className="flex items-center">
                 Tax :
                 <div className="flex items-center border mx-1 rounded px-2 w-[80px] h-6 text-sm">
@@ -871,7 +871,12 @@ export default function PayrollCreatePage() {
                 </div> :
               </div>
               <div className="w-[100px]">{formatRupee(tax)}</div>
+            </div> */}
+            <div className=" flex justify-end">
+              <div>Deductions :</div>
+              <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
             </div>
+
             <Divider />
 
             <div className=" flex justify-end font-bold">

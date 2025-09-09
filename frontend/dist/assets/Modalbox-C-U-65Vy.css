@@ -1,1 +1,0 @@
-.modalwrapper{position:fixed;top:0;right:0;bottom:0;left:0;background:#00000080;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);z-index:1000;display:flex;justify-content:center;align-items:center}.modalwrapper .modalbox{position:relative;width:min-content;height:min-content;max-width:98vw;max-height:90vh}

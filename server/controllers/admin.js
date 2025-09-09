@@ -193,6 +193,12 @@ const addemployee = async (req, res, next) => {
 }
 
 const updateemployee = async (req, res, next) => {
+
+    // console.log(req.body);
+    // console.log(req?.file);
+    // return res.status(400).json({
+    //     message: 'Employee updated successfully'
+    // });
     try {
         const { employeeId, employeeName, branchId, department, email, username, designation,
             phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary = 0, achievements,
@@ -212,7 +218,7 @@ const updateemployee = async (req, res, next) => {
             'dob', 'designation', 'phone', 'address', 'gender', 'bloodGroup',
             'Emergencyphone', 'skills', 'department', 'maritalStatus', 'salary',
             'achievements', 'education', 'acHolderName', 'bankName', 'bankbranch',
-            'acnumber', 'ifscCode', 'adhaar', 'pan', 'status','employeeName'
+            'acnumber', 'ifscCode', 'adhaar', 'pan', 'status', 'employeeName', 'guardian'
         ];
 
         let updatedFields = {};
@@ -229,6 +235,13 @@ const updateemployee = async (req, res, next) => {
                 } catch (err) {
                     console.log(`Error parsing ${field}:`, err.message);
                     updatedFields[field] = []; // fallback to empty array
+                }
+            } else if (field === 'guardian') {
+                try {
+                    updatedFields[field] = typeof value === "string" ? JSON.parse(value) : value;
+                } catch (err) {
+                    console.log(`Error parsing guardian:`, err.message);
+                    updatedFields[field] = { relation: "S/o", name: "" }; // fallback default
                 }
             } else {
                 updatedFields[field] = value;
@@ -270,6 +283,18 @@ const updateemployee = async (req, res, next) => {
             userupdatedFields,
             { new: true }
         );
+        if (req?.body?.empId) {
+            let empcode = "EMP" + String(req.body.empId).padStart(3, "0");
+            const alreadyEmpId = await employeeModal.findOne({
+                empId: empcode,
+                companyId: req.user.companyId,
+                _id: { $ne: employeeId }
+            });
+            if (alreadyEmpId) {
+                return next({ status: 400, message: "This Employee iD already Exist" });
+            }
+            updatedFields.empId = empcode;
+        }
         const updatedEmployee = await employeeModal.findByIdAndUpdate(
             employeeId,
             updatedFields,
@@ -281,7 +306,7 @@ const updateemployee = async (req, res, next) => {
             return next({ status: 400, message: "Something went wrong while updating" });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Employee updated successfully'
         });
 
@@ -680,7 +705,7 @@ const firstfetch = async (req, res, next) => {
             employees = await employeeModal.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
                 .populate('department', 'department')
                 .populate('userid', 'email name ')
-                .sort({ employeename: 1 });
+                .sort({ empId: 1 });
 
             const employeeIds = employees.map(emp => emp._id);
 
@@ -689,7 +714,8 @@ const firstfetch = async (req, res, next) => {
                 employeeId: {
                     $in: employeeIds
                 }
-            }).sort({ date: -1 })
+            })
+                .sort({ date: -1, _id: 1 })
                 .populate({
                     path: 'employeeId',
                     select: 'userid profileimage department',
@@ -732,10 +758,10 @@ const firstfetch = async (req, res, next) => {
             employees = await employeeModal.find({ companyId: compId })
                 .populate('department', 'department')
                 .populate('userid', 'email name role')
-                .sort({ employeename: 1 });
+                .sort({ empId: 1 });
 
             attendance = await attendanceModal.find({ companyId: compId })
-                .sort({ date: -1 })
+                .sort({ date: -1, _id: 1 })
                 .populate({
                     path: 'employeeId',
                     select: 'userid profileimage department',
