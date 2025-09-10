@@ -44,9 +44,10 @@ export default function PayrollCreatePage() {
   const [holidaydate, setholidaydate] = useState([]);
   const [taxrate, settaxrate] = useState(0);
   const [employeeleavebal, setemployeeleavebal] = useState(0);
+  const [previousAdvance, setpreviousAdvance] = useState(0);
 
 
-  const { holidays, company, employee, attandence, leaveBalance } = useSelector(
+  const { holidays, company, employee, attandence, leaveBalance, advance } = useSelector(
     (state) => state.user
   );
 
@@ -65,6 +66,17 @@ export default function PayrollCreatePage() {
     console.log("Latest Leave Balance:", latest);
     setemployeeleavebal(latest?.balance)
   }, [leaveBalance, selectedEmployeedetail]);
+  useEffect(() => {
+    if (!selectedEmployeedetail || !advance) return;
+
+    const latest = advance
+      .filter(e => e.employeeId?._id?.toString() === selectedEmployeedetail._id?.toString())
+      .slice() // clone so sort doesn’t mutate original
+      .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
+
+    console.log("Latest advance Balance:", latest);
+    setpreviousAdvance(latest?.balance)
+  }, [advance, selectedEmployeedetail]);
 
 
   function formatRupee(amount) {
@@ -115,7 +127,7 @@ export default function PayrollCreatePage() {
   // const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
   // const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
   // const availablePaidLeaves = 1;
-  const advance = selectedEmployeedetail?.advance;
+  // const previousadvance = selectedEmployeedetail?.advance;
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -353,8 +365,8 @@ export default function PayrollCreatePage() {
 
     // Advance
     updatedDeductions = updatedDeductions.filter(d => d.name !== "Advance");
-    if (options.adjustAdvance && advance > 0) {
-      let remainigadvance = advance - options.adjustedAdvance;
+    if (options.adjustAdvance && previousAdvance > 0) {
+      let remainigadvance = previousAdvance - options.adjustedAdvance;
       updatedDeductions.push({
         name: "Advance", amount: (options.adjustedAdvance).toFixed(2),
         extraInfo: `Adjusted :${options.adjustedAdvance},  Remaining :${remainigadvance}`
@@ -668,13 +680,13 @@ export default function PayrollCreatePage() {
                 )}
               </div> : ''
             }
-            {advance > 0 ?
+            {previousAdvance > 0 ?
               <div className="flex items-center flex-wrap md:border-none md:shadow-none border border-slate-300 shadow rounded md:p-0 p-1 gap-4">
                 <FormControlLabel
                   control={<Checkbox checked={options.adjustAdvance} onChange={(e) => setOptions(p => ({ ...p, adjustAdvance: e.target.checked }))} />}
                   label="Adjust Advance"
                 />
-                <p className="w-full md:w-fit">Advance: {advance}</p>
+                <p className="w-full md:w-fit">Advance: {previousAdvance}</p>
                 {options.adjustAdvance && (
                   <TextField
                     type="number"

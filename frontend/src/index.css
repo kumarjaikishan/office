@@ -186,13 +186,13 @@ body {
 
 @media (max-width: 600px) {
     .membermodal {
-        max-height: 90vh;
+        max-height: 85vh;
 
         form,
         .whole {
 
             .modalcontent {
-                max-height: calc(90vh - 45px - 55px);
+                max-height: calc(85vh - 45px - 55px);
                 gap: 15px;
                 padding: 20px 10px;
                 padding-bottom: 10px;

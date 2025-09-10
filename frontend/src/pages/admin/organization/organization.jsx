@@ -142,12 +142,12 @@ export default function OrganizationSettings() {
                     </div>
 
                     <div
-                        className={`
+                        className={` 
                           rounded overflow-hidden transition-all duration-300 
-                          ${openSection === 'company' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          ${openSection === 'company' ? 'max-h-fit p-0 md:p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                     >
-                        <div className="p-4 rounded flex flex-col md:flex-row items-center  mt-2 space-y-4">
+                        <div className="p-1 md:p-4 rounded  flex flex-col md:flex-row items-center  mt-2 space-y-4">
                             <div className="relative flex items-center mx-auto">
                                 <div className="relative w-30 h-30 mx-auto">
                                     {companyinp?.logo ? (
@@ -249,7 +249,7 @@ export default function OrganizationSettings() {
                                         label="Company Full Name"
                                         variant="outlined"
                                         fullWidth
-                                        
+
                                         value={companyinp?.fullname || ""}
                                         onChange={(e) => setcompany({ ...companyinp, fullname: e.target.value })}
                                     />
@@ -299,7 +299,7 @@ export default function OrganizationSettings() {
                     <div
                         className={`
                           rounded space-y-1 overflow-hidden transition-all duration-300
-                          ${openSection === 'branches' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          ${openSection === 'branches' ? 'max-h-fit p-1 md:p-2 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                     >
                         <div className="flex justify-end items-center">
@@ -406,7 +406,7 @@ export default function OrganizationSettings() {
                     <div
                         className={`
                           rounded overflow-hidden transition-all duration-300 
-                          ${openSection === 'admin' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
+                          ${openSection === 'admin' ? 'max-h-fit md:p-2 p-1 my-2' : 'max-h-0 p-0 my-0'}
                         `}
                     >
                         <SuperAdminDashboard />

@@ -20,26 +20,26 @@ import { MdDelete, MdEdit } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
-const LeaveBalancePage = () => {
+const EmployeeAdvancePage = () => {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState({
         employeeId: "",
         companyId: "",
         branchId: "",
-        type: "credit",
+        empId: "",
         amount: 0,
+        type: "given",
         remarks: "",
     });
     const [editingId, setEditingId] = useState(null);
-    const { company, employee, leaveBalance } = useSelector((state) => state.user);
+    const {  employee,advance } = useSelector((state) => state.user);
 
     useEffect(() => {
-        if (leaveBalance) setRows(leaveBalance)
-        console.log(leaveBalance)
-    }, [leaveBalance]);
+        if (advance) setRows(advance);
+        // fetchData()
+    }, [advance]);
 
-    // ✅ Handle form change
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -50,8 +50,9 @@ const LeaveBalancePage = () => {
                 employeeId: row.employeeId?._id || "",
                 companyId: row.companyId || "",
                 branchId: row.branchId || "",
-                type: row.type,
+                empId: row.empId || "",
                 amount: row.amount,
+                type: row.type || "given",
                 remarks: row.remarks,
             });
             setEditingId(row._id);
@@ -60,8 +61,9 @@ const LeaveBalancePage = () => {
                 employeeId: "",
                 companyId: "",
                 branchId: "",
-                type: "credit",
+                empId: "",
                 amount: 0,
+                type: "given",
                 remarks: "",
             });
             setEditingId(null);
@@ -71,60 +73,68 @@ const LeaveBalancePage = () => {
 
     const handleClose = () => setOpen(false);
 
-    // ✅ Submit (Create or Update)
     const handleSubmit = async () => {
+
+        // return console.log(form)
         try {
             const token = localStorage.getItem("emstoken");
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
             if (editingId) {
                 await axios.put(
-                    `${import.meta.env.VITE_API_ADDRESS}leave-balances/${editingId}`,
+                    `${import.meta.env.VITE_API_ADDRESS}advance/${editingId}`,
                     form,
                     config
                 );
-                toast.success("Leave balance updated");
+                toast.success("Advance updated");
             } else {
                 await axios.post(
-                    `${import.meta.env.VITE_API_ADDRESS}leave-balances`,
+                    `${import.meta.env.VITE_API_ADDRESS}advance`,
                     form,
                     config
                 );
-                toast.success("Leave balance added");
+                toast.success("Advance added");
             }
 
             handleClose();
+            fetchData();
         } catch (error) {
-            console.error("Error saving leave balance:", error);
-            if (error.response) {
-                toast.error(error.response.data.message || "Failed to save");
-            } else {
-                toast.error("Server error");
-            }
+            console.error("Error saving advance:", error);
+            toast.error(error.response?.data?.message || "Server error");
         }
     };
 
-    // ✅ Delete record
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this record?")) {
             try {
                 const token = localStorage.getItem("emstoken");
                 await axios.delete(
-                    `${import.meta.env.VITE_API_ADDRESS}leave-balances/${id}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
+                    `${import.meta.env.VITE_API_ADDRESS}advance/${id}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
-                toast.success("Leave balance deleted");
+                toast.success("Advance deleted");
                 fetchData();
             } catch (error) {
-                console.error("Error deleting leave balance:", error);
+                console.error("Error deleting advance:", error);
                 toast.error("Failed to delete record");
             }
         }
     };
 
-    // ✅ Set employee selection
+    const fetchData = async () => {
+        try {
+            const token = localStorage.getItem("emstoken");
+            const { data } = await axios.get(
+                `${import.meta.env.VITE_API_ADDRESS}advance`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            // console.log(data)
+            setRows(data.data);
+        } catch (error) {
+            console.error("Error fetching advances:", error);
+        }
+    };
+
     const setEmployee = (e) => {
         const empId = e.target.value;
         const emp = employee.find((emp) => emp._id === empId);
@@ -134,25 +144,25 @@ const LeaveBalancePage = () => {
                 employeeId: emp._id,
                 companyId: emp.companyId,
                 branchId: emp.branchId,
+                empId: emp.empId,
             });
         }
     };
 
-    // ✅ DataTable columns
     const columns = [
         {
             name: "Employee",
             selector: (row) => row.employeeId?.userid?.name || "N/A",
             sortable: true,
         },
-        { name: "Type", selector: (row) => row.type, sortable: true,width:'90px'  },
-        { name: "Leaves", selector: (row) => row.type =='credit'? row.amount : `-${row.amount}`, sortable: true, width:'90px' },
-        { name: "Balance", selector: (row) => row.balance, sortable: true,width:'90px'  },
-        { name: "Remarks", selector: (row) => row.remarks || "-" },
+        { name: "Amount", selector: (row) => row.type=='given' ? `${row.amount}` :`-${row.amount}` , sortable: true, width: "100px" },
+        { name: "Balance", selector: (row) => row.balance, sortable: true, width: "100px" },
+        { name: "type", selector: (row) => row.type || "-", sortable: true, width: "120px" },
+        { name: "Remarks", selector: (row) => row.remarks || "-", sortable: true },
         {
             name: "Actions",
             cell: (row) => (
-                <> {!row?.payrollId && <>
+                <>
                     <IconButton color="primary" onClick={() => handleOpen(row)}>
                         <MdEdit />
                     </IconButton>
@@ -160,23 +170,21 @@ const LeaveBalancePage = () => {
                         <MdDelete />
                     </IconButton>
                 </>
-                }
-                </>
             ),
-            width:'120px' 
+            width: "120px",
         },
     ];
 
     return (
         <Box p={2}>
-            <h2>Leave Balance Management</h2>
+            <h2>Employee Advance Management</h2>
             <Button
                 variant="contained"
                 color="primary"
                 onClick={() => handleOpen()}
                 sx={{ mb: 2 }}
             >
-                Add Leave Balance
+                Add Advance
             </Button>
 
             <DataTable
@@ -188,19 +196,14 @@ const LeaveBalancePage = () => {
                 responsive
             />
 
-            {/* Dialog Form */}
             <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
                 <DialogTitle>
-                    {editingId ? "Edit Leave Balance" : "Add Leave Balance"}
+                    {editingId ? "Edit Advance" : "Add Advance"}
                 </DialogTitle>
                 <DialogContent>
-                    {/* Employee Dropdown */}
                     <FormControl className="w-full mt-4" size="small">
                         <InputLabel>Select Employee</InputLabel>
-                        <Select
-                            value={form.employeeId}
-                            onChange={setEmployee}
-                        >
+                        <Select value={form.employeeId} onChange={setEmployee}>
                             <MenuItem value="">Select Employee</MenuItem>
                             {employee?.map((emp) => (
                                 <MenuItem key={emp._id} value={emp._id}>
@@ -218,26 +221,26 @@ const LeaveBalancePage = () => {
 
                     <TextField
                         margin="dense"
-                        select
-                        label="Type"
-                        name="type"
-                        fullWidth
-                        value={form.type}
-                        onChange={handleChange}
-                    >
-                        <MenuItem value="credit">Credit</MenuItem>
-                        <MenuItem value="debit">Debit</MenuItem>
-                    </TextField>
-
-                    <TextField
-                        margin="dense"
-                        label="No. of Allotted Leaves"
+                        label="Amount"
                         name="amount"
                         type="number"
                         fullWidth
                         value={form.amount}
                         onChange={handleChange}
                     />
+
+                    <TextField
+                        margin="dense"
+                        select
+                        label="type"
+                        name="type"
+                        fullWidth
+                        value={form.type}
+                        onChange={handleChange}
+                    >
+                        <MenuItem value="given">Given</MenuItem>
+                        <MenuItem value="adjusted">Adjusted</MenuItem>
+                    </TextField>
 
                     <TextField
                         margin="dense"
@@ -259,4 +262,4 @@ const LeaveBalancePage = () => {
     );
 };
 
-export default LeaveBalancePage;
+export default EmployeeAdvancePage;

@@ -334,9 +334,9 @@ export default function SuperAdminDashboard() {
     return (
         <div className="p-1 w-full">
             {/* Admin List */}
-            <div className="bg-white shadow-md rounded-lg p-1">
+            <div className=" shadow-md rounded-lg">
                 <div className="flex justify-between flex-wrap items-center mb-4">
-                    <h2 className="text-[16px] mb-2 md:mb-0 md:text-xl font-semibold">Admin/Manager Management</h2>
+                    {/* <h2 className="text-[16px] mb-2 md:mb-0 md:text-xl font-semibold">Admin/Manager Management</h2> */}
 
                     <Button variant="contained"
                         className='mr-2 w-full md:w-fit'
@@ -384,7 +384,7 @@ export default function SuperAdminDashboard() {
                                             className="p-2 border rounded hover:bg-gray-100 text-green-500"
                                             onClick={() => { setpass({ ...pass, userid: admin._id }); setpassmodal(true) }}
                                         >
-                                            <TbPasswordUser className="h-4 w-4 border" />
+                                            <TbPasswordUser className="h-4 w-4 " />
                                         </button>
 
                                         <button

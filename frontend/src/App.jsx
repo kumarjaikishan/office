@@ -16,6 +16,7 @@ import AttendanceReport from './pages/report/attandenceReport';
 import PayrollPrint from './pages/payroll/payrollprint';
 import PayrollEdit from './pages/payroll/payrollEdit';
 import LeaveBalancePage from './pages/leavebalamce/leavebalance';
+import EmployeeAdvancePage from './pages/advance/advance';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -67,6 +68,7 @@ const routesByRole = {
       <Route path="holiday" element={<HolidayForm />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="leavebal" element={<LeaveBalancePage />} />
+      <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="setting" element={<Setting />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
@@ -92,6 +94,7 @@ const routesByRole = {
       <Route path="holiday" element={<HolidayForm />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="leavebal" element={<LeaveBalancePage />} />
+      <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="setting" element={<Setting />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
@@ -114,6 +117,7 @@ const routesByRole = {
       <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="leave" element={<Adminleave />} />
       <Route path="leavebal" element={<LeaveBalancePage />} />
+      <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="setting" element={<Setting />} />

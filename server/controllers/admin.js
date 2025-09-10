@@ -4,6 +4,7 @@ const usermodal = require('../models/user');
 const leavemodal = require('../models/leave')
 const holidaymodal = require('../models/holiday')
 const LeaveBalance = require('../models/leavebalance')
+const advancemodal = require('../models/advance')
 const Ledger = require("../models/ledger");
 const Entry = require("../models/entry");
 const notificationmodal = require('../models/notification')
@@ -681,6 +682,7 @@ const firstfetch = async (req, res, next) => {
         let ledger = [];
         let user;
         let leaveBalance = [];
+        let advance = [];
         // let permissionName=[];
         // let defaultRolePermission=[];
         user = await usermodal.findById(req.user.id).select('name email profileImage role');
@@ -734,6 +736,15 @@ const firstfetch = async (req, res, next) => {
                 select: "userid",
                 populate: { path: "userid", select: "name", },
             }).sort({ date: -1, createdAt: -1 });
+
+            advance = await advancemodal.find({
+                companyId: req.user.companyId,
+                branchId: { $in: req.user.branchIds }
+            }).populate({
+                path: "employeeId",
+                select: "userid",
+                populate: { path: "userid", select: "name", },
+            }).sort({ date: -1, createdAt: -1 });
         }
 
         if ((req.user.role == 'superadmin' || req.user.role == 'admin') && companye) {
@@ -778,6 +789,13 @@ const firstfetch = async (req, res, next) => {
                 select: "userid",
                 populate: { path: "userid", select: "name", },
             }).sort({ date: -1, createdAt: -1 });
+
+            advance = await advancemodal.find({ companyId: compId, }).populate({
+                path: "employeeId",
+                select: "userid",
+                populate: { path: "userid", select: "name", },
+            }).sort({ date: -1, createdAt: -1 });
+            // console.log(advance)
         }
 
         ledger = await Ledger.find({ userId: req.user.id });
@@ -798,7 +816,7 @@ const firstfetch = async (req, res, next) => {
             user: user,
             departmentlist,
             employee: employees,
-            attendance,
+            attendance,advance,
             holidays,
             ledger: ledgersWithBalance,
             leaveBalance

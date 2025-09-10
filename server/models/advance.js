@@ -1,27 +1,32 @@
+const mongoose = require('mongoose');
+
 const advanceSchema = new mongoose.Schema({
-    employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "Employee", required: true },
-    originalAmount: { type: Number, required: true },
-    remainingAmount: { type: Number, required: true },  // keeps track of unpaid balance
-    reason: { type: String },
+    employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "employee", required: true },
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
+
+    empId: { type: String },
     date: { type: Date, default: Date.now },
-    status: { type: String, enum: ["open", "closed"], default: "open" },
-    transactions: [{
-        date: { type: Date },
-        amount: { type: Number, required: true },
-        fromSalary: { type: Boolean, required: true },
-        payrollId: { type: mongoose.Schema.Types.ObjectId, ref: "Payroll" }
-    }],
+    type: { type: String, enum: ["given", "adjusted"], required: true }, // like credit/debit
+    amount: { type: Number, required: true }, // transaction amount
+    balance: { type: Number, default: 0 }, // running balance
+    remarks: { type: String },
+
+    payrollId: { type: mongoose.Schema.Types.ObjectId, ref: "Payroll" },
+    status: { type: String, enum: ["open", "closed"], default: "open" }
 }, { timestamps: true });
 
-// Auto update status before saving
+
+// ✅ Auto update status before saving
 advanceSchema.pre("save", function (next) {
-    this.status = this.remainingAmount > 0 ? "open" : "closed";
+    this.status = this.balance > 0 ? "open" : "closed";
     next();
 });
 
-// Validation
-advanceSchema.path("remainingAmount").validate(function (value) {
-    return value >= 0 && value <= this.originalAmount;
-}, "Remaining amount must be between 0 and original amount.");
+// ✅ Validation for remainingAmount
+advanceSchema.path("balance").validate(function (value) {
+    return value >= 0;
+}, "Balance cannot be negative.");
+
 
 module.exports = mongoose.model("Advance", advanceSchema);

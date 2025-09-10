@@ -27,6 +27,7 @@ const userSlice = createSlice({
         attandence: null,
         ledger: null,
         leaveBalance: null,
+        advance: null,
         salary: null,
         status: 'idle',
         sidebar: false,
@@ -45,6 +46,7 @@ const userSlice = createSlice({
             state.holidays = null;
             state.branch = null;
             state.leaveBalance = null;
+            state.advance = null;
             state.attandence = null;
             state.ledger = null;
             state.salary = null;
@@ -81,6 +83,7 @@ const userSlice = createSlice({
                 state.branch = action.payload?.branch;
                 state.holidays = action.payload?.holidays;
                 state.leaveBalance = action.payload?.leaveBalance;
+                state.advance = action.payload?.advance;
                 state.ledger = action.payload?.ledger;
                 state.status = 'succeeded';
             })

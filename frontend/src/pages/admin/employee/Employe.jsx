@@ -583,12 +583,20 @@ const Employe = () => {
                       fullWidth
                       type="number"
                       value={inp.empId}
-                      onChange={(e) => handleChange(e, "empId")}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val.length <= 3) {
+                          handleChange(e, "empId");
+                        }
+                      }}
                       label="Employee ID"
                       size="small"
                       helperText={`ID - EMP${String(inp?.empId || '').padStart(3, '0')}`}
                       InputProps={{
                         startAdornment: <InputAdornment position="start">EMP</InputAdornment>,
+                      }}
+                      inputProps={{
+                        maxLength: 3, // still good for text inputs
                       }}
                     />
 

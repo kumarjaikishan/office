@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const Payroll = require("../models/payroll");
 const Employee = require("../models/employee");
-const Advance = require("../models/advance");
 const LeaveBalance = require("../models/leavebalance");
 const { recalculateLeaveBalances } = require("./leaveBalance");
-const { recalculateAdvanceBalances } = require("./advance");
 
 exports.createPayroll = async (req, res, next) => {
+
+  // console.log(req.body)
+  //  return res.status(201).json({ messgae: "ok" });
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -44,11 +45,7 @@ exports.createPayroll = async (req, res, next) => {
       designation,
       availableLeaves = 0,
       advance = 0,
-      profileimage,
-      phone,
-      email,
-      address,
-      guardian = { name: "", relation: "" },
+      profileimage, phone, email, address, guardian = { name: '', realtion: '' }
     } = whichEmployee;
 
     // ---- Salary Computation ----
@@ -66,44 +63,27 @@ exports.createPayroll = async (req, res, next) => {
 
     // 🔹 Create payroll
     const payroll = new Payroll({
-      companyId,
-      branchId,
-      employeeId,
-      month,
-      year,
-      name,
-      profileimage,
-      phone,
-      email,
-      address,
-      guardian,
+      companyId, branchId, employeeId,
+      month, year, name,
+      profileimage, phone, email, address, guardian, profileimage,
       department: department?.department || "",
-      designation,
-      present,
-      leave,
-      absent,
+      designation, present, leave, absent,
       overtime: basic.overtime,
       shortTime: basic.shortmin,
       monthDays: basic.totalDays,
       holidays: basic.holidaysCount,
       weekOffs: basic.weeklyOff,
       workingDays: basic.workingDays,
-      options,
-      baseSalary: salary,
-      allowances,
-      bonuses,
-      deductions,
-      taxRate,
-      status: "pending",
-      grossSalary,
-      taxAmount,
-      netSalary,
+      options, baseSalary: salary, allowances, bonuses,
+      deductions, taxRate, status: "pending", grossSalary,
+      taxAmount, netSalary,
     });
 
     await payroll.save({ session });
 
-    // 🔹 Handle leave adjustment
+    // 🔹 Handle leave adjustment via LeaveBalance ledger
     if (options.adjustLeave && options.adjustedLeaveCount > 0) {
+      // Find latest leave balance for this employee
       const latestLeave = await LeaveBalance.findOne({
         employeeId,
         companyId,
@@ -118,7 +98,7 @@ exports.createPayroll = async (req, res, next) => {
       }
 
       const newBalance = availableLeaves - options.adjustedLeaveCount;
-
+      // Insert a new "debit" entry into leave balance
       await LeaveBalance.create(
         [
           {
@@ -136,55 +116,28 @@ exports.createPayroll = async (req, res, next) => {
         { session }
       );
 
+      // Recalculate leave balances for consistency
       await recalculateLeaveBalances(employeeId, companyId);
     }
 
-    // 🔹 Handle advance adjustment
-    if (options.adjustAdvance && options.adjustedAdvance > 0) {
+    if (options.adjustAdvance) {
       if (options.adjustedAdvance > advance) {
-        throw new Error("Adjusted Advance can't be more than Advance Balance");
+        return next({ status: 400, message: "Adjusted Advance can't be more than Advance Balance" });
       }
-
-      // Create an Advance ledger entry of type "adjusted"
-      await Advance.create(
-        [
-          {
-            employeeId,
-            companyId,
-            branchId,
-            type: "adjusted",
-            amount: options.adjustedAdvance,
-            balance: 0, // will be recalculated
-            remarks: `Advance adjusted in Payroll ${month}-${year}`,
-            payrollId: payroll._id,
-            date: new Date().setHours(0, 0, 0, 0),
-          },
-        ],
-        { session }
-      );
-
-      // Recalculate advance balances
-      await recalculateAdvanceBalances(employeeId, companyId);
-
-      // Update employee’s running advance balance
       whichEmployee.advance = advance - options.adjustedAdvance;
     }
 
     await whichEmployee.save({ session });
 
-    // 🔹 Commit transaction
+    // 🔹 Commit
     await session.commitTransaction();
     session.endSession();
 
-    return res.status(201).json({
-      success: true,
-      message: "Payroll Created",
-      payroll,
-    });
+    return res.status(201).json({ success: true, message: 'Payroll Created', payroll });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Error in createPayroll:", error);
+    console.error(error);
     return next({ status: 500, message: error.message });
   }
 };
@@ -204,28 +157,21 @@ exports.editPayroll = async (req, res, next) => {
     }
 
     // 🔹 Find existing leave adjustment linked to this payroll
-    let leaveAdjustment = await LeaveBalance.findOne({
+    let adjustment = await LeaveBalance.findOne({
       payrollId: payroll._id,
-    }).session(session);
-
-    // 🔹 Find existing advance adjustment linked to this payroll
-    let advanceAdjustment = await Advance.findOne({
-      payrollId: payroll._id,
-      type: "adjusted",
     }).session(session);
 
     // 🔹 Update payroll fields
     Object.assign(payroll, updates);
     await payroll.save({ session });
 
-    // =============================
     // 🔹 Handle leave adjustment
-    // =============================
     if (updates.options?.adjustLeave && updates.options.adjustedLeaveCount > 0) {
+      // Get latest leave balance (excluding this payroll’s record if it exists)
       const latestLeave = await LeaveBalance.findOne({
         employeeId: payroll.employeeId,
         companyId: payroll.companyId,
-        _id: { $ne: leaveAdjustment?._id },
+        _id: { $ne: adjustment?._id }, // ignore current adjustment record
       })
         .sort({ date: -1, createdAt: -1 })
         .session(session);
@@ -239,14 +185,16 @@ exports.editPayroll = async (req, res, next) => {
 
       const newBalance = availableLeaves - adjusted;
 
-      if (leaveAdjustment) {
-        leaveAdjustment.amount = adjusted;
-        leaveAdjustment.balance = newBalance;
-        leaveAdjustment.remarks = `Leave adjusted in Payroll ${payroll.month}-${payroll.year}`;
-        leaveAdjustment.date = new Date().setHours(0, 0, 0, 0);
-        await leaveAdjustment.save({ session });
+      if (adjustment) {
+        // 🔹 Update existing adjustment
+        adjustment.amount = adjusted;
+        adjustment.balance = newBalance;
+        adjustment.remarks = `Leave adjusted in Payroll ${payroll.month}-${payroll.year}`;
+        adjustment.date = new Date().setHours(0, 0, 0, 0);
+        await adjustment.save({ session });
       } else {
-        leaveAdjustment = new LeaveBalance({
+        // 🔹 Create new adjustment
+        adjustment = new LeaveBalance({
           employeeId: payroll.employeeId,
           companyId: payroll.companyId,
           branchId: payroll.branchId,
@@ -257,48 +205,15 @@ exports.editPayroll = async (req, res, next) => {
           payrollId: payroll._id,
           date: new Date().setHours(0, 0, 0, 0),
         });
-        await leaveAdjustment.save({ session });
+        await adjustment.save({ session });
       }
 
+      // 🔄 Recalculate ledger after change
       await recalculateLeaveBalances(payroll.employeeId, payroll.companyId);
-    } else if (leaveAdjustment) {
-      await leaveAdjustment.deleteOne({ session });
+    } else if (adjustment) {
+      // 🔹 If adjustment is removed in update, delete it
+      await adjustment.deleteOne({ session });
       await recalculateLeaveBalances(payroll.employeeId, payroll.companyId);
-    }
-
-    // =============================
-    // 🔹 Handle advance adjustment
-    // =============================
-    if (updates.options?.adjustAdvance && updates.options.adjustedAdvance > 0) {
-      const adjusted = updates.options.adjustedAdvance;
-
-      if (advanceAdjustment) {
-        // update existing advance adjustment
-        advanceAdjustment.amount = adjusted;
-        advanceAdjustment.remarks = `Advance adjusted in Payroll ${payroll.month}-${payroll.year}`;
-        advanceAdjustment.date = new Date().setHours(0, 0, 0, 0);
-        await advanceAdjustment.save({ session });
-      } else {
-        // create new advance adjustment
-        advanceAdjustment = new Advance({
-          employeeId: payroll.employeeId,
-          companyId: payroll.companyId,
-          branchId: payroll.branchId,
-          type: "adjusted",
-          amount: adjusted,
-          balance: 0, // will be recalculated
-          remarks: `Advance adjusted in Payroll ${payroll.month}-${payroll.year}`,
-          payrollId: payroll._id,
-          date: new Date().setHours(0, 0, 0, 0),
-        });
-        await advanceAdjustment.save({ session });
-      }
-
-      await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
-    } else if (advanceAdjustment) {
-      // adjustment removed in update
-      await advanceAdjustment.deleteOne({ session });
-      await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
     }
 
     // 🔹 Commit
@@ -312,6 +227,7 @@ exports.editPayroll = async (req, res, next) => {
     return next({ status: 500, message: error.message });
   }
 };
+
 
 
 exports.allPayroll = async (req, res, next) => {

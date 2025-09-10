@@ -1,7 +1,7 @@
 const LeaveBalance = require("../models/leavebalance");
 
 // 🔄 Recalculate balances for all entries of one employee
-exports.recalculateLeaveBalances = async (employeeId, companyId) => {
+const recalculateLeaveBalances = async (employeeId, companyId) => {
   const entries = await LeaveBalance.find({ employeeId, companyId })
     .sort({ date: 1, _id: 1 });
 
@@ -174,3 +174,5 @@ exports.deleteleavebalance = async (req, res) => {
     });
   }
 };
+
+exports.recalculateLeaveBalances = recalculateLeaveBalances;

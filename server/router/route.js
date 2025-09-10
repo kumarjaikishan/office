@@ -8,6 +8,7 @@ const salary = require('../controllers/salary');
 const ledger = require("../controllers/ledger");
 const attendance = require('../controllers/attandence');
 const leaveBalance = require('../controllers/leaveBalance');
+const advance = require('../controllers/advance');
 const leave = require('../controllers/leave');
 const developer = require('../controllers/developer');
 const holiday = require('../controllers/holiday');
@@ -102,6 +103,13 @@ router.route('/leave-balances')
 router.route('/leave-balances/:id')
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.editleavebalance)
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.deleteleavebalance)
+
+router.route('/advance')
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.getAllAdvances)
+  .post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.addAdvance)
+router.route('/advance/:id')
+  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.editAdvance)
+  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.deleteAdvance)
 
 router.route('/developerfetch').get(authmiddlewre, authorizeRoles('developer'), developer.allUser);
 router.route('/User').post(authmiddlewre, authorizeRoles('developer'), developer.addUser)
