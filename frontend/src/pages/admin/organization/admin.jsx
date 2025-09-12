@@ -453,7 +453,7 @@ export default function SuperAdminDashboard() {
             </div>
 
             <Modalbox open={showForm} onClose={() => setShowForm(false)}>
-                <div className="membermodal">
+                <div className="membermodal w-[660px]">
                     <form onSubmit={handleSave}>
                         <div className="modalhead"> {editingIndex !== null ? "Edit Admin" : "Add Admin"}</div>
                         <span className="modalcontent">

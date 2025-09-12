@@ -573,7 +573,7 @@ export default function OrganizationSettings() {
                 seteditbranchdata(null);
                 seteditbranch(false)
             }}>
-                <div className="membermodal" >
+                <div className="membermodal w-[680px]" >
                     <Addbranch setopenviewmodal={setopenviewmodal} editbranchdata={editbranchdata} editbranch={editbranch} company={company} employee={employee} />
                 </div>
             </Modalbox>

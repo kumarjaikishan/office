@@ -221,7 +221,7 @@ const AdminManagerProfile = () => {
           {profile?.role === "superadmin" && (
             <div className="my-2 flex flex-wrap gap-2">
               <Button
-              
+
                 onClick={() => { setname(profilee?.name); setEditOpen(true) }}
                 disabled={isLoading}
                 title="Send Password Reset Link"
@@ -263,25 +263,27 @@ const AdminManagerProfile = () => {
               />
 
               {/* Avatar + file input */}
-              <div className="relative">
-                <Avatar
-                  sx={{ width: 72, height: 72 }}
-                  alt={profilee?.name}
-                  src={profilee?.profileImage}
-                />
-                <input
-                  type="file"
-                  ref={inputRef}
-                  style={{ display: "none" }}
-                  onChange={handlePhotoChange}
-                  accept="image/*"
-                />
-                <span
-                  onClick={() => inputRef.current.click()}
-                  className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
-                >
-                  <MdOutlineModeEdit size={18} />
-                </span>
+              <div className=" flex justify-center">
+                <div className="relative ">
+                  <Avatar
+                    sx={{ width: 72, height: 72 }}
+                    alt={profilee?.name}
+                    src={profilee?.profileImage}
+                  />
+                  <input
+                    type="file"
+                    ref={inputRef}
+                    style={{ display: "none" }}
+                    onChange={handlePhotoChange}
+                    accept="image/*"
+                  />
+                  <span
+                    onClick={() => inputRef.current.click()}
+                    className="absolute -bottom-1 -right-1 rounded-full bg-teal-900 text-white p-1 cursor-pointer"
+                  >
+                    <MdOutlineModeEdit size={18} />
+                  </span>
+                </div>
               </div>
 
 

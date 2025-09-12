@@ -166,7 +166,7 @@ const Department = () => {
       </div>
 
       <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
-        <div className="membermodal">
+        <div className="membermodal w-[650px]">
           <div className='whole'>
             <div className='modalhead'>Add Department</div>
             <form onSubmit={adddepartcall}>

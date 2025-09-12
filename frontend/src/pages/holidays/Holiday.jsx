@@ -15,6 +15,7 @@ import swal from 'sweetalert';
 import { useCustomStyles } from '../admin/attandence/attandencehelper';
 import HolidayCalander from './holidayCalander';
 import { BiMessageRoundedError } from 'react-icons/bi';
+import Modalbox from '../../components/custommodal/Modalbox';
 
 dayjs.extend(isSameOrBefore);
 
@@ -30,6 +31,8 @@ const HolidayForm = () => {
   const [filterMonth, setFilterMonth] = useState("All");
   const [filterType, setFilterType] = useState("All");
   const nameInputRef = React.useRef(null);
+  const [holidaymodal, setholidaymodal] = useState(false)
+  const [open, setopen] = useState(false)
 
   useEffect(() => {
     setWeeklyOffs(company?.weeklyOffs || [1]);
@@ -98,6 +101,7 @@ const HolidayForm = () => {
 
   const handleEdit = (holi) => {
     setIsUpdate(true);
+    setopen(true)
     setHolidayId(holi._id);
     setForm({
       name: holi.name,
@@ -135,7 +139,8 @@ const HolidayForm = () => {
 
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
     try {
       const token = localStorage.getItem('emstoken');
       const endpoint = isUpdate ? 'updateholiday' : 'addholiday';
@@ -146,6 +151,7 @@ const HolidayForm = () => {
       toast.success(res.data.message);
       setForm({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' });
       setIsUpdate(false);
+      setopen(false)
       fetchHolidays();
     } catch (err) {
       console.error(err.response);
@@ -183,14 +189,14 @@ const HolidayForm = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className="flex flex-col md:flex-row gap-4 p-1">
+      {/* <Box className="flex flex-col md:flex-row gap-4 p-1">
         <HolidayCalander highlightedDates={holidaylist.map(dateObj => ({ date: dayjs(dateObj.date).toDate(), name: dateObj.name }))} weeklyOffs={weeklyOffs} />
         <form onSubmit={handleSave} className='rounded w-full max-w-md'>
           <Box className="flex flex-col gap-4 p-4 bg-white shadow rounded w-full max-w-md">
             <TextField required inputRef={nameInputRef} label="Holiday Name" size="small" value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} fullWidth />
             <DatePicker required label="From Date" format='dd/MM/yyyy' value={form.fromDate} onChange={(newValue) => setForm(prev => ({ ...prev, fromDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
             <DatePicker required label="To Date" format='dd/MM/yyyy' value={form.toDate} onChange={(newValue) => setForm(prev => ({ ...prev, toDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
-            {/* Type Selector */}
+         
             <FormControl size="small" required fullWidth>
               <InputLabel>Type</InputLabel>
               <Select
@@ -198,7 +204,7 @@ const HolidayForm = () => {
                 label="Type"
                 onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))}
               >
-                <MenuItem  disabled value="">Select Type</MenuItem>
+                <MenuItem disabled value="">Select Type</MenuItem>
                 <MenuItem value="National">National</MenuItem>
                 <MenuItem value="Religious">Religious</MenuItem>
                 <MenuItem value="Public">Public</MenuItem>
@@ -213,11 +219,11 @@ const HolidayForm = () => {
             </div>
           </Box>
         </form>
-      </Box>
+      </Box> */}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2  w-full md:w-[600px] my-4 ">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 w-full my-4">
         {/* Year Filter */}
-        <FormControl className=" md:max-w-[150px] col-span-1" size="small">
+        <FormControl size="small" className="w-full">
           <InputLabel>Year</InputLabel>
           <Select
             label="Year"
@@ -234,8 +240,8 @@ const HolidayForm = () => {
         </FormControl>
 
         {/* Month Filter */}
-        <FormControl className="md:max-w-[150px] col-span-1" size="small">
-          <InputLabel> Month</InputLabel>
+        <FormControl size="small" className="w-full">
+          <InputLabel>Month</InputLabel>
           <Select
             label="Month"
             value={filterMonth}
@@ -251,7 +257,7 @@ const HolidayForm = () => {
         </FormControl>
 
         {/* Type Filter */}
-        <FormControl className="md:max-w-[150px] col-span-1" size="small">
+        <FormControl size="small" className="w-full">
           <InputLabel>Type</InputLabel>
           <Select
             label="Filter by Type"
@@ -267,9 +273,8 @@ const HolidayForm = () => {
           </Select>
         </FormControl>
 
-        {/* Reset Filters Button */}
+        {/* Reset Button */}
         <Button
-          className="md:max-w-[150px] col-span-1"
           variant="outlined"
           color="secondary"
           onClick={() => {
@@ -277,10 +282,30 @@ const HolidayForm = () => {
             setFilterMonth("All");
             setFilterType("All");
           }}
+          className="w-full"
         >
           Reset
         </Button>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-2 w-full">
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => setholidaymodal(true)}
+          >
+            Calendar
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => setopen(true)}
+          >
+            Add Holiday
+          </Button>
+        </div>
       </div>
+
 
       <div className='capitalize'>
         <DataTable
@@ -297,6 +322,52 @@ const HolidayForm = () => {
           highlightOnHover
         />
       </div>
+
+      <Modalbox open={holidaymodal} onClose={() => setholidaymodal(false)}>
+        <div className="membermodal w-[400px]">
+          <HolidayCalander highlightedDates={holidaylist.map(dateObj => ({ date: dayjs(dateObj.date).toDate(), name: dateObj.name }))} weeklyOffs={weeklyOffs} />
+        </div>
+      </Modalbox>
+
+      <Modalbox open={open} onClose={() => {
+        setopen(false)
+      }}>
+        <div className="membermodal w-[600px]">
+          <form onSubmit={handleSave}>
+            <div className='modalhead'> {isUpdate ? 'Edit Holiday' : 'Add holiday'}</div>
+            <span className="modalcontent ">
+              <div className='flex flex-col gap-3 w-full'>
+                <TextField required inputRef={nameInputRef} label="Holiday Name" size="small" value={form.name} onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))} fullWidth />
+                <DatePicker required label="From Date" format='dd/MM/yyyy' value={form.fromDate} onChange={(newValue) => setForm(prev => ({ ...prev, fromDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                <DatePicker required label="To Date" format='dd/MM/yyyy' value={form.toDate} onChange={(newValue) => setForm(prev => ({ ...prev, toDate: newValue }))} slotProps={{ textField: { size: 'small', fullWidth: true } }} />
+                {/* Type Selector */}
+                <FormControl size="small" required fullWidth>
+                  <InputLabel>Type</InputLabel>
+                  <Select
+                    value={form.type}
+                    label="Type"
+                    onChange={(e) => setForm(prev => ({ ...prev, type: e.target.value }))}
+                  >
+                    <MenuItem disabled value="">Select Type</MenuItem>
+                    <MenuItem value="National">National</MenuItem>
+                    <MenuItem value="Religious">Religious</MenuItem>
+                    <MenuItem value="Public">Public</MenuItem>
+                    <MenuItem value="Other">Other</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField label="Description (optional)" multiline rows={2} size="small" value={form.description} onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))} fullWidth />
+
+              </div>
+            </span>
+            <div className='modalfooter'>
+              <Button variant="outlined" onClick={() => { setIsUpdate(false); setopen(false); setForm({ name: '', type: 'Public', fromDate: null, toDate: null, description: '' }); }}>Cancel</Button>
+              {/* <Button variant="contained" type='submit'>{isUpdate ? 'Update' : 'Add'} Holiday</Button> */}
+              <Button variant="contained" type='submit'>{isUpdate ? 'Update' : 'Add'} Holiday</Button>
+            </div>
+          </form>
+        </div>
+      </Modalbox>
 
     </LocalizationProvider>
   );

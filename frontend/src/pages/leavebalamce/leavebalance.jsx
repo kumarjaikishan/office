@@ -192,7 +192,7 @@ const LeaveBalancePage = () => {
             />
 
             <Modalbox open={open} onClose={handleClose}>
-                <div className="membermodal">
+                <div className="membermodal w-[500px]">
                     <div className='whole'>
                         <div className='modalhead'> {editingId ? "Edit Leave Balance" : "Add Leave Balance"}</div>
                         <form onSubmit={handleSubmit}>

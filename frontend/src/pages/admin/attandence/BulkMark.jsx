@@ -212,7 +212,7 @@ const BulkMark = ({
 
   return (
     <Modalbox open={openmodal} outside={false} onClose={() => setopenmodal(false)}>
-      <div className="membermodal w-[400px] md:w-[800px]">
+      <div className="membermodal w-[600px] md:w-[800px]">
         <form onSubmit={handleSubmit}>
           <div className="modalhead">Bulk Mark Attendance</div>
           <span className="modalcontent overflow-x-auto">

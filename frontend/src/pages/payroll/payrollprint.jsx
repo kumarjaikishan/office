@@ -169,7 +169,7 @@ export default function PayslipPrintPage() {
                 <div className="flex">
                   <dt className="w-18 md-w-25 font-medium text-gray-600 whitespace-nowrap">Address</dt>
                   <dd className="flex-1">
-                    : {payroll?.address || 'Imapur, Bihar Sharif, Nalanda, Bihar, 803101'}
+                    : {payroll?.address || 'N/A'}
                   </dd>
                 </div>
               </div>

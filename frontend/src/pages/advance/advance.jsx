@@ -197,13 +197,13 @@ const EmployeeAdvancePage = () => {
 
 
             <Modalbox open={open} onClose={handleClose}>
-                <div className="membermodal">
+                <div className="membermodal w-[500px]">
                     <div className='whole'>
                         <div className='modalhead'> {editingId ? "Edit Advance" : "Add Advance"}</div>
                         <form onSubmit={handleSubmit}>
                             <span className="modalcontent ">
                                 <div className='flex flex-col gap-3 w-full'>
-                                    <FormControl  className="w-full mt-4" size="small">
+                                    <FormControl className="w-full mt-4" size="small">
                                         <InputLabel>Select Employee</InputLabel>
                                         <Select label="select employee" value={form.employeeId} onChange={setEmployee}>
                                             <MenuItem value="">Select Employee</MenuItem>

@@ -147,8 +147,10 @@ const Attandence = () => {
               className={`px-2 py-1 rounded
                  ${absent ? 'bg-red-100 text-red-800'
                   : leave ? 'bg-amber-100 text-amber-800'
-                    : (isholday || isweeklyoff) ? 'bg-blue-50 text-blue-800'
-                      : 'bg-green-100 text-green-800'
+                    // : (isholday || isweeklyoff) ? 'bg-blue-50 text-blue-800'
+                    : isholday ? 'bg-blue-50 text-blue-800'
+                      : isweeklyoff ? 'bg-gray-50 text-gray-800'
+                        : 'bg-green-100 text-green-800'
                 }`}
             >
               {emp.status}

@@ -513,7 +513,7 @@ const Employe = () => {
       <Modalbox open={openmodal} onClose={() => {
         setopenmodal(false); setisupdate(false); setInp(init); resetPhoto();
       }}>
-        <div className="membermodal">
+        <div className="membermodal w-[680px]">
           <div className="whole" >
             <form onSubmit={adddepartcall}>
               <div className="modalhead">{isupdate ? "Update Employee" : "Add Employee"}</div>
@@ -862,7 +862,7 @@ const Employe = () => {
       <Modalbox open={openviewmodal} onClose={() => {
         setopenviewmodal(false);
       }}>
-        <div className="membermodal" >
+        <div className="membermodal w-[690px]" >
           <EmployeeProfile viewEmployee={viewEmployee} />
         </div>
       </Modalbox>
@@ -870,13 +870,13 @@ const Employe = () => {
       <Modalbox open={passmodal} onClose={() => {
         setpassmodal(false);
       }}>
-        <div className="membermodal" >
+        <div className="membermodal w-[350px]" >
           <form onSubmit={updatePassword}>
             <h2>Reset Passowrd</h2>
-            <span className="modalcontent ">
+            <div className="modalcontent flex  flex-col gap-3">
               <TextField fullWidth required value={pass.pass} onChange={(e) => setpass({ ...pass, pass: e.target.value })} label="Passowrd" size="small" />
-              <Button variant="contained" sx={{ mr: 2 }} type="submit" >Reset Password</Button>
-            </span>
+              <Button variant="contained" sx={{ mt: 2 }} type="submit" >Reset Password</Button>
+            </div>
           </form>
         </div>
       </Modalbox>

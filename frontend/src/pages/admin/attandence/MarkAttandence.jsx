@@ -27,7 +27,7 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
 
     return (
         <Modalbox open={openmodal} onClose={() => setopenmodal(false)}>
-            <div className="membermodal w-[200px]">
+            <div className="membermodal w-[500px]">
                 <form onSubmit={submitHandle}>
                     <h2>Mark Attendance</h2>
                     <span className="modalcontent">

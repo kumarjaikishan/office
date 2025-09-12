@@ -24,6 +24,7 @@ dayjs.extend(isBetween);
 const AttendanceReport = () => {
     const [employeelist, setemployeelist] = useState([]);
     const [departmentlist, setdepartmentlist] = useState([]);
+    const [theme, setTheme] = useState(true);
     const [filters, setFilters] = useState({
         searchText: '',
         branch: 'all',
@@ -125,7 +126,6 @@ const AttendanceReport = () => {
 
             return {
                 id: emp._id,
-                sno: idx + 1,
                 rawname: emp?.userid?.name,
                 branch: emp?.branchId,
                 department: emp?.department?._id,
@@ -180,7 +180,7 @@ const AttendanceReport = () => {
 
     // datatable columns
     const columns = [
-        { name: "S.No", selector: row => row.sno, width: "50px" },
+        { name: "S.No", selector: (row,ind) => ind+1, width: "50px" },
         { name: "Employee", selector: row => row.name },
         { name: "Present", selector: row => row.present, width: '100px' },
         { name: "Absent", selector: row => row.absent, width: '100px' },
@@ -334,12 +334,34 @@ const AttendanceReport = () => {
                     </div>
                 }
             />
-            <div className='mt-4 bg-white rounded shadow'>
-                <div className='text-xl font-semibold text-center my-3'>
-                  Daily Attendance Report
+            <div className="mt-4 bg-white rounded shadow p-1 md:p-3">
+                <div className="text-xl relative font-semibold flex justify-between mb-5">
+                    <p className="text-gray-700">
+                        Daily Attendance Report -{" "}
+                        {dayjs(`${filters.year}-${filters.month}-01`).format("MMMM YYYY")}
+                    </p>
+
+                    {/* Toggle Switch */}
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={theme}
+                            onChange={() => setTheme(!theme)}
+                            className="sr-only peer"
+                        />
+                        <div className="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600 relative transition-colors">
+                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-6"></div>
+                        </div>
+                        <span className="ml-2 text-sm text-gray-600">
+                            {theme ? "Light Theme" : "Dark Theme"}
+                        </span>
+                    </label>
+
                 </div>
-                <RegisterView filters={filters} />
+
+                <RegisterView filters={filters} theme={theme} />
             </div>
+
         </div>
     );
 };
