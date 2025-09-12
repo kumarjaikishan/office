@@ -1,24 +1,48 @@
 const Advance = require("../models/advance");
 
 // 🔄 Recalculate balances for all advances of one employee
+// const recalculateAdvanceBalances = async (employeeId, companyId) => {
+//   const entries = await Advance.find({ employeeId, companyId })
+//     .sort({ date: 1, _id: 1 });
+
+//   let runningBalance = 0;
+
+//   for (let entry of entries) {
+//     if (entry.type === "given") {
+//       runningBalance += entry.amount;   // add advance given
+//     } else if (entry.type === "adjusted") {
+//       runningBalance -= entry.amount;   // subtract adjustment
+//     }
+
+//     entry.balance = runningBalance >= 0 ? runningBalance : 0;
+//     entry.status = entry.balance > 0 ? "open" : "closed";
+//     await entry.save();
+//   }
+// };
+
 const recalculateAdvanceBalances = async (employeeId, companyId) => {
   const entries = await Advance.find({ employeeId, companyId })
-    .sort({ date: 1, _id: 1 });
+    .sort({ date: 1, createdAt: 1, _id: 1 });
 
   let runningBalance = 0;
 
   for (let entry of entries) {
     if (entry.type === "given") {
-      runningBalance += entry.amount;   // add advance given
+      runningBalance += Number(entry.amount) || 0;   // add advance
     } else if (entry.type === "adjusted") {
-      runningBalance -= entry.amount;   // subtract adjustment
+      runningBalance -= Number(entry.amount) || 0;   // subtract adjustment
     }
 
-    entry.balance = runningBalance >= 0 ? runningBalance : 0;
-    entry.status = entry.balance > 0 ? "open" : "closed";
+    // ✅ Set running balance (allow negative if logic requires it)
+    entry.balance = runningBalance;
+
+    // ✅ Status based on remaining balance
+    entry.status = runningBalance > 0 ? "open" : "closed";
+
     await entry.save();
   }
 };
+
 
 // ➕ Add new advance
 exports.addAdvance = async (req, res) => {

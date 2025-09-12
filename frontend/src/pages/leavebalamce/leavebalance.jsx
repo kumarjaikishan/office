@@ -19,6 +19,7 @@ import axios from "axios";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import Modalbox from "../../components/custommodal/Modalbox";
 
 const LeaveBalancePage = () => {
     const [rows, setRows] = useState([]);
@@ -73,6 +74,8 @@ const LeaveBalancePage = () => {
 
     // ✅ Submit (Create or Update)
     const handleSubmit = async () => {
+        if (!form.employeeId) return toast.warning("Please select Employee")
+        if (form.amount < 1) return toast.warning("Please enter No. of Leaves")
         try {
             const token = localStorage.getItem("emstoken");
             const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -145,9 +148,9 @@ const LeaveBalancePage = () => {
             selector: (row) => row.employeeId?.userid?.name || "N/A",
             sortable: true,
         },
-        { name: "Type", selector: (row) => row.type, sortable: true,width:'90px'  },
-        { name: "Leaves", selector: (row) => row.type =='credit'? row.amount : `-${row.amount}`, sortable: true, width:'90px' },
-        { name: "Balance", selector: (row) => row.balance, sortable: true,width:'90px'  },
+        { name: "Type", selector: (row) => row.type, sortable: true, width: '90px' },
+        { name: "Leaves", selector: (row) => row.type == 'credit' ? row.amount : `-${row.amount}`, sortable: true, width: '90px' },
+        { name: "Balance", selector: (row) => row.balance, sortable: true, width: '90px' },
         { name: "Remarks", selector: (row) => row.remarks || "-" },
         {
             name: "Actions",
@@ -163,7 +166,7 @@ const LeaveBalancePage = () => {
                 }
                 </>
             ),
-            width:'120px' 
+            width: '120px'
         },
     ];
 
@@ -188,73 +191,83 @@ const LeaveBalancePage = () => {
                 responsive
             />
 
-            {/* Dialog Form */}
-            <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-                <DialogTitle>
-                    {editingId ? "Edit Leave Balance" : "Add Leave Balance"}
-                </DialogTitle>
-                <DialogContent>
-                    {/* Employee Dropdown */}
-                    <FormControl className="w-full mt-4" size="small">
-                        <InputLabel>Select Employee</InputLabel>
-                        <Select
-                            value={form.employeeId}
-                            onChange={setEmployee}
-                        >
-                            <MenuItem value="">Select Employee</MenuItem>
-                            {employee?.map((emp) => (
-                                <MenuItem key={emp._id} value={emp._id}>
-                                    <div className="flex items-center gap-2">
-                                        <Avatar
-                                            src={emp?.profileimage}
-                                            sx={{ width: 24, height: 24 }}
+            <Modalbox open={open} onClose={handleClose}>
+                <div className="membermodal">
+                    <div className='whole'>
+                        <div className='modalhead'> {editingId ? "Edit Leave Balance" : "Add Leave Balance"}</div>
+                        <form onSubmit={handleSubmit}>
+                            <span className="modalcontent ">
+                                <div className='flex flex-col gap-3 w-full'>
+                                    <FormControl className="w-full mt-4" >
+                                        <InputLabel>Select Employee</InputLabel>
+                                        <Select
+                                        label="Select Employee"
+                                            value={form.employeeId}
+                                            onChange={setEmployee}
+                                        >
+                                            <MenuItem value="">Select Employee</MenuItem>
+                                            {employee?.map((emp) => (
+                                                <MenuItem key={emp._id} value={emp._id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Avatar
+                                                            src={emp?.profileimage}
+                                                            sx={{ width: 24, height: 24 }}
+                                                        />
+                                                        {emp.userid?.name}
+                                                    </div>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <div className="w-full flex justify-between gap-3">
+                                        <TextField
+                                            margin="dense"
+                                            select
+                                            size="small"
+                                            label="Type"
+                                            name="type"
+                                            fullWidth
+                                            value={form.type}
+                                            onChange={handleChange}
+                                        >
+                                            <MenuItem value="credit">Credit</MenuItem>
+                                            <MenuItem value="debit">Debit</MenuItem>
+                                        </TextField>
+
+                                        <TextField
+                                            margin="dense"
+                                            label="No. of Allotted Leaves"
+                                            name="amount"
+                                            size="small"
+                                            type="number"
+                                            fullWidth
+                                            value={form.amount}
+                                            onChange={handleChange}
                                         />
-                                        {emp.userid?.name}
                                     </div>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-
-                    <TextField
-                        margin="dense"
-                        select
-                        label="Type"
-                        name="type"
-                        fullWidth
-                        value={form.type}
-                        onChange={handleChange}
-                    >
-                        <MenuItem value="credit">Credit</MenuItem>
-                        <MenuItem value="debit">Debit</MenuItem>
-                    </TextField>
-
-                    <TextField
-                        margin="dense"
-                        label="No. of Allotted Leaves"
-                        name="amount"
-                        type="number"
-                        fullWidth
-                        value={form.amount}
-                        onChange={handleChange}
-                    />
-
-                    <TextField
-                        margin="dense"
-                        label="Remarks"
-                        name="remarks"
-                        fullWidth
-                        value={form.remarks}
-                        onChange={handleChange}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained" color="primary">
-                        {editingId ? "Update" : "Save"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                                    <TextField
+                                        margin="dense"
+                                        label="Remarks"
+                                        name="remarks"
+                                        size="small"
+                                        multiline
+                                        minRows={2}
+                                        fullWidth
+                                        value={form.remarks}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </span>
+                        </form>
+                        <div className='modalfooter'>
+                            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+                            <Button onClick={handleSubmit} variant="contained" color="primary">
+                                {editingId ? "Update" : "Save"}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </Modalbox>
         </Box>
     );
 };

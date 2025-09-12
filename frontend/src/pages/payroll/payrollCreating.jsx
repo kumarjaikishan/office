@@ -63,9 +63,10 @@ export default function PayrollCreatePage() {
       .slice() // clone so sort doesn’t mutate original
       .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
 
-    console.log("Latest Leave Balance:", latest);
-    setemployeeleavebal(latest?.balance)
+    // console.log("Latest Leave Balance:", latest);
+    setemployeeleavebal(latest?.balance || 0)
   }, [leaveBalance, selectedEmployeedetail]);
+
   useEffect(() => {
     if (!selectedEmployeedetail || !advance) return;
 
@@ -74,7 +75,7 @@ export default function PayrollCreatePage() {
       .slice() // clone so sort doesn’t mutate original
       .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
 
-    console.log("Latest advance Balance:", latest);
+    // console.log("Latest advance Balance:", latest);
     setpreviousAdvance(latest?.balance)
   }, [advance, selectedEmployeedetail]);
 
@@ -92,9 +93,9 @@ export default function PayrollCreatePage() {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     calculationBasis: "monthDays", // ✅ new: monthDays | workingDays
-    allowances: [{ name: "HRA", amount: 0, extraInfo: '' }],
-    bonuses: [{ name: "Performance", amount: 0, extraInfo: '' }],
-    deductions: [{ name: "PF", amount: 0, extraInfo: '' }],
+    allowances: [{ name: "HRA", amount: 0, extraInfo: '', inputDisabled: false }],
+    bonuses: [{ name: "Performance", amount: 0, extraInfo: '', inputDisabled: false }],
+    deductions: [{ name: "PF", amount: 0, extraInfo: '', inputDisabled: false }],
     leaveDays: 0,
     absentDays: 0,
     presentDays: 0,
@@ -123,11 +124,6 @@ export default function PayrollCreatePage() {
 
   const [options, setOptions] = useState(optionsinit);
 
-  // Assume each employee has a paid leave balance (mock if not in DB)
-  // const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
-  // const availablePaidLeaves = selectedEmployeedetail?.availableLeaves;
-  // const availablePaidLeaves = 1;
-  // const previousadvance = selectedEmployeedetail?.advance;
 
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -211,10 +207,10 @@ export default function PayrollCreatePage() {
         if (isHoliday || isWeeklyOff) {
           acc.overtime += workingMinutes;
         } else if (atten.status === "present") {
-          if (workingMinutes < company?.workingMinutes?.fullDay) {
-            acc.shortmin += company.workingMinutes.fullDay - workingMinutes;
-          } else if (workingMinutes > company?.workingMinutes?.fullDay) {
-            acc.overtime += workingMinutes - company.workingMinutes.fullDay;
+          if (workingMinutes < company?.workingMinutes?.shortDayThreshold) {
+            acc.shortmin += company.workingMinutes.shortDayThreshold - workingMinutes;
+          } else if (workingMinutes > company?.workingMinutes?.overtimeAfterMinutes) {
+            acc.overtime += workingMinutes - company.workingMinutes.overtimeAfterMinutes;
           }
         }
         return acc;
@@ -340,7 +336,8 @@ export default function PayrollCreatePage() {
       const OvertTimeBonus = basic.overtime * perminuteRate;
       updatedBonuses.push({
         name: "Overtime", amount: OvertTimeBonus.toFixed(2),
-        extraInfo: `${basic.overtime} Min @ ₹${perminuteRate} per min.`
+        extraInfo: `${basic.overtime} Min @ ₹${perminuteRate} per min.`,
+        inputDisabled: true
       });
     }
 
@@ -350,7 +347,8 @@ export default function PayrollCreatePage() {
       const shortTimeDeduction = basic.shortmin * perminuteRate;
       updatedDeductions.push({
         name: "Short Time", amount: shortTimeDeduction.toFixed(2),
-        extraInfo: `${basic.shortmin} min @ ₹${perminuteRate} per min.`
+        extraInfo: `${basic.shortmin} min @ ₹${perminuteRate} per min.`,
+        inputDisabled: true
       });
     }
 
@@ -359,7 +357,8 @@ export default function PayrollCreatePage() {
     if (options.deductAbsent && form.absentDays > 0) {
       updatedDeductions.push({
         name: "Absent", amount: (form.absentDays * perDayRate).toFixed(2),
-        extraInfo: `${form.absentDays} Absent @ ₹${perDayRate} per day`
+        extraInfo: `${form.absentDays} Absent @ ₹${perDayRate} per day`,
+        inputDisabled: true
       });
     }
 
@@ -369,7 +368,8 @@ export default function PayrollCreatePage() {
       let remainigadvance = previousAdvance - options.adjustedAdvance;
       updatedDeductions.push({
         name: "Advance", amount: (options.adjustedAdvance).toFixed(2),
-        extraInfo: `Adjusted :${options.adjustedAdvance},  Remaining :${remainigadvance}`
+        extraInfo: `Adjusted :${options.adjustedAdvance},  Remaining :${remainigadvance}`,
+        inputDisabled: true
       });
     }
 
@@ -384,13 +384,15 @@ export default function PayrollCreatePage() {
       if (adjusted > 0) {
         updatedDeductions.push({
           name: "Paid Leave Adjustment", amount: 0,
-          extraInfo: `${adjusted} Leaves adjusted, Remaining Leaves: ${employeeleavebal - adjusted}`
+          extraInfo: `${adjusted} Leaves adjusted, Remaining Leaves: ${employeeleavebal - adjusted}`,
+          inputDisabled: true
         });
       }
       if (unadjusted > 0) {
         updatedDeductions.push({
           name: "Unpaid Leave", amount: (unadjusted * perDayRate).toFixed(2),
-          extraInfo: `${unadjusted} leaves @ ${perDayRate}`
+          extraInfo: `${unadjusted} leaves @ ${perDayRate}`,
+          inputDisabled: true
         });
       }
     }
@@ -672,14 +674,24 @@ export default function PayrollCreatePage() {
                     label="Adjust Count"
                     inputProps={{
                       min: 0,
-                      max: Math.min(employeeleavebal, form.leaveDays)
+                      max: Math.min(employeeleavebal, form.leaveDays),
                     }}
                     value={options.adjustedLeaveCount}
-                    onChange={(e) => setOptions(p => ({ ...p, adjustedLeaveCount: Number(e.target.value) }))}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      const max = Math.min(employeeleavebal, form.leaveDays);
+
+                      setOptions((p) => ({
+                        ...p,
+                        adjustedLeaveCount: Math.max(0, Math.min(val, max)), // clamp between 0 and max
+                      }));
+                    }}
                   />
+
                 )}
               </div> : ''
             }
+
             {previousAdvance > 0 ?
               <div className="flex items-center flex-wrap md:border-none md:shadow-none border border-slate-300 shadow rounded md:p-0 p-1 gap-4">
                 <FormControlLabel
@@ -693,10 +705,25 @@ export default function PayrollCreatePage() {
                     size="small"
                     className="w-full md:w-[120px]"
                     label="Adjust Advance"
-                    inputProps={{ min: 0, max: advance }}
+                    inputProps={{
+                      min: 0,
+                      max: previousAdvance,
+                    }}
                     value={options.adjustedAdvance}
-                    onChange={(e) => setOptions(p => ({ ...p, adjustedAdvance: Number(e.target.value) }))}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+
+                      // Enforce min and max
+                      if (val < 0) {
+                        setOptions(p => ({ ...p, adjustedAdvance: 0 }));
+                      } else if (val > previousAdvance) {
+                        setOptions(p => ({ ...p, adjustedAdvance: previousAdvance }));
+                      } else {
+                        setOptions(p => ({ ...p, adjustedAdvance: val }));
+                      }
+                    }}
                   />
+
                 )}
               </div> : ''
             }
@@ -712,7 +739,7 @@ export default function PayrollCreatePage() {
           </div>
           <Divider />
           {form.allowances.map((allowance, index) => (
-            <div key={index} className="flex gap-2 items-center mt-4">
+            <div key={index} className="flex gap-2 items-start mt-4">
               <TextField
                 size="small"
                 label="Name"
@@ -725,6 +752,9 @@ export default function PayrollCreatePage() {
                 type="number"
                 label="Amount"
                 className="flex-2"
+                InputProps={{
+                  readOnly: allowance.inputDisabled || false,
+                }}
                 value={allowance.amount}
                 onChange={(e) => handleArrayChange("allowances", index, "amount", e.target.value)}
               />
@@ -736,7 +766,7 @@ export default function PayrollCreatePage() {
           <Button
             startIcon={<AiOutlinePlus />}
             variant="outlined"
-            onClick={() => addArrayItem("allowances", { name: "", amount: 0, extraInfo: '' })}
+            onClick={() => addArrayItem("allowances", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
             className="mt-2 flex-1"
           >
             Add Allowance
@@ -752,7 +782,7 @@ export default function PayrollCreatePage() {
           </div>
           <Divider />
           {form.bonuses.map((bonus, index) => (
-            <div key={index} className="flex gap-2 items-center mt-4">
+            <div key={index} className="flex gap-2 items-start mt-4">
               <TextField
                 size="small"
                 label="Name"
@@ -765,6 +795,9 @@ export default function PayrollCreatePage() {
                 size="small"
                 type="number"
                 label="Amount"
+                InputProps={{
+                  readOnly: bonus.inputDisabled || false,
+                }}
                 className="flex-2"
                 value={bonus.amount}
                 onChange={(e) => handleArrayChange("bonuses", index, "amount", e.target.value)}
@@ -777,7 +810,7 @@ export default function PayrollCreatePage() {
           <Button
             variant="outlined"
             startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("bonuses", { name: "", amount: 0, extraInfo: '' })}
+            onClick={() => addArrayItem("bonuses", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
             className="mt-2"
           >
             Add Bonus
@@ -793,7 +826,7 @@ export default function PayrollCreatePage() {
           </div>
           <Divider />
           {form.deductions.map((deduction, index) => (
-            <div key={index} className="flex gap-2  items-start mt-4">
+            <div key={index} className="flex gap-2 items-start mt-4">
               <TextField
                 size="small"
                 label="Deduction"
@@ -807,6 +840,11 @@ export default function PayrollCreatePage() {
                 type="number"
                 className="flex-2"
                 label="Amount"
+                // disabled={deduction.inputDisabled || false}
+                InputProps={{
+                  readOnly: deduction.inputDisabled || false,
+                }}
+                readon
                 value={deduction.amount}
                 onChange={(e) => handleArrayChange("deductions", index, "amount", e.target.value)}
               />
@@ -818,7 +856,7 @@ export default function PayrollCreatePage() {
           <Button
             variant="outlined"
             startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("deductions", { name: "", amount: 0, extraInfo: '' })}
+            onClick={() => addArrayItem("deductions", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
             className="mt-2"
           >
             Add Deduction

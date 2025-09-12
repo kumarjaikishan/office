@@ -42,8 +42,6 @@ exports.createPayroll = async (req, res, next) => {
       department,
       salary = 0,
       designation,
-      availableLeaves = 0,
-      advance = 0,
       profileimage,
       phone,
       email,
@@ -141,7 +139,15 @@ exports.createPayroll = async (req, res, next) => {
 
     // 🔹 Handle advance adjustment
     if (options.adjustAdvance && options.adjustedAdvance > 0) {
-      if (options.adjustedAdvance > advance) {
+      let hey = await Advance.find({ employeeId }).sort({ createdAt: -1 })
+      // console.log(advancebalance[0]);
+
+      if (!hey) {
+        throw new Error("Employee Advance Balance not found");
+      }
+      const advanceBalance = hey[0].balance;
+
+      if (options.adjustedAdvance > advanceBalance) {
         throw new Error("Adjusted Advance can't be more than Advance Balance");
       }
 
@@ -154,7 +160,7 @@ exports.createPayroll = async (req, res, next) => {
             branchId,
             type: "adjusted",
             amount: options.adjustedAdvance,
-            balance: 0, // will be recalculated
+            balance: advanceBalance - options.adjustedAdvance,
             remarks: `Advance adjusted in Payroll ${month}-${year}`,
             payrollId: payroll._id,
             date: new Date().setHours(0, 0, 0, 0),
@@ -165,9 +171,6 @@ exports.createPayroll = async (req, res, next) => {
 
       // Recalculate advance balances
       await recalculateAdvanceBalances(employeeId, companyId);
-
-      // Update employee’s running advance balance
-      whichEmployee.advance = advance - options.adjustedAdvance;
     }
 
     await whichEmployee.save({ session });
@@ -266,15 +269,33 @@ exports.editPayroll = async (req, res, next) => {
       await recalculateLeaveBalances(payroll.employeeId, payroll.companyId);
     }
 
-    // =============================
+
     // 🔹 Handle advance adjustment
     // =============================
     if (updates.options?.adjustAdvance && updates.options.adjustedAdvance > 0) {
       const adjusted = updates.options.adjustedAdvance;
 
+      // Find the latest advance balance excluding this adjustment
+      const latestAdvance = await Advance.findOne({
+        employeeId: payroll.employeeId,
+        companyId: payroll.companyId,
+        _id: { $ne: advanceAdjustment?._id },
+      })
+        .sort({ date: -1, createdAt: -1 })
+        .session(session);
+
+      const availableAdvance = latestAdvance?.balance || 0;
+
+      if (adjusted > availableAdvance) {
+        throw new Error("Adjusted Advance can't be more than Advance Balance");
+      }
+
+      const newBalance = availableAdvance - adjusted;
+
       if (advanceAdjustment) {
         // update existing advance adjustment
         advanceAdjustment.amount = adjusted;
+        advanceAdjustment.balance = newBalance;
         advanceAdjustment.remarks = `Advance adjusted in Payroll ${payroll.month}-${payroll.year}`;
         advanceAdjustment.date = new Date().setHours(0, 0, 0, 0);
         await advanceAdjustment.save({ session });
@@ -286,8 +307,8 @@ exports.editPayroll = async (req, res, next) => {
           branchId: payroll.branchId,
           type: "adjusted",
           amount: adjusted,
-          balance: 0, // will be recalculated
-          remarks: `Advance adjusted in Payroll ${payroll.month}-${payroll.year}`,
+          balance: newBalance,
+          remarks: `Advance adjusted in Payroll ${payroll.month}-${payroll - year}`,
           payrollId: payroll._id,
           date: new Date().setHours(0, 0, 0, 0),
         });
@@ -300,6 +321,7 @@ exports.editPayroll = async (req, res, next) => {
       await advanceAdjustment.deleteOne({ session });
       await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
     }
+
 
     // 🔹 Commit
     await session.commitTransaction();
@@ -372,11 +394,15 @@ exports.deletePayroll = async (req, res, next) => {
     // 🔹 Delete linked leave adjustment if exists
     await LeaveBalance.deleteOne({ payrollId: payroll._id }).session(session);
 
+    // 🔹 Delete linked advance adjustment if exists
+    await Advance.deleteOne({ payrollId: payroll._id, type: "adjusted" }).session(session);
+
     // 🔹 Delete payroll
     await payroll.deleteOne({ session });
 
-    // 🔹 Recalculate leave balances
+    // 🔹 Recalculate balances
     await recalculateLeaveBalances(payroll.employeeId, payroll.companyId);
+    await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
 
     await session.commitTransaction();
     session.endSession();

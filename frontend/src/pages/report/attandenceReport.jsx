@@ -17,6 +17,7 @@ import { useCustomStyles } from "../admin/attandence/attandencehelper";
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { FiDownload } from 'react-icons/fi';
+import RegisterView from './registerView';
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
 
@@ -114,7 +115,7 @@ const AttendanceReport = () => {
                 }
                 attendanceByEmp[empId].push(a);
             });
-
+        //   console.log(employee)
         const data = employee.filter(e => e.status).map((emp, idx) => {
             const empAttendance = attendanceByEmp[emp._id] || [];
 
@@ -126,6 +127,8 @@ const AttendanceReport = () => {
                 id: emp._id,
                 sno: idx + 1,
                 rawname: emp?.userid?.name,
+                branch: emp?.branchId,
+                department: emp?.department?._id,
                 name: (
                     <div className="flex items-center capitalize gap-3">
                         <Avatar src={emp.profileimage || employepic} alt={emp.employeename} />
@@ -161,9 +164,10 @@ const AttendanceReport = () => {
 
     // search & filter
     const filteredEmployees = useMemo(() => {
+        // console.log(employeelist)
         return employeelist.filter(emp => {
             const name = emp.rawname?.toLowerCase() || '';
-            const deptId = emp.departmentid || '';
+            const deptId = emp.department || '';
             const branchId = emp.branch || '';
 
             const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
@@ -276,7 +280,7 @@ const AttendanceReport = () => {
                     </FormControl>
 
                     {/* Month */}
-                    <FormControl size="small" className="md:w-[120px] w-[47%]">
+                    <FormControl size="small" className="md:w-[130px] w-[47%]">
                         <InputLabel>Month</InputLabel>
                         <Select
                             value={filters.month}
@@ -330,6 +334,12 @@ const AttendanceReport = () => {
                     </div>
                 }
             />
+            <div className='mt-4 bg-white rounded shadow'>
+                <div className='text-xl font-semibold text-center my-3'>
+                  Daily Attendance Report
+                </div>
+                <RegisterView filters={filters} />
+            </div>
         </div>
     );
 };

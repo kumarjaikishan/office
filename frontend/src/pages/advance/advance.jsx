@@ -2,10 +2,6 @@ import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import {
     Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     TextField,
     MenuItem,
     IconButton,
@@ -19,6 +15,7 @@ import axios from "axios";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import Modalbox from "../../components/custommodal/Modalbox";
 
 const EmployeeAdvancePage = () => {
     const [rows, setRows] = useState([]);
@@ -33,7 +30,7 @@ const EmployeeAdvancePage = () => {
         remarks: "",
     });
     const [editingId, setEditingId] = useState(null);
-    const {  employee,advance } = useSelector((state) => state.user);
+    const { employee, advance } = useSelector((state) => state.user);
 
     useEffect(() => {
         if (advance) setRows(advance);
@@ -155,20 +152,22 @@ const EmployeeAdvancePage = () => {
             selector: (row) => row.employeeId?.userid?.name || "N/A",
             sortable: true,
         },
-        { name: "Amount", selector: (row) => row.type=='given' ? `${row.amount}` :`-${row.amount}` , sortable: true, width: "100px" },
-        { name: "Balance", selector: (row) => row.balance, sortable: true, width: "100px" },
         { name: "type", selector: (row) => row.type || "-", sortable: true, width: "120px" },
+        { name: "Amount", selector: (row) => row.type == 'given' ? `${row.amount}` : `-${row.amount}`, sortable: true, width: "100px" },
+        { name: "Balance", selector: (row) => row.balance, sortable: true, width: "100px" },
         { name: "Remarks", selector: (row) => row.remarks || "-", sortable: true },
         {
             name: "Actions",
             cell: (row) => (
-                <>
+                <> {!row?.payrollId && <>
                     <IconButton color="primary" onClick={() => handleOpen(row)}>
                         <MdEdit />
                     </IconButton>
                     <IconButton color="error" onClick={() => handleDelete(row._id)}>
                         <MdDelete />
                     </IconButton>
+                </>
+                }
                 </>
             ),
             width: "120px",
@@ -196,68 +195,82 @@ const EmployeeAdvancePage = () => {
                 responsive
             />
 
-            <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-                <DialogTitle>
-                    {editingId ? "Edit Advance" : "Add Advance"}
-                </DialogTitle>
-                <DialogContent>
-                    <FormControl className="w-full mt-4" size="small">
-                        <InputLabel>Select Employee</InputLabel>
-                        <Select value={form.employeeId} onChange={setEmployee}>
-                            <MenuItem value="">Select Employee</MenuItem>
-                            {employee?.map((emp) => (
-                                <MenuItem key={emp._id} value={emp._id}>
-                                    <div className="flex items-center gap-2">
-                                        <Avatar
-                                            src={emp?.profileimage}
-                                            sx={{ width: 24, height: 24 }}
+
+            <Modalbox open={open} onClose={handleClose}>
+                <div className="membermodal">
+                    <div className='whole'>
+                        <div className='modalhead'> {editingId ? "Edit Advance" : "Add Advance"}</div>
+                        <form onSubmit={handleSubmit}>
+                            <span className="modalcontent ">
+                                <div className='flex flex-col gap-3 w-full'>
+                                    <FormControl  className="w-full mt-4" size="small">
+                                        <InputLabel>Select Employee</InputLabel>
+                                        <Select label="select employee" value={form.employeeId} onChange={setEmployee}>
+                                            <MenuItem value="">Select Employee</MenuItem>
+                                            {employee?.map((emp) => (
+                                                <MenuItem key={emp._id} value={emp._id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Avatar
+                                                            src={emp?.profileimage}
+                                                            sx={{ width: 24, height: 24 }}
+                                                        />
+                                                        {emp.userid?.name}
+                                                    </div>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+
+                                    <div className="w-full flex justify-between gap-3">
+                                        <TextField
+                                            margin="dense"
+                                            size="small"
+                                            label="Amount"
+                                            name="amount"
+                                            type="number"
+                                            fullWidth
+                                            value={form.amount}
+                                            onChange={handleChange}
                                         />
-                                        {emp.userid?.name}
+
+                                        <TextField
+                                            margin="dense"
+                                            size="small"
+                                            select
+                                            label="type"
+                                            name="type"
+                                            fullWidth
+                                            value={form.type}
+                                            onChange={handleChange}
+                                        >
+                                            <MenuItem value="given">Given</MenuItem>
+                                            <MenuItem value="adjusted">Adjusted</MenuItem>
+                                        </TextField>
                                     </div>
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
 
-                    <TextField
-                        margin="dense"
-                        label="Amount"
-                        name="amount"
-                        type="number"
-                        fullWidth
-                        value={form.amount}
-                        onChange={handleChange}
-                    />
-
-                    <TextField
-                        margin="dense"
-                        select
-                        label="type"
-                        name="type"
-                        fullWidth
-                        value={form.type}
-                        onChange={handleChange}
-                    >
-                        <MenuItem value="given">Given</MenuItem>
-                        <MenuItem value="adjusted">Adjusted</MenuItem>
-                    </TextField>
-
-                    <TextField
-                        margin="dense"
-                        label="Remarks"
-                        name="remarks"
-                        fullWidth
-                        value={form.remarks}
-                        onChange={handleChange}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained" color="primary">
-                        {editingId ? "Update" : "Save"}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                                    <TextField
+                                        margin="dense"
+                                        multiline
+                                        minRows={2}
+                                        size="small"
+                                        label="Remarks"
+                                        name="remarks"
+                                        fullWidth
+                                        value={form.remarks}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </span>
+                        </form>
+                        <div className='modalfooter'>
+                            <Button onClick={handleClose} variant="outlined">Cancel</Button>
+                            <Button onClick={handleSubmit} variant="contained" color="primary">
+                                {editingId ? "Update" : "Save"}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </Modalbox>
         </Box>
     );
 };
