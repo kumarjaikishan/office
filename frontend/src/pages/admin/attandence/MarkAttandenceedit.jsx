@@ -75,105 +75,107 @@ const MarkAttandenceedit = ({ openmodal, setisload, dispatch, isPunchIn, init, s
                 <form onSubmit={editattandence}>
                     <h2>Edit Attendance</h2>
                     <span className="modalcontent">
-                        <TextField fullWidth
-                            InputLabelProps={{ shrink: true }}
-                            value={inp.date} label="Attandence Date" size="small" />
+                        <div className='flex flex-col gap-3'>
+                            <TextField fullWidth
+                                InputLabelProps={{ shrink: true }}
+                                value={inp.date} label="Attandence Date" size="small" />
 
-                        <TextField fullWidth value={inp.employeeName} label="Name" size="small" />
+                            <TextField fullWidth value={inp.employeeName} label="Name" size="small" />
 
-                        <Box sx={{ width: '100%', gap: 2 }}>
+                            <div className='flex justify-between gap-2'>
 
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <TimePicker
-                                    value={inp.punchIn}
-                                    disabled={["absent", 'leave'].includes(inp.status)}
-                                    slotProps={{
-                                        textField: {
-                                            size: 'small',
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <TimePicker
+                                        value={inp.punchIn}
+                                        disabled={["absent", 'leave'].includes(inp.status)}
+                                        slotProps={{
+                                            textField: {
+                                                size: 'small',
 
-                                        },
-                                    }}
-                                    onChange={(newValue) => {
-                                        setinp({
-                                            ...inp,
-                                            punchIn: newValue
-                                        })
-                                    }}
-                                    sx={{ width: '100%' }}
-                                    label="Punch In"
-                                />
-                            </LocalizationProvider>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <TimePicker
-                                    value={inp.punchOut}
-                                    disabled={["absent", 'leave'].includes(inp.status)}
-                                    slotProps={{
-                                        textField: {
-                                            size: 'small',
+                                            },
+                                        }}
+                                        onChange={(newValue) => {
+                                            setinp({
+                                                ...inp,
+                                                punchIn: newValue
+                                            })
+                                        }}
+                                        sx={{ width: '100%' }}
+                                        label="Punch In"
+                                    />
+                                </LocalizationProvider>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <TimePicker
+                                        value={inp.punchOut}
+                                        disabled={["absent", 'leave'].includes(inp.status)}
+                                        slotProps={{
+                                            textField: {
+                                                size: 'small',
 
-                                        },
-                                    }}
-                                    onChange={(newValue) => {
-                                        setinp({
-                                            ...inp,
-                                            punchOut: newValue
-                                        })
-                                    }} sx={{ width: '100%' }} label="Punch Out" />
-                            </LocalizationProvider>
+                                            },
+                                        }}
+                                        onChange={(newValue) => {
+                                            setinp({
+                                                ...inp,
+                                                punchOut: newValue
+                                            })
+                                        }} sx={{ width: '100%' }} label="Punch Out" />
+                                </LocalizationProvider>
 
 
-                            <FormControl sx={{ width: '100%' }} size="small">
-                                <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-helper-label"
-                                    id="demo-simple-select-helper"
-                                    value={inp.status}
-                                    name="status"
-                                    label="Status"
-                                    required
+                                <FormControl sx={{ width: '100%' }} size="small">
+                                    <InputLabel id="demo-simple-select-helper-label">Status</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-helper-label"
+                                        id="demo-simple-select-helper"
+                                        value={inp.status}
+                                        name="status"
+                                        label="Status"
+                                        required
+                                        onChange={(e) => {
+                                            setinp({
+                                                ...inp,
+                                                status: e.target.value
+                                            });
+                                        }}
+                                    >
+                                        <MenuItem value={'present'}>Present</MenuItem>
+                                        <MenuItem value={'leave'}>Leave</MenuItem>
+                                        <MenuItem value={'absent'}>Absent</MenuItem>
+                                        <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+                                        <MenuItem value={'holiday'}>Holiday</MenuItem>
+                                        <MenuItem value={'half day'}>Half Day</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+
+                            {inp.status == 'leave' &&
+                                <TextField fullWidth multiline required
                                     onChange={(e) => {
                                         setinp({
                                             ...inp,
-                                            status: e.target.value
+                                            leaveReason: e.target.value
                                         });
                                     }}
+                                    minRows={2} value={inp.leaveReason} label="Reason" size="small" />
+                            }
+
+                            <div className='w-full flex gap-2'>
+                                <Button size="small"
+                                    onClick={() => {
+                                        setopenmodal(false); setisUpdate(false); setinp(init)
+                                    }}
+                                    variant="outlined"> cancel</Button>
+                                <Button
+                                    loading={isload}
+                                    loadingPosition="end"
+                                    endIcon={<IoIosSend />}
+                                    variant="contained"
+                                    type="submit"
                                 >
-                                    <MenuItem value={'present'}>Present</MenuItem>
-                                    <MenuItem value={'leave'}>Leave</MenuItem>
-                                    <MenuItem value={'absent'}>Absent</MenuItem>
-                                    <MenuItem value={'weekly off'}>Weekly off</MenuItem>
-                                    <MenuItem value={'holiday'}>Holiday</MenuItem>
-                                    <MenuItem value={'half day'}>Half Day</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Box>
-
-                        {inp.status == 'leave' &&
-                            <TextField fullWidth multiline required
-                                onChange={(e) => {
-                                    setinp({
-                                        ...inp,
-                                        leaveReason: e.target.value
-                                    });
-                                }}
-                                minRows={2} value={inp.leaveReason} label="Reason" size="small" />
-                        }
-
-                        <div className='w-full flex gap-2'>
-                            <Button size="small"
-                                onClick={() => {
-                                    setopenmodal(false); setisUpdate(false); setinp(init)
-                                }}
-                                variant="outlined"> cancel</Button>
-                            <Button
-                                loading={isload}
-                                loadingPosition="end"
-                                endIcon={<IoIosSend />}
-                                variant="contained"
-                                type="submit"
-                            >
-                                Update
-                            </Button>
+                                    Update
+                                </Button>
+                            </div>
                         </div>
                     </span>
                 </form>

@@ -186,17 +186,17 @@ const AttenPerformance = () => {
                 overtime.push(date);
                 overtimemin += workingMinutes;
             } else {
-                const isshort = workingMinutes < setting.workingMinutes.fullDay;
-                const isOvertime = workingMinutes >= setting.workingMinutes.fullDay;
+                const isshort = workingMinutes < setting.workingMinutes.shortDayThreshold;
+                const isOvertime = workingMinutes >= setting.workingMinutes.overtimeAfterMinutes;
 
                 if (isshort) {
                     shortDates.push(date);
-                    shorttimemin += setting.workingMinutes.fullDay - workingMinutes;
+                    shorttimemin += setting.workingMinutes.shortDayThreshold - workingMinutes;
                 }
 
                 if (isOvertime) {
                     overtime.push(date);
-                    overtimemin += workingMinutes - setting.workingMinutes.fullDay;
+                    overtimemin += workingMinutes - setting.workingMinutes.overtimeAfterMinutes;
                 }
             }
 
@@ -228,14 +228,12 @@ const AttenPerformance = () => {
             short: shortDates,
             overtime, shorttimemin, overtimemin, latearrival,
             earlyarrival, earlyLeave, lateleave,
-            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary / 31 / setting.workingMinutes.fullDay))
-            // overtimesalary: Math.floor((overtimemin - shorttimemin) * (employee.salary /  dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() / setting.workingMinutes.fullDay))
 
             overtimesalary: selectedMonth !== "all"
                 ? Math.floor((overtimemin - shorttimemin) * parseFloat((
                     employee.salary /
                     dayjs(new Date(selectedYear, selectedMonth)).daysInMonth() /
-                    setting.workingMinutes.fullDay)))
+                    setting.workingMinutes.overtimeAfterMinutes)))
                 : null
         });
         // console.log('gettitng mothes days', (employee.salary / 31 / 480))
@@ -507,11 +505,11 @@ const columns = (setting) => [
             return (
                 <span className=' flex'>
                     <span className='block w-[60px] '>{minutesinhours(wm)}</span>
-                    {!emp.remarks && wm < setting?.workingMinutes?.fullDay && (
-                        <span className=" block w-[100px] px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-xs">Short {setting?.workingMinutes?.fullDay - wm} min</span>
+                    {!emp.remarks && wm < setting?.workingMinutes?.shortDayThreshold && (
+                        <span className=" block w-[100px] px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-xs">Short {setting?.workingMinutes?.shortDayThreshold - wm} min</span>
                     )}
-                    {!emp.remarks && wm > setting?.workingMinutes?.fullDay && (
-                        <span className="px-2 block w-[115px] py-0.5  rounded bg-green-100 text-green-900 text-xs">Overtime {wm - setting?.workingMinutes?.fullDay} min</span>
+                    {!emp.remarks && wm > setting?.workingMinutes?.overtimeAfterMinutes && (
+                        <span className="px-2 block w-[115px] py-0.5  rounded bg-green-100 text-green-900 text-xs">Overtime {wm - setting?.workingMinutes?.overtimeAfterMinutes} min</span>
                     )}
                 </span>
             );

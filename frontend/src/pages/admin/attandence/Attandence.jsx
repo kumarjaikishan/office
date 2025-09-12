@@ -227,21 +227,31 @@ const Attandence = () => {
           workingHours: emp.workingMinutes && (
             <div>
               <p>
-                <span className=" inline-block w-[50px]"> {minutesinhours(emp?.workingMinutes)}</span>
+                <span className="inline-block w-[50px]">
+                  {minutesinhours(emp?.workingMinutes)}
+                </span>
+
                 {isWeeklyOff || isHoliday ? (
                   <span className="ml-2 px-1 py-1 rounded bg-green-100 text-green-800">
                     Overtime {emp.workingMinutes} min
                   </span>
-                ) : emp.workingMinutes < attendanceSetting?.workingMinutes?.fullDay ? (
-                  <span className="ml-2 px-1 py-1 rounded bg-amber-100 text-amber-800">
-                    Short {attendanceSetting?.workingMinutes?.fullDay - emp.workingMinutes} min
-                  </span>
                 ) : (
-                  <span className="ml-2 px-1 py-1 rounded bg-green-100 text-green-800">
-                    Overtime {emp.workingMinutes - attendanceSetting?.workingMinutes?.fullDay} min
-                  </span>
+                  <>
+                    {emp.workingMinutes < attendanceSetting?.workingMinutes?.shortDayThreshold && (
+                      <span className="ml-2 px-1 py-1 rounded bg-amber-100 text-amber-800">
+                        Short {attendanceSetting?.workingMinutes?.shortDayThreshold - emp.workingMinutes} min
+                      </span>
+                    )}
+
+                    {emp.workingMinutes > attendanceSetting?.workingMinutes?.overtimeAfterMinutes && (
+                      <span className="ml-2 p-1 rounded bg-green-100 text-green-800">
+                        Overtime {emp.workingMinutes - attendanceSetting?.workingMinutes?.overtimeAfterMinutes} min
+                      </span>
+                    )}
+                  </>
                 )}
               </p>
+
               <p className="text-[12px] mt-1 text-gray-600">
                 {isHoliday ? "(Holiday)" : isWeeklyOff ? "(Weekly Off)" : ""}
               </p>
