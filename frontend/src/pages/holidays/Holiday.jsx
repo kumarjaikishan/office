@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { useSelector } from 'react-redux';
 import DataTable from 'react-data-table-component';
-import { MdOutlineModeEdit } from 'react-icons/md';
+import { MdAddCircleOutline, MdCalendarToday, MdOutlineModeEdit, MdRefresh } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
 import { Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { toast } from 'react-toastify';
@@ -221,83 +221,86 @@ const HolidayForm = () => {
         </form>
       </Box> */}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 w-full my-4">
+      <div className="flex flex-wrap  justify-between items-center gap-3 w-full my-4">
         {/* Year Filter */}
-        <FormControl size="small" className="w-full">
-          <InputLabel>Year</InputLabel>
-          <Select
-            label="Year"
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-          >
-            <MenuItem value="All">All</MenuItem>
-            {years.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <div className='flex gap-2 flex-wrap justify-between w-full md:w-fit'>
+          <FormControl size="small" className="w-[47%] md:w-[120px]">
+            <InputLabel>Year</InputLabel>
+            <Select
+              label="Year"
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {years.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        {/* Month Filter */}
-        <FormControl size="small" className="w-full">
-          <InputLabel>Month</InputLabel>
-          <Select
-            label="Month"
-            value={filterMonth}
-            onChange={(e) => setFilterMonth(e.target.value)}
-          >
-            <MenuItem value="All">All</MenuItem>
-            {months.map((month, ind) => (
-              <MenuItem key={month} value={ind}>
-                {month}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          {/* Month Filter */}
+          <FormControl size="small" className="w-[47%] md:w-[120px]">
+            <InputLabel>Month</InputLabel>
+            <Select
+              label="Month"
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {months.map((month, ind) => (
+                <MenuItem key={month} value={ind}>
+                  {month}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        {/* Type Filter */}
-        <FormControl size="small" className="w-full">
-          <InputLabel>Type</InputLabel>
-          <Select
-            label="Filter by Type"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <MenuItem value="All">All</MenuItem>
-            {[...new Set(holidays.map((h) => h.type))].map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          {/* Type Filter */}
+          <FormControl size="small" className="w-[47%] md:w-[150px]">
+            <InputLabel>Type</InputLabel>
+            <Select
+              label="Filter by Type"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <MenuItem value="All">All</MenuItem>
+              {[...new Set(holidays.map((h) => h.type))].map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        {/* Reset Button */}
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={() => {
-            setFilterYear("All");
-            setFilterMonth("All");
-            setFilterType("All");
-          }}
-          className="w-full"
-        >
-          Reset
-        </Button>
+          {/* Reset Button */}
+          <Button
+            variant="outlined"
+            color="secondary"
+            className='w-[47%] md:w-fit'
+            startIcon={<MdRefresh />}
+            onClick={() => {
+              setFilterYear("All");
+              setFilterMonth("All");
+              setFilterType("All");
+            }}
+          >
+            Reset
+          </Button>
+        </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-2 w-full">
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-fit">
           <Button
-            fullWidth
+            startIcon={<MdCalendarToday />}
             variant="contained"
             onClick={() => setholidaymodal(true)}
           >
             Calendar
           </Button>
           <Button
-            fullWidth
+            startIcon={<MdAddCircleOutline />}
             variant="contained"
             onClick={() => setopen(true)}
           >

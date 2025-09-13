@@ -312,15 +312,7 @@ const AttendanceReport = () => {
                 </div>
             </div>
 
-
-            {/* <div className="mb-4 flex gap-6 text-sm text-gray-700">
-                <span>Total Days: {basic.totalDays}</span>
-                <span>Working Days: {basic.workingDays}</span>
-                <span>Weekly Offs: {basic.weeklyOff}</span>
-                <span>Holidays: {basic.holidaysCount}</span>
-            </div> */}
-
-            <DataTable
+            {/* <DataTable
                 columns={columns}
                 data={filteredEmployees}
                 pagination
@@ -333,7 +325,7 @@ const AttendanceReport = () => {
                         <BiMessageRoundedError className="text-xl" /> No Employee records found.
                     </div>
                 }
-            />
+            /> */}
             <div className="mt-4 bg-white rounded shadow p-1 md:p-3">
                 <div className="text-xl relative font-semibold flex justify-between mb-5">
                     <p className="text-gray-700">
@@ -350,7 +342,7 @@ const AttendanceReport = () => {
                             className="sr-only peer"
                         />
                         <div className="w-12 h-6 bg-gray-200 rounded-full peer-checked:bg-blue-600 relative transition-colors">
-                            <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-6"></div>
+                            {/* <div className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-6"></div> */}
                         </div>
                         <span className="ml-2 text-sm text-gray-600">
                             {theme ? "Light Theme" : "Dark Theme"}

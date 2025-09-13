@@ -107,6 +107,7 @@ const checkin = async (req, res, next) => {
   try {
     const { employeeId, date, punchIn, status } = req.body;
 
+
     if (!employeeId || !date || !status) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -121,7 +122,8 @@ const checkin = async (req, res, next) => {
 
     // Check if already checked in
     const existing = await Attendance.findOne({ employeeId, date: dateObj });
-    const whichemployee = await employee.findById(employeeId).select('branchId');
+    const whichemployee = await employee.findById(employeeId).select('branchId empId');
+    // console.log("whichemployee",whichemployee)
     if (existing) {
       return res.status(400).json({ message: 'Already checked in' });
     }
@@ -130,6 +132,7 @@ const checkin = async (req, res, next) => {
       companyId: req.user.companyId,
       attendanceById: req.user.id,
       branchId: whichemployee.branchId,
+      empId: whichemployee?.empId,
       employeeId,
       date: dateObj,
       status,
@@ -271,7 +274,8 @@ const bulkMarkAttendance = async (req, res, next) => {
     let companyId = req.user.companyId
     const bulkOps = attendanceRecords.map(record => {
       const {
-        empId: employeeId,
+        employeeId,
+        empId,
         branchId,
         date,
         punchIn,
@@ -302,6 +306,7 @@ const bulkMarkAttendance = async (req, res, next) => {
             $set: {
               companyId,
               branchId,
+              empId,
               punchIn: punchInDate,
               punchOut: punchOutDate,
               workingMinutes,

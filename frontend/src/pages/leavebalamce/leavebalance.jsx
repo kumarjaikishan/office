@@ -171,16 +171,18 @@ const LeaveBalancePage = () => {
     ];
 
     return (
-        <Box p={2}>
-            <h2>Leave Balance Management</h2>
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleOpen()}
-                sx={{ mb: 2 }}
-            >
-                Add Leave Balance
-            </Button>
+        <div className="w-full md:p-3 p-1">
+            {/* <h2>Leave Balance Management</h2> */}
+            <div className="flex float-end">
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleOpen()}
+                    sx={{ mb: 2 }}
+                >
+                    Add Leave Balance
+                </Button>
+            </div>
 
             <DataTable
                 columns={columns}
@@ -201,7 +203,7 @@ const LeaveBalancePage = () => {
                                     <FormControl className="w-full mt-4" >
                                         <InputLabel>Select Employee</InputLabel>
                                         <Select
-                                        label="Select Employee"
+                                            label="Select Employee"
                                             value={form.employeeId}
                                             onChange={setEmployee}
                                         >
@@ -268,7 +270,7 @@ const LeaveBalancePage = () => {
                     </div>
                 </div>
             </Modalbox>
-        </Box>
+        </div>
     );
 };
 

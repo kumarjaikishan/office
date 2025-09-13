@@ -338,7 +338,7 @@ const Attandence = () => {
       dangerMode: true,
     }).then(async (proceed) => {
       if (proceed) {
-        await deleteAttandence({ attandanceId: multideletearray, setisload, dispatch });
+        await deleteAttandence({ attandanceId: multideletearray,setselectedRows, setisload, dispatch });
         setselectedRows([]);
       }
     });

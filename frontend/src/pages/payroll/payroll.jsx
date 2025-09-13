@@ -24,6 +24,7 @@ export default function PayrollPage() {
   const [payroll, setPayroll] = useState(null);
   const [error, setError] = useState(null);
   let navigate = useNavigate();
+  const themes = useCustomStyles()
 
   useEffect(() => {
     fetchPayroll();
@@ -112,18 +113,21 @@ export default function PayrollPage() {
   if (!payroll) return <p className="p-4 text-gray-500">No payroll data found</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="w-full mx-auto p-1 md:p-4">
+    <div className="flex my-3">
       <Button size="small"
+      className="w-full md:w-fit"
         onClick={() => {
           navigate('/dashboard/payroll/add')
         }}
-        variant="outlined"> Add Payroll</Button>
+        variant="contained"> Add Payroll</Button>
+    </div>
       <div>
         <DataTable
           columns={payrollColumns(handleView, handleEdit, handleDelete)}
           data={payroll}
           pagination
-          // customStyles={useCustomStyles()}
+          customStyles={themes}
           highlightOnHover
           paginationPerPage={20}
           paginationRowsPerPageOptions={[20, 50, 100, 300]}

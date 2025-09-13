@@ -717,7 +717,7 @@ const firstfetch = async (req, res, next) => {
                     $in: employeeIds
                 }
             })
-                .sort({ date: -1, _id: 1 })
+                .sort({ date: -1,empId:1 })
                 .populate({
                     path: 'employeeId',
                     select: 'userid profileimage department',
@@ -772,7 +772,7 @@ const firstfetch = async (req, res, next) => {
                 .sort({ empId: 1 });
 
             attendance = await attendanceModal.find({ companyId: compId })
-                .sort({ date: -1, _id: 1 })
+                .sort({ date: -1,empId:1 })
                 .populate({
                     path: 'employeeId',
                     select: 'userid profileimage department',

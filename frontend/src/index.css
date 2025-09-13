@@ -106,7 +106,7 @@ body {
     max-width: 100%;
     max-height: 95vh;
     border-radius: 10px 10px 5px 5px;
-    background: teal;
+   background: var(--color-primary);
     overflow: hidden;
 
     form,

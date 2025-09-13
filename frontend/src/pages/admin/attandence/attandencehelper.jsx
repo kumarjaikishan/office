@@ -61,7 +61,7 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) 
   }
 }
 
-export const deleteAttandence = async ({ attandanceId, setisload, dispatch }) => {
+export const deleteAttandence = async ({ attandanceId, setselectedRows,setisload, dispatch }) => {
   if (!attandanceId) return toast.warning('Attandance Id is needed');
   const address = `${import.meta.env.VITE_API_ADDRESS}deleteattandence`
 
@@ -80,6 +80,7 @@ export const deleteAttandence = async ({ attandanceId, setisload, dispatch }) =>
     // console.log('delete attandence Query:', res);
     toast.success(res.data.message, { autoClose: 1800 });
     dispatch(FirstFetch());
+    setselectedRows([]);
     return true;
   } catch (error) {
     console.log(error);
@@ -146,7 +147,7 @@ export const columns = [
 
 
 export const useCustomStyles = () => {
-  const primaryColor = useSelector((state) => state.user.primaryColor) || "teal";
+  const primaryColor = useSelector((state) => state.user.primaryColor) || "#115e59";
 
   return {
     headCells: {

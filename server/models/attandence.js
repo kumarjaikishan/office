@@ -2,11 +2,12 @@
 const mongoose = require('mongoose');
 
 const attendanceSchema = new mongoose.Schema({
-  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company',required: true },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
   branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
   attendanceById: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
   date: { type: Date, required: true },
+  empId: { type: String },
   punchIn: { type: Date },
   punchOut: { type: Date },
   workingMinutes: { type: Number }, // calculated in hours

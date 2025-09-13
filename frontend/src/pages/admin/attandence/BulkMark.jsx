@@ -162,11 +162,14 @@ const BulkMark = ({
       return;
     }
 
-    const selectedData = checkedemployee.map(empId => {
-      const { punchIn, punchOut, status } = rowData[empId];
-      const branchId = employee.find(e => e._id === empId)?.branchId;
+    const selectedData = checkedemployee.map(employeeId => {
+      const { punchIn, punchOut, status } = rowData[employeeId];
+      const { branchId, empId } = employee.find(e => e._id === employeeId);
+
+      // return console.log(branchId,empId)
 
       const data = {
+        employeeId,
         empId,
         status,
         branchId,
@@ -181,6 +184,8 @@ const BulkMark = ({
       }
       return data;
     });
+
+    // return console.log(selectedData)
 
     try {
       const token = localStorage.getItem('emstoken');
