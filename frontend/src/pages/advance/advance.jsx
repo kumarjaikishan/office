@@ -10,16 +10,22 @@ import {
     InputLabel,
     Select,
     Avatar,
+    InputAdornment,
+    OutlinedInput,
+    Typography,
 } from "@mui/material";
 import axios from "axios";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Modalbox from "../../components/custommodal/Modalbox";
+import { IoSearch } from "react-icons/io5";
+import { CiFilter } from "react-icons/ci";
 
 const EmployeeAdvancePage = () => {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
+    const [departmentlist, setdepartmentlist] = useState([]);
     const [form, setForm] = useState({
         employeeId: "",
         companyId: "",
@@ -29,13 +35,25 @@ const EmployeeAdvancePage = () => {
         type: "given",
         remarks: "",
     });
+    const [filters, setFilters] = useState({
+        searchText: '',
+        branch: 'all',
+        department: 'all'
+    });
     const [editingId, setEditingId] = useState(null);
-    const { employee, advance } = useSelector((state) => state.user);
+    const { employee, advance, branch, department } = useSelector((state) => state.user);
 
     useEffect(() => {
         if (advance) setRows(advance);
         // fetchData()
     }, [advance]);
+
+    const handleFilterChange = (key, value) => {
+        setFilters(prev => ({
+            ...prev,
+            [key]: value
+        }));
+    };
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -145,11 +163,26 @@ const EmployeeAdvancePage = () => {
             });
         }
     };
+    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
     const columns = [
+        { name: "S.no", selector: (row, ind) => ind + 1, width: "60px" },
+        // {
+        //     name: "Employee",
+        //     selector: (row) => row.employeeId?.userid?.name || "N/A",
+        //     sortable: true,
+        // },
         {
             name: "Employee",
-            selector: (row) => row.employeeId?.userid?.name || "N/A",
+            selector: (row) => (<div className="flex items-center capitalize gap-3 ">
+                <Avatar src={row.profileimage || employepic} alt={row.employeename}>
+                    {!row.profileimage && employepic}
+                </Avatar>
+                <Box>
+                    <Typography variant="body2">{row?.userid?.name}</Typography>
+                    <p className="t text-[10px] text-gray-600">({row?.designation})</p>
+                </Box>
+            </div>),
             sortable: true,
         },
         { name: "type", selector: (row) => row.type || "-", sortable: true, width: "120px" },
@@ -175,16 +208,107 @@ const EmployeeAdvancePage = () => {
     ];
 
     return (
-        <Box p={2}>
-            <h2>Employee Advance Management</h2>
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleOpen()}
-                sx={{ mb: 2 }}
-            >
-                Add Advance
-            </Button>
+        <div className="p-1 md:p-3">
+            {/* <h2>Employee Advance Management</h2> */}
+            <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
+                <div className="flex flex-wrap gap-3 justify-between w-full md:w-fit">
+                    {/* Search (full on small, shrink on md+) */}
+                    <TextField
+                        size="small"
+                        className="w-[47%] md:w-[160px]"
+                        value={filters.searchText}
+                        onChange={(e) => handleFilterChange("searchText", e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <IoSearch />
+                                </InputAdornment>
+                            ),
+                        }}
+                        label="Search Employee"
+                    />
+
+                    {/* Branch (50% on small, shrink on md+) */}
+                    <FormControl
+                        size="small"
+                        className="w-[47%] md:w-[160px]"
+                    >
+                        <InputLabel>Branch</InputLabel>
+                        <Select
+                            label="Branch"
+                            value={filters.branch}
+                            input={
+                                <OutlinedInput
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <CiFilter fontSize="small" />
+                                        </InputAdornment>
+                                    }
+                                    label="Branch"
+                                />
+                            }
+                            onChange={(e) => handleFilterChange("branch", e.target.value)}
+                        >
+                            <MenuItem value="all">All</MenuItem>
+                            {branch?.map((list) => (
+                                <MenuItem key={list._id} value={list._id}>
+                                    {list.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    {/* Department (50% on small, shrink on md+) */}
+                    <FormControl
+                        size="small"
+                        className="w-[47%] md:w-[160px]"
+                    >
+                        <InputLabel>Department</InputLabel>
+                        <Select
+                            label="Department"
+                            disabled={filters.branch === "all"}
+                            value={filters.department}
+                            input={
+                                <OutlinedInput
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <CiFilter fontSize="small" />
+                                        </InputAdornment>
+                                    }
+                                    label="Department"
+                                />
+                            }
+                            onChange={(e) =>
+                                handleFilterChange("department", e.target.value)
+                            }
+                        >
+                            <MenuItem value="all">All</MenuItem>
+                            {departmentlist.length > 0 ? (
+                                departmentlist.map((list) => (
+                                    <MenuItem key={list._id} value={list._id}>
+                                        {list.department}
+                                    </MenuItem>
+                                ))
+                            ) : (
+                                <MenuItem disabled>No departments found</MenuItem>
+                            )}
+                        </Select>
+                    </FormControl>
+                </div>
+
+                <div className="w-full md:w-fit">
+                    <Button
+                        className="w-full md:w-fit"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleOpen()}
+                        sx={{ mb: 2 }}
+                    >
+                        Add Advance
+                    </Button>
+                </div>
+            </div>
+
 
             <DataTable
                 columns={columns}
@@ -271,7 +395,7 @@ const EmployeeAdvancePage = () => {
                     </div>
                 </div>
             </Modalbox>
-        </Box>
+        </div>
     );
 };
 

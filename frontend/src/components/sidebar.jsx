@@ -87,7 +87,7 @@ const Sidebar = () => {
                   end={item.link === "/dashboard"}
                   key={item.link}
                   className={({ isActive }) =>
-                    `flex w-full mb-1 items-center rounded text-gray-600 
+                    `flex text-nowrap w-full mb-1 items-center rounded text-gray-600 
                         ${showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"} 
                         ${isActive ? "bg-primary text-white" : ""}`
                   }
@@ -115,11 +115,11 @@ const menu = [
       { menu: "Attendance", link: '/dashboard/attandence', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/empattandence', icon: <TbReportAnalytics />, roles: ['employee'] },
       { menu: "Attend Report", link: '/dashboard/attandence_Report', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
-      // { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
-      // { menu: "Advance", link: '/dashboard/advance', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Advance", link: '/dashboard/advance', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Holiday", link: '/dashboard/holiday', icon: <FaCalendarDay />, roles: ['superadmin', 'admin'] },
       { menu: "Leave", link: '/dashboard/leave', icon: <FaUmbrellaBeach />, roles: ['employee', 'admin', 'superadmin', 'manager'] },
-      // { menu: "Leavebal", link: '/dashboard/leavebal', icon: <FaUmbrellaBeach />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Leavebal", link: '/dashboard/leavebal', icon: <FaUmbrellaBeach />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Ledger", link: '/dashboard/ledger', icon: <FaBook />, roles: ['admin', 'superadmin', 'manager'] },
     ]
   },

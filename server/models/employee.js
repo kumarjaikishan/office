@@ -18,7 +18,7 @@ const employeeSchema = new mongoose.Schema({
         ref: 'Branch',
         required: true
     },
-    empId: { type: String },
+    empId: { type: String, required:true },
     employeeName: { type: String },
     department: {
         type: mongoose.Schema.Types.ObjectId,

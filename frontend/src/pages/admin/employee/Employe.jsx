@@ -493,7 +493,7 @@ const Employe = () => {
       </div>
 
 
-      <div className="mt-2">
+      <div className="mt-2 capitalize">
         <DataTable
           columns={columns}
           data={filteredEmployees}
@@ -614,7 +614,7 @@ const Employe = () => {
                       size="small"
                       InputProps={{
                         startAdornment: (
-                          <InputAdornment position="start" sx={{ minWidth: 80 }}>
+                          <InputAdornment position="start" sx={{ minWidth: 45 }}>
                             <Select
                               variant="standard"
                               disableUnderline

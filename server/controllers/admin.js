@@ -53,25 +53,48 @@ async function generateNextEmpId(companyId, prefix = "EMP", padding = 3) {
 const addDepartment = async (req, res, next) => {
     try {
         const { branchId, department, description } = req.body;
+
         if (!department) {
-            return next({ status: 400, message: "all fields are required" });
+            return next({ status: 400, message: "Department name is required" });
         }
 
-        const query = new departmentModal({ companyId: req.user.companyId, branchId, department, description });
-        const result = await query.save();
+        const normalizedDept = department.toLowerCase();
+
+        const isExist = await departmentModal.findOne({
+            companyId: req.user.companyId,
+            branchId,
+            department: normalizedDept,
+        });
+
+        if (isExist) {
+            return next({
+                status: 400,
+                message: "Department already exists for this branch",
+            });
+        }
+
+        const newDepartment = new departmentModal({
+            companyId: req.user.companyId,
+            branchId,
+            department: normalizedDept,
+            description,
+        });
+
+        const result = await newDepartment.save();
         if (!result) {
             return next({ status: 400, message: "Something went wrong" });
         }
 
-        res.status(200).json({
-            message: 'Department Created Successfully'
-        })
-
+        res.status(201).json({
+            message: "Department created successfully",
+            department: result,
+        });
     } catch (error) {
-        console.log(error.message)
+        console.error(error.message);
         return next({ status: 500, message: error.message });
     }
-}
+};
+
 const updatedepartment = async (req, res, next) => {
     try {
         const { department, description, departmentId } = req.body;
@@ -131,7 +154,7 @@ const departmentlist = async (req, res, next) => {
 
 const addemployee = async (req, res, next) => {
 
-    const { employeeName, branchId, department, email, password, designation, salary } = req.body;
+    const { employeeName, branchId, department, email, password = 'employee', designation, salary } = req.body;
 
     if (!employeeName || !email || !department || !branchId) {
         return res.status(400).json({ message: "Please Fill required Fields" });
@@ -717,7 +740,7 @@ const firstfetch = async (req, res, next) => {
                     $in: employeeIds
                 }
             })
-                .sort({ date: -1,empId:1 })
+                .sort({ date: -1, empId: 1 })
                 .populate({
                     path: 'employeeId',
                     select: 'userid profileimage department',
@@ -772,7 +795,7 @@ const firstfetch = async (req, res, next) => {
                 .sort({ empId: 1 });
 
             attendance = await attendanceModal.find({ companyId: compId })
-                .sort({ date: -1,empId:1 })
+                .sort({ date: -1, empId: 1 })
                 .populate({
                     path: 'employeeId',
                     select: 'userid profileimage department',
@@ -812,11 +835,38 @@ const firstfetch = async (req, res, next) => {
             })
         );
 
+
+
+        async function fixEmployeeEmpIds() {
+            // find records where empId is missing or null
+            const records = await attendanceModal.find({
+                $or: [{ empId: { $exists: false } }, { empId: null }]
+            });
+
+            for (const rec of records) {
+                if (!rec.employeeId) continue; // skip if employeeId itself is missing
+
+                // find employee doc
+                const employee = await employeeModal.findById(rec.employeeId).select("empId");
+                if (employee && employee.empId) {
+                    await attendanceModal.updateOne(
+                        { _id: rec._id },
+                        { $set: { empId: employee.empId } }
+                    );
+                }
+            }
+
+            console.log("✅ Employee empId fixed where missing!");
+        }
+
+        // fixEmployeeEmpIds()
+
+
         const response = {
             user: user,
             departmentlist,
             employee: employees,
-            attendance,advance,
+            attendance, advance,
             holidays,
             ledger: ledgersWithBalance,
             leaveBalance

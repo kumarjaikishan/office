@@ -37,10 +37,13 @@ const Navbar = () => {
     "attandence": "Attendance",
     "salary": "Salary",
     "department": "Department",
+    "payroll": "Payroll",
+    "advance": "Advance",
     "setting": "Settings",
     "faceatten": "Face Attendance",
     "performance/:userid": "Performance",
     "empattandence": "Attendance",
+    "attandence_Report": "Attendance Report",
     "profile": "Profile",
     "adminprofile": "Profile",
   };
