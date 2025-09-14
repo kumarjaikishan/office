@@ -138,7 +138,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
 
   // Helper for counting totals per employee
   const getEmployeeTotals = (empId) => {
-    const totals = { P: 0, A: 0, L: 0, W: 0, H: 0, LA: 0 };
+    const totals = { P: 0, A: 0, L: 0, W: 0, H: 0, LA: 0, NW: 0 };
 
     days.forEach((d) => {
       let status = attendanceByEmp[empId]?.[d.date()] || "-";
@@ -164,6 +164,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
       .reduce((sum, e) => sum + (e.amount || 0), 0);
 
     totals.LA += totalAdjustedLeaves;
+    totals.NW = totals.P + totals.W + totals.H + totals.LA
 
     return totals;
   };
@@ -174,60 +175,69 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
   ];
 
   const exportCSV2 = () => {
-    // CSV Headers: Employee Name + Each day + Totals
-    const headers = [
-      "Employee",
-      // ...days.map((d) => d.format("DD-MMM")), // each day of the month
-      ...days.map((d) => d.format("DD")), // each day of the month
-      "Present", "Absent", "Leave", "Weekly Off", "Holiday"
-    ];
+  // Month-Year title row (e.g. April-2025)
+  const titleRow = [`Attendance Register - ${dayjs(`${filters.year}-${filters.month}-01`).format("MMMM-YYYY")}`];
 
-    // Rows per employee
-    const rows = filteredEmployees.map((emp) => {
-      const totals = getEmployeeTotals(emp._id);
+  // CSV Headers: Employee Name + Each day + Totals
+  const headers = [
+    "Employee",
+    ...days.map((d) => d.format("DD")),
+    "Present",
+    "Absent",
+    "Leave",
+    "Weekly Off",
+    "Holiday",
+    "Leave Adjusted",
+    "Net Payable Days",
+  ];
 
-      // daily status (P, A, L, W, H, or "-")
-      const dailyStatus = days.map((d) => {
-        let status = attendanceByEmp[emp._id]?.[d.date()] || "-";
+  // Rows per employee
+  const rows = filteredEmployees.map((emp) => {
+    const totals = getEmployeeTotals(emp._id);
 
-        if (holidayDates.has(d.date())) {
-          status = "H";
-        } else {
-          const weekday = monthStart.date(d.date()).day();
-          if (weeklyOffDays.includes(weekday)) status = "W";
-        }
+    const dailyStatus = days.map((d) => {
+      let status = attendanceByEmp[emp._id]?.[d.date()] || "-";
 
-        if (status === "present") status = "P";
-        if (status === "leave") status = "L";
-        if (status === "absent") status = "A";
+      if (holidayDates.has(d.date())) {
+        status = "H";
+      } else {
+        const weekday = monthStart.date(d.date()).day();
+        if (weeklyOffDays.includes(weekday)) status = "W";
+      }
 
-        return status;
-      });
+      if (status === "present") status = "P";
+      if (status === "leave") status = "L";
+      if (status === "absent") status = "A";
 
-      return [
-        emp?.userid?.name || "Unknown",
-        ...dailyStatus,
-        totals.P,
-        totals.A,
-        totals.L,
-        totals.W,
-        totals.H,
-      ];
+      return status;
     });
 
-    // Combine headers + rows into CSV text
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    return [
+      emp?.userid?.name || "Unknown",
+      ...dailyStatus,
+      totals.P,
+      totals.A,
+      totals.L,
+      totals.W,
+      totals.H,
+      totals.LA,
+      totals.NW,
+    ];
+  });
 
-    // Create CSV file for download
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Attendance Register ${months[filters.month - 1]}-${filters.year}.csv`;
-    // a.download = `Attendance Register.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  // Combine rows: title row, empty spacer row, headers, then data
+  const csv = [titleRow, headers, ...rows].map((r) => r.join(",")).join("\n");
+
+  // Download CSV
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Attendance Register ${dayjs(`${filters.year}-${filters.month}-01`).format("MMMM-YYYY")}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
 
   const defaultEmployeePic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
@@ -252,6 +262,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
             <th title="Weekly Off" className="px-2 border-r border-gray-500 text-gray-800">W</th>
             <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">H</th>
             <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">LA</th>
+            <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">NP</th>
             <th title="Holiday" className="px-2 border-r ">Actions</th>
 
           </tr>
@@ -288,6 +299,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
                 <td className="text-center font-bold text-gray-800" >{totals.W}</td>
                 <td className="text-center font-bold text-blue-800">{totals.H}</td>
                 <td className="text-center font-bold text-blue-800">{totals.LA}</td>
+                <td className="text-center font-bold text-blue-800">{totals.NW}</td>
                 <td className=" border-r border-gray-300">
                   <div className="action flex justify-center gap-2">
                     <span className="text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
@@ -297,6 +309,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
             );
           })}
         </tbody>
+
         <tfoot>
           <tr>
             <td colSpan={days.length + 6} className="py-4">
@@ -320,6 +333,14 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
                 <div className="flex items-center gap-1">
                   <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
                   <span>H = Holiday</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
+                  <span>LA = Leave Availed/Adjusted</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
+                  <span>NP = Net Payable Days</span>
                 </div>
               </div>
             </td>

@@ -3,13 +3,15 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import swal from 'sweetalert';
 import {
-  FaBook, FaCalendarDay, FaUmbrellaBeach, FaUserCircle, FaUserTie, FaSitemap
+  FaBook, FaCalendarDay, FaUmbrellaBeach, FaUserCircle, FaUserTie, FaSitemap,
+  FaHandHoldingUsd
 } from 'react-icons/fa';
 import { VscDashboard } from "react-icons/vsc";
 import { TbReportAnalytics } from "react-icons/tb";
 import { SiAudiotechnica } from "react-icons/si";
 import { CgLogOut } from "react-icons/cg";
 import { FiSettings } from 'react-icons/fi';
+import { MdOutlineAssignmentTurnedIn, MdPayments } from 'react-icons/md';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -115,11 +117,11 @@ const menu = [
       { menu: "Attendance", link: '/dashboard/attandence', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Attendance", link: '/dashboard/empattandence', icon: <TbReportAnalytics />, roles: ['employee'] },
       { menu: "Attend Report", link: '/dashboard/attandence_Report', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
-      { menu: "Payroll", link: '/dashboard/payroll', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
-      { menu: "Advance", link: '/dashboard/advance', icon: <TbReportAnalytics />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Payroll", link: '/dashboard/payroll', icon: <MdPayments />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Advance", link: '/dashboard/advance', icon: <FaHandHoldingUsd />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Holiday", link: '/dashboard/holiday', icon: <FaCalendarDay />, roles: ['superadmin', 'admin'] },
       { menu: "Leave", link: '/dashboard/leave', icon: <FaUmbrellaBeach />, roles: ['employee', 'admin', 'superadmin', 'manager'] },
-      { menu: "Leavebal", link: '/dashboard/leavebal', icon: <FaUmbrellaBeach />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Leavebal", link: '/dashboard/leavebal', icon: <MdOutlineAssignmentTurnedIn />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Ledger", link: '/dashboard/ledger', icon: <FaBook />, roles: ['admin', 'superadmin', 'manager'] },
     ]
   },
