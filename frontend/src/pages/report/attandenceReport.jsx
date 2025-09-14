@@ -25,6 +25,7 @@ const AttendanceReport = () => {
     const [employeelist, setemployeelist] = useState([]);
     const [departmentlist, setdepartmentlist] = useState([]);
     const [theme, setTheme] = useState(true);
+    const [csvcall, setcsvcall] = useState(false);
     const [filters, setFilters] = useState({
         searchText: '',
         branch: 'all',
@@ -146,7 +147,7 @@ const AttendanceReport = () => {
                 present,
                 action: (
                     <div className="action flex gap-2.5">
-                        <span className="edit text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
+                        <span className="text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
                     </div>
                 )
             };
@@ -180,7 +181,7 @@ const AttendanceReport = () => {
 
     // datatable columns
     const columns = [
-        { name: "S.No", selector: (row,ind) => ind+1, width: "50px" },
+        { name: "S.No", selector: (row, ind) => ind + 1, width: "50px" },
         { name: "Employee", selector: row => row.name },
         { name: "Present", selector: row => row.present, width: '100px' },
         { name: "Absent", selector: row => row.absent, width: '100px' },
@@ -206,6 +207,11 @@ const AttendanceReport = () => {
         a.click();
         URL.revokeObjectURL(url);
     };
+
+    const exportCSV2call = () => {
+        setcsvcall(true)
+    };
+
 
     return (
         <div className='employee p-2'>
@@ -308,7 +314,8 @@ const AttendanceReport = () => {
                     </FormControl>
                 </div>
                 <div className=" w-full md:w-fit">
-                    <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
+                    {/* <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button> */}
+                    <Button onClick={exportCSV2call} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
                 </div>
             </div>
 
@@ -351,7 +358,7 @@ const AttendanceReport = () => {
 
                 </div>
 
-                <RegisterView filters={filters} theme={theme} />
+                <RegisterView csvcall={csvcall} filters={filters} setcsvcall={setcsvcall} theme={theme} />
             </div>
 
         </div>

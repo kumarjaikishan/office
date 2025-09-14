@@ -1,4 +1,4 @@
-import { Button, Stack } from "@mui/material";
+import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { BiEdit, BiTrash, BiShow } from "react-icons/bi"; // react-icons
 
@@ -8,9 +8,22 @@ export const payrollColumns = (onView, onEdit, onDelete) => [
     selector: (row, ind) => ind + 1,
     width: "60px",
   },
+  // {
+  //   name: "Name",
+  //   selector: (row) => row.name,
+  // },
   {
-    name: "Name",
-    selector: (row) => row.name,
+    name: "Employee",
+    selector: (row) => (<div className="flex items-center capitalize gap-3 ">
+      <Avatar src={row?.employeeId?.profileimage || employepic} alt={row?.employeeId?.userid?.name}>
+        {!row?.employeeId?.profileimage && employepic}
+      </Avatar>
+      <Box>
+        <Typography variant="body2">{row?.employeeId?.userid?.name}</Typography>
+        <p className="t text-[10px] text-gray-600">({row?.employeeId?.designation})</p>
+      </Box>
+    </div>),
+    sortable: true,
   },
   {
     name: "Month",

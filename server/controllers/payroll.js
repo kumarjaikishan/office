@@ -124,6 +124,7 @@ exports.createPayroll = async (req, res, next) => {
             companyId,
             branchId,
             type: "debit",
+            period: `${month}-${year}`,
             balance: newBalance,
             amount: options.adjustedLeaveCount,
             remarks: `Leave adjusted in Payroll ${month}-${year}`,
@@ -344,9 +345,19 @@ exports.allPayroll = async (req, res, next) => {
     if (req.user.role == 'manager') {
       payrolls = await Payroll.find({ companyId: req.user.companyId, branchId: { $in: req.user.branchIds } })
         .select('branchId companyId department employeeId month year name status')
+        .populate({
+          path: "employeeId",
+          select: "userid profileimage empId designation",
+          populate: { path: "userid", select: "name", },
+        })
     } else {
       payrolls = await Payroll.find({ companyId: req.user.companyId })
         .select('branchId companyId department employeeId month year name status')
+         .populate({
+          path: "employeeId",
+          select: "userid profileimage empId designation",
+          populate: { path: "userid", select: "name", },
+        })
     }
 
     return res.status(201).json({ payrolls });

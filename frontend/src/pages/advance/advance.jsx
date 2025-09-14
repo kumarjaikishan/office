@@ -46,6 +46,7 @@ const EmployeeAdvancePage = () => {
     useEffect(() => {
         if (advance) setRows(advance);
         // fetchData()
+        // console.log(advance)
     }, [advance]);
 
     const handleFilterChange = (key, value) => {
@@ -54,6 +55,18 @@ const EmployeeAdvancePage = () => {
             [key]: value
         }));
     };
+
+    const filteredEmployees = rows?.filter(emp => {
+        const name = emp.employeeId?.userid?.name?.toLowerCase() || '';
+        const branchId = emp.branchId || '';
+        // const deptId = emp.departmentid || '';
+
+        const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
+        const branchMatch = filters.branch === 'all' || branchId === filters.branch;
+        // const deptMatch = filters.department === 'all' || deptId === filters.department;
+
+        return nameMatch && branchMatch;
+    });
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -167,20 +180,15 @@ const EmployeeAdvancePage = () => {
 
     const columns = [
         { name: "S.no", selector: (row, ind) => ind + 1, width: "60px" },
-        // {
-        //     name: "Employee",
-        //     selector: (row) => row.employeeId?.userid?.name || "N/A",
-        //     sortable: true,
-        // },
         {
             name: "Employee",
             selector: (row) => (<div className="flex items-center capitalize gap-3 ">
-                <Avatar src={row.profileimage || employepic} alt={row.employeename}>
-                    {!row.profileimage && employepic}
+                <Avatar src={row?.employeeId?.profileimage || employepic} alt={row?.employeeId?.userid?.name}>
+                    {!row?.employeeId?.profileimage && employepic}
                 </Avatar>
                 <Box>
-                    <Typography variant="body2">{row?.userid?.name}</Typography>
-                    <p className="t text-[10px] text-gray-600">({row?.designation})</p>
+                    <Typography variant="body2">{row?.employeeId?.userid?.name}</Typography>
+                    <p className="t text-[10px] text-gray-600">({row?.employeeId?.designation})</p>
                 </Box>
             </div>),
             sortable: true,
@@ -259,7 +267,7 @@ const EmployeeAdvancePage = () => {
                     </FormControl>
 
                     {/* Department (50% on small, shrink on md+) */}
-                    <FormControl
+                    {/* <FormControl
                         size="small"
                         className="w-[47%] md:w-[160px]"
                     >
@@ -293,7 +301,7 @@ const EmployeeAdvancePage = () => {
                                 <MenuItem disabled>No departments found</MenuItem>
                             )}
                         </Select>
-                    </FormControl>
+                    </FormControl> */}
                 </div>
 
                 <div className="w-full md:w-fit">
@@ -312,7 +320,7 @@ const EmployeeAdvancePage = () => {
 
             <DataTable
                 columns={columns}
-                data={rows}
+                data={filteredEmployees}
                 pagination
                 highlightOnHover
                 striped

@@ -43,7 +43,7 @@ export default function PayrollPage() {
           }
         }
       );
-      // console.log(res.data.payrolls)
+      console.log(res.data.payrolls)
       setPayroll(res?.data?.payrolls)
 
     } catch (error) {

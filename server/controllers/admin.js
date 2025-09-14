@@ -756,7 +756,7 @@ const firstfetch = async (req, res, next) => {
                 branchId: { $in: req.user.branchIds }
             }).populate({
                 path: "employeeId",
-                select: "userid",
+                select: "userid profileimage empId designation",
                 populate: { path: "userid", select: "name", },
             }).sort({ date: -1, createdAt: -1 });
 
@@ -765,7 +765,7 @@ const firstfetch = async (req, res, next) => {
                 branchId: { $in: req.user.branchIds }
             }).populate({
                 path: "employeeId",
-                select: "userid",
+                select: "userid profileimage empId",
                 populate: { path: "userid", select: "name", },
             }).sort({ date: -1, createdAt: -1 });
         }
@@ -809,13 +809,13 @@ const firstfetch = async (req, res, next) => {
             // await usermodal.find({})
             leaveBalance = await LeaveBalance.find({ companyId: compId, }).populate({
                 path: "employeeId",
-                select: "userid",
+                select: "userid profileimage empId designation",
                 populate: { path: "userid", select: "name", },
             }).sort({ date: -1, createdAt: -1 });
 
             advance = await advancemodal.find({ companyId: compId, }).populate({
                 path: "employeeId",
-                select: "userid",
+                select: "userid profileimage empId designation",
                 populate: { path: "userid", select: "name", },
             }).sort({ date: -1, createdAt: -1 });
             // console.log(advance)

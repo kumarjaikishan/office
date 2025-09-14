@@ -9,6 +9,7 @@ const leaveBalanceSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   empId: { type: String },
   type: { type: String, enum: ["credit", "debit"], required: true },
+  period: { type: String },
 
   amount: { type: Number, required: true },
   balance: { type: Number, required: true },

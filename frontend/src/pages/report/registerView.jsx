@@ -1,21 +1,47 @@
 import { Typography } from "@mui/material";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { HiOutlineDocumentReport } from "react-icons/hi";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-const RegisterView = ({ filters, theme }) => {
+const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
   const monthStart = dayjs(`${filters.year}-${filters.month}-01`);
   const isCurrentMonth = monthStart.isSame(dayjs(), "month");
   const monthEnd = isCurrentMonth ? dayjs() : monthStart.endOf("month");
   const totalDays = monthEnd.date();
+  const [employeeleavesadjusted, setemployeeleavesadjusted] = useState([])
 
   // Generate all days for header
   const days = Array.from({ length: totalDays }, (_, i) =>
     monthStart.date(i + 1)
   );
 
-  const { employee, attandence, holidays, company } = useSelector(
-    (e) => e.user
-  );
+  const { employee, attandence, holidays, company, leaveBalance } = useSelector((e) => e.user);
+
+  useEffect(() => {
+    if (!csvcall) return;
+    exportCSV2();
+    setcsvcall(false);
+  }, [csvcall])
+
+  useEffect(() => {
+
+    console.log(leaveBalance)
+    const selectedPeriod = dayjs(`${filters.year}-${filters.month}-01`);
+    const thisMonthLeaves = leaveBalance.filter((e) => {
+      if (e.type !== "debit" || !e.period) return false;
+
+      // parse "8-2025" into dayjs
+      const [m, y] = e.period.split("-");
+      const periodDate = dayjs(`${y}-${m}-01`, "YYYY-M-DD");
+
+      return periodDate.isSame(selectedPeriod, "month");
+    });
+
+    console.log(thisMonthLeaves)
+    setemployeeleavesadjusted(thisMonthLeaves)
+  }, [filters])
 
   // 👉 Apply same filters
   const filteredEmployees = employee.filter((emp) => {
@@ -35,6 +61,8 @@ const RegisterView = ({ filters, theme }) => {
 
     return nameMatch && deptMatch && branchMatch;
   });
+
+  let navigate = useNavigate();
 
   // Pre-group attendance
   const attendanceByEmp = {};
@@ -80,16 +108,18 @@ const RegisterView = ({ filters, theme }) => {
       ? {
         P: "bg-green-200 text-green-900",
         A: "bg-red-200 text-red-900",
+        // L: "bg-orange-200 text-orange-900",
+        L: "bg-red-200 text-red-900",
         W: "bg-gray-200 text-gray-900",
         H: "bg-blue-200 text-blue-900",
-        L: "bg-amber-200 text-amber-900",
       }
       : {
         P: "bg-green-900 text-green-100",
         A: "bg-red-900 text-red-100",
+        // L: "bg-orange-500 text-orange-100",
+        L: "bg-red-500 text-red-100",
         W: "bg-gray-900 text-gray-100",
         H: "bg-blue-900 text-blue-100",
-        L: "bg-orange-500 text-orange-100",
       };
 
     return (
@@ -108,7 +138,7 @@ const RegisterView = ({ filters, theme }) => {
 
   // Helper for counting totals per employee
   const getEmployeeTotals = (empId) => {
-    const totals = { P: 0, A: 0, L: 0, W: 0, H: 0 };
+    const totals = { P: 0, A: 0, L: 0, W: 0, H: 0, LA: 0 };
 
     days.forEach((d) => {
       let status = attendanceByEmp[empId]?.[d.date()] || "-";
@@ -129,7 +159,74 @@ const RegisterView = ({ filters, theme }) => {
       }
     });
 
+    const totalAdjustedLeaves = employeeleavesadjusted
+      .filter(e => e.employeeId?._id === empId)
+      .reduce((sum, e) => sum + (e.amount || 0), 0);
+
+    totals.LA += totalAdjustedLeaves;
+
     return totals;
+  };
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const exportCSV2 = () => {
+    // CSV Headers: Employee Name + Each day + Totals
+    const headers = [
+      "Employee",
+      // ...days.map((d) => d.format("DD-MMM")), // each day of the month
+      ...days.map((d) => d.format("DD")), // each day of the month
+      "Present", "Absent", "Leave", "Weekly Off", "Holiday"
+    ];
+
+    // Rows per employee
+    const rows = filteredEmployees.map((emp) => {
+      const totals = getEmployeeTotals(emp._id);
+
+      // daily status (P, A, L, W, H, or "-")
+      const dailyStatus = days.map((d) => {
+        let status = attendanceByEmp[emp._id]?.[d.date()] || "-";
+
+        if (holidayDates.has(d.date())) {
+          status = "H";
+        } else {
+          const weekday = monthStart.date(d.date()).day();
+          if (weeklyOffDays.includes(weekday)) status = "W";
+        }
+
+        if (status === "present") status = "P";
+        if (status === "leave") status = "L";
+        if (status === "absent") status = "A";
+
+        return status;
+      });
+
+      return [
+        emp?.userid?.name || "Unknown",
+        ...dailyStatus,
+        totals.P,
+        totals.A,
+        totals.L,
+        totals.W,
+        totals.H,
+      ];
+    });
+
+    // Combine headers + rows into CSV text
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+
+    // Create CSV file for download
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Attendance Register ${months[filters.month - 1]}-${filters.year}.csv`;
+    // a.download = `Attendance Register.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const defaultEmployeePic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
@@ -154,6 +251,8 @@ const RegisterView = ({ filters, theme }) => {
             <th title="Leave" className="px-2 border-r border-gray-500 text-orange-600">L</th>
             <th title="Weekly Off" className="px-2 border-r border-gray-500 text-gray-800">W</th>
             <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">H</th>
+            <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">LA</th>
+            <th title="Holiday" className="px-2 border-r ">Actions</th>
 
           </tr>
         </thead>
@@ -188,6 +287,12 @@ const RegisterView = ({ filters, theme }) => {
                 <td className="text-center font-bold text-orange-600">{totals.L}</td>
                 <td className="text-center font-bold text-gray-800" >{totals.W}</td>
                 <td className="text-center font-bold text-blue-800">{totals.H}</td>
+                <td className="text-center font-bold text-blue-800">{totals.LA}</td>
+                <td className=" border-r border-gray-300">
+                  <div className="action flex justify-center gap-2">
+                    <span className="text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
+                  </div>
+                </td>
               </tr>
             );
           })}

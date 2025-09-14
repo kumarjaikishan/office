@@ -16,14 +16,16 @@ import {
     Avatar,
     InputAdornment,
     OutlinedInput,
+    Typography,
 } from "@mui/material";
 import axios from "axios";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdDelete, MdEdit, MdOpenInNew } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Modalbox from "../../components/custommodal/Modalbox";
 import { CiFilter } from "react-icons/ci";
 import { IoSearch } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 const LeaveBalancePage = () => {
     const [rows, setRows] = useState([]);
@@ -42,6 +44,7 @@ const LeaveBalancePage = () => {
         branch: 'all',
         department: 'all'
     });
+    const navigate = useNavigate();
     const [editingId, setEditingId] = useState(null);
     const { company, employee, leaveBalance, branch, department } = useSelector((state) => state.user);
 
@@ -90,6 +93,18 @@ const LeaveBalancePage = () => {
         }
         setOpen(true);
     };
+
+    const filteredEmployees = rows?.filter(emp => {
+        const name = emp.employeeId?.userid?.name?.toLowerCase() || '';
+        const branchId = emp.branchId || '';
+        // const deptId = emp.departmentid || '';
+
+        const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
+        const branchMatch = filters.branch === 'all' || branchId === filters.branch;
+        // const deptMatch = filters.department === 'all' || deptId === filters.department;
+
+        return nameMatch && branchMatch;
+    });
 
     const handleClose = () => setOpen(false);
 
@@ -161,13 +176,22 @@ const LeaveBalancePage = () => {
             });
         }
     };
+    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
     // ✅ DataTable columns
     const columns = [
         { name: "S.no", selector: (row, ind) => ind + 1, width: '60px' },
         {
             name: "Employee",
-            selector: (row) => row.employeeId?.userid?.name || "N/A",
+            selector: (row) => (<div className="flex items-center capitalize gap-3 ">
+                <Avatar src={row?.employeeId?.profileimage || employepic} alt={row?.employeeId?.userid?.name}>
+                    {!row?.employeeId?.profileimage && employepic}
+                </Avatar>
+                <Box>
+                    <Typography variant="body2">{row?.employeeId?.userid?.name}</Typography>
+                    <p className="t text-[10px] text-gray-600">({row?.employeeId?.designation})</p>
+                </Box>
+            </div>),
             sortable: true,
         },
         { name: "Type", selector: (row) => row.type, sortable: true, width: '90px' },
@@ -177,15 +201,21 @@ const LeaveBalancePage = () => {
         {
             name: "Actions",
             cell: (row) => (
-                <> {!row?.payrollId && <>
-                    <IconButton color="primary" onClick={() => handleOpen(row)}>
-                        <MdEdit />
+                <>
+                    {!row?.payrollId && <>
+                        <IconButton color="primary" onClick={() => handleOpen(row)}>
+                            <MdEdit />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleDelete(row._id)}>
+                            <MdDelete />
+                        </IconButton>
+                    </>
+                    }
+                    {row.payrollId && <> 
+                     <IconButton title="Open Payroll" color="primary" onClick={() =>  navigate(`/dashboard/payroll/print/${row.payrollId}`)}>
+                        <MdOpenInNew  />
                     </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(row._id)}>
-                        <MdDelete />
-                    </IconButton>
-                </>
-                }
+                    </> }
                 </>
             ),
             width: '120px'
@@ -244,7 +274,7 @@ const LeaveBalancePage = () => {
                     </FormControl>
 
                     {/* Department (50% on small, shrink on md+) */}
-                    <FormControl
+                    {/* <FormControl
                         size="small"
                         className="w-[47%] md:w-[160px]"
                     >
@@ -278,7 +308,7 @@ const LeaveBalancePage = () => {
                                 <MenuItem disabled>No departments found</MenuItem>
                             )}
                         </Select>
-                    </FormControl>
+                    </FormControl> */}
                 </div>
                 <div className="w-full md:w-fit">
                     <Button
@@ -293,11 +323,9 @@ const LeaveBalancePage = () => {
                 </div>
             </div>
 
-
-
             <DataTable
                 columns={columns}
-                data={rows}
+                data={filteredEmployees}
                 pagination
                 highlightOnHover
                 striped
