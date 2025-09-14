@@ -257,7 +257,7 @@ const AdminManagerProfile = () => {
                 size="small"
                 fullWidth
                 margin="dense"
-                label="Ledger Name"
+                label="Profile Name"
                 value={name}
                 onChange={(e) => setname(e.target.value)}
               />

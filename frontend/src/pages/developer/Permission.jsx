@@ -338,7 +338,7 @@ const Permission = () => {
 
             {/* Modal */}
             <Modalbox open={passmodal} onClose={() => setPassmodal(false)}>
-                <div className="membermodal">
+                <div className="membermodal w-[680px]">
                     <form action="">
                         <h2 className="font-bold text-lg mb-3">Edit Permission - {selectedRole?.role}</h2>
                         <span className="modalcontent">

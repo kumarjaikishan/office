@@ -82,6 +82,15 @@ const routesByRole = {
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
+  grant: (
+    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['grant']} />}>
+      <Route index element={<LedgerListPage />} />
+      <Route path="profile" element={<AdminManagerProfile />} />
+      <Route path="ledger" element={<LedgerListPage />} />
+      <Route path=":id" element={<LedgerDetailPage />} />
+      <Route path="*" element={<Errorpage />} />
+    </Route>
+  ),
   superadmin: (
     <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['superadmin']} />}>
       <Route index element={<AdminDashboard />} />
@@ -169,7 +178,7 @@ function App() {
     }
     const role = user?.profile?.role;
 
-    if (['superadmin', 'admin', 'manager'].includes(role)) {
+    if (['superadmin', 'admin', 'manager', 'grant'].includes(role)) {
       dispatch(FirstFetch());
     } else if (role === 'employee') {
       dispatch(empFirstFetch());

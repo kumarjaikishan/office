@@ -62,7 +62,7 @@ const LeaveBalancePage = () => {
 
     useEffect(() => {
         if (leaveBalance) setRows(leaveBalance)
-        console.log(leaveBalance)
+        // console.log(leaveBalance)
     }, [leaveBalance]);
 
     // ✅ Handle form change
@@ -334,7 +334,7 @@ const LeaveBalancePage = () => {
                 responsive
             />
 
-            <Modalbox open={open} onClose={handleClose}>
+            <Modalbox open={open} outside={false} onClose={handleClose}>
                 <div className="membermodal w-[500px]">
                     <div className='whole'>
                         <div className='modalhead'> {editingId ? "Edit Leave Balance" : "Add Leave Balance"}</div>

@@ -212,34 +212,36 @@ const DeveloperDashboard = () => {
             <Modalbox open={passmodal} onClose={() => {
                 setpassmodal(false);
             }}>
-                <div className="membermodal" >
+                <div className="membermodal w-[500px]" >
                     <form onSubmit={adduser}>
                         <h2>Add New User</h2>
                         <span className="modalcontent ">
-                            <TextField fullWidth required
-                                value={inp.name}
-                                onChange={(e) => setinp({ ...inp, name: e.target.value })}
-                                label="Name" size="small"
+                            <div className='flex flex-col gap-3 w-full'>
+                                <TextField fullWidth required
+                                    value={inp.name}
+                                    onChange={(e) => setinp({ ...inp, name: e.target.value })}
+                                    label="Name" size="small"
 
-                            />
-                            <TextField fullWidth required type='email'
-                                value={inp.email}
-                                onChange={(e) => setinp({ ...inp, email: e.target.value })}
-                                label="Email" size="small"
+                                />
+                                <TextField fullWidth required type='email'
+                                    value={inp.email}
+                                    onChange={(e) => setinp({ ...inp, email: e.target.value })}
+                                    label="Email" size="small"
 
-                            />
+                                />
 
-                            {!isedit && <TextField fullWidth required type='password'
-                                value={inp.password}
-                                onChange={(e) => setinp({ ...inp, password: e.target.value })}
-                                label="Passowrd" size="small"
-                            />}
+                                {!isedit && <TextField fullWidth required type='password'
+                                    value={inp.password}
+                                    onChange={(e) => setinp({ ...inp, password: e.target.value })}
+                                    label="Passowrd" size="small"
+                                />}
 
-                            <div>
-                                {isedit ? <Button variant="contained" sx={{ mr: 2 }} onClick={saveedit} >Save</Button>
-                                    : <Button variant="contained" sx={{ mr: 2 }} type="submit" >Add User</Button>}
+                                <div>
+                                    {isedit ? <Button variant="contained" sx={{ mr: 2 }} onClick={saveedit} >Save</Button>
+                                        : <Button variant="contained" sx={{ mr: 2 }} type="submit" >Add User</Button>}
 
-                                <Button variant="outlined" onClick={cancel} sx={{ mr: 2 }} >Cancel</Button>
+                                    <Button variant="outlined" onClick={cancel} sx={{ mr: 2 }} >Cancel</Button>
+                                </div>
                             </div>
                         </span>
                     </form>

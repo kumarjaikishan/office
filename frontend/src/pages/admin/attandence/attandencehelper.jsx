@@ -61,7 +61,7 @@ export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) 
   }
 }
 
-export const deleteAttandence = async ({ attandanceId, setselectedRows,setisload, dispatch }) => {
+export const deleteAttandence = async ({ attandanceId, setselectedRows, setisload, dispatch }) => {
   if (!attandanceId) return toast.warning('Attandance Id is needed');
   const address = `${import.meta.env.VITE_API_ADDRESS}deleteattandence`
 
@@ -103,6 +103,7 @@ export const columns = [
     sortable: true,
     sortFunction: (a, b) => a.rawname.localeCompare(b.rawname),
     // width: '120px'
+    minWidth: "180px",
     id: "rawname"
   },
   {

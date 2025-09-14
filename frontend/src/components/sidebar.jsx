@@ -76,7 +76,7 @@ const Sidebar = () => {
                 <button
                   key={item.menu}
                   onClick={handleLogout}
-                  className={`flex w-full mb-1 items-center rounded text-gray-600 hover:bg-teal-50
+                  className={`flex cursor-pointer w-full mb-1 items-center rounded text-gray-600 hover:bg-teal-50
                        ${showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"}
                      `}
                 >
@@ -89,7 +89,7 @@ const Sidebar = () => {
                   end={item.link === "/dashboard"}
                   key={item.link}
                   className={({ isActive }) =>
-                    `flex text-nowrap w-full mb-1 items-center rounded text-gray-600 
+                    `flex text-nowrap w-full mb-1 text-[14px] md:text-[16px] items-center rounded text-gray-600 
                         ${showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"} 
                         ${isActive ? "bg-primary text-white" : ""}`
                   }
@@ -123,14 +123,15 @@ const menu = [
       { menu: "Leave", link: '/dashboard/leave', icon: <FaUmbrellaBeach />, roles: ['employee', 'admin', 'superadmin', 'manager'] },
       { menu: "Leavebal", link: '/dashboard/leavebal', icon: <MdOutlineAssignmentTurnedIn />, roles: ['admin', 'superadmin', 'manager'] },
       { menu: "Ledger", link: '/dashboard/ledger', icon: <FaBook />, roles: ['admin', 'superadmin', 'manager'] },
+      { menu: "Dashboard", link: '/dashboard', icon: <VscDashboard />, roles: ['grant'] },
     ]
   },
   {
     title: 'Others',
     items: [
-      { menu: "Profile", link: '/dashboard/profile', icon: <FaUserCircle />, roles: ['admin', 'superadmin', 'manager', 'employee'] },
+      { menu: "Profile", link: '/dashboard/profile', icon: <FaUserCircle />, roles: ['admin', 'superadmin', 'manager', 'employee','grant'] },
       { menu: "Setting", link: '/dashboard/setting', icon: <FiSettings />, roles: ['admin', 'superadmin', 'manager', 'employee'] },
-      { menu: "Logout", isLogout: true, icon: <CgLogOut />, roles: ['admin', 'employee', 'superadmin', 'developer', 'manager'] }
+      { menu: "Logout", isLogout: true, icon: <CgLogOut />, roles: ['admin', 'employee', 'superadmin', 'developer', 'manager','grant'] }
     ]
   }
 ];

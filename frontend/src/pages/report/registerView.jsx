@@ -27,7 +27,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
 
   useEffect(() => {
 
-    console.log(leaveBalance)
+    // console.log(leaveBalance)
     const selectedPeriod = dayjs(`${filters.year}-${filters.month}-01`);
     const thisMonthLeaves = leaveBalance.filter((e) => {
       if (e.type !== "debit" || !e.period) return false;
@@ -39,7 +39,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
       return periodDate.isSame(selectedPeriod, "month");
     });
 
-    console.log(thisMonthLeaves)
+    // console.log(thisMonthLeaves)
     setemployeeleavesadjusted(thisMonthLeaves)
   }, [filters])
 
@@ -73,6 +73,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
       if (!attendanceByEmp[empId]) attendanceByEmp[empId] = {};
       attendanceByEmp[empId][dayjs(a.date).date()] = a.status;
     });
+  // console.log(attendanceByEmp)
 
   // Holidays + Weekly Offs
   const holidayDates = new Set();
@@ -175,178 +176,179 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
   ];
 
   const exportCSV2 = () => {
-  // Month-Year title row (e.g. April-2025)
-  const titleRow = [`Attendance Register - ${dayjs(`${filters.year}-${filters.month}-01`).format("MMMM-YYYY")}`];
+    // Month-Year title row (e.g. April-2025)
+    const titleRow = [`Attendance Register - ${dayjs(`${filters.year}-${filters.month}-01`).format("MMMM-YYYY")}`];
 
-  // CSV Headers: Employee Name + Each day + Totals
-  const headers = [
-    "Employee",
-    ...days.map((d) => d.format("DD")),
-    "Present",
-    "Absent",
-    "Leave",
-    "Weekly Off",
-    "Holiday",
-    "Leave Adjusted",
-    "Net Payable Days",
-  ];
+    // CSV Headers: Employee Name + Each day + Totals
+    const headers = [
+      "Employee",
+      ...days.map((d) => d.format("DD")),
+      "Present",
+      "Absent",
+      "Leave",
+      "Weekly Off",
+      "Holiday",
+      "Leave Adjusted",
+      "Net Payable Days",
+    ];
 
-  // Rows per employee
-  const rows = filteredEmployees.map((emp) => {
-    const totals = getEmployeeTotals(emp._id);
+    // Rows per employee
+    const rows = filteredEmployees.map((emp) => {
+      const totals = getEmployeeTotals(emp._id);
 
-    const dailyStatus = days.map((d) => {
-      let status = attendanceByEmp[emp._id]?.[d.date()] || "-";
+      const dailyStatus = days.map((d) => {
+        let status = attendanceByEmp[emp._id]?.[d.date()] || "-";
 
-      if (holidayDates.has(d.date())) {
-        status = "H";
-      } else {
-        const weekday = monthStart.date(d.date()).day();
-        if (weeklyOffDays.includes(weekday)) status = "W";
-      }
+        if (holidayDates.has(d.date())) {
+          status = "H";
+        } else {
+          const weekday = monthStart.date(d.date()).day();
+          if (weeklyOffDays.includes(weekday)) status = "W";
+        }
 
-      if (status === "present") status = "P";
-      if (status === "leave") status = "L";
-      if (status === "absent") status = "A";
+        if (status === "present") status = "P";
+        if (status === "leave") status = "L";
+        if (status === "absent") status = "A";
 
-      return status;
+        return status;
+      });
+
+      return [
+        emp?.userid?.name || "Unknown",
+        ...dailyStatus,
+        totals.P,
+        totals.A,
+        totals.L,
+        totals.W,
+        totals.H,
+        totals.LA,
+        totals.NW,
+      ];
     });
 
-    return [
-      emp?.userid?.name || "Unknown",
-      ...dailyStatus,
-      totals.P,
-      totals.A,
-      totals.L,
-      totals.W,
-      totals.H,
-      totals.LA,
-      totals.NW,
-    ];
-  });
+    // Combine rows: title row, empty spacer row, headers, then data
+    const csv = [titleRow, headers, ...rows].map((r) => r.join(",")).join("\n");
 
-  // Combine rows: title row, empty spacer row, headers, then data
-  const csv = [titleRow, headers, ...rows].map((r) => r.join(",")).join("\n");
-
-  // Download CSV
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `Attendance Register ${dayjs(`${filters.year}-${filters.month}-01`).format("MMMM-YYYY")}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
+    // Download CSV
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Attendance Register ${dayjs(`${filters.year}-${filters.month}-01`).format("MMMM-YYYY")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
 
   const defaultEmployeePic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
   return (
     <div className="overflow-auto">
-      <table className="border-collapse text-xs">
-        <thead>
-          <tr className=" border-t border-gray-400 text-gray-500">
-            {/* <tr className=" border-t border-gray-400 bg-gray-700 text-gray-100"> */}
-            <th className="sticky left-0 bg-white font-bold min-w-[180px] text-left">
-              Employee
-            </th>
-            {days.map((d) => (
-              <th key={d.date()} className="w-9 border border-gray-400 min-w-[35px] text-center">
-                <div>{d.format("DD")}</div>
-                <div>{d.format("ddd")}</div>
+      {(filteredEmployees?.length < 1 || Object.keys(attendanceByEmp).length === 0) && <p className="text-center font-semibold text-xl" colSpan={days.length + 6}>No Record Found</p>}
+      {filteredEmployees?.length > 0 && Object.keys(attendanceByEmp).length !== 0 &&
+        <table className="border-collapse text-xs">
+          <thead>
+            <tr className=" border-t border-gray-400 text-gray-500">
+              {/* <tr className=" border-t border-gray-400 bg-gray-700 text-gray-100"> */}
+              <th className="sticky left-0 bg-white font-bold min-w-[180px] text-left">
+                Employee
               </th>
-            ))}
-            <th title="Present" className="px-2 border-r border-gray-500 text-green-800">P</th>
-            <th title="Absent" className="px-2 border-r border-gray-500 text-red-800">A</th>
-            <th title="Leave" className="px-2 border-r border-gray-500 text-orange-600">L</th>
-            <th title="Weekly Off" className="px-2 border-r border-gray-500 text-gray-800">W</th>
-            <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">H</th>
-            <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">LA</th>
-            <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">NP</th>
-            <th title="Holiday" className="px-2 border-r ">Actions</th>
+              {days.map((d) => (
+                <th key={d.date()} className="w-9 border border-gray-400 min-w-[35px] text-center">
+                  <div>{d.format("DD")}</div>
+                  <div>{d.format("ddd")}</div>
+                </th>
+              ))}
+              <th title="Present" className="px-2 border-r border-gray-500 text-green-800">P</th>
+              <th title="Absent" className="px-2 border-r border-gray-500 text-red-800">A</th>
+              <th title="Leave" className="px-2 border-r border-gray-500 text-orange-600">L</th>
+              <th title="Weekly Off" className="px-2 border-r border-gray-500 text-gray-800">W</th>
+              <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">H</th>
+              <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">LA</th>
+              <th title="Holiday" className="px-2 border-r border-gray-500 text-blue-800">NP</th>
+              <th title="Holiday" className="px-2 border-r ">Actions</th>
+            </tr>
+          </thead>
 
-          </tr>
-        </thead>
+          <tbody>
+            {filteredEmployees?.map((emp) => {
+              const totals = getEmployeeTotals(emp._id); // ✅ calculate inside loop
+              return (
+                <tr key={emp._id} className="border-y border-gray-300">
+                  <td className="sticky py-1 left-0 bg-white min-w-[150px] font-semibold">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={emp?.profileimage || defaultEmployeePic}
+                        onError={(e) => { e.target.src = defaultEmployeePic }}
+                        alt={emp?.userid?.name || "Employee"}
+                        className="w-8 h-8 rounded-full"
+                      />
 
-        <tbody>
-          {filteredEmployees.map((emp) => {
-            const totals = getEmployeeTotals(emp._id); // ✅ calculate inside loop
-            return (
-              <tr key={emp._id} className="border-y border-gray-300">
-                <td className="sticky py-1 left-0 bg-white min-w-[150px] font-semibold">
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={emp?.profileimage || defaultEmployeePic}
-                      onError={(e) => { e.target.src = defaultEmployeePic }}
-                      alt={emp?.userid?.name || "Employee"}
-                      className="w-8 h-8 rounded-full"
-                    />
-
-                    <div>
-                      <p>{emp?.userid?.name}</p>
-                      <p className="text-[10px] text-gray-600">
-                        ({emp?.designation})
-                      </p>
+                      <div>
+                        <p className="text-gray-800" >{emp?.userid?.name}</p>
+                        <p className="text-[10px] text-gray-600">
+                          ({emp?.designation})
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                {days.map((d) => renderStatus(emp._id, d.date()))}
+                  </td>
+                  {days.map((d) => renderStatus(emp._id, d.date()))}
 
-                {/* Totals */}
-                <td className="text-center font-bold text-green-800">{totals.P}</td>
-                <td className="text-center font-bold text-red-800">{totals.A}</td>
-                <td className="text-center font-bold text-orange-600">{totals.L}</td>
-                <td className="text-center font-bold text-gray-800" >{totals.W}</td>
-                <td className="text-center font-bold text-blue-800">{totals.H}</td>
-                <td className="text-center font-bold text-blue-800">{totals.LA}</td>
-                <td className="text-center font-bold text-blue-800">{totals.NW}</td>
-                <td className=" border-r border-gray-300">
-                  <div className="action flex justify-center gap-2">
-                    <span className="text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
+                  {/* Totals */}
+                  <td className="text-center font-bold text-green-800">{totals.P}</td>
+                  <td className="text-center font-bold text-red-800">{totals.A}</td>
+                  <td className="text-center font-bold text-orange-600">{totals.L}</td>
+                  <td className="text-center font-bold text-gray-800" >{totals.W}</td>
+                  <td className="text-center font-bold text-blue-800">{totals.H}</td>
+                  <td className="text-center font-bold text-blue-800">{totals.LA}</td>
+                  <td className="text-center font-bold text-blue-800">{totals.NW}</td>
+                  <td className=" border-r border-gray-300">
+                    <div className="action flex justify-center gap-2">
+                      <span className="text-[18px] text-amber-500 cursor-pointer" title="Attandence Report" onClick={() => navigate(`/dashboard/performance/${emp.userid._id}`)} ><HiOutlineDocumentReport /></span>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
 
-        <tfoot>
-          <tr>
-            <td colSpan={days.length + 6} className="py-4">
-              <div className="flex flex-wrap gap-4 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-green-200 border border-green-600 rounded"></span>
-                  <span>P = Present</span>
+          <tfoot>
+            <tr>
+              <td colSpan={days.length + 6} className="py-4">
+                <div className="flex flex-wrap gap-4 text-xs font-semibold">
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-green-200 border border-green-600 rounded"></span>
+                    <span>P = Present</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-red-200 border border-red-600 rounded"></span>
+                    <span>A = Absent</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-orange-200 border border-orange-600 rounded"></span>
+                    <span>L = Leave</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-gray-200 border border-gray-600 rounded"></span>
+                    <span>W = Weekly Off</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
+                    <span>H = Holiday</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
+                    <span>LA = Leave Availed/Adjusted</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
+                    <span>NP = Net Payable Days</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-red-200 border border-red-600 rounded"></span>
-                  <span>A = Absent</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-orange-200 border border-orange-600 rounded"></span>
-                  <span>L = Leave</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-gray-200 border border-gray-600 rounded"></span>
-                  <span>W = Weekly Off</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
-                  <span>H = Holiday</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
-                  <span>LA = Leave Availed/Adjusted</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-4 h-4 bg-blue-200 border border-blue-600 rounded"></span>
-                  <span>NP = Net Payable Days</span>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tfoot>
-      </table>
+              </td>
+            </tr>
+          </tfoot>
+        </table>}
     </div>
   );
 };

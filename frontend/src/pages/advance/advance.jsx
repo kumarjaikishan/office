@@ -331,7 +331,7 @@ const EmployeeAdvancePage = () => {
             />
 
 
-            <Modalbox open={open} onClose={handleClose}>
+            <Modalbox open={open} outside={false} onClose={handleClose}>
                 <div className="membermodal w-[500px]">
                     <div className='whole'>
                         <div className='modalhead'> {editingId ? "Edit Advance" : "Add Advance"}</div>

@@ -107,7 +107,6 @@ const Navbar = () => {
     }
   ];
 
-
   const pathParts = location.pathname.split("/").filter(Boolean);
 
   const lastPart = pathParts[pathParts.length - 1] || "";
@@ -151,7 +150,7 @@ const Navbar = () => {
         {/* <NotificationIcon1 notifications={notification} /> */}
         <div className='flex flex-col items-end px-1'>
           <span className='text-[10px] md:text-xs font-medium leading-4 capitalize'>{user?.profile?.name}</span>
-          <p className='text-[8px] md:text-[10px] text-gray-500 text-right capitalize'>{user?.profile?.role}</p>
+          <p className='text-[8px] md:text-[10px] text-gray-500 text-right capitalize'>{user?.profile?.role == 'grant' ? 'User':user?.profile?.role}</p>
         </div>
         <Avatar src={user?.profile?.profileImage} alt={user?.profile?.name}>
           {!user?.profile?.profileImage && <FaRegUser />}

@@ -165,12 +165,13 @@ const Attandence = () => {
           rawpunchOut: emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
           rawworkingHour: emp.workingMinutes || "-",
           name: (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ">
               <Avatar src={emp?.employeeId?.profileimage} alt={emp?.employeeId?.employeename}>
                 {!emp?.employeeId?.profileimage && <FaRegUser />}
               </Avatar>
               <Box>
-                <Typography variant="body2">{emp?.employeeId?.userid?.name}</Typography>
+                {/* <Typography variant="body2">{emp?.employeeId?.userid?.name}</Typography> */}
+                <p className="text-[12px] md:text-[14px] text-gray-700 font-semibold">{emp?.employeeId?.userid?.name}</p>
               </Box>
             </div>
           ),
@@ -338,7 +339,7 @@ const Attandence = () => {
       dangerMode: true,
     }).then(async (proceed) => {
       if (proceed) {
-        await deleteAttandence({ attandanceId: multideletearray,setselectedRows, setisload, dispatch });
+        await deleteAttandence({ attandanceId: multideletearray, setselectedRows, setisload, dispatch });
         setselectedRows([]);
       }
     });
@@ -527,31 +528,6 @@ const Attandence = () => {
                 </Select>
               </FormControl>
 
-              <TextField
-                size="small"
-                className="col-span-1 md:w-[150px]"
-                value={filtere.employee}
-                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IoSearch />
-                    </InputAdornment>
-                  ),
-                  endAdornment: filtere.employee && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setfiltere({ ...filtere, employee: "" })}
-                        edge="end"
-                        size="small"
-                      >
-                        <MdClear />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                label="Search Employee"
-              />
               <FormControl size="small" className="col-span-1 md:w-[150px]">
                 <InputLabel>Month</InputLabel>
                 <Select
@@ -579,13 +555,38 @@ const Attandence = () => {
                   ))}
                 </Select>
               </FormControl>
+              <TextField
+                size="small"
+                className="col-span-1 md:w-[150px]"
+                value={filtere.employee}
+                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IoSearch />
+                    </InputAdornment>
+                  ),
+                  endAdornment: filtere.employee && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setfiltere({ ...filtere, employee: "" })}
+                        edge="end"
+                        size="small"
+                      >
+                        <MdClear />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                label="Search Employee"
+              />
             </div>
           }
 
         </div>
       </div>
 
-      <div className="capitalize">
+      <div className="capitalize ">
         <DataTable
           columns={columns}
           data={finalData}

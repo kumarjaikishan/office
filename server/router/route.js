@@ -127,21 +127,21 @@ router.route('/permission/:id')
 
 router.route('/superfirstfetch').post(authmiddlewre, leave.addleave);
 
-router.route("/ledgerEntries").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), ledger.ledgerEntries);
-router.route("/ledger").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger", 1), ledger.ledger);
-router.route("/entries/:id").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger_entry", 1), ledger.Entries);
+router.route("/ledgerEntries").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), ledger.ledgerEntries);
+router.route("/ledger").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 1), ledger.ledger);
+router.route("/entries/:id").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 1), ledger.Entries);
 
-router.route("/ledger").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger", 2), upload.single('image'), ledger.createLedger)
+router.route("/ledger").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 2), upload.single('image'), ledger.createLedger)
 
 router.route("/ledger/:id")
-  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger", 3), upload.single('image'), ledger.updateLedger)
-  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger", 4), ledger.deleteLedger);
+  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 3), upload.single('image'), ledger.updateLedger)
+  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 4), ledger.deleteLedger);
 
-router.route("/ledgerentry").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger_entry", 2), ledger.createEntry)
+router.route("/ledgerentry").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 2), ledger.createEntry)
 
 router.route("/ledgerentry/:id")
-  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger_entry", 3), ledger.updateEntry)
-  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
+  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 3), ledger.updateEntry)
+  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
 
 
 module.exports = router;
