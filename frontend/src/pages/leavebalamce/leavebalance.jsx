@@ -19,7 +19,7 @@ import {
     Typography,
 } from "@mui/material";
 import axios from "axios";
-import { MdDelete, MdEdit, MdOpenInNew } from "react-icons/md";
+import { MdClear, MdDelete, MdEdit, MdOpenInNew } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Modalbox from "../../components/custommodal/Modalbox";
@@ -239,6 +239,17 @@ const LeaveBalancePage = () => {
                             startAdornment: (
                                 <InputAdornment position="start">
                                     <IoSearch />
+                                </InputAdornment>
+                            ),
+                            endAdornment: filters.searchText && (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={() => handleFilterChange("searchText", '')}
+                                        edge="end"
+                                        size="small"
+                                    >
+                                        <MdClear />
+                                    </IconButton>
                                 </InputAdornment>
                             ),
                         }}

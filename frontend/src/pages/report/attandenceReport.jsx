@@ -3,7 +3,8 @@ import {
     Avatar, Box, Typography, TextField,
     InputAdornment, FormControl, InputLabel, OutlinedInput,
     Select, MenuItem,
-    Button
+    Button,
+    IconButton
 } from '@mui/material';
 import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
@@ -18,6 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { FiDownload } from 'react-icons/fi';
 import RegisterView from './registerView';
+import { MdClear } from 'react-icons/md';
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
 
@@ -226,6 +228,17 @@ const AttendanceReport = () => {
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start"><IoSearch /></InputAdornment>
+                            ),
+                            endAdornment: filters.searchText && (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={() => handleFilterChange("searchText", '')}
+                                        edge="end"
+                                        size="small"
+                                    >
+                                        <MdClear />
+                                    </IconButton>
+                                </InputAdornment>
                             ),
                         }}
                         label="Search Employee"

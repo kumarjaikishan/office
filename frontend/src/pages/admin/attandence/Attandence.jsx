@@ -532,6 +532,16 @@ const Attandence = () => {
                 <InputLabel>Month</InputLabel>
                 <Select
                   value={filtere.month}
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <CiFilter fontSize="small" />
+                        </InputAdornment>
+                      }
+                      label="Branch"
+                    />
+                  }
                   label="Month"
                   onChange={(e) => setfiltere({ ...filtere, month: e.target.value })}
                 >
@@ -546,6 +556,16 @@ const Attandence = () => {
                 <InputLabel>Year</InputLabel>
                 <Select
                   value={filtere.year}
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <CiFilter fontSize="small" />
+                        </InputAdornment>
+                      }
+                      label="Branch"
+                    />
+                  }
                   label="Year"
                   onChange={(e) => setfiltere({ ...filtere, year: e.target.value })}
                 >

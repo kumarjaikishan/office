@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, OutlinedInput, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, IconButton, OutlinedInput, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../../components/custommodal/Modalbox';
@@ -20,7 +20,7 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "./profile";
 import { useDispatch, useSelector } from "react-redux";
-import { MdCurrencyRupee, MdExpandLess, MdOutlineModeEdit } from "react-icons/md";
+import { MdClear, MdCurrencyRupee, MdExpandLess, MdOutlineModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { MdExpandMore } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -392,8 +392,17 @@ const Employe = () => {
             onChange={(e) => handleFilterChange("searchText", e.target.value)}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">
-                  <IoSearch />
+                <InputAdornment position="start">  <IoSearch /> </InputAdornment>
+              ),
+              endAdornment: filters.searchText && (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => handleFilterChange("searchText", '')}
+                    edge="end"
+                    size="small"
+                  >
+                    <MdClear />
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
