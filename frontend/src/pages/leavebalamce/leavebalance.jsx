@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { MdDelete, MdEdit, MdOpenInNew } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Modalbox from "../../components/custommodal/Modalbox";
 import { CiFilter } from "react-icons/ci";
@@ -31,6 +31,7 @@ const LeaveBalancePage = () => {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
     const [departmentlist, setdepartmentlist] = useState([]);
+    const dispatch = useDispatch();
     const [form, setForm] = useState({
         employeeId: "",
         companyId: "",
@@ -131,7 +132,7 @@ const LeaveBalancePage = () => {
                 );
                 toast.success("Leave balance added");
             }
-
+            dispatch(FirstFetch())
             handleClose();
         } catch (error) {
             console.error("Error saving leave balance:", error);
@@ -155,6 +156,7 @@ const LeaveBalancePage = () => {
                     }
                 );
                 toast.success("Leave balance deleted");
+                dispatch(FirstFetch())
                 fetchData();
             } catch (error) {
                 console.error("Error deleting leave balance:", error);
@@ -211,11 +213,11 @@ const LeaveBalancePage = () => {
                         </IconButton>
                     </>
                     }
-                    {row.payrollId && <> 
-                     <IconButton title="Open Payroll" color="primary" onClick={() =>  navigate(`/dashboard/payroll/print/${row.payrollId}`)}>
-                        <MdOpenInNew  />
-                    </IconButton>
-                    </> }
+                    {row.payrollId && <>
+                        <IconButton title="Open Payroll" color="primary" onClick={() => navigate(`/dashboard/payroll/print/${row.payrollId}`)}>
+                            <MdOpenInNew />
+                        </IconButton>
+                    </>}
                 </>
             ),
             width: '120px'

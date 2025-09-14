@@ -309,7 +309,7 @@ exports.editPayroll = async (req, res, next) => {
           type: "adjusted",
           amount: adjusted,
           balance: newBalance,
-          remarks: `Advance adjusted in Payroll ${payroll.month}-${payroll - year}`,
+          remarks: `Advance adjusted in Payroll ${payroll.month}-${payroll.year}`,
           payrollId: payroll._id,
           date: new Date().setHours(0, 0, 0, 0),
         });
@@ -328,14 +328,14 @@ exports.editPayroll = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
-    return res.status(200).json({ success: true, payroll });
+    return res.status(200).json({ success: true, payroll , message:'Payroll Edited Successfully'});
   } catch (error) {
+    console.log(error)
     await session.abortTransaction();
     session.endSession();
     return next({ status: 500, message: error.message });
   }
 };
-
 
 exports.allPayroll = async (req, res, next) => {
   try {
@@ -353,7 +353,7 @@ exports.allPayroll = async (req, res, next) => {
     } else {
       payrolls = await Payroll.find({ companyId: req.user.companyId })
         .select('branchId companyId department employeeId month year name status')
-         .populate({
+        .populate({
           path: "employeeId",
           select: "userid profileimage empId designation",
           populate: { path: "userid", select: "name", },

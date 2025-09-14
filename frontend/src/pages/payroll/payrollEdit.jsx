@@ -65,7 +65,7 @@ export default function PayrollEdit() {
   }
   const [options, setOptions] = useState(optionsinit);
 
-    useEffect(() => {
+  useEffect(() => {
     console.log(options)
   }, [options])
 
@@ -100,7 +100,6 @@ export default function PayrollEdit() {
         console.error(error);
         setError(error.response?.data?.message || "Failed to fetch payroll");
         toast.warn("Using dummy payroll data for testing", { autoClose: 1500 });
-        setPayroll(employee); // fallback
       } finally {
         setLoading(false);
       }

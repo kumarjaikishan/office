@@ -16,16 +16,18 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { MdDelete, MdEdit } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Modalbox from "../../components/custommodal/Modalbox";
 import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
+import { FirstFetch } from "../../../store/userSlice";
 
 const EmployeeAdvancePage = () => {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
     const [departmentlist, setdepartmentlist] = useState([]);
+    const dispatch = useDispatch();
     const [form, setForm] = useState({
         employeeId: "",
         companyId: "",
@@ -123,7 +125,7 @@ const EmployeeAdvancePage = () => {
                 );
                 toast.success("Advance added");
             }
-
+            dispatch(FirstFetch())
             handleClose();
             fetchData();
         } catch (error) {
@@ -141,6 +143,7 @@ const EmployeeAdvancePage = () => {
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 toast.success("Advance deleted");
+                dispatch(FirstFetch())
                 fetchData();
             } catch (error) {
                 console.error("Error deleting advance:", error);
