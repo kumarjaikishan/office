@@ -29,6 +29,7 @@ import isBetween from "dayjs/plugin/isBetween";
 import localeData from "dayjs/plugin/localeData";
 import { toast } from "react-toastify";
 import numberToWords from "../../../utils/numToWord";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
@@ -66,7 +67,7 @@ export default function PayrollEdit() {
   const [options, setOptions] = useState(optionsinit);
 
   useEffect(() => {
-    console.log(options)
+    // console.log(options)
   }, [options])
 
   function formatRupee(amount) {
@@ -126,13 +127,13 @@ export default function PayrollEdit() {
       .filter(e => e.employeeId?._id?.toString() === selectedEmployeedetail._id?.toString())
       .slice() // clone so sort doesn’t mutate original
       .sort((a, b) => new Date(b.date) - new Date(a.date))?.[0];
-    console.log(latest)
+    // console.log(latest)
     setpreviousAdvance(latest?.balance + options?.adjustedAdvance)
   }, [advance, selectedEmployeedetail]);
 
   useEffect(() => {
     if (!data) return;
-    console.log(data)
+    // console.log(data)
     setForm({
       month: data.month,
       year: data.year,
@@ -588,7 +589,14 @@ export default function PayrollEdit() {
               {employees.map((emp) => (
                 <MenuItem key={emp._id} value={emp._id}>
                   <div className="flex items-center gap-2">
-                    <Avatar src={emp.profileimage} sx={{ width: 24, height: 24 }} />
+                    <Avatar
+                      // src={emp.profileimage} 
+                      src={cloudinaryUrl(emp.profileimage, {
+                        format: "webp",
+                        width: 100,
+                        height: 100,
+                      })}
+                      sx={{ width: 24, height: 24 }} />
                     {emp.userid?.name}
                   </div>
                 </MenuItem>

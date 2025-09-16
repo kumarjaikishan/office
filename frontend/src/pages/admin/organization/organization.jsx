@@ -58,6 +58,11 @@ export default function OrganizationSettings() {
             considerLateEntryAfter: '10:10',
             considerEarlyExitBefore: '17:50',
             considerLateExitAfter: '18:15'
+        },
+        payrollPolicies: {
+            allowances: [], // [{ name: "HRA", mode: "percentage", value: 40 }]
+            bonuses: [],
+            deductions: []
         }
     })
 
@@ -69,7 +74,7 @@ export default function OrganizationSettings() {
     };
 
     useEffect(() => {
-        // console.log(branch)
+        // console.log(company)
         if (company) {
             setcompany(company)
         }
@@ -173,13 +178,13 @@ export default function OrganizationSettings() {
                                             const file = e.target.files[0];
                                             if (!file) return;
 
-                                            const optimisedLogo = await handleImage(240, file);
+                                            const optimisedLogo = await handleImage(300, file);
                                             const formData = new FormData();
                                             formData.append('_id', companyinp._id);
                                             formData.append('logo', optimisedLogo);
 
                                             try {
-                                                console.log('api calling')
+                                                // console.log('api calling')
                                                 setisload(true);
                                                 const token = localStorage.getItem('emstoken');
                                                 const res = await axios.post(
@@ -222,7 +227,7 @@ export default function OrganizationSettings() {
                                         <TextField
                                             label="Company Name"
                                             size='small'
-                                       variant="standard"
+                                            variant="standard"
                                             fullWidth
                                             value={companyinp?.name || ""}
                                             onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
@@ -233,7 +238,7 @@ export default function OrganizationSettings() {
                                         <TextField
                                             label="Contact"
                                             type='tel'
-                                             variant="standard"
+                                            variant="standard"
                                             size='small'
                                             fullWidth
                                             value={companyinp?.contact || ""}
@@ -267,7 +272,7 @@ export default function OrganizationSettings() {
                                         label="Address"
                                         fullWidth
                                         multiline
-                                         size='small'
+                                        size='small'
                                         minRows={2}
                                         value={companyinp?.address || ""}
                                         onChange={(e) => setcompany({ ...companyinp, address: e.target.value })}
@@ -575,6 +580,137 @@ export default function OrganizationSettings() {
                 </div>
 
             </div>
+
+            <div className='border shadow-lg bg-purple-50 border-dashed border-purple-400 rounded-md'>
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-purple-200 px-4 py-2 rounded-md"
+                    onClick={() => toggleSection('policies')}
+                >
+                    <span className="font-semibold text-[16px] md:text-lg text-left">Default Payroll Policies</span>
+                    {openSection === 'policies' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+
+
+                <div
+                    className={`rounded overflow-hidden transition-all duration-300 
+                     ${openSection === 'policies' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}`}
+                >
+                    <div className="flex flex-col gap-3">
+                        {['allowances', 'bonuses', 'deductions'].map((type) => {
+                            // fallback to [] if not defined
+                            const policies = companyinp?.payrollPolicies?.[type] || [];
+
+                            return (
+                                <Grid item xs={12} md={4} key={type}>
+                                    <Typography variant="h6" className="capitalize">{type}</Typography>
+                                    {policies.map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 mb-2">
+                                            <TextField
+                                                label="Name"
+                                                size="small"
+                                                value={item.name}
+                                                onChange={(e) => {
+                                                    const updated = policies.map((policy, i) =>
+                                                        i === idx ? { ...policy, name: e.target.value } : policy
+                                                    );
+                                                    setcompany({
+                                                        ...companyinp,
+                                                        payrollPolicies: {
+                                                            ...companyinp.payrollPolicies,
+                                                            [type]: updated
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                            <Select
+                                                size="small"
+                                                className="w-[120px]"
+                                                value={item.type}
+                                                onChange={(e) => {
+                                                    const updated = policies.map((policy, i) =>
+                                                        i === idx ? { ...policy, type: e.target.value } : policy
+                                                    );
+                                                    setcompany({
+                                                        ...companyinp,
+                                                        payrollPolicies: {
+                                                            ...companyinp.payrollPolicies,
+                                                            [type]: updated
+                                                        }
+                                                    });
+                                                }}
+                                            >
+                                                <MenuItem value="amount">Amount</MenuItem>
+                                                <MenuItem value="percentage">%</MenuItem>
+                                            </Select>
+                                            <TextField
+                                                label={item.type === 'amount' ? '₹' : '%'}
+                                                type="number"
+                                                size="small"
+                                                value={item.value}
+                                                onChange={(e) => {
+                                                    const updated = policies.map((policy, i) =>
+                                                        i === idx ? { ...policy, value: Number(e.target.value) } : policy
+                                                    );
+                                                    setcompany({
+                                                        ...companyinp,
+                                                        payrollPolicies: {
+                                                            ...companyinp.payrollPolicies,
+                                                            [type]: updated
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                            <AiOutlineDelete
+                                                className="text-red-500 cursor-pointer text-lg"
+                                                onClick={() => {
+                                                    const updated = policies.filter((_, i) => i !== idx);
+                                                    setcompany({
+                                                        ...companyinp,
+                                                        payrollPolicies: {
+                                                            ...companyinp.payrollPolicies,
+                                                            [type]: updated
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                        </div>
+                                    ))}
+                                    <Button
+                                        size="small"
+                                        variant="outlined"
+                                        onClick={() =>
+                                            setcompany({
+                                                ...companyinp,
+                                                payrollPolicies: {
+                                                    ...companyinp.payrollPolicies,
+                                                    [type]: [
+                                                        ...policies,
+                                                        { name: '', type: 'amount', value: 0 }
+                                                    ]
+                                                }
+                                            })
+                                        }
+                                    >
+                                        + Add {type.slice(0, -1)}
+                                    </Button>
+                                </Grid>
+                            );
+                        })}
+                    </div>
+                    <Box sx={{ mt: 2, textAlign: 'right' }}>
+                        <Button variant="contained" onClick={handleSubmit}>
+                            Save Policies
+                        </Button>
+                    </Box>
+                </div>
+
+
+            </div>
+
 
             <Modalbox open={openviewmodal} onClose={() => {
                 setopenviewmodal(false);

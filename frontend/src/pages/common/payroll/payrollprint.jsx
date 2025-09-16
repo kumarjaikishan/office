@@ -74,7 +74,7 @@ export default function PayslipPrintPage() {
           }
         );
 
-        // console.log(res?.data?.payroll);
+        console.log(res?.data?.payroll);
         setPayroll(res?.data?.payroll || employee); // fallback to dummy
       } catch (error) {
         console.error(error);
@@ -129,11 +129,16 @@ export default function PayslipPrintPage() {
           <h3 className="text-center text-lg mb-6 font-semibold text-gray-700">Salary Slip</h3>
 
           {/* Employee Info with Profile */}
-          <div className="grid grid-cols-5 gap-4 mb-6 text-sm items-start print:grid-cols-5">
+          <div className="grid grid-cols-5 gap-4 mb-6 capitalize text-sm items-start print:grid-cols-5">
             {/* Profile Pic */}
             <div className="col-span-1 flex justify-center">
               <img
-                src={payroll?.profileimage || defaultProfile}
+                // src={payroll?.profileimage || defaultProfile}
+                src={cloudinaryUrl(payroll?.profileimage || defaultProfile , {
+                  format: "webp",
+                  width: 100,
+                  // height: 100,
+                })}
                 alt="Profile"
                 className="w-20 rounded  shadow print:w-18"
               />
@@ -163,6 +168,14 @@ export default function PayslipPrintPage() {
 
               {/* Right column */}
               <div className="col-span-3">
+                {payroll?.guardian &&
+                  <div className="flex">
+                    <dt className="w-18 md-w-25 font-medium text-gray-600 whitespace-nowrap ">{payroll?.guardian?.relation}</dt>
+                    <dd className="flex-1">
+                      : {payroll?.guardian?.name}
+                    </dd>
+                  </div>
+                }
                 <div className="flex">
                   <dt className="w-18 md-w-25 font-medium text-gray-600 whitespace-nowrap">Month</dt>
                   <dd className="flex-1">

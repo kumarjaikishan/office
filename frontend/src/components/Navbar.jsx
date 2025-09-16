@@ -38,6 +38,7 @@ const Navbar = () => {
     "salary": "Salary",
     "department": "Department",
     "payroll": "Payroll",
+    "payroll/edit/:id": "Payroll Edit",
     "advance": "Advance",
     "setting": "Settings",
     "leave-ledger": "Leave",

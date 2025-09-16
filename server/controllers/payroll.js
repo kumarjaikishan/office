@@ -64,39 +64,14 @@ exports.createPayroll = async (req, res, next) => {
 
     // 🔹 Create payroll
     const payroll = new Payroll({
-      companyId,
-      branchId,
-      employeeId,
-      month,
-      year,
-      name,
-      profileimage,
-      phone,
-      email,
-      address,
-      guardian,
-      department: department?.department || "",
-      designation,
-      present,
-      leave,
-      absent,
-      overtime: basic.overtime,
-      shortTime: basic.shortmin,
-      monthDays: basic.totalDays,
-      holidays: basic.holidaysCount,
-      weekOffs: basic.weeklyOff,
-      workingDays: basic.workingDays,
-      options,
-      baseSalary: salary,
-      allowances,
-      bonuses,
-      deductions,
-      taxRate,
-      status: "pending",
-      grossSalary,
-      taxAmount,
-      netSalary,
+      companyId, branchId, employeeId, month, year, name, profileimage, phone, email, address, guardian,
+      department: department?.department || "", designation, present, leave, absent,
+      overtime: basic?.overtime, shortTime: basic?.shortmin, monthDays: basic?.totalDays,
+      holidays: basic?.holidaysCount, weekOffs: basic?.weeklyOff, workingDays: basic?.workingDays,
+      options, baseSalary: salary, allowances, bonuses, deductions, taxRate,
+      status: "pending", grossSalary, taxAmount, netSalary
     });
+
 
     await payroll.save({ session });
 
@@ -199,48 +174,72 @@ exports.editPayroll = async (req, res, next) => {
 
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const {
+      employeeId, month, year, name, present = 0, leave = 0, absent = 0,
+      options, basic, allowances = [], bonuses = [], deductions = [], taxRate = 0
+    } = req.body;
+
+    const whichEmployee = await Employee.findById(employeeId)
+      .populate("department", "department")
+      .session(session);
+
+    if (!whichEmployee) {
+      throw new Error("Employee not found");
+    }
+
+    const {
+      branchId,
+      department,
+      designation,
+      profileimage,
+      phone,
+      email,
+      address,
+      guardian = { relation: "", name: "" },
+    } = whichEmployee;
+
+    // console.log('guardian', guardian)
 
     // 🔹 Find payroll
     const payroll = await Payroll.findById(id).session(session);
-    if (!payroll) {
-      throw new Error("Payroll not found");
+    if (!payroll) throw new Error("Payroll not found");
+
+    // 🔹 Calculate salary
+    const salary = basic?.salary || payroll.baseSalary || 0;
+    const allowanceTotal = allowances.reduce((sum, a) => sum + Number(a.amount || 0), 0);
+    const bonusTotal = bonuses.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+    const deductionTotal = deductions.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+
+    const grossSalary = Number(salary) + allowanceTotal + bonusTotal - deductionTotal;
+    const taxAmount = (grossSalary * Number(taxRate || 0)) / 100;
+    const netSalary = grossSalary - taxAmount;
+
+    if (isNaN(grossSalary) || isNaN(taxAmount) || isNaN(netSalary)) {
+      throw new Error("Salary calculation resulted in NaN — check input data");
     }
 
-    // 🔹 Find existing leave adjustment linked to this payroll
-    let leaveAdjustment = await LeaveBalance.findOne({
-      payrollId: payroll._id,
-    }).session(session);
-
-    // 🔹 Find existing advance adjustment linked to this payroll
-    let advanceAdjustment = await Advance.findOne({
-      payrollId: payroll._id,
-      type: "adjusted",
-    }).session(session);
-
     // 🔹 Update payroll fields
-    Object.assign(payroll, updates);
+    Object.assign(payroll, {
+      employeeId, month, year, name, present, leave, absent, options, basic, allowances, bonuses, deductions, taxRate,
+      grossSalary, taxAmount, netSalary, branchId,
+      department: department?.department || "",
+      designation, profileimage, phone, email, address, guardian,
+    });
     await payroll.save({ session });
 
-    // =============================
     // 🔹 Handle leave adjustment
-    // =============================
-    if (updates.options?.adjustLeave && updates.options.adjustedLeaveCount > 0) {
+    let leaveAdjustment = await LeaveBalance.findOne({ payrollId: payroll._id }).session(session);
+
+    if (options?.adjustLeave && options.adjustedLeaveCount > 0) {
       const latestLeave = await LeaveBalance.findOne({
         employeeId: payroll.employeeId,
         companyId: payroll.companyId,
-        _id: { $ne: leaveAdjustment?._id },
-      })
-        .sort({ date: -1, createdAt: -1 })
-        .session(session);
+        _id: { $ne: leaveAdjustment?._id }
+      }).sort({ date: -1, createdAt: -1 }).session(session);
 
       const availableLeaves = latestLeave?.balance || 0;
-      const adjusted = updates.options.adjustedLeaveCount;
-
-      if (adjusted > availableLeaves) {
-        throw new Error("Adjusted Leave can't be more than available leaves");
-      }
-
+      const adjusted = options.adjustedLeaveCount;
+      if (adjusted > availableLeaves) throw new Error("Adjusted Leave can't be more than available leaves");
       const newBalance = availableLeaves - adjusted;
 
       if (leaveAdjustment) {
@@ -263,45 +262,34 @@ exports.editPayroll = async (req, res, next) => {
         });
         await leaveAdjustment.save({ session });
       }
-
       await recalculateLeaveBalances(payroll.employeeId, payroll.companyId);
     } else if (leaveAdjustment) {
       await leaveAdjustment.deleteOne({ session });
       await recalculateLeaveBalances(payroll.employeeId, payroll.companyId);
     }
 
-
     // 🔹 Handle advance adjustment
-    // =============================
-    if (updates.options?.adjustAdvance && updates.options.adjustedAdvance > 0) {
-      const adjusted = updates.options.adjustedAdvance;
+    let advanceAdjustment = await Advance.findOne({ payrollId: payroll._id, type: "adjusted" }).session(session);
 
-      // Find the latest advance balance excluding this adjustment
+    if (options?.adjustAdvance && options.adjustedAdvance > 0) {
+      const adjusted = options.adjustedAdvance;
       const latestAdvance = await Advance.findOne({
         employeeId: payroll.employeeId,
         companyId: payroll.companyId,
-        _id: { $ne: advanceAdjustment?._id },
-      })
-        .sort({ date: -1, createdAt: -1 })
-        .session(session);
+        _id: { $ne: advanceAdjustment?._id }
+      }).sort({ date: -1, createdAt: -1 }).session(session);
 
       const availableAdvance = latestAdvance?.balance || 0;
-
-      if (adjusted > availableAdvance) {
-        throw new Error("Adjusted Advance can't be more than Advance Balance");
-      }
-
+      if (adjusted > availableAdvance) throw new Error("Adjusted Advance can't be more than Advance Balance");
       const newBalance = availableAdvance - adjusted;
 
       if (advanceAdjustment) {
-        // update existing advance adjustment
         advanceAdjustment.amount = adjusted;
         advanceAdjustment.balance = newBalance;
         advanceAdjustment.remarks = `Advance adjusted in Payroll ${payroll.month}-${payroll.year}`;
         advanceAdjustment.date = new Date().setHours(0, 0, 0, 0);
         await advanceAdjustment.save({ session });
       } else {
-        // create new advance adjustment
         advanceAdjustment = new Advance({
           employeeId: payroll.employeeId,
           companyId: payroll.companyId,
@@ -315,27 +303,25 @@ exports.editPayroll = async (req, res, next) => {
         });
         await advanceAdjustment.save({ session });
       }
-
       await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
     } else if (advanceAdjustment) {
-      // adjustment removed in update
       await advanceAdjustment.deleteOne({ session });
       await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
     }
 
-
-    // 🔹 Commit
+    // 🔹 Commit transaction
     await session.commitTransaction();
     session.endSession();
 
-    return res.status(200).json({ success: true, payroll , message:'Payroll Edited Successfully'});
+    return res.status(200).json({ success: true, payroll, message: 'Payroll Edited Successfully' });
   } catch (error) {
-    console.log(error)
+    console.error(error);
     await session.abortTransaction();
     session.endSession();
     return next({ status: 500, message: error.message });
   }
 };
+
 
 exports.allPayroll = async (req, res, next) => {
   try {

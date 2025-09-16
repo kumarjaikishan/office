@@ -14,9 +14,9 @@ const payrollSchema = new mongoose.Schema({
   address: { type: String, default: '' },
 
   guardian: {
-    realtion: { type: String, },
-    name: { type: String },
-  },
+        relation: { type: String, },
+        name: { type: String },
+    },
   department: { type: String, required: true },
   designation: { type: String, required: true },
 

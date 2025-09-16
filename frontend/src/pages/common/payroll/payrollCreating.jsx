@@ -93,15 +93,16 @@ export default function PayrollCreatePage() {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     calculationBasis: "monthDays", // ✅ new: monthDays | workingDays
-    allowances: [{ name: "HRA", amount: 0, extraInfo: '', inputDisabled: false }],
-    bonuses: [{ name: "Performance", amount: 0, extraInfo: '', inputDisabled: false }],
-    deductions: [{ name: "PF", amount: 0, extraInfo: '', inputDisabled: false }],
+    allowances: [], //{ name: "HRA", amount: 0, extraInfo: '', inputDisabled: false }
+    bonuses: [], //{ name: "Performance", amount: 0, extraInfo: '', inputDisabled: false }
+    deductions: [], // { name: "PF", amount: 0, extraInfo: '', inputDisabled: false }
     leaveDays: 0,
     absentDays: 0,
     presentDays: 0,
     paidDays: 0,
     adjustPaidLeave: false, // ✅ toggle for paid leave adjustment
   });
+
 
   const [basic, setBasic] = useState({
     totalDays: 0,
@@ -134,6 +135,37 @@ export default function PayrollCreatePage() {
   useEffect(() => {
     setEmployees(employee || []);
   }, [employee]);
+
+  useEffect(() => {
+    if (!company.payrollPolicies || company.payrollPolicies == '') return;
+    setForm({
+      ...form,
+      allowances: company.payrollPolicies?.allowances?.map((e, i) => {
+        return {
+          name: e.name,
+          amount: e.value,
+          extraInfo: '',
+          inputDisabled: false
+        }
+      }),
+      bonuses: company.payrollPolicies?.bonuses?.map((e, i) => {
+        return {
+          name: e.name,
+          amount: e.value,
+          extraInfo: '',
+          inputDisabled: false
+        }
+      }),
+      deductions: company.payrollPolicies?.deductions?.map((e, i) => {
+        return {
+          name: e.name,
+          amount: e.value,
+          extraInfo: '',
+          inputDisabled: false
+        }
+      })
+    })
+  }, [company.payrollPolicies]);
 
   useEffect(() => {
     if (!selectedEmployeedetail || !basic?.totalDays || !company?.workingMinutes) return;
@@ -842,9 +874,9 @@ export default function PayrollCreatePage() {
                 label="Amount"
                 // disabled={deduction.inputDisabled || false}
                 InputProps={{
-                  readOnly: deduction.inputDisabled || false,
+                  readOnly: deduction?.inputDisabled || false,
                 }}
-                readon
+
                 value={deduction.amount}
                 onChange={(e) => handleArrayChange("deductions", index, "amount", e.target.value)}
               />
