@@ -10,7 +10,7 @@ import { connectSSE, closeSSE } from "./utils/sse";
 import { Avatar } from '@mui/material';
 import dayjs from 'dayjs';
 import { FaRegUser } from 'react-icons/fa';
-import LeaveBalancePage from './pages/leavebalamce/leavebalance';
+import LeaveBalancePage from './pages/leaveledger/leaveledger';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -64,8 +64,8 @@ const routesByRole = {
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="holiday" element={<HolidayForm />} />
-      <Route path="leave" element={<Adminleave />} />
-      <Route path="leavebal" element={<LeaveBalancePage />} />
+      <Route path="leave-request" element={<Adminleave />} />
+      <Route path="leave-ledger" element={<LeaveBalancePage />} />
       <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="setting" element={<Setting />} />
       <Route path="faceatten" element={<FaceAttandance />} />
@@ -98,8 +98,8 @@ const routesByRole = {
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="holiday" element={<HolidayForm />} />
-      <Route path="leave" element={<Adminleave />} />
-      <Route path="leavebal" element={<LeaveBalancePage />} />
+      <Route path="leave-request" element={<Adminleave />} />
+      <Route path="leave-ledger" element={<LeaveBalancePage />} />
       <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="setting" element={<Setting />} />
       <Route path="faceatten" element={<FaceAttandance />} />
@@ -121,8 +121,8 @@ const routesByRole = {
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
-      <Route path="leave" element={<Adminleave />} />
-      <Route path="leavebal" element={<LeaveBalancePage />} />
+      <Route path="leave-request" element={<Adminleave />} />
+      <Route path="leave-ledger" element={<LeaveBalancePage />} />
       <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />

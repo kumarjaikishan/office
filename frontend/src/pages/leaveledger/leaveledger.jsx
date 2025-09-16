@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import {
     Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     TextField,
     MenuItem,
     IconButton,
@@ -15,16 +19,16 @@ import {
     Typography,
 } from "@mui/material";
 import axios from "axios";
-import { MdClear, MdDelete, MdEdit } from "react-icons/md";
+import { MdClear, MdDelete, MdEdit, MdOpenInNew } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import Modalbox from "../../components/custommodal/Modalbox";
-import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
-import { FirstFetch } from "../../../store/userSlice";
+import { IoSearch } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 import { cloudinaryUrl } from "../../utils/imageurlsetter";
 
-const EmployeeAdvancePage = () => {
+const Leaveledger = () => {
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
     const [departmentlist, setdepartmentlist] = useState([]);
@@ -33,9 +37,8 @@ const EmployeeAdvancePage = () => {
         employeeId: "",
         companyId: "",
         branchId: "",
-        empId: "",
+        type: "credit",
         amount: 0,
-        type: "given",
         remarks: "",
     });
     const [filters, setFilters] = useState({
@@ -43,20 +46,54 @@ const EmployeeAdvancePage = () => {
         branch: 'all',
         department: 'all'
     });
+    const navigate = useNavigate();
     const [editingId, setEditingId] = useState(null);
-    const { employee, advance, branch, department } = useSelector((state) => state.user);
+    const { company, employee, leaveBalance, branch, department } = useSelector((state) => state.user);
 
     useEffect(() => {
-        if (advance) setRows(advance);
-        // fetchData()
-        // console.log(advance)
-    }, [advance]);
+        department.length > 0 && setdepartmentlist(department.filter((dep) => dep?.branchId?._id == filters.branch))
+    }, [filters.branch]);
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({
             ...prev,
             [key]: value
         }));
+    };
+
+    useEffect(() => {
+        if (leaveBalance) setRows(leaveBalance)
+        // console.log(leaveBalance)
+    }, [leaveBalance]);
+
+    // ✅ Handle form change
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleOpen = (row = null) => {
+        if (row) {
+            setForm({
+                employeeId: row.employeeId?._id || "",
+                companyId: row.companyId || "",
+                branchId: row.branchId || "",
+                type: row.type,
+                amount: row.amount,
+                remarks: row.remarks,
+            });
+            setEditingId(row._id);
+        } else {
+            setForm({
+                employeeId: "",
+                companyId: "",
+                branchId: "",
+                type: "credit",
+                amount: 0,
+                remarks: "",
+            });
+            setEditingId(null);
+        }
+        setOpen(true);
     };
 
     const filteredEmployees = rows?.filter(emp => {
@@ -71,102 +108,65 @@ const EmployeeAdvancePage = () => {
         return nameMatch && branchMatch;
     });
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    const handleOpen = (row = null) => {
-        if (row) {
-            setForm({
-                employeeId: row.employeeId?._id || "",
-                companyId: row.companyId || "",
-                branchId: row.branchId || "",
-                empId: row.empId || "",
-                amount: row.amount,
-                type: row.type || "given",
-                remarks: row.remarks,
-            });
-            setEditingId(row._id);
-        } else {
-            setForm({
-                employeeId: "",
-                companyId: "",
-                branchId: "",
-                empId: "",
-                amount: 0,
-                type: "given",
-                remarks: "",
-            });
-            setEditingId(null);
-        }
-        setOpen(true);
-    };
-
     const handleClose = () => setOpen(false);
 
+    // ✅ Submit (Create or Update)
     const handleSubmit = async () => {
-
-        // return console.log(form)
+        if (!form.employeeId) return toast.warning("Please select Employee")
+        if (form.amount < 1) return toast.warning("Please enter No. of Leaves")
         try {
             const token = localStorage.getItem("emstoken");
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
             if (editingId) {
                 await axios.put(
-                    `${import.meta.env.VITE_API_ADDRESS}advance/${editingId}`,
+                    `${import.meta.env.VITE_API_ADDRESS}leave-balances/${editingId}`,
                     form,
                     config
                 );
-                toast.success("Advance updated");
+                toast.success("Leave balance updated");
             } else {
                 await axios.post(
-                    `${import.meta.env.VITE_API_ADDRESS}advance`,
+                    `${import.meta.env.VITE_API_ADDRESS}leave-balances`,
                     form,
                     config
                 );
-                toast.success("Advance added");
+                toast.success("Leave balance added");
             }
             dispatch(FirstFetch())
             handleClose();
-            fetchData();
         } catch (error) {
-            console.error("Error saving advance:", error);
-            toast.error(error.response?.data?.message || "Server error");
+            console.error("Error saving leave balance:", error);
+            if (error.response) {
+                toast.error(error.response.data.message || "Failed to save");
+            } else {
+                toast.error("Server error");
+            }
         }
     };
 
+    // ✅ Delete record
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this record?")) {
             try {
                 const token = localStorage.getItem("emstoken");
                 await axios.delete(
-                    `${import.meta.env.VITE_API_ADDRESS}advance/${id}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
+                    `${import.meta.env.VITE_API_ADDRESS}leave-balances/${id}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
                 );
-                toast.success("Advance deleted");
+                toast.success("Leave balance deleted");
                 dispatch(FirstFetch())
                 fetchData();
             } catch (error) {
-                console.error("Error deleting advance:", error);
+                console.error("Error deleting leave balance:", error);
                 toast.error("Failed to delete record");
             }
         }
     };
 
-    const fetchData = async () => {
-        try {
-            const token = localStorage.getItem("emstoken");
-            const { data } = await axios.get(
-                `${import.meta.env.VITE_API_ADDRESS}advance`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            // console.log(data)
-            setRows(data.data);
-        } catch (error) {
-            console.error("Error fetching advances:", error);
-        }
-    };
-
+    // ✅ Set employee selection
     const setEmployee = (e) => {
         const empId = e.target.value;
         const emp = employee.find((emp) => emp._id === empId);
@@ -176,19 +176,19 @@ const EmployeeAdvancePage = () => {
                 employeeId: emp._id,
                 companyId: emp.companyId,
                 branchId: emp.branchId,
-                empId: emp.empId,
             });
         }
     };
     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
+    // ✅ DataTable columns
     const columns = [
-        { name: "S.no", selector: (row, ind) => ind + 1, width: "60px" },
+        { name: "S.no", selector: (row, ind) => ind + 1, width: '60px' },
         {
             name: "Employee",
             selector: (row) => (<div className="flex items-center capitalize gap-3 ">
                 <Avatar
-                    //  src={row?.employeeId?.profileimage || employepic} 
+                    // src={row?.employeeId?.profileimage || employepic} 
                     src={cloudinaryUrl(row?.employeeId?.profileimage, {
                         format: "webp",
                         width: 100,
@@ -204,39 +204,45 @@ const EmployeeAdvancePage = () => {
             </div>),
             sortable: true,
         },
-        // { name: "type", selector: (row) => row.type || "-", sortable: true, width: "120px" },
-        // { name: "Amount", selector: (row) => row.type == 'given' ? `${row.amount}` : `-${row.amount}`, sortable: true, width: "100px" },
-        { name: "Given", selector: (row) => row.type == 'given' ? row.amount : '-', sortable: true, width: '90px' },
-        { name: "Adjusted", selector: (row) => row.type == 'adjusted' ? row.amount : '-', sortable: true, width: '100px' },
-        { name: "Balance", selector: (row) => row.balance, sortable: true, width: "100px" },
-        { name: "Remarks", selector: (row) => row.remarks || "-", sortable: true },
+        // { name: "Type", selector: (row) => row.type, sortable: true, width: '90px' },
+        // { name: "Leaves", selector: (row) => row.type == 'credit' ? row.amount : `-${row.amount}`, sortable: true, width: '90px' },
+        { name: "Alloted", selector: (row) => row.type == 'credit' ? row.amount : '-', sortable: true, width: '90px' },
+        { name: "Adjusted", selector: (row) => row.type == 'debit' ? row.amount : '-', sortable: true, width: '100px' },
+        { name: "Balance", selector: (row) => row.balance, sortable: true, width: '90px' },
+        { name: "Remarks", selector: (row) => row.remarks || "-" },
         {
             name: "Actions",
             cell: (row) => (
-                <> {!row?.payrollId && <>
-                    <IconButton color="primary" onClick={() => handleOpen(row)}>
-                        <MdEdit />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(row._id)}>
-                        <MdDelete />
-                    </IconButton>
-                </>
-                }
+                <>
+                    {!row?.payrollId && <>
+                        <IconButton color="primary" onClick={() => handleOpen(row)}>
+                            <MdEdit />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleDelete(row._id)}>
+                            <MdDelete />
+                        </IconButton>
+                    </>
+                    }
+                    {row.payrollId && <>
+                        <IconButton title="Open Payroll" color="primary" onClick={() => navigate(`/dashboard/payroll/print/${row.payrollId}`)}>
+                            <MdOpenInNew />
+                        </IconButton>
+                    </>}
                 </>
             ),
-            width: "120px",
+            width: '120px'
         },
     ];
 
     return (
-        <div className="p-1 md:p-3">
-            {/* <h2>Employee Advance Management</h2> */}
+        <div className="w-full md:p-3 p-1">
+            {/* <h2>Leave Balance Management</h2> */}
             <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
+                {/* Search (full on small, shrink on md+) */}
                 <div className="flex flex-wrap gap-3 justify-between w-full md:w-fit">
-                    {/* Search (full on small, shrink on md+) */}
                     <TextField
                         size="small"
-                        className="w-[47%] md:w-[160px]"
+                        className="w-[100%] md:w-[160px]"
                         value={filters.searchText}
                         onChange={(e) => handleFilterChange("searchText", e.target.value)}
                         InputProps={{
@@ -327,20 +333,18 @@ const EmployeeAdvancePage = () => {
                         </Select>
                     </FormControl> */}
                 </div>
-
                 <div className="w-full md:w-fit">
                     <Button
                         className="w-full md:w-fit"
                         variant="contained"
                         color="primary"
                         onClick={() => handleOpen()}
-                        sx={{ mb: 2 }}
+
                     >
-                        Add Advance
+                        Add Leave Balance
                     </Button>
                 </div>
             </div>
-
 
             <DataTable
                 columns={columns}
@@ -351,17 +355,20 @@ const EmployeeAdvancePage = () => {
                 responsive
             />
 
-
             <Modalbox open={open} outside={false} onClose={handleClose}>
                 <div className="membermodal w-[500px]">
                     <div className='whole'>
-                        <div className='modalhead'> {editingId ? "Edit Advance" : "Add Advance"}</div>
+                        <div className='modalhead'> {editingId ? "Edit Leave Balance" : "Add Leave Balance"}</div>
                         <form onSubmit={handleSubmit}>
                             <span className="modalcontent ">
                                 <div className='flex flex-col gap-3 w-full'>
-                                    <FormControl className="w-full mt-4" size="small">
+                                    <FormControl className="w-full mt-4" >
                                         <InputLabel>Select Employee</InputLabel>
-                                        <Select label="select employee" value={form.employeeId} onChange={setEmployee}>
+                                        <Select
+                                            label="Select Employee"
+                                            value={form.employeeId}
+                                            onChange={setEmployee}
+                                        >
                                             <MenuItem value="">Select Employee</MenuItem>
                                             {employee?.map((emp) => (
                                                 <MenuItem key={emp._id} value={emp._id}>
@@ -381,41 +388,39 @@ const EmployeeAdvancePage = () => {
                                             ))}
                                         </Select>
                                     </FormControl>
-
                                     <div className="w-full flex justify-between gap-3">
                                         <TextField
                                             margin="dense"
-                                            size="small"
-                                            label="Amount"
-                                            name="amount"
-                                            type="number"
-                                            fullWidth
-                                            value={form.amount}
-                                            onChange={handleChange}
-                                        />
-
-                                        <TextField
-                                            margin="dense"
-                                            size="small"
                                             select
-                                            label="type"
+                                            size="small"
+                                            label="Type"
                                             name="type"
                                             fullWidth
                                             value={form.type}
                                             onChange={handleChange}
                                         >
-                                            <MenuItem value="given">Given</MenuItem>
-                                            <MenuItem value="adjusted">Adjusted</MenuItem>
+                                            <MenuItem value="credit">Credit</MenuItem>
+                                            <MenuItem value="debit">Debit</MenuItem>
                                         </TextField>
-                                    </div>
 
+                                        <TextField
+                                            margin="dense"
+                                            label="No. of Allotted Leaves"
+                                            name="amount"
+                                            size="small"
+                                            type="number"
+                                            fullWidth
+                                            value={form.amount}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
                                     <TextField
                                         margin="dense"
-                                        multiline
-                                        minRows={2}
-                                        size="small"
                                         label="Remarks"
                                         name="remarks"
+                                        size="small"
+                                        multiline
+                                        minRows={2}
                                         fullWidth
                                         value={form.remarks}
                                         onChange={handleChange}
@@ -424,7 +429,7 @@ const EmployeeAdvancePage = () => {
                             </span>
                         </form>
                         <div className='modalfooter'>
-                            <Button onClick={handleClose} variant="outlined">Cancel</Button>
+                            <Button variant="outlined" onClick={handleClose}>Cancel</Button>
                             <Button onClick={handleSubmit} variant="contained" color="primary">
                                 {editingId ? "Update" : "Save"}
                             </Button>
@@ -436,4 +441,4 @@ const EmployeeAdvancePage = () => {
     );
 };
 
-export default EmployeeAdvancePage;
+export default Leaveledger;

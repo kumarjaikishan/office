@@ -28,11 +28,9 @@ const Sidebar = () => {
   const extended = Boolean(user?.extendedonMobile);
   const isMobile = window.innerWidth < 600;
 
-  const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [openSubmenu, setOpenSubmenu] = useState(null); // for expanded sidebar
+  const [hoveredMenu, setHoveredMenu] = useState(null); // for collapsed sidebar
   const [anchorEl, setAnchorEl] = useState(null);
-
-
-
 
   const handleLogout = () => {
     swal({
@@ -41,36 +39,18 @@ const Sidebar = () => {
       buttons: true,
       dangerMode: true,
     }).then((willLogout) => {
-      if (willLogout) {
-        navigate("/logout");
-      }
+      if (willLogout) navigate("/logout");
     });
   };
 
   const showText = isMobile ? sidebarOpen && extended : sidebarOpen;
 
-  const handleMenuClick = (menuId, event, hasChildren) => {
-    if (showText) {
-      // expanded: accordion
-      setOpenSubmenu(openSubmenu === menuId ? null : menuId);
-    } else if (hasChildren) {
-      // collapsed: popover
-      setAnchorEl(event.currentTarget);
-      setOpenSubmenu(openSubmenu === menuId ? null : menuId);
-    } else {
-      setOpenSubmenu(null);
-    }
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
+  useEffect(() => {
     setOpenSubmenu(null);
-  };
-  // inside Sidebar component
-  // useEffect(() => {
-  //   setOpenSubmenu(null);
-  //   setAnchorEl(null);
-  // }, [showText]);
+    setHoveredMenu(null);
+    setAnchorEl(null);
+  }, [showText]);
+
   return (
     <div className="w-full h-full scrollbar-hide overflow-y-auto px-1 md:px-2">
       {/* Logo */}
@@ -80,11 +60,7 @@ const Sidebar = () => {
             <div className="rounded-full overflow-hidden w-10 h-10 md:h-14 md:w-14">
               <img
                 className="w-full h-full object-fill"
-                src={cloudinaryUrl(company?.logo, {
-                  format: "webp",
-                  width: 100,
-                  height: 100,
-                })}
+                src={cloudinaryUrl(company?.logo, { format: "webp", width: 100, height: 100 })}
                 alt="Company Logo"
               />
             </div>
@@ -110,16 +86,36 @@ const Sidebar = () => {
           <div key={sIndex} className="mt-2">
             {filteredItems.map((item, iIndex) => {
               const menuId = `${sIndex}-${iIndex}`;
-              const isOpen = openSubmenu === menuId;
+              const isOpen = showText
+                ? openSubmenu === menuId
+                : hoveredMenu === menuId;
 
-              // Parent with children
               if (item.children) {
                 return (
-                  <div key={item.menu} className="relative">
+                  <div
+                    key={item.menu}
+                    className="relative"
+                    onMouseEnter={(e) => {
+                      if (!showText) {
+                        setHoveredMenu(menuId);
+                        setAnchorEl(e.currentTarget);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!showText) {
+                        setHoveredMenu(null);
+                        setAnchorEl(null);
+                      }
+                    }}
+                  >
+                    {/* Parent Button */}
                     <button
-                      onClick={(e) => handleMenuClick(menuId, e, true)}
-                      className={`relative flex w-full items-center px-2 py-2 text-gray-600 hover:bg-teal-50 rounded transition-all ${showText ? "justify-start gap-2" : "justify-center"
-                        }`}
+                      onClick={() => {
+                        if (showText) setOpenSubmenu(openSubmenu === menuId ? null : menuId);
+                      }}
+                      className={`relative flex w-full items-center px-2 py-2 text-gray-600 hover:bg-teal-50 rounded transition-all ${
+                        showText ? "justify-start gap-2" : "justify-center"
+                      }`}
                     >
                       <span className="text-[18px]">{item.icon}</span>
                       {showText && <span>{item.menu}</span>}
@@ -130,35 +126,25 @@ const Sidebar = () => {
                       )}
                     </button>
 
-                    {/* Expanded submenu (when sidebar is open) */}
+                    {/* Expanded submenu (sidebar open) */}
                     {showText && (
                       <div
                         className="ml-1 mt-1 space-y-1 overflow-hidden transition-all duration-300"
-                        style={{
-                          maxHeight: isOpen
-                            ? `${item.children.length * 45}px`
-                            : "0px",
-                        }}
+                        style={{ maxHeight: isOpen ? `${item.children.length * 45}px` : "0px" }}
                       >
                         {item.children.map((child) => {
                           if (!child.roles.includes(role)) return null;
-
                           return (
                             <NavLink
                               to={child.link}
                               key={child.menu}
                               onClick={() => setOpenSubmenu(menuId)}
-
                               className={({ isActive }) =>
                                 `relative flex items-center gap-2 px-3 py-2 ml-6 text-sm rounded text-gray-600
-                                   before:content-[''] before:absolute before:-left-4 before:top-1/2  before:h-[1px] before:w-3  before:bg-gray-700  
-                                   after:content-[''] after:absolute after:-left-4 after:top-0 after:h-full after:w-[1px]  after:bg-gray-700
-                                   ${isActive
-                                  ? "bg-primary text-white after:bg-blue-700 before:bg-blue-700 "
-                                  : "hover:bg-teal-50  "
-                                }`
+                                  before:content-[''] before:absolute before:-left-4 before:top-1/2  before:h-[1px] before:w-3  before:bg-gray-700  
+                                  after:content-[''] after:absolute after:-left-4 after:top-0 after:h-full after:w-[1px]  after:bg-gray-700
+                                  ${isActive ? "bg-primary text-white after:bg-blue-700 before:bg-blue-700 " : "hover:bg-teal-50"}`
                               }
-
                             >
                               {child.menu}
                             </NavLink>
@@ -167,34 +153,33 @@ const Sidebar = () => {
                       </div>
                     )}
 
-                    {/* Floating submenu with Popover (when collapsed) */}
-                    {!showText && (
+                    {/* Collapsed sidebar Popover on hover */}
+                    {!showText && isOpen && anchorEl && (
                       <Popover
-                        open={openSubmenu === menuId}
+                        open
                         anchorEl={anchorEl}
-                        onClose={handlePopoverClose}
-                        anchorOrigin={{
-                          vertical: "center",
-                          horizontal: "right",
-                        }}
-                        transformOrigin={{
-                          vertical: "center",
-                          horizontal: "left",
+                        onClose={() => setHoveredMenu(null)}
+                        anchorOrigin={{ vertical: "center", horizontal: "right" }}
+                        transformOrigin={{ vertical: "center", horizontal: "left" }}
+                        disableAutoFocus
+                        disableEnforceFocus
+                        disableRestoreFocus
+                        PaperProps={{
+                          onMouseEnter: () => setHoveredMenu(menuId),
+                          onMouseLeave: () => setHoveredMenu(null),
                         }}
                       >
                         <div className="bg-white rounded-md shadow-lg min-w-[160px] py-2">
                           {item.children.map((child) => {
                             if (!child.roles.includes(role)) return null;
-
                             return (
                               <NavLink
                                 to={child.link}
                                 key={child.menu}
-                                onClick={handlePopoverClose}
+                                onClick={() => setHoveredMenu(null)}
                                 className={({ isActive }) =>
-                                  `block px-4 py-2 text-sm text-gray-600 whitespace-nowrap ${isActive
-                                    ? "bg-primary text-white"
-                                    : "hover:bg-gray-100"
+                                  `block px-4 py-2 text-sm text-gray-600 whitespace-nowrap ${
+                                    isActive ? "bg-primary text-white" : "hover:bg-gray-100"
                                   }`
                                 }
                               >
@@ -213,13 +198,10 @@ const Sidebar = () => {
               return item.isLogout ? (
                 <button
                   key={item.menu}
-                  onClick={() => {
-                    handleLogout();
-                  }}
-                  className={`flex cursor-pointer w-full mb-1 items-center rounded text-gray-600 hover:bg-teal-50 ${showText
-                    ? "justify-start gap-3 px-2 py-2"
-                    : "justify-center h-10"
-                    }`}
+                  onClick={handleLogout}
+                  className={`flex cursor-pointer w-full mb-1 items-center rounded text-gray-600 hover:bg-teal-50 ${
+                    showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"
+                  }`}
                 >
                   <span className="text-[18px]">{item.icon}</span>
                   {showText && <span>{item.menu}</span>}
@@ -231,9 +213,8 @@ const Sidebar = () => {
                   key={item.link}
                   onClick={() => setOpenSubmenu(null)}
                   className={({ isActive }) =>
-                    `flex text-nowrap w-full mb-1 text-[14px] md:text-[16px] items-center rounded text-gray-600 ${showText
-                      ? "justify-start gap-3 px-2 py-2"
-                      : "justify-center h-10"
+                    `flex text-nowrap w-full mb-1 text-[14px] md:text-[16px] items-center rounded text-gray-600 ${
+                      showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"
                     } ${isActive ? "bg-primary text-white" : ""}`
                   }
                 >
@@ -249,7 +230,6 @@ const Sidebar = () => {
   );
 };
 
-// Menu stays same...
 const menu = [
   {
     title: "Menu",
@@ -262,8 +242,8 @@ const menu = [
         roles: ["admin", "superadmin", "manager"],
         children: [
           { menu: "Employee", link: "/dashboard/employe", roles: ["admin", "superadmin", "manager"] },
-          { menu: "Leave", link: "/dashboard/leave", roles: ["employee", "admin", "superadmin", "manager"] },
-          { menu: "Leavebal", link: "/dashboard/leavebal", roles: ["admin", "superadmin", "manager"] },
+          { menu: "Leave Request", link: "/dashboard/leave-request", roles: ["employee", "admin", "superadmin", "manager"] },
+          { menu: "Leave", link: "/dashboard/leave-ledger", roles: ["admin", "superadmin", "manager"] },
           { menu: "Advance", link: "/dashboard/advance", roles: ["admin", "superadmin", "manager"] },
         ],
       },

@@ -33,13 +33,14 @@ const Navbar = () => {
     "holiday": "Holiday",
     "ledger": "Ledger",
     "ledger/:id": "Ledger Detail",
-    "leave": "Leave Request",
+    "leave-request": "Leave Request",
     "attandence": "Attendance",
     "salary": "Salary",
     "department": "Department",
     "payroll": "Payroll",
     "advance": "Advance",
     "setting": "Settings",
+    "leave-ledger": "Leave",
     "faceatten": "Face Attendance",
     "performance/:userid": "Performance",
     "empattandence": "Attendance",
@@ -91,20 +92,7 @@ const Navbar = () => {
       read: false,
       createdAt: new Date("2025-08-18T08:45:00Z")
     },
-    {
-      _id: "64a1b2c3d4e5f67890123459",
-      userId: "64f9a1c2e3b4d56789012347",
-      message: "Your password was changed successfully.",
-      read: true,
-      createdAt: new Date("2025-08-18T08:45:00Z")
-    },
-    {
-      _id: "64a1b2c3d4e5f67890123460",
-      userId: "64f9a1c2e3b4d56789012348",
-      message: "New task assigned: Complete project documentation.",
-      read: false,
-      createdAt: new Date("2025-08-17T11:20:00Z")
-    }
+   
   ];
 
   const pathParts = location.pathname.split("/").filter(Boolean);
