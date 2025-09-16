@@ -11,7 +11,7 @@ import Addbranch from './addbranch';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCompany } from './helper';
 import { MdExpandLess, MdExpandMore, MdOutlineModeEdit } from "react-icons/md";
-import Department from '../department/Department';
+import Department from './department/Department';
 import { FaRegUser } from 'react-icons/fa';
 import { AiFillAmazonCircle, AiOutlineDelete } from "react-icons/ai";
 import useImageUpload from "../../../utils/imageresizer";
@@ -19,6 +19,7 @@ import SuperAdminDashboard from './admin';
 import { FirstFetch } from '../../../../store/userSlice';
 import DataTable from 'react-data-table-component';
 import { useCustomStyles } from '../attandence/attandencehelper';
+import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -152,7 +153,12 @@ export default function OrganizationSettings() {
                                 <div className="relative w-30 h-30 mx-auto">
                                     {companyinp?.logo ? (
                                         <img
-                                            src={companyinp.logo}
+                                            // src={companyinp.logo}
+                                            src={cloudinaryUrl(companyinp.logo, {
+                                                format: "webp",
+                                                width: 200,
+                                                height: 200,
+                                            }) || employepic}
                                             alt="Company Logo"
                                             className="w-full h-full object-fill rounded-full border-2 border-dashed border-blue-300"
                                         />
@@ -167,7 +173,7 @@ export default function OrganizationSettings() {
                                             const file = e.target.files[0];
                                             if (!file) return;
 
-                                            const optimisedLogo = await handleImage(200, file);
+                                            const optimisedLogo = await handleImage(240, file);
                                             const formData = new FormData();
                                             formData.append('_id', companyinp._id);
                                             formData.append('logo', optimisedLogo);
@@ -215,7 +221,8 @@ export default function OrganizationSettings() {
                                     <div className='w-full md:flex-1'>
                                         <TextField
                                             label="Company Name"
-                                            variant="outlined"
+                                            size='small'
+                                       variant="standard"
                                             fullWidth
                                             value={companyinp?.name || ""}
                                             onChange={(e) => setcompany({ ...companyinp, name: e.target.value })}
@@ -226,7 +233,8 @@ export default function OrganizationSettings() {
                                         <TextField
                                             label="Contact"
                                             type='tel'
-                                            variant="outlined"
+                                             variant="standard"
+                                            size='small'
                                             fullWidth
                                             value={companyinp?.contact || ""}
                                             inputProps={{
@@ -247,9 +255,9 @@ export default function OrganizationSettings() {
                                 <div >
                                     <TextField
                                         label="Company Full Name"
-                                        variant="outlined"
+                                        variant="standard"
                                         fullWidth
-
+                                        size='small'
                                         value={companyinp?.fullname || ""}
                                         onChange={(e) => setcompany({ ...companyinp, fullname: e.target.value })}
                                     />
@@ -257,9 +265,9 @@ export default function OrganizationSettings() {
                                 <div >
                                     <TextField
                                         label="Address"
-                                        variant="outlined"
                                         fullWidth
                                         multiline
+                                         size='small'
                                         minRows={2}
                                         value={companyinp?.address || ""}
                                         onChange={(e) => setcompany({ ...companyinp, address: e.target.value })}

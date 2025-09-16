@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { cloudinaryUrl } from "../../utils/imageurlsetter";
 
 const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
   const monthStart = dayjs(`${filters.year}-${filters.month}-01`);
@@ -278,7 +279,12 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
                   <td className="sticky py-1 left-0 bg-white min-w-[150px] font-semibold">
                     <div className="flex items-center gap-2">
                       <img
-                        src={emp?.profileimage || defaultEmployeePic}
+                        // src={emp?.profileimage || defaultEmployeePic}
+                        src={cloudinaryUrl(emp?.profileimage, {
+                          format: "webp",
+                          width: 100,
+                          height: 100,
+                        }) || defaultEmployeePic}
                         onError={(e) => { e.target.src = defaultEmployeePic }}
                         alt={emp?.userid?.name || "Employee"}
                         className="w-8 h-8 rounded-full"

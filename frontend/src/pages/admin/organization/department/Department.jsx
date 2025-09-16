@@ -6,10 +6,10 @@ import { IoIosSend } from "react-icons/io";
 import swal from 'sweetalert';
 import DataTable from 'react-data-table-component';
 import { adddepartment, columns, delette, update } from './departmenthelper';
-import { useCustomStyles } from '../attandence/attandencehelper';
+import { useCustomStyles } from '../../attandence/attandencehelper';
 import { CiFilter } from 'react-icons/ci';
 import { useDispatch, useSelector } from 'react-redux';
-import Modalbox from '../../../components/custommodal/Modalbox';
+import Modalbox from '../../../../components/custommodal/Modalbox';
 import { MdOutlineModeEdit } from 'react-icons/md';
 import { AiOutlineDelete } from 'react-icons/ai';
 

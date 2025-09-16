@@ -18,7 +18,7 @@ import { FiDownload } from "react-icons/fi";
 import { BiGroup } from "react-icons/bi";
 import { GoPlus } from "react-icons/go";
 import { BiMessageRoundedError } from "react-icons/bi";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import MarkAttandence from "./MarkAttandence";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -29,6 +29,7 @@ import { FaRegUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import MarkAttandenceedit from "./MarkAttandenceedit";
 import CheckPermission from "../../../utils/CheckPermission";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 dayjs.extend(isSameOrBefore);
 
@@ -37,26 +38,26 @@ const Attandence = () => {
   const [isUpdate, setisUpdate] = useState(false);
   const [isload, setisload] = useState(false);
   const [openmodal, setopenmodal] = useState(false);
+  const [isPunchIn, setisPunchIn] = useState(true);
   const [atteneditmodal, setatteneditmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
-  const { branch, attandence, department, company, holidays } = useSelector((state) => state.user);
-  const [attandencelist, setattandencelist] = useState([]);
-  const [filterattandence, setfilterattandence] = useState([]);
-  const [isPunchIn, setisPunchIn] = useState(true);
+  const { branch, attandence, department, company, holidays } = useSelector(
+    (state) => state.user
+  );
   const [selectedRows, setselectedRows] = useState([]);
   const [holidaydate, setholidaydate] = useState([]);
   const dispatch = useDispatch();
   const customStyles = useCustomStyles();
-  const [sortedData, setSortedData] = useState([]);
-
+  const [sortConfig, setSortConfig] = useState({ column: null, direction: null });
 
   const init = {
-    employeeId: '',
+    employeeId: "",
     date: dayjs(),
     punchIn: null,
     punchOut: null,
-    status: '',
-  }
+    status: "",
+    reason: '',
+  };
 
   const init2 = {
     id: '',
@@ -65,231 +66,124 @@ const Attandence = () => {
     punchIn: null,
     punchOut: null,
     status: '',
+    leaveid: '',
+    leaveReason: ''
   }
+
   const [inp, setinp] = useState(init);
-
-  useEffect(() => {
-    setfiltere((prev) => ({
-      ...prev,
-      departmente: 'all'
-    }));
-    inp.punchIn !== null && setinp({ ...inp, status: 'present' })
-  }, [inp.punchIn]);
-
   const [editinp, seteditinp] = useState(init2)
-
-  const [filtere, setfiltere] = useState({
-    // date: null,
-    date: '',
-    branch: 'all',
-    departmente: 'all',
-    employee: '',
-    status: 'all',
-    month: 'all',
-    year: 'all',
-  })
 
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
-
-  useEffect(() => {
-    // setdepartmentlist(department.filter((dep) => dep.branchId._id == filters.branch))
-  }, [filtere.branch]);
-
-  const isFilterActive = (
-    filtere.branch !== 'all' ||
-    filtere.departmente !== 'all' ||
-    filtere.status !== 'all' ||
-    filtere.month !== 'all' ||
-    filtere.year !== 'all' ||
-    filtere.employee.trim() !== '' ||
-    filtere.date !== null
-  );
-
-  useEffect(() => {
-    if (inp.punchIn && inp.punchOut && dayjs(inp.punchOut).isAfter(dayjs(inp.punchIn))) {
-      const diff = dayjs(inp.punchOut).diff(dayjs(inp.punchIn), 'minute');
-      const hours = Math.floor(diff / 60);
-      const minutes = diff % 60;
-      const formatted = `${hours}h ${minutes}m`;
-
-      setinp((prev) => ({
-        ...prev,
-        workingMinutes: diff,
-      }));
-    }
-  }, [inp.punchIn, inp.punchOut]);
-
-  useEffect(() => {
-    // console.log(attandencelist)
-    if (!attandencelist) return;
-
-    const today = dayjs(); // today's date without time
-
-    const fil = attandencelist.filter((val) => {
-      const recordDate = dayjs(val.date, "DD MMM, YYYY");
-
-      // Exclude future dates
-      if (recordDate.isAfter(today, 'day')) return false;
-
-      const matchDate =
-        !filtere.date || recordDate.isSame(filtere.date, 'day');
-
-      const matchMonth =
-        filtere.month === "all" || recordDate.month() === Number(filtere.month);
-
-      const matchYear =
-        filtere.year === "all" || recordDate.year() === Number(filtere.year);
-
-
-      const matchbranch =
-        filtere.branch === 'all' || val.branchid === filtere.branch;
-
-      const matchDept =
-        filtere.departmente === 'all' || val.departmentId === filtere.departmente;
-
-      const matchStatus =
-        filtere.status === 'all' || val.status === filtere.status;
-
-      const matchEmployee =
-        filtere.employee.trim() === '' ||
-        val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
-
-      return matchDate && matchbranch && matchDept && matchStatus && matchEmployee && matchMonth && matchYear;
-    });
-
-    setfilterattandence(fil);
-  }, [filtere, attandencelist]);
-
-
-  useEffect(() => {
-    if (inp.employeeId && inp.date) {
-      const punchedIn = attandence.find((val) => {
-        return (
-          val.employeeId._id === inp.employeeId &&
-          dayjs(val.date).isSame(dayjs(inp.date), 'day')
-        );
-      });
-
-      if (punchedIn) {
-        setinp({ ...inp, punchIn: dayjs(punchedIn.punchIn), status: punchedIn.status })
-      } else {
-        setinp({ ...inp, punchIn: null, status: '' })
-      }
-    } else {
-      //  setinp({...inp,punchIn: null })
-    }
-  }, [inp.employeeId, inp.date]);
-
-  const minutesinhours = (minutes) => {
-    let hour = Math.floor(minutes / 60);
-    let minute = minutes % 60;
-    let formatted;
-
-    formatted = `${hour}h ${minute}m`;
-    return formatted;
-  }
-
-  useEffect(() => {
-    setfiltere((prev) => ({
-      ...prev,
-      departmente: 'all'
-    }));
-  }, [filtere.branch]);
-
-  const canAdd = CheckPermission('attandence', 2);
-  const canEdit = CheckPermission('attandence', 3);
-  const canDelete = CheckPermission('attandence', 4);
-
   useEffect(() => {
     if (!holidays) return;
-    // console.log(holidays)
-
     const dateObjects = [];
-    holidays.forEach(holiday => {
+    holidays.forEach((holiday) => {
       let current = dayjs(holiday.fromDate);
       const end = holiday.toDate ? dayjs(holiday.toDate) : current;
-
-      while (current.isSameOrBefore(end, 'day')) {
-        dateObjects.push(current.format('DD/MM/YYYY'));
-        current = current.add(1, 'day');
+      while (current.isSameOrBefore(end, "day")) {
+        dateObjects.push(current.format("DD/MM/YYYY"));
+        current = current.add(1, "day");
       }
-
     });
     setholidaydate(dateObjects);
   }, [holidays]);
 
-  useEffect(() => {
-    // console.log(company)
-    // console.log(branch)
+  const minutesinhours = useCallback((minutes) => {
+    const hour = Math.floor(minutes / 60);
+    const minute = minutes % 60;
+    return `${hour}h ${minute}m`;
+  }, []);
+
+  const canAdd = CheckPermission("attandence", 2);
+  const canEdit = CheckPermission("attandence", 3);
+  const canDelete = CheckPermission("attandence", 4);
+
+  // Transform raw attendance → display-ready list
+  const attandencelist = useMemo(() => {
+    if (!attandence) return [];
     // console.log(attandence)
+    const today = dayjs().startOf("day");
 
-    if (!attandence) return;
-    const today = dayjs().startOf('day');
-
-    const data = attandence
-      .filter(emp => !dayjs(emp.date).isAfter(today, 'day'))
+    return attandence
+      .filter((emp) => !dayjs(emp.date).isAfter(today, "day"))
       .map((emp) => {
-        const day = dayjs(emp.date).startOf('day').day();
-        let formatdate = dayjs(emp.date).format('DD/MM/YYYY');
-        let absent = emp.status == 'absent';
-        let leave = emp.status == 'leave';
-        let isholday = emp.status == 'holiday';
-        let isweeklyoff = emp.status == 'weekly off';
+        const dayNum = dayjs(emp.date).startOf("day").day();
+        let formatdate = dayjs(emp.date).format("DD/MM/YYYY");
+        let absent = emp.status === "absent";
+        let leave = emp.status === "leave";
+        let isholday = emp.status === "holiday";
+        let isweeklyoff = emp.status === "weekly off";
 
+        const ifdirretent = branch.filter(
+          (e) => e._id === emp.branchId && e.defaultsetting === false
+        )[0];
 
-        const ifdirretent = branch.filter(e => e._id == emp.branchId && e.defaultsetting == false)[0];
-        // console.log("caught different", ifdirretent)
-        const attendanceSetting = ifdirretent ? {
-          attendanceRules: ifdirretent?.setting?.attendanceRules,
-          workingMinutes: ifdirretent?.setting?.workingMinutes,
-          weeklyOffs: ifdirretent?.setting?.weeklyOffs
-        } : {
-          attendanceRules: company?.attendanceRules,
-          workingMinutes: company?.workingMinutes,
-          weeklyOffs: company?.weeklyOffs
-        }
-        const isWeeklyOff = attendanceSetting?.weeklyOffs.includes(day);
+        const attendanceSetting = ifdirretent
+          ? {
+            attendanceRules: ifdirretent?.setting?.attendanceRules,
+            workingMinutes: ifdirretent?.setting?.workingMinutes,
+            weeklyOffs: ifdirretent?.setting?.weeklyOffs,
+          }
+          : {
+            attendanceRules: company?.attendanceRules,
+            workingMinutes: company?.workingMinutes,
+            weeklyOffs: company?.weeklyOffs,
+          };
+
+        const isWeeklyOff = attendanceSetting?.weeklyOffs.includes(dayNum);
         const isHoliday = holidaydate.includes(formatdate);
 
         return {
           attenid: emp?._id,
-          remarks: (isHoliday && emp?.workingMinutes) ? "Worked on Holiday" : (isWeeklyOff && emp.workingMinutes) ? "Worked on Weekly Off" : undefined,
           departmentId: emp?.employeeId?.department,
           branchid: emp?.branchId,
           employeeId: emp?.employeeId?._id,
           status: emp?.status,
           stat: (
-            <span
+            <span title={emp.status == 'leave' ? emp?.leave?.reason : ''}
               className={`px-2 py-1 rounded
                  ${absent ? 'bg-red-100 text-red-800'
                   : leave ? 'bg-amber-100 text-amber-800'
-                    : (isholday || isweeklyoff) ? 'bg-blue-50 text-blue-800'
-                      : 'bg-green-100 text-green-800'
+                    // : (isholday || isweeklyoff) ? 'bg-blue-50 text-blue-800'
+                    : isholday ? 'bg-blue-50 text-blue-800'
+                      : isweeklyoff ? 'bg-gray-50 text-gray-800'
+                        : 'bg-green-100 text-green-800'
                 }`}
             >
               {emp.status}
             </span>
           ),
+          remarks:
+            (isHoliday && emp?.workingMinutes) || (isWeeklyOff && emp?.workingMinutes)
+              ? "Worked Extra"
+              : undefined,
           rawname: emp?.employeeId?.userid?.name,
           rawpunchIn: emp?.punchIn ? dayjs(emp?.punchIn).format('hh:mm A') : '-',
           rawpunchOut: emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
-          rawworkingHour: emp.workingMinutes || '-',
+          rawworkingHour: emp.workingMinutes || "-",
           name: (
-            <div className="flex items-center gap-3">
-              <Avatar src={emp?.employeeId?.profileimage} alt={emp?.employeeId?.employeename}>
+            <div className="flex items-center gap-3 ">
+              <Avatar
+                src={cloudinaryUrl(emp?.employeeId?.profileimage, {
+                  format: "webp",
+                  width: 100,
+                  height: 100,
+                })}
+                alt={emp?.employeeId?.employeename}>
                 {!emp?.employeeId?.profileimage && <FaRegUser />}
               </Avatar>
               <Box>
-                <Typography variant="body2">{emp?.employeeId?.userid?.name}</Typography>
+                {/* <Typography variant="body2">{emp?.employeeId?.userid?.name}</Typography> */}
+                <p className="text-[12px] md:text-[14px] text-gray-700 font-semibold">{emp?.employeeId?.userid?.name}</p>
               </Box>
             </div>
           ),
-          date: dayjs(emp.date).format('DD MMM, YYYY'),
-          //  date: <div> <p>{dayjs(emp.date).format('DD MMM, YYYY')}</p> <p className="text-[12px] text-gray-500">{isHoliday ? '(Holiday)':isWeeklyOff ? "(Weekly Off)":''}</p> </div>,
+          date: dayjs(emp.date).format("DD MMM, YYYY"),
+          rawdate: emp?.date,
           punchIn: emp.punchIn && (() => {
             const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
             const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);
@@ -340,74 +234,108 @@ const Attandence = () => {
               </span>
             );
           })(),
-
           workingHours: emp.workingMinutes && (
-            <div className="bordere">
+            <div>
               <p>
-                <span className=" inline-block w-[50px]"> {minutesinhours(emp.workingMinutes)}</span>
+                <span className="inline-block w-[50px]">
+                  {minutesinhours(emp?.workingMinutes)}
+                </span>
 
                 {isWeeklyOff || isHoliday ? (
-                  <span className="px-1  py-1 ml-2 rounded bg-green-100 text-green-800">
+                  <span className="ml-2 px-1 py-1 rounded bg-green-100 text-green-800">
                     Overtime {emp.workingMinutes} min
                   </span>
                 ) : (
                   <>
-                    {emp.workingMinutes < attendanceSetting?.workingMinutes?.fullDay && (
-                      <span className="px-1  py-1 ml-2 rounded bg-amber-100 text-amber-800">
-                        Short {attendanceSetting?.workingMinutes?.fullDay - emp.workingMinutes} min
+                    {emp.workingMinutes < attendanceSetting?.workingMinutes?.shortDayThreshold && (
+                      <span className="ml-2 px-1 py-1 rounded bg-amber-100 text-amber-800">
+                        Short {attendanceSetting?.workingMinutes?.shortDayThreshold - emp.workingMinutes} min
                       </span>
                     )}
-                    {emp.workingMinutes > attendanceSetting?.workingMinutes?.fullDay && (
-                      <span className="px-1 py-1 ml-2 rounded bg-green-100 text-green-800">
-                        Overtime {emp.workingMinutes - attendanceSetting?.workingMinutes?.fullDay} min
+
+                    {emp.workingMinutes > attendanceSetting?.workingMinutes?.overtimeAfterMinutes && (
+                      <span className="ml-2 p-1 rounded bg-green-100 text-green-800">
+                        Overtime {emp.workingMinutes - attendanceSetting?.workingMinutes?.overtimeAfterMinutes} min
                       </span>
                     )}
                   </>
                 )}
               </p>
-              <p className="text-[12px] mt-1 text-gray-600">{isHoliday ? '(Holiday)' : isWeeklyOff ? "(Weekly Off)" : ''}</p>
+
+              <p className="text-[12px] mt-1 text-gray-600">
+                {isHoliday ? "(Holiday)" : isWeeklyOff ? "(Weekly Off)" : ""}
+              </p>
             </div>
           ),
           action: (
-            <div className="action flex gap-2.5">
-              {canEdit && <span className="edit text-[18px] text-blue-500 cursor-pointer" title="Edit" onClick={() => edite(emp)}><MdOutlineModeEdit /></span>}
-              {canDelete && <span className="delete text-[18px] text-red-500 cursor-pointer" onClick={() => deletee(emp._id)}><AiOutlineDelete /></span>}
+            <div className="flex gap-2.5">
+              {canEdit && (
+                <span
+                  className="text-[18px] text-blue-500 cursor-pointer"
+                  title="Edit"
+                  onClick={() => edite(emp)}
+                >
+                  <MdOutlineModeEdit />
+                </span>
+              )}
+              {canDelete && (
+                <span
+                  className="text-[18px] text-red-500 cursor-pointer"
+                  onClick={() => deletee(emp._id)}
+                >
+                  <AiOutlineDelete />
+                </span>
+              )}
             </div>
-          )
-        }
+          ),
+        };
+      });
+  }, [attandence, branch, company, holidaydate, minutesinhours, canEdit, canDelete]);
 
-      })
-    // console.log(res.data.list)
-    setattandencelist(data);
-  }, [attandence]);
+  // Filters
+  const [filtere, setfiltere] = useState({
+    date: "",
+    branch: "all",
+    departmente: "all",
+    employee: "",
+    status: "all",
+    month: "all",
+    year: "all",
+  });
 
-  const edite = (atten) => {
-    // console.log(atten)
-    seteditinp({
-      id: atten._id,
-      employeeName: atten?.employeeId?.userid?.name || "",
-      date: dayjs(atten.date).format('DD MMM, YYYY'),
-      punchIn: atten.punchIn ? dayjs(atten.punchIn) : null,
-      punchOut: atten.punchOut ? dayjs(atten.punchOut) : null,
-      status: atten.status || ""
+  const filteredData = useMemo(() => {
+    const today = dayjs();
+    return attandencelist.filter((val) => {
+      const recordDate = dayjs(val.date, "DD MMM, YYYY");
+      if (recordDate.isAfter(today, "day")) return false;
+      const matchDate = !filtere.date || recordDate.isSame(filtere.date, "day");
+      const matchMonth = filtere.month === "all" || recordDate.month() === Number(filtere.month);
+      const matchYear = filtere.year === "all" || recordDate.year() === Number(filtere.year);
+      const matchBranch = filtere.branch === "all" || val.branchid === filtere.branch;
+      const matchDept = filtere.departmente === "all" || val.departmentId === filtere.departmente;
+      const matchStatus = filtere.status === "all" || val.status === filtere.status;
+      const matchEmployee =
+        !filtere.employee.trim() ||
+        val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
+      return matchDate && matchBranch && matchDept && matchStatus && matchEmployee && matchMonth && matchYear;
     });
+  }, [attandencelist, filtere]);
 
-    setatteneditmodal(true)
-  }
-
-  const deletee = (attanId) => {
-    swal({
-      title: "Are you sure you want to Delete this record?",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    }).then(async (proceed) => {
-      if (proceed) {
-        await deleteAttandence({ attandanceId: [attanId], setisload, dispatch });
-        setselectedRows([]);
-      }
+  // Sorting
+  const finalData = useMemo(() => {
+    if (!sortConfig.column) return filteredData;
+    return [...filteredData].sort((a, b) => {
+      const aVal = a[sortConfig.column];
+      const bVal = b[sortConfig.column];
+      return sortConfig.direction === "asc"
+        ? aVal > bVal
+          ? 1
+          : -1
+        : aVal < bVal
+          ? 1
+          : -1;
     });
-  }
+  }, [filteredData, sortConfig]);
 
   const multidelete = () => {
     let multideletearray = selectedRows.map(id => id.attenid);
@@ -418,42 +346,59 @@ const Attandence = () => {
       dangerMode: true,
     }).then(async (proceed) => {
       if (proceed) {
-        await deleteAttandence({ attandanceId: multideletearray, setisload, dispatch });
+        await deleteAttandence({ attandanceId: multideletearray, setselectedRows, setisload, dispatch });
         setselectedRows([]);
       }
     });
   }
 
-  const submitHandle = async (e) => {
-    e.preventDefault();
-    const res = await submitAttandence({ isPunchIn, inp, setisload, dispatch });
-    // console.log(res)
-    if (res) {
-      setopenmodal(false);
-      setinp(init);
-    }
-  }
+  const handleSort = useCallback((column, sortDirection) => {
+    setSortConfig({ column: column.id, direction: sortDirection });
+  }, []);
 
-  const handleRowSelect = ({ selectedRows }) => {
-    // console.log("Selected Rows:", selectedRows);
-    setselectedRows(selectedRows)
+  const handleRowSelect = useCallback(({ selectedRows }) => {
+    setselectedRows(selectedRows);
+  }, []);
+
+  const edite = (atten) => {
+    // console.log(atten)
+    seteditinp({
+      id: atten._id,
+      employeeName: atten?.employeeId?.userid?.name || "",
+      date: dayjs(atten.date).format('DD MMM, YYYY'),
+      punchIn: atten.punchIn ? dayjs(atten.punchIn) : null,
+      punchOut: atten.punchOut ? dayjs(atten.punchOut) : null,
+      status: atten.status || "",
+      leaveid: atten?.leave?._id,
+      leaveReason: atten?.leave?.reason,
+    });
+    setatteneditmodal(true);
+  };
+
+  const deletee = async (id) => {
+    swal({
+      title: "Are you sure you want to Delete this record?",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then(async (proceed) => {
+      if (proceed) {
+        await deleteAttandence({ attandanceId: [id], setisload, dispatch });
+        setselectedRows([]);
+      }
+    });
   };
 
   const conditionalRowStyles = [
     {
-      when: row => row.remarks,
-      style: {
-        backgroundColor: 'rgba(21, 233, 233, 0.1)',
-        color: 'teal'
-      },
+      when: (row) => row.remarks,
+      style: { backgroundColor: "rgba(21, 233, 233, 0.1)", color: "teal" },
     },
   ];
 
   const exportCSV = () => {
-    const dataset = sortedData.length > 0 ? sortedData : (isFilterActive ? filterattandence : attandencelist);
-
     const headers = ["S.no", "Name", "Date", "Punch In", "Punch Out", "Status", "Working Minutes"];
-    const rows = dataset.map((e, idx) => [
+    const rows = finalData.map((e, idx) => [
       idx + 1, e.rawname, dayjs(e.date).format('YYYY-MM-DD'), e.rawpunchIn, e.rawpunchOut, e.status, e.rawworkingHour
     ]);
 
@@ -467,21 +412,15 @@ const Attandence = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleSort = (column, sortDirection) => {
-    // console.log("sorting", column, sortDirection)
-    const data = [...(isFilterActive ? filterattandence : attandencelist)];
-
-    data.sort((a, b) => {
-      const aVal = a[column.id];
-      const bVal = b[column.id];
-
-      if (sortDirection === "asc") return aVal > bVal ? 1 : -1;
-      return aVal < bVal ? 1 : -1;
-    });
-
-    setSortedData(data);
-  };
-
+  const submitHandle = async (e) => {
+    e.preventDefault();
+    const res = await submitAttandence({ isPunchIn, inp, setisload, dispatch });
+    // console.log(res)
+    if (res) {
+      setopenmodal(false);
+      setinp(init);
+    }
+  }
 
   return (
     <div className='p-1'>
@@ -596,6 +535,53 @@ const Attandence = () => {
                 </Select>
               </FormControl>
 
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
+                <InputLabel>Month</InputLabel>
+                <Select
+                  value={filtere.month}
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <CiFilter fontSize="small" />
+                        </InputAdornment>
+                      }
+                      label="Branch"
+                    />
+                  }
+                  label="Month"
+                  onChange={(e) => setfiltere({ ...filtere, month: e.target.value })}
+                >
+                  <MenuItem value='all'>All</MenuItem>
+                  {months.map((m, idx) => (
+                    <MenuItem key={idx} value={idx}>{m}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" className="col-span-1 md:w-[150px]">
+                <InputLabel>Year</InputLabel>
+                <Select
+                  value={filtere.year}
+                  input={
+                    <OutlinedInput
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <CiFilter fontSize="small" />
+                        </InputAdornment>
+                      }
+                      label="Branch"
+                    />
+                  }
+                  label="Year"
+                  onChange={(e) => setfiltere({ ...filtere, year: e.target.value })}
+                >
+                  <MenuItem value='all'>All</MenuItem>
+                  {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
+                    <MenuItem key={y} value={y}>{y}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 size="small"
                 className="col-span-1 md:w-[150px]"
@@ -621,43 +607,16 @@ const Attandence = () => {
                 }}
                 label="Search Employee"
               />
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Month</InputLabel>
-                <Select
-                  value={filtere.month}
-                  label="Month"
-                  onChange={(e) => setfiltere({ ...filtere, month: e.target.value })}
-                >
-                  <MenuItem value='all'>All</MenuItem>
-                  {months.map((m, idx) => (
-                    <MenuItem key={idx} value={idx}>{m}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Year</InputLabel>
-                <Select
-                  value={filtere.year}
-                  label="Year"
-                  onChange={(e) => setfiltere({ ...filtere, year: e.target.value })}
-                >
-                  <MenuItem value='all'>All</MenuItem>
-                  {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
-                    <MenuItem key={y} value={y}>{y}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
             </div>
           }
 
         </div>
       </div>
 
-      <div className="capitalize">
+      <div className="capitalize ">
         <DataTable
           columns={columns}
-          data={isFilterActive ? filterattandence : attandencelist}
+          data={finalData}
           pagination
           onSort={handleSort}
           selectableRows
@@ -666,7 +625,7 @@ const Attandence = () => {
           onSelectedRowsChange={handleRowSelect}
           highlightOnHover
           paginationPerPage={20}
-          paginationRowsPerPageOptions={[20, 50, 100, 300, `${isFilterActive ? filterattandence?.length : attandencelist?.length}`]}
+          // paginationRowsPerPageOptions={[20, 50, 100, 300, `${isFilterActive ? filterattandence?.length : attandencelist?.length}`]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
               <BiMessageRoundedError className="text-xl" /> No records found.

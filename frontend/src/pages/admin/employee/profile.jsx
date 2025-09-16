@@ -16,6 +16,7 @@ import { GoGear } from "react-icons/go";
 import { useSelector } from 'react-redux';
 import { HiIdentification } from 'react-icons/hi';
 import { BiKey } from 'react-icons/bi';
+import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 
 const EmployeeProfile = ({ viewEmployee }) => {
   const [isload, setisload] = useState(false);
@@ -73,7 +74,12 @@ const EmployeeProfile = ({ viewEmployee }) => {
           <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-teal-500 border-dashed p-[2px] flex items-center justify-center overflow-hidden">
             {employee?.profileimage ? (
               <img
-                src={employee.profileimage}
+                // src={employee.profileimage}
+                src={cloudinaryUrl(employee.profileimage, {
+                  format: "webp",
+                  width: 200,
+                  height: 200,
+                })}
                 alt="Profile"
                 className="w-full h-full object-cover rounded-full"
               />
@@ -88,7 +94,7 @@ const EmployeeProfile = ({ viewEmployee }) => {
 
             <div className="flex gap-2 mt-2">
               <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">{employee?.department?.department}</span>
-              <span className={`px-2 py-0.5 ${employee?.status ? 'bg-green-100 text-green-800':'bg-red-100 text-red-800'}  text-xs rounded`}>{employee?.status ? 'Active':'In Active'}</span>
+              <span className={`px-2 py-0.5 ${employee?.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}  text-xs rounded`}>{employee?.status ? 'Active' : 'In Active'}</span>
             </div>
 
             <div className="hidden md:flex mt-3 justify-start flex-wrap text-sm text-gray-600 space-y-1">

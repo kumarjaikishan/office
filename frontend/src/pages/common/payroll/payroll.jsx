@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import DataTable from "react-data-table-component";
-import { useCustomStyles } from "../admin/attandence/attandencehelper";
+import { useCustomStyles } from "../../admin/attandence/attandencehelper";
 import { BiMessageRoundedError } from "react-icons/bi";
 import dayjs from "dayjs";
 import { payrollColumns } from "./payrollhelper";

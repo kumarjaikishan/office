@@ -29,6 +29,7 @@ import { FaRegUser } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import MarkAttandenceedit from "./MarkAttandenceedit";
 import CheckPermission from "../../../utils/CheckPermission";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 dayjs.extend(isSameOrBefore);
 
@@ -104,186 +105,28 @@ const Attandence = () => {
   // Transform raw attendance → display-ready list
   const attandencelist = useMemo(() => {
     if (!attandence) return [];
-    // console.log(attandence)
     const today = dayjs().startOf("day");
 
-    return attandence
-      .filter((emp) => !dayjs(emp.date).isAfter(today, "day"))
-      .map((emp) => {
-        const dayNum = dayjs(emp.date).startOf("day").day();
-        let formatdate = dayjs(emp.date).format("DD/MM/YYYY");
-        let absent = emp.status === "absent";
-        let leave = emp.status === "leave";
-        let isholday = emp.status === "holiday";
-        let isweeklyoff = emp.status === "weekly off";
+    return attandence.filter((emp) => !dayjs(emp.date).isAfter(today, "day"));
+  }, [attandence]);
 
-        const ifdirretent = branch.filter(
-          (e) => e._id === emp.branchId && e.defaultsetting === false
-        )[0];
+  function getAttendanceSetting(emp, branch, company) {
+    const ifdirretent = branch.find(
+      (e) => e._id === emp.branchId && e.defaultsetting === false
+    );
 
-        const attendanceSetting = ifdirretent
-          ? {
-            attendanceRules: ifdirretent?.setting?.attendanceRules,
-            workingMinutes: ifdirretent?.setting?.workingMinutes,
-            weeklyOffs: ifdirretent?.setting?.weeklyOffs,
-          }
-          : {
-            attendanceRules: company?.attendanceRules,
-            workingMinutes: company?.workingMinutes,
-            weeklyOffs: company?.weeklyOffs,
-          };
-
-        const isWeeklyOff = attendanceSetting?.weeklyOffs.includes(dayNum);
-        const isHoliday = holidaydate.includes(formatdate);
-
-        return {
-          attenid: emp?._id,
-          departmentId: emp?.employeeId?.department,
-          branchid: emp?.branchId,
-          employeeId: emp?.employeeId?._id,
-          status: emp?.status,
-          stat: (
-            <span title={emp.status == 'leave' ? emp?.leave?.reason : ''}
-              className={`px-2 py-1 rounded
-                 ${absent ? 'bg-red-100 text-red-800'
-                  : leave ? 'bg-amber-100 text-amber-800'
-                    // : (isholday || isweeklyoff) ? 'bg-blue-50 text-blue-800'
-                    : isholday ? 'bg-blue-50 text-blue-800'
-                      : isweeklyoff ? 'bg-gray-50 text-gray-800'
-                        : 'bg-green-100 text-green-800'
-                }`}
-            >
-              {emp.status}
-            </span>
-          ),
-          remarks:
-            (isHoliday && emp?.workingMinutes) || (isWeeklyOff && emp?.workingMinutes)
-              ? "Worked Extra"
-              : undefined,
-          rawname: emp?.employeeId?.userid?.name,
-          rawpunchIn: emp?.punchIn ? dayjs(emp?.punchIn).format('hh:mm A') : '-',
-          rawpunchOut: emp?.punchOut ? dayjs(emp?.punchOut).format('hh:mm A') : '-',
-          rawworkingHour: emp.workingMinutes || "-",
-          name: (
-            <div className="flex items-center gap-3 ">
-              <Avatar src={emp?.employeeId?.profileimage} alt={emp?.employeeId?.employeename}>
-                {!emp?.employeeId?.profileimage && <FaRegUser />}
-              </Avatar>
-              <Box>
-                {/* <Typography variant="body2">{emp?.employeeId?.userid?.name}</Typography> */}
-                <p className="text-[12px] md:text-[14px] text-gray-700 font-semibold">{emp?.employeeId?.userid?.name}</p>
-              </Box>
-            </div>
-          ),
-          date: dayjs(emp.date).format("DD MMM, YYYY"),
-          rawdate: emp?.date,
-          punchIn: emp.punchIn && (() => {
-            const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyEntryBefore.split(':').map(Number);
-            const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateEntryAfter.split(':').map(Number);
-
-            const earlyThreshold = dayjs(emp.punchIn).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
-            const lateThreshold = dayjs(emp.punchIn).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
-
-            return (
-              <span className="flex items-center gap-1">
-                <IoMdTime className="text-[16px] text-blue-700" />
-                {dayjs(emp.punchIn).format('hh:mm A')}
-
-                {isWeeklyOff || isHoliday ? '' : (
-                  <>
-                    {dayjs(emp.punchIn).isBefore(earlyThreshold) && (
-                      <span className="px-2 py-1 rounded bg-sky-100 text-sky-800">Early</span>
-                    )}
-                    {dayjs(emp.punchIn).isAfter(lateThreshold) && (
-                      <span className="px-2 py-1 rounded bg-amber-100 text-amber-800">Late</span>
-                    )}
-                  </>
-                )}
-              </span>
-            );
-          })(),
-          punchOut: emp.punchOut && (() => {
-            const [earlyHour, earlyMinute] = attendanceSetting?.attendanceRules?.considerEarlyExitBefore.split(':').map(Number);
-            const [lateHour, lateMinute] = attendanceSetting?.attendanceRules?.considerLateExitAfter.split(':').map(Number);
-
-            const earlyExitThreshold = dayjs(emp.punchOut).startOf('day').add(earlyHour, 'hour').add(earlyMinute, 'minute');
-            const lateExitThreshold = dayjs(emp.punchOut).startOf('day').add(lateHour, 'hour').add(lateMinute, 'minute');
-
-            return (
-              <span className="flex items-center gap-1">
-                <IoMdTime className="text-[16px] text-blue-700" />
-                {dayjs(emp.punchOut).format('hh:mm A')}
-                {isWeeklyOff || isHoliday ? '' : (
-                  <>
-                    {dayjs(emp.punchOut).isBefore(earlyExitThreshold) && (
-                      <span className="px-2 py-1 rounded bg-amber-100 text-amber-800">Early</span>
-                    )}
-                    {dayjs(emp.punchOut).isAfter(lateExitThreshold) && (
-                      <span className="px-2 py-1 rounded bg-sky-100 text-sky-800">Late</span>
-                    )}
-                  </>
-                )}
-
-              </span>
-            );
-          })(),
-          workingHours: emp.workingMinutes && (
-            <div>
-              <p>
-                <span className="inline-block w-[50px]">
-                  {minutesinhours(emp?.workingMinutes)}
-                </span>
-
-                {isWeeklyOff || isHoliday ? (
-                  <span className="ml-2 px-1 py-1 rounded bg-green-100 text-green-800">
-                    Overtime {emp.workingMinutes} min
-                  </span>
-                ) : (
-                  <>
-                    {emp.workingMinutes < attendanceSetting?.workingMinutes?.shortDayThreshold && (
-                      <span className="ml-2 px-1 py-1 rounded bg-amber-100 text-amber-800">
-                        Short {attendanceSetting?.workingMinutes?.shortDayThreshold - emp.workingMinutes} min
-                      </span>
-                    )}
-
-                    {emp.workingMinutes > attendanceSetting?.workingMinutes?.overtimeAfterMinutes && (
-                      <span className="ml-2 p-1 rounded bg-green-100 text-green-800">
-                        Overtime {emp.workingMinutes - attendanceSetting?.workingMinutes?.overtimeAfterMinutes} min
-                      </span>
-                    )}
-                  </>
-                )}
-              </p>
-
-              <p className="text-[12px] mt-1 text-gray-600">
-                {isHoliday ? "(Holiday)" : isWeeklyOff ? "(Weekly Off)" : ""}
-              </p>
-            </div>
-          ),
-          action: (
-            <div className="flex gap-2.5">
-              {canEdit && (
-                <span
-                  className="text-[18px] text-blue-500 cursor-pointer"
-                  title="Edit"
-                  onClick={() => edite(emp)}
-                >
-                  <MdOutlineModeEdit />
-                </span>
-              )}
-              {canDelete && (
-                <span
-                  className="text-[18px] text-red-500 cursor-pointer"
-                  onClick={() => deletee(emp._id)}
-                >
-                  <AiOutlineDelete />
-                </span>
-              )}
-            </div>
-          ),
-        };
-      });
-  }, [attandence, branch, company, holidaydate, minutesinhours, canEdit, canDelete]);
+    return ifdirretent
+      ? {
+        attendanceRules: ifdirretent?.setting?.attendanceRules,
+        workingMinutes: ifdirretent?.setting?.workingMinutes,
+        weeklyOffs: ifdirretent?.setting?.weeklyOffs,
+      }
+      : {
+        attendanceRules: company?.attendanceRules,
+        workingMinutes: company?.workingMinutes,
+        weeklyOffs: company?.weeklyOffs,
+      };
+  }
 
   // Filters
   const [filtere, setfiltere] = useState({
@@ -608,7 +451,16 @@ const Attandence = () => {
 
       <div className="capitalize ">
         <DataTable
-          columns={columns}
+          columns={columns({
+            branch,
+            company,
+            holidaydate,
+            minutesinhours,
+            canEdit,
+            canDelete,
+            edite,
+            deletee,
+          })}
           data={finalData}
           pagination
           onSort={handleSort}
@@ -618,13 +470,13 @@ const Attandence = () => {
           onSelectedRowsChange={handleRowSelect}
           highlightOnHover
           paginationPerPage={20}
-          // paginationRowsPerPageOptions={[20, 50, 100, 300, `${isFilterActive ? filterattandence?.length : attandencelist?.length}`]}
           noDataComponent={
             <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
               <BiMessageRoundedError className="text-xl" /> No records found.
             </div>
           }
         />
+
       </div>
       <MarkAttandence isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
         setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}

@@ -18,6 +18,7 @@ import Modalbox from '../../../components/custommodal/Modalbox';
 import { useCustomStyles } from '../attandence/attandencehelper';
 import { GoGear } from 'react-icons/go';
 import Loader from '../../../utils/loader';
+import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -226,7 +227,14 @@ const LedgerDetailPage = () => {
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
                     <div className="flex items-start md:items-center  gap-3">
-                        <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName} src={profile} />
+                        <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName}
+                            // src={profile}
+                            src={cloudinaryUrl(profile, {
+                                format: "webp",
+                                width: 100,
+                                height: 100,
+                            })}
+                        />
                         <h2 className="text-2xl font-semibold text-teal-700 capitalize">{ledgerName}</h2>
                     </div>
                     <Button className=' w-full md:w-auto' onClick={() => navigate(-1)} variant="contained">Ledger Page</Button>
@@ -335,8 +343,8 @@ const LedgerDetailPage = () => {
                     paginationComponentOptions={{
                         rowsPerPageText: 'Rows per page:',
                     }}
-                    // fixedHeader
-                    // fixedHeaderScrollHeight="500px" // set the scroll height you want
+                // fixedHeader
+                // fixedHeaderScrollHeight="500px" // set the scroll height you want
                 />
             </div>
 

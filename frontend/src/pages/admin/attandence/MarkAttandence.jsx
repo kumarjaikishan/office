@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 import { FaRegUser } from "react-icons/fa";
 import Modalbox from '../../../components/custommodal/Modalbox';
 import dayjs from 'dayjs';
+import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 
 const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle, setopenmodal, isUpdate, isload, inp, setinp, setisUpdate }) => {
 
@@ -90,7 +91,14 @@ const MarkAttandence = ({ openmodal, isPunchIn, init, setisPunchIn, submitHandle
                                             sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                                             {...rest} // spread the rest
                                         >
-                                            <Avatar src={option.profileimage} alt={option.userid.name}>
+                                            <Avatar
+                                                // src={option.profileimage} 
+                                                src={cloudinaryUrl(option.profileimage, {
+                                                    format: "webp",
+                                                    width: 100,
+                                                    height: 100,
+                                                })}
+                                                alt={option.userid.name}>
                                                 {!option.profileimage && <FaRegUser />}
                                             </Avatar>
                                             <Box className=' capitalize'>

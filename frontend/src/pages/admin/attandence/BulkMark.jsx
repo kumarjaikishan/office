@@ -15,6 +15,7 @@ import { toast } from 'react-toastify';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 
 const BulkMark = ({
   openmodal, init, setopenmodal,
@@ -346,7 +347,12 @@ const BulkMark = ({
                             <div className="flex items-center gap-2">
                               <Avatar
                                 alt={emp.userid.name}
-                                src={emp.profileimage}
+                                // src={emp.profileimage}
+                                src={cloudinaryUrl(emp.profileimage, {
+                                  format: "webp",
+                                  width: 100,
+                                  height: 100,
+                                })}
                                 sx={{ width: 30, height: 30 }}
                               />
                               <Typography variant="body2">{emp.userid.name}</Typography>

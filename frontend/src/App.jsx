@@ -10,13 +10,7 @@ import { connectSSE, closeSSE } from "./utils/sse";
 import { Avatar } from '@mui/material';
 import dayjs from 'dayjs';
 import { FaRegUser } from 'react-icons/fa';
-import PayrollPage from './pages/payroll/payroll';
-import PayrollCreatePage from './pages/payroll/payrollCreating';
-import AttendanceReport from './pages/report/attandenceReport';
-import PayrollPrint from './pages/payroll/payrollprint';
-import PayrollEdit from './pages/payroll/payrollEdit';
 import LeaveBalancePage from './pages/leavebalamce/leavebalance';
-import EmployeeAdvancePage from './pages/advance/advance';
 // import  Errorpage  from './pages/error/Errorpage';
 
 // ✅ Lazy imports
@@ -27,7 +21,6 @@ const Errorpage = lazy(() => import('./pages/error/Errorpage'));
 // Admin/Manager
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Employe = lazy(() => import('./pages/admin/employee/Employe'));
-const Department = lazy(() => import('./pages/admin/department/Department'));
 const OrganizationSettings = lazy(() => import('./pages/admin/organization/organization'));
 const Salary = lazy(() => import('./pages/salary/salary'));
 const Attandence = lazy(() => import('./pages/admin/attandence/Attandence'));
@@ -36,6 +29,12 @@ const Adminleave = lazy(() => import('./pages/admin/leave/Adminleave'));
 const HolidayForm = lazy(() => import('./pages/holidays/Holiday'));
 const Setting = lazy(() => import('./pages/settingPage'));
 const FaceAttandance = lazy(() => import('./pages/admin/facerecoginaion/faceAttandance'));
+const AttendanceReport = lazy(() => import('./pages/report/attandenceReport'));
+const PayrollPage = lazy(() => import('./pages/common/payroll/payroll'));
+const PayrollCreatePage = lazy(() => import('./pages/common/payroll/payrollCreating'));
+const PayrollEdit = lazy(() => import('./pages/common/payroll/payrollEdit'));
+const PayslipPrintPage = lazy(() => import('./pages/common/payroll/payrollprint'));
+const EmployeeAdvancePage = lazy(() => import('./pages/advance/advance'));
 const LedgerListPage = lazy(() => import('./pages/admin/ledger/ledgerpagelist'));
 const LedgerDetailPage = lazy(() => import('./pages/admin/ledger/ledgerdetailpage'));
 const ManagerDashboard = lazy(() => import('./pages/manager/ManagerDashboard'));
@@ -61,7 +60,6 @@ const routesByRole = {
       <Route index element={<AdminDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="organization" element={<OrganizationSettings />} />
-      <Route path="department" element={<Department />} />
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
@@ -77,7 +75,7 @@ const routesByRole = {
       <Route path="performance/:userid" element={<AttenPerformance />} />
       <Route path="payroll" element={<PayrollPage />} />
       <Route path="payroll/add" element={<PayrollCreatePage />} />
-      <Route path="payroll/print/:id" element={<PayrollPrint />} />
+      <Route path="payroll/print/:id" element={<PayslipPrintPage />} />
       <Route path="payroll/edit/:id" element={<PayrollEdit />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
@@ -96,7 +94,6 @@ const routesByRole = {
       <Route index element={<AdminDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="organization" element={<OrganizationSettings />} />
-      <Route path="department" element={<Department />} />
       <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
@@ -112,7 +109,7 @@ const routesByRole = {
       <Route path="performance/:userid" element={<AttenPerformance />} />
       <Route path="payroll" element={<PayrollPage />} />
       <Route path="payroll/add" element={<PayrollCreatePage />} />
-      <Route path="payroll/print/:id" element={<PayrollPrint />} />
+      <Route path="payroll/print/:id" element={<PayslipPrintPage />} />
       <Route path="payroll/edit/:id" element={<PayrollEdit />} />
       <Route path="*" element={<Errorpage />} />
     </Route>
@@ -135,7 +132,7 @@ const routesByRole = {
       <Route path="performance/:userid" element={<AttenPerformance />} />
       <Route path="payroll" element={<PayrollPage />} />
       <Route path="payroll/add" element={<PayrollCreatePage />} />
-      <Route path="payroll/print/:id" element={<PayrollPrint />} />
+      <Route path="payroll/print/:id" element={<PayslipPrintPage />} />
       <Route path="payroll/edit/:id" element={<PayrollEdit />} />
       <Route path="*" element={<Errorpage />} />
     </Route>

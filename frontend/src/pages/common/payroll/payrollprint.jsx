@@ -6,8 +6,9 @@ import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { toast } from "react-toastify";
-import numberToWords from "../../utils/numToWord";
+import numberToWords from "../../../utils/numToWord";
 import { FaCalendarAlt, FaCalendarWeek, FaUmbrellaBeach, FaBriefcase, FaUserCheck, FaUserTimes, FaUserClock } from "react-icons/fa";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 
 export default function PayslipPrintPage() {
@@ -108,13 +109,19 @@ export default function PayslipPrintPage() {
 
         {/* Content to print */}
         <div ref={printRef} className="p-2 md:p-6">
-
           {/* company */}
           <div className="borde flex justify-between mb-2">
-            <img src={company.logo} alt="" className="w-15 h-15 object-fill" />
+            <img
+              // src={company.logo} 
+              src={cloudinaryUrl(company.logo, {
+                format: "webp",
+                width: 200,
+                height: 200,
+              })}
+              alt="" className="w-15 h-15 object-fill" />
             <div className="flex-1 text-center">
-              <h2 className="text-center text-2xl font-bold mb-1">{company?.fullname}</h2>
-              <h2 className="text-center text-sm  mb-1 text-gray-600">{company?.address}</h2>
+              <h2 className="text-center text-2xl font-bold mb-1">{company?.fullname || 'Update Company Full Name'}</h2>
+              <h2 className="text-center text-sm  mb-1 text-gray-600">{company?.address || 'Update Company Full Address'}</h2>
             </div>
           </div>
           <div className="border-t border-gray-400"></div>

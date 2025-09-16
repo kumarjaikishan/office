@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { FirstFetch } from "../../../../store/userSlice";
+import { FirstFetch } from "../../../../../store/userSlice";
 
 export const columns = [
     {

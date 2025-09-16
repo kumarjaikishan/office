@@ -1,9 +1,9 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import Sidebar from '../components/sidebar';
 import Navbar from '../components/Navbar';
 import { useEffect, useState } from 'react';
+import Sidebar from '../components/sidebar';
 
 const ProtectedRoutes = ({ allowedRoles = [] }) => {
   const { islogin } = useSelector((state) => state.auth);

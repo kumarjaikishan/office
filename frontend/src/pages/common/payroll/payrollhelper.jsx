@@ -1,6 +1,7 @@
 import { Avatar, Box, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { BiEdit, BiTrash, BiShow } from "react-icons/bi"; // react-icons
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 export const payrollColumns = (onView, onEdit, onDelete) => [
   {
@@ -15,7 +16,15 @@ export const payrollColumns = (onView, onEdit, onDelete) => [
   {
     name: "Employee",
     selector: (row) => (<div className="flex items-center capitalize gap-3 ">
-      <Avatar src={row?.employeeId?.profileimage || employepic} alt={row?.employeeId?.userid?.name}>
+      <Avatar
+        // src={row?.employeeId?.profileimage || employepic} 
+        src={cloudinaryUrl(row?.employeeId?.profileimage, {
+          format: "webp",
+          width: 100,
+          height: 100,
+        }) || employepic}
+        
+        alt={row?.employeeId?.userid?.name}>
         {!row?.employeeId?.profileimage && employepic}
       </Avatar>
       <Box>

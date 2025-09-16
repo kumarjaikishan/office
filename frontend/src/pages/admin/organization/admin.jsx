@@ -102,7 +102,7 @@ export default function SuperAdminDashboard() {
         setisload(true)
         try {
             const resizedFile = newEntry.profileImage
-                ? await handleImage(300, newEntry.profileImage)
+                ? await handleImage(240, newEntry.profileImage)
                 : null;
 
             if (resizedFile) {

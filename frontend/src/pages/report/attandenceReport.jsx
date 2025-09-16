@@ -20,6 +20,7 @@ import { HiOutlineDocumentReport } from 'react-icons/hi';
 import { FiDownload } from 'react-icons/fi';
 import RegisterView from './registerView';
 import { MdClear } from 'react-icons/md';
+import { cloudinaryUrl } from '../../utils/imageurlsetter';
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
 
@@ -134,7 +135,13 @@ const AttendanceReport = () => {
                 department: emp?.department?._id,
                 name: (
                     <div className="flex items-center capitalize gap-3">
-                        <Avatar src={emp.profileimage || employepic} alt={emp.employeename} />
+                        <Avatar
+                            src={cloudinaryUrl(emp.profileimage, {
+                                format: "webp",
+                                width: 100,
+                                height: 100,
+                            }) || employepic}
+                            alt={emp.employeename} />
                         <Box>
                             <Typography variant="body2">{emp?.userid?.name}</Typography>
                             <p className="text-[10px] text-gray-600">({emp?.designation})</p>

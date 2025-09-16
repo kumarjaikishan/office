@@ -30,6 +30,7 @@ import useImageUpload from "../../../utils/imageresizer";
 import CheckPermission from "../../../utils/CheckPermission";
 import { useCustomStyles } from "../attandence/attandencehelper";
 import { BiMessageRoundedError } from "react-icons/bi";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 const Employe = () => {
   const [openmodal, setopenmodal] = useState(false);
@@ -148,7 +149,13 @@ const Employe = () => {
         rawname: emp?.userid?.name,
         empId: emp?.empId,
         name: (<div className="flex items-center capitalize gap-3 ">
-          <Avatar src={emp.profileimage || employepic} alt={emp.employeename}>
+          <Avatar
+            src={cloudinaryUrl(emp?.profileimage, {
+              format: "webp",
+              width: 100,
+              height: 100,
+            })}
+            alt={emp.employeename}>
             {!emp.profileimage && employepic}
           </Avatar>
           <Box>
@@ -216,7 +223,7 @@ const Employe = () => {
     formData.append('salary', inp.salary);
 
     if (employeePhoto) {
-      let resizedfile = await handleImage(300, employeePhoto);
+      let resizedfile = await handleImage(350, employeePhoto);
       formData.append('photo', resizedfile);
     }
 
@@ -238,7 +245,7 @@ const Employe = () => {
     });
 
     if (employeePhoto) {
-      let resizedfile = await handleImage(300, employeePhoto);
+      let resizedfile = await handleImage(350, employeePhoto);
       formData.append('photo', resizedfile);
     }
 

@@ -27,8 +27,8 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isBetween from "dayjs/plugin/isBetween";
 import localeData from "dayjs/plugin/localeData";
-import numberToWords from "../../utils/numToWord";
 import { toast } from "react-toastify";
+import numberToWords from "../../../utils/numToWord";
 
 dayjs.extend(localeData);
 dayjs.extend(isBetween);

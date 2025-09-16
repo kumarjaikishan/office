@@ -12,6 +12,7 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Modalbox from "../../../components/custommodal/Modalbox";
 import Loader from "../../../utils/loader";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
@@ -73,7 +74,7 @@ const LedgerListPage = () => {
         } catch (err) {
             console.log(err.response);
             toast.warning(err.response?.data?.message || "Failed to fetch ledgers");
-        } finally{
+        } finally {
             setLoading(false)
         }
     };
@@ -200,86 +201,93 @@ const LedgerListPage = () => {
                         Add Ledger
                     </Button>
                 </div>
-                
-                {loading ? <Loader /> : 
-                <div className="w-full p-1 md:p-3">
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                        {filteredLedgers.map((l, ind) => (
-                            <div
-                                key={ind}
-                                onClick={() => handleNavigate(l)}
-                                className="relative cursor-pointer overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all pl-3 pr-1 py-3 bg-gray-50"
-                            >
-                                {/* Card content */}
-                                <div className="flex justify-between items-start">
-                                    <div className="flex gap-1 items-center">
-                                        <Avatar sx={{ width: 35, height: 35 }} alt={l.name} src={l.profileImage} />
-                                        <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
-                                            {l.name}
+
+                {loading ? <Loader /> :
+                    <div className="w-full p-1 md:p-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                            {filteredLedgers.map((l, ind) => (
+                                <div
+                                    key={ind}
+                                    onClick={() => handleNavigate(l)}
+                                    className="relative cursor-pointer overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all pl-3 pr-1 py-3 bg-gray-50"
+                                >
+                                    {/* Card content */}
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex gap-1 items-center">
+                                            <Avatar sx={{ width: 35, height: 35 }} alt={l.name}
+                                                // src={l.profileImage} 
+                                                src={cloudinaryUrl(l.profileImage, {
+                                                    format: "webp",
+                                                    width: 100,
+                                                    height: 100,
+                                                })}
+                                            />
+                                            <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
+                                                {l.name}
+                                            </div>
                                         </div>
+
+                                        {/* Three-dot menu */}
+                                        <IconButton onClick={handleMenuOpen} size="small">
+                                            <HiOutlineDotsVertical className="text-gray-700" />
+                                        </IconButton>
+                                        <Menu
+                                            anchorEl={anchorEl}
+                                            open={open}
+                                            onClose={handleMenuClose}
+                                            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                                            transformOrigin={{ vertical: "top", horizontal: "right" }}
+                                            PaperProps={{
+                                                elevation: 1, // lower the shadow (0 = none, 1-24)
+                                            }}
+                                        >
+                                            <MenuItem
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleMenuClose();
+                                                    handleNavigate(l);
+                                                }}
+                                            >
+                                                <MdVisibility className="text-teal-600 mr-2" /> See
+                                            </MenuItem>
+                                            <MenuItem
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleMenuClose();
+                                                    handleOpenLedgerDialog(l);
+                                                }}
+                                            >
+                                                <MdEdit className="text-blue-600 mr-2" /> Edit
+                                            </MenuItem>
+                                            <MenuItem
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleMenuClose();
+                                                    deleteLedger(l);
+                                                }}
+                                            >
+                                                <MdDelete className="text-red-600 mr-2" /> Delete
+                                            </MenuItem>
+                                        </Menu>
                                     </div>
 
-                                    {/* Three-dot menu */}
-                                    <IconButton onClick={handleMenuOpen} size="small">
-                                        <HiOutlineDotsVertical className="text-gray-700" />
-                                    </IconButton>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        open={open}
-                                        onClose={handleMenuClose}
-                                        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                                        transformOrigin={{ vertical: "top", horizontal: "right" }}
-                                        PaperProps={{
-                                            elevation: 1, // lower the shadow (0 = none, 1-24)
-                                        }}
+                                    {/* Balance */}
+                                    <p
+                                        className={`text-[16px] md:text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
+                                            }`}
                                     >
-                                        <MenuItem
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleMenuClose();
-                                                handleNavigate(l);
-                                            }}
-                                        >
-                                            <MdVisibility className="text-teal-600 mr-2" /> See
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleMenuClose();
-                                                handleOpenLedgerDialog(l);
-                                            }}
-                                        >
-                                            <MdEdit className="text-blue-600 mr-2" /> Edit
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleMenuClose();
-                                                deleteLedger(l);
-                                            }}
-                                        >
-                                            <MdDelete className="text-red-600 mr-2" /> Delete
-                                        </MenuItem>
-                                    </Menu>
+                                        ₹ {l?.netBalance?.toLocaleString()}
+                                    </p>
+
+                                    {/* Left border highlight */}
+                                    <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
                                 </div>
-
-                                {/* Balance */}
-                                <p
-                                    className={`text-[16px] md:text-lg mr-1 text-end font-medium ${l.netBalance >= 0 ? "text-green-600" : "text-red-600"
-                                        }`}
-                                >
-                                    ₹ {l?.netBalance?.toLocaleString()}
-                                </p>
-
-                                {/* Left border highlight */}
-                                <span className="w-[4px] h-full absolute left-0 top-0 bg-teal-700"></span>
-                            </div>
-                        ))}
-                        {filteredLedgers?.length < 1 && <div className="w-full text-center ">
-                            No Ledger found
-                        </div>}
-                    </div>
-                </div>}
+                            ))}
+                            {filteredLedgers?.length < 1 && <div className="w-full text-center ">
+                                No Ledger found
+                            </div>}
+                        </div>
+                    </div>}
             </div>
 
             <Modalbox open={editOpen} onClose={() => {

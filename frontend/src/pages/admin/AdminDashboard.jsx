@@ -9,6 +9,7 @@ import { FirstFetch, updateAttendance } from '../../../store/userSlice';
 import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select, Tooltip, Typography } from '@mui/material';
 import { CiFilter } from 'react-icons/ci';
 import OfficialNoticeBoard from '../../components/notice';
+import { cloudinaryUrl } from '../../utils/imageurlsetter';
 
 
 const Main = () => {
@@ -196,8 +197,8 @@ const Main = () => {
               <MenuItem selected value={'all'}>All</MenuItem>
               {branch?.length > 1 ? branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
-              )) : 
-              <MenuItem disabled value={""}>No Branch Found</MenuItem>
+              )) :
+                <MenuItem disabled value={""}>No Branch Found</MenuItem>
               }
             </Select>
           </FormControl>
@@ -230,7 +231,7 @@ const Main = () => {
         </div>
 
         <div className='px-1 md:px-3 grid grid-cols-5 md:grid-cols-10 lg:grid-cols-13 gap-2 md:gap-4'>
-          {employeelist?.filter(e=> e.status !== false).map((emp) => {
+          {employeelist?.filter(e => e.status !== false).map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId?._id === emp?._id);
             const todaypresente = todaypresent.find(att => att.employeeId?._id === emp?._id);
             return (
@@ -241,7 +242,14 @@ const Main = () => {
               </div>}>
                 <div key={emp._id} className='flex flex-col items-center'>
                   <span className={`${todaypresente ? (isPresent ? 'border-green-500' : 'border-amber-400') : 'border-gray-300'} p-[2px] border-3 rounded-full`}>
-                    <Avatar src={emp?.profileimage} alt={emp.employeename}>
+                    <Avatar
+                      // src={emp?.profileimage}
+                      src={cloudinaryUrl(emp?.profileimage, {
+                        format: "webp",
+                        width: 100,
+                        height: 100,
+                      })}
+                      alt={emp.employeename}>
                       {!emp.profileimage && <FaRegUser />}
                     </Avatar>
                   </span>

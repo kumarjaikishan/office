@@ -12,6 +12,7 @@ import CheckPermission from '../../../utils/CheckPermission';
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { BiMessageRoundedError } from 'react-icons/bi';
+import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 
 const Adminleave = () => {
     const [leavelist, setleavelist] = useState([]);
@@ -61,7 +62,14 @@ const Adminleave = () => {
                     id: leave._id,
                     sno: sno++,
                     name: (<div className="flex items-center gap-3 ">
-                        <Avatar src={leave?.employeeId?.profileimage} alt={leave?.employeeId?.employeename}>
+                        <Avatar
+                            // src={leave?.employeeId?.profileimage}
+                            src={cloudinaryUrl(leave?.employeeId?.profileimage, {
+                                format: "webp",
+                                width: 100,
+                                height: 100,
+                            })}
+                            alt={leave?.employeeId?.employeename}>
                             {!leave.employeeId?.profileimage && <FaRegUser />}
                         </Avatar>
                         <Box>
@@ -145,11 +153,11 @@ const Adminleave = () => {
                 data={leavelist}
                 pagination
                 highlightOnHover
-                 noDataComponent={
-                              <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
-                                <BiMessageRoundedError className="text-xl" /> No Leave Request found.
-                              </div>
-                            }
+                noDataComponent={
+                    <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+                        <BiMessageRoundedError className="text-xl" /> No Leave Request found.
+                    </div>
+                }
             />
             <Adminleavemodal firstfetch={firstfetch} handleChange={handleChange} inp={inp} isload={isload} init={init} setInp={setInp} openmodal={openmodal} setopenmodal={setopenmodal} />
         </div>

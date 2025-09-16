@@ -26,6 +26,7 @@ import Modalbox from "../../components/custommodal/Modalbox";
 import { CiFilter } from "react-icons/ci";
 import { IoSearch } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import { cloudinaryUrl } from "../../utils/imageurlsetter";
 
 const LeaveBalancePage = () => {
     const [rows, setRows] = useState([]);
@@ -186,7 +187,14 @@ const LeaveBalancePage = () => {
         {
             name: "Employee",
             selector: (row) => (<div className="flex items-center capitalize gap-3 ">
-                <Avatar src={row?.employeeId?.profileimage || employepic} alt={row?.employeeId?.userid?.name}>
+                <Avatar
+                    // src={row?.employeeId?.profileimage || employepic} 
+                    src={cloudinaryUrl(row?.employeeId?.profileimage, {
+                        format: "webp",
+                        width: 100,
+                        height: 100,
+                    }) || employepic}
+                    alt={row?.employeeId?.userid?.name}>
                     {!row?.employeeId?.profileimage && employepic}
                 </Avatar>
                 <Box>
@@ -364,7 +372,12 @@ const LeaveBalancePage = () => {
                                                 <MenuItem key={emp._id} value={emp._id}>
                                                     <div className="flex items-center gap-2">
                                                         <Avatar
-                                                            src={emp?.profileimage}
+                                                            // src={emp?.profileimage}
+                                                            src={cloudinaryUrl(emp?.profileimage, {
+                                                                format: "webp",
+                                                                width: 100,
+                                                                height: 100,
+                                                            })}
                                                             sx={{ width: 24, height: 24 }}
                                                         />
                                                         {emp.userid?.name}
