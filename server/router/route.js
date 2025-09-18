@@ -18,6 +18,9 @@ const upload = require('../middleware/multer_middleware')
 const checkPermission = require('../middleware/checkpermission');
 const checkpermissionchange = require('../middleware/checkpermissionchange');
 const employeemiddlewre = require('../middleware/employee_middleware');
+const { exec } = require("child_process");
+
+const DEPLOY_SCRIPT = "/home/ubuntu/deploy.sh";
 
 router.route('/health').get(async (req, res) => {
   return res.status(200).json({ status: "ok" })
@@ -127,21 +130,44 @@ router.route('/permission/:id')
 
 router.route('/superfirstfetch').post(authmiddlewre, leave.addleave);
 
-router.route("/ledgerEntries").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), ledger.ledgerEntries);
-router.route("/ledger").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 1), ledger.ledger);
-router.route("/entries/:id").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 1), ledger.Entries);
+router.route("/ledgerEntries").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), ledger.ledgerEntries);
+router.route("/ledger").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger", 1), ledger.ledger);
+router.route("/entries/:id").get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 1), ledger.Entries);
 
-router.route("/ledger").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 2), upload.single('image'), ledger.createLedger)
+router.route("/ledger").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger", 2), upload.single('image'), ledger.createLedger)
 
 router.route("/ledger/:id")
-  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 3), upload.single('image'), ledger.updateLedger)
-  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger", 4), ledger.deleteLedger);
+  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger", 3), upload.single('image'), ledger.updateLedger)
+  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger", 4), ledger.deleteLedger);
 
-router.route("/ledgerentry").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 2), ledger.createEntry)
+router.route("/ledgerentry").post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 2), ledger.createEntry)
 
 router.route("/ledgerentry/:id")
-  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 3), ledger.updateEntry)
-  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
+  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 3), ledger.updateEntry)
+  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
 
+router.route("/deploy").post(authmiddlewre, authorizeRoles("developer"), (req, res) => {
+  exec(`bash ${DEPLOY_SCRIPT}`, (error, stdout, stderr) => {
+    if (error) {
+      console.error("Deployment error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Deployment failed",
+        error: error.message,
+      });
+    }
+
+    if (stderr) {
+      console.error("Deployment stderr:", stderr);
+    }
+
+    console.log("Deployment stdout:", stdout);
+    return res.json({
+      success: true,
+      message: "Deployment triggered successfully!",
+      logs: stdout,
+    });
+  });
+});
 
 module.exports = router;
