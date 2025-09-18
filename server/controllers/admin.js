@@ -217,128 +217,96 @@ const addemployee = async (req, res, next) => {
 }
 
 const updateemployee = async (req, res, next) => {
-
-    // console.log(req.body);
-    // console.log(req?.file);
-    // return res.status(400).json({
-    //     message: 'Employee updated successfully'
-    // });
     try {
-        const { employeeId, employeeName, branchId, department, email, username, designation,
-            phone, address, gender, bloodGroup, dob, Emergencyphone, skills = [], maritalStatus, salary = 0, achievements,
-            education } = req.body;
+        const { employeeId, employeeName, branchId, department, email, empId } = req.body;
 
         if (!employeeId || !department || !branchId) {
-            return next({ status: 400, message: "All fields are required" });
+            return next({ status: 400, message: "Required fields (employeeId, department, branchId) are missing." });
         }
 
-        // Get existing employee data (to keep old image if no new one uploaded)
         const existingEmployee = await employeeModal.findById(employeeId);
         if (!existingEmployee) {
-            return next({ status: 404, message: "Employee not found" });
+            return next({ status: 404, message: "Employee not found." });
         }
-        // Define fields to update dynamically
-        const possibleEmployeeFields = [
-            'dob', 'designation', 'phone', 'address', 'gender', 'bloodGroup',
-            'Emergencyphone', 'skills', 'department', 'maritalStatus', 'salary',
-            'achievements', 'education', 'acHolderName', 'bankName', 'bankbranch',
-            'acnumber', 'ifscCode', 'adhaar', 'pan', 'status', 'employeeName', 'guardian'
-        ];
 
-        let updatedFields = {};
+        // Fields that may come as JSON strings from frontend
+        const jsonFields = ["allowances", "bonuses", "deductions", "achievements", "education", "guardian"];
 
-        possibleEmployeeFields.forEach(field => {
-            let value = req.body[field];
+        let employeeUpdateData = {};
+        let userUpdateData = {};
 
-            // Convert invalid values to empty string
-            if (value === undefined || value === null || value === '' || value === 'undefined' || value === 'null') {
-                updatedFields[field] = '';
-            } else if (field === 'achievements' || field === 'education') {
+        for (const key in req.body) {
+            let value = req.body[key];
+
+            // Parse JSON fields if needed
+            if (jsonFields.includes(key) && typeof value === "string") {
                 try {
-                    updatedFields[field] = JSON.parse(value);
-                } catch (err) {
-                    console.log(`Error parsing ${field}:`, err.message);
-                    updatedFields[field] = []; // fallback to empty array
+                    value = JSON.parse(value);
+                } catch (e) {
+                    // fallback to empty array/object
+                    if (["allowances", "bonuses", "deductions", "achievements", "education"].includes(key)) {
+                        value = [];
+                    } else if (key === "guardian") {
+                        value = { name: "", relation: "S/o" };
+                    }
                 }
-            } else if (field === 'guardian') {
-                try {
-                    updatedFields[field] = typeof value === "string" ? JSON.parse(value) : value;
-                } catch (err) {
-                    console.log(`Error parsing guardian:`, err.message);
-                    updatedFields[field] = { relation: "S/o", name: "" }; // fallback default
-                }
-            } else {
-                updatedFields[field] = value;
             }
-        });
 
+            // Handle type conversion
+            if (key === "salary") value = Number(value) || 0;
+            if (key === "status" || key === "defaultPolicies") value = (value === true || value === "true");
 
-        let userupdatedFields = {
-            name: employeeName, email, branchId, department,
-        };
-
-        // If a new photo is uploaded
-        if (req.file) {
-            const cloudinaryResult = await cloudinary.uploader.upload(
-                req.file.path,
-                { folder: 'ems/employee' }
-            );
-
-            // Delete local file
-            fs.unlink(req.file.path, (err) => {
-                if (err) {
-                    console.log("Error deleting local file:", err.message);
-                }
-            });
-
-            // Set new photo URL
-            updatedFields.profileimage = cloudinaryResult.secure_url;
-
-            if (existingEmployee.profileimage && existingEmployee.profileimage !== "") {
-                let arraye = [];
-                arraye.push(existingEmployee.profileimage);
-                await removePhotoBySecureUrl(arraye);
+            // Separate user and employee fields
+            if (["employeeName", "email", "branchId", "department"].includes(key)) {
+                userUpdateData[key] = value;
+            } else if (key !== "employeeId") {
+                employeeUpdateData[key] = value;
             }
         }
 
-        // Update employee
-        const updatedUser = await usermodal.findByIdAndUpdate(
-            existingEmployee.userid,
-            userupdatedFields,
-            { new: true }
-        );
-        if (req?.body?.empId) {
-            let empcode = "EMP" + String(req.body.empId).padStart(3, "0");
+        // Handle empId uniqueness
+        if (empId) {
+            const empcode = "EMP" + String(empId).padStart(3, "0");
             const alreadyEmpId = await employeeModal.findOne({
                 empId: empcode,
                 companyId: req.user.companyId,
                 _id: { $ne: employeeId }
             });
             if (alreadyEmpId) {
-                return next({ status: 400, message: "This Employee iD already Exist" });
+                return next({ status: 400, message: "This Employee ID already exists." });
             }
-            updatedFields.empId = empcode;
+            employeeUpdateData.empId = empcode;
         }
-        const updatedEmployee = await employeeModal.findByIdAndUpdate(
-            employeeId,
-            updatedFields,
-            { new: true }
-        );
 
+        // Handle profile photo
+        if (req.file) {
+            const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
+                folder: "ems/employee"
+            });
+            fs.unlink(req.file.path, err => { if (err) console.log("File delete error:", err.message); });
+            employeeUpdateData.profileimage = cloudinaryResult.secure_url;
+
+            if (existingEmployee.profileimage) {
+                await removePhotoBySecureUrl([existingEmployee.profileimage]);
+            }
+        }
+
+        await usermodal.findByIdAndUpdate(existingEmployee.userid, userUpdateData, { new: true });
+        const updatedEmployee = await employeeModal.findByIdAndUpdate(employeeId, employeeUpdateData, { new: true, runValidators: true });
 
         if (!updatedEmployee) {
-            return next({ status: 400, message: "Something went wrong while updating" });
+            return next({ status: 400, message: "Failed to update employee." });
         }
 
-        return res.status(200).json({
-            message: 'Employee updated successfully'
-        });
+        return res.status(200).json({ message: "Employee updated successfully." });
 
     } catch (error) {
-        console.log(error.message);
+        console.error("Update employee error:", error.message);
         return next({ status: 500, message: error.message });
     }
 };
+
+
 
 const enrollFace = async (req, res, next) => {
     try {

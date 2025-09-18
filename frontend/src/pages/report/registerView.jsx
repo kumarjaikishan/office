@@ -335,7 +335,8 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
                     <span>L = Leave</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="w-4 h-4 bg-gray-200 border border-gray-600 rounded"></span>
+                    <span className="w-4 h-4 bg-yellow-200 border border-yellow-600 rounded"></span>
+                    {/* <span className="w-4 h-4 bg-gray-200 border border-gray-600 rounded"></span> */}
                     <span>W = Weekly Off</span>
                   </div>
                   <div className="flex items-center gap-1">

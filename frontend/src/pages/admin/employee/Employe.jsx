@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, IconButton, OutlinedInput, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, Checkbox, FormControlLabel, Grid, IconButton, OutlinedInput, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../../components/custommodal/Modalbox';
@@ -87,7 +87,6 @@ const Employe = () => {
     status: true,
     dob: '',
     Emergencyphone: '',
-    skills: [],
     maritalStatus: true,
     salary: 0,
     acHolderName: "",
@@ -98,13 +97,13 @@ const Employe = () => {
     upi: '',
     adhaar: '',
     pan: '',
-
-    achievements: [
-
-    ],
-    education: [
-
-    ],
+    skills: [],
+    achievements: [],
+    education: [],
+    defaultPolicies: true,
+    allowances: [], // [{ name: "HRA", mode: "percentage", value: 40 }]
+    bonuses: [],
+    deductions: []
   };
   const [inp, setInp] = useState(init);
 
@@ -231,7 +230,7 @@ const Employe = () => {
   };
 
   const updatee = async () => {
-    // console.log(inp)
+    console.log(inp)
     const formData = new FormData();
     Object.keys(inp).forEach(key => {
       const value = inp[key];
@@ -653,7 +652,6 @@ const Employe = () => {
                     />
                   </div>
 
-
                   <div className="w-full  flex justify-center">
                     <div className="mt-1 w-fit text-center gap-2  relative">
                       <input style={{ display: 'none' }} type="file" onChange={handlePhotoChange} ref={inputref} accept="image/*" name="" id="fileInput" />
@@ -852,6 +850,148 @@ const Employe = () => {
 
                     </div>
                   }
+
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={inp.defaultPolicies}
+                        onChange={e => setInp(prev => ({ ...prev, defaultPolicies: !inp.defaultPolicies }))}
+                      />
+                    }
+                    label="Override Payroll Policies"
+                    sx={{ mt: 2 }}
+                  />
+
+                  {isupdate && inp.defaultPolicies &&
+                    <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
+                      <div
+                        className="flex justify-between items-center cursor-pointer bg-primary text-white px-4 py-2 rounded-md"
+                        onClick={() => toggleSection('policy')}
+                      >
+                        <span className="md:font-semibold text-[12px] md:text-sm text-left">Payroll Policies</span>
+                        {openSection === 'policy' ? (
+                          <MdExpandLess className="text-xl" />
+                        ) : (
+                          <MdExpandMore className="text-xl" />
+                        )}
+                      </div>
+
+                      <div
+                        className={`
+                          rounded overflow-hidden transition-all duration-300 ease-linear flex gap-6 flex-col
+                          ${openSection === 'policy' ? 'max-h-[500px] p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                      >
+                        <div className="flex flex-col gap-3">
+                          {['allowances', 'bonuses', 'deductions'].map((type) => {
+                            // fallback to [] if not defined
+                            const policies = inp?.[type] || [];
+
+                            return (
+                              <Grid item xs={12} md={4} key={type}>
+                                <Typography variant="h6" className="capitalize">{type}</Typography>
+                                {policies.map((item, idx) => (
+                                  <div key={idx} className="flex items-center gap-2 mb-2">
+                                    <TextField
+                                      label="Name"
+                                      size="small"
+                                      value={item.name}
+                                      onChange={(e) => {
+                                        const updated = policies.map((policy, i) =>
+                                          i === idx ? { ...policy, name: e.target.value } : policy
+                                        );
+                                        setInp({
+                                          ...inp,
+                                         
+                                            [type]: updated
+                                          
+                                        });
+                                      }}
+                                    />
+                                    <Select
+                                      size="small"
+                                      className="w-[120px]"
+                                      value={item.type}
+                                      onChange={(e) => {
+                                        const updated = policies.map((policy, i) =>
+                                          i === idx ? { ...policy, type: e.target.value } : policy
+                                        );
+                                        setInp({
+                                          ...inp,
+                                         
+                                            [type]: updated
+                                          
+                                        });
+                                      }}
+                                    >
+                                      <MenuItem value="amount">Amount</MenuItem>
+                                      <MenuItem value="percentage">%</MenuItem>
+                                    </Select>
+                                    <TextField
+                                      label={item.type === 'amount' ? '₹' : '%'}
+                                      type="number"
+                                      size="small"
+                                      value={item.value}
+                                      onChange={(e) => {
+                                        const updated = policies.map((policy, i) =>
+                                          i === idx ? { ...policy, value: Number(e.target.value) } : policy
+                                        );
+                                        setInp({
+                                          ...inp,
+                                        
+                                            [type]: updated
+                                         
+                                        });
+                                      }}
+                                    />
+                                    <AiOutlineDelete
+                                      className="text-red-500 cursor-pointer text-lg"
+                                      onClick={() => {
+                                        const updated = policies.filter((_, i) => i !== idx);
+                                        setInp({
+                                          ...inp,
+                                        
+                                            [type]: updated
+                                         
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                ))}
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  onClick={() =>
+                                    setInp({
+                                      ...inp,
+                                    
+                                        [type]: [
+                                          ...policies,
+                                          { name: '', type: 'amount', value: 0 }
+                                        ]
+                                      
+                                    })
+                                  }
+                                >
+                                  + Add {type.slice(0, -1)}
+                                </Button>
+                              </Grid>
+                            );
+                          })}
+                        </div>
+                        <Box sx={{ mt: 2, textAlign: 'right' }}>
+                          <Button variant="contained"
+                          // onClick={handleSubmit}
+                          >
+                            Save Policies
+                          </Button>
+                        </Box>
+                      </div>
+
+                    </div>
+                  }
+
+
                 </div>
               </span>
 

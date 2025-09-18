@@ -597,8 +597,7 @@ export default function OrganizationSettings() {
 
                 <div
                     className={`rounded overflow-hidden transition-all duration-300 
-                     ${openSection === 'policies' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}`}
-                >
+                     ${openSection === 'policies' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}`} >
                     <div className="flex flex-col gap-3">
                         {['allowances', 'bonuses', 'deductions'].map((type) => {
                             // fallback to [] if not defined
@@ -707,8 +706,6 @@ export default function OrganizationSettings() {
                         </Button>
                     </Box>
                 </div>
-
-
             </div>
 
 

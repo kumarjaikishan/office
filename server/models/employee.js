@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
+
+const policyItemSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+    value: { type: Number, required: true }, // value can be fixed amount or % 
+}, { _id: false });
 
 const employeeSchema = new mongoose.Schema({
     userid: {
@@ -18,7 +22,7 @@ const employeeSchema = new mongoose.Schema({
         ref: 'Branch',
         required: true
     },
-    empId: { type: String, required:true },
+    empId: { type: String, required: true },
     employeeName: { type: String },
     department: {
         type: mongoose.Schema.Types.ObjectId,
@@ -62,6 +66,30 @@ const employeeSchema = new mongoose.Schema({
             degree: { type: String, required: true },
             institution: { type: String, required: true }, // renamed "from" to "institution"
             date: { type: String } // more descriptive than just "date"
+        }
+    ],
+    defaultPolicies: {
+        type: Boolean,
+    },
+    allowances: [
+        {
+            name: { type: String, required: true },
+            type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+            value: { type: Number, required: true }, // value can be fixed amount or % 
+        }
+    ],
+    bonuses: [
+        {
+            name: { type: String, required: true },
+            type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+            value: { type: Number, required: true }, // value can be fixed amount or % 
+        }
+    ],
+    deductions: [
+        {
+            name: { type: String, required: true },
+            type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+            value: { type: Number, required: true }, // value can be fixed amount or % 
         }
     ],
     weeklyOff: {
