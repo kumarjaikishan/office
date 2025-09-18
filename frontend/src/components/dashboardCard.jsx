@@ -2,7 +2,7 @@ import { FaBuilding } from "react-icons/fa"
 import { FiClock, FiUsers } from "react-icons/fi"
 import { SlBag } from "react-icons/sl"
 
-const DashboardCard = ({ employee, todaypresent, currentpresent }) => {
+const DashboardCard = ({ employee, todaypresent, currentpresent,todayleave }) => {
     return (
         <div className="car grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
             <div className="relative px-1 md:px-4 py-1 md:py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">
@@ -47,7 +47,7 @@ const DashboardCard = ({ employee, todaypresent, currentpresent }) => {
                 </div>
 
                 <div className="details px-2">
-                      <p className="text-[22px] md:text-[28px] text-slate-800 font-bold mt-1 md:mt-2">{0}</p>
+                      <p className="text-[22px] md:text-[28px] text-slate-800 font-bold mt-1 md:mt-2">{todayleave}</p>
                 </div>
             </div>
             <div className="relative px-1 md:px-4 py-1 md:py-2 shadow flex-1 flex-col bg-white rounded overflow-hidden">

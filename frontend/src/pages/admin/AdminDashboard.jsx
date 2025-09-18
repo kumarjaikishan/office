@@ -10,6 +10,7 @@ import { Avatar, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInpu
 import { CiFilter } from 'react-icons/ci';
 import OfficialNoticeBoard from '../../components/notice';
 import { cloudinaryUrl } from '../../utils/imageurlsetter';
+import { CgLayoutGrid } from 'react-icons/cg';
 
 
 const Main = () => {
@@ -18,6 +19,8 @@ const Main = () => {
   const { islogin, isadmin } = useSelector((state) => state.auth);
   const [currentpresent, setcurrentpresent] = useState([]);
   const [todaypresent, settodaypresent] = useState([])
+  const [todayabsent, settodayabsent] = useState([])
+  const [todayleave, settodayleave] = useState([])
   let navigate = useNavigate();
   const dispatch = useDispatch();
   const attandenceRef = useRef(attandence);
@@ -55,17 +58,27 @@ const Main = () => {
     // console.log("attandence", attandence)
     // console.log("employee", employee)
     // console.log("currentPresent", currentpresent)
-    // console.log("department", department)
+    // console.log("department", attandence)
     if (!attandence) return;
-    let currentPresent = attandence.filter((val) => {
-      return dayjs(val.date).isSame(dayjs(), 'day') && !val.punchOut
+    let todaysAttendance = attandence.filter(val => dayjs(val.date).isSame(dayjs(), 'day'));
+    console.log(todaysAttendance)
+    let currentPresent = todaysAttendance?.filter((val) => {
+      return !val.punchOut && val.status !== 'absent' && val.status !== 'leave'
     })
-    let todaypresent = attandence.filter((val) => {
-      return dayjs(val.date).isSame(dayjs(), 'day')
+    let todaypresent = todaysAttendance?.filter((val) => {
+      return val.status == 'present'
     })
-    // console.log("today present",currentPresent)
+    let todayabsent = todaysAttendance?.filter((val) => {
+      return val.status == 'absent'
+    })
+    let todayleave = todaysAttendance?.filter((val) => {
+      return val.status == 'leave'
+    })
+    // console.log("today present",todaypresent,todayabsent,todayleave)
     setcurrentpresent(currentPresent);
     settodaypresent(todaypresent)
+    settodayabsent(todayabsent)
+    settodayleave(todayleave)
   }, [attandence])
 
   useEffect(() => {
@@ -173,7 +186,7 @@ const Main = () => {
     <div className='p-0  md:p-3'>
       <div className="mb-3 ">
         {/* <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3> */}
-        <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
+        <DashboardCard employee={employee} todayleave={todayleave.length + todayabsent.length} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
       </div>
 
       <div className='w-full flex-col flex gap-5 shadow  bg-white p-2 rounded'>
@@ -230,47 +243,99 @@ const Main = () => {
           </FormControl>
         </div>
 
-        <div className='px-1 md:px-3 grid grid-cols-5 md:grid-cols-10 lg:grid-cols-13 gap-2 md:gap-4'>
-          {employeelist?.filter(e => e.status !== false).map((emp) => {
-            const isPresent = currentpresent.some(att => att.employeeId?._id === emp?._id);
-            const todaypresente = todaypresent.find(att => att.employeeId?._id === emp?._id);
-            return (
-              <Tooltip arrow enterDelay={800} key={emp._id} placement="top" title={<div className='flex flex-col '>
-                {/* <span className='flex border-b border-white mb-1'> {emp.userid.name} </span> */}
-                <span> In &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {todaypresente?.punchIn ? dayjs(todaypresente.punchIn).format('hh:mm A') : ' -:-'}</span>
-                <span> Out &nbsp;&nbsp; {todaypresente?.punchOut ? dayjs(todaypresente.punchOut).format('hh:mm A') : '-:-'}</span>
-              </div>}>
-                <div key={emp._id} className='flex flex-col items-center'>
-                  <span className={`${todaypresente ? (isPresent ? 'border-green-500' : 'border-amber-400') : 'border-gray-300'} p-[2px] border-3 rounded-full`}>
-                    <Avatar
-                      // src={emp?.profileimage}
-                      src={cloudinaryUrl(emp?.profileimage, {
-                        format: "webp",
-                        width: 100,
-                        height: 100,
-                      })}
-                      alt={emp.employeename}>
-                      {!emp.profileimage && <FaRegUser />}
-                    </Avatar>
-                  </span>
-                  <p className={`${todaypresente ? (isPresent ? 'text-green-600 text-[14px]' : 'text-amber-700') : 'text-gray-500'} text-[12px] text-center transition-all duration-300 capitalize `}>
-                    {emp?.userid?.name}
-                  </p>
-                </div>
-              </Tooltip>
-            );
-          })}
+        <div className="px-1 md:px-3 grid grid-cols-5 md:grid-cols-10 lg:grid-cols-13 gap-2 md:gap-4">
+          {employeelist
+            ?.filter((e) => e.status !== false)
+            .map((emp) => {
+              const isPresent = currentpresent.some(
+                (att) => att.employeeId?._id === emp?._id
+              );
+              const isAbsent = todayabsent.some(
+                (att) => att.employeeId?._id === emp?._id
+              );
+              const isLeave = todayleave.find(
+                (att) => att.employeeId?._id === emp?._id
+              );
+              const todaypresente = todaypresent.find(
+                (att) => att.employeeId?._id === emp?._id
+              );
+              {/* console.log(emp.empId, isPresent, isAbsent, isLeave, todaypresente)  */ }
+
+              return (
+                <Tooltip
+                  arrow
+                  enterDelay={800}
+                  key={emp._id}
+                  placement="top"
+                  title={
+                    <div className="flex flex-col">
+                      {isAbsent && <span>Absent</span>}
+                      {isLeave && <>
+                        <span>on Leave</span>
+                        <span>{isLeave?.leave?.reason}</span>
+                      </>
+                      }
+                      {(!isAbsent && !isLeave) && <>
+                        <span>
+                          In &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{" "}
+                          {todaypresente?.punchIn
+                            ? dayjs(todaypresente.punchIn).format("hh:mm A")
+                            : " -:-"}
+                        </span>
+                        <span>
+                          Out &nbsp;&nbsp;&nbsp;
+                          {todaypresente?.punchOut
+                            ? dayjs(todaypresente.punchOut).format("hh:mm A")
+                            : "-:-"}
+                        </span>
+                      </>}
+                    </div>
+                  }
+                >
+                  <div className="flex flex-col items-center">
+                    <span
+                      className={`${isAbsent || isLeave
+                        ? "border-red-500"
+                        : isPresent
+                          ? "border-green-500"
+                          : "border-amber-400"} p-[2px] border-3 rounded-full`}
+                    >
+                      <Avatar
+                        src={cloudinaryUrl(emp?.profileimage, {
+                          format: "webp",
+                          width: 100,
+                          height: 100,
+                        })}
+                        alt={emp.employeename}
+                      >
+                        {!emp.profileimage && <FaRegUser />}
+                      </Avatar>
+                    </span>
+
+                    <p
+                      className={`${isAbsent || isLeave
+                        ? "text-red-600 text-[14px]"
+                        : isPresent
+                          ? "text-green-600 text-[14px]"
+                          : "text-amber-700"} text-[12px] text-center transition-all duration-300 capitalize`}
+                    >
+                      {emp?.userid?.name}
+                    </p>
+                  </div>
+                </Tooltip>
+              );
+            })}
         </div>
 
         <div className='flex gap-5'>
           <span className='flex items-center gap-1 text-green-500 text-[13px] '>
-            <span className='block w-[15px] rounded-3xl h-[15px] bg-green-500 '></span> In Premise
+            <span className='block w-[15px] rounded-3xl h-[15px] bg-green-500 '></span> Currently In Premise
           </span>
           <span className='flex items-center gap-1 text-amber-700 text-[13px]'>
             <span className='block w-[15px] rounded-3xl h-[15px] bg-amber-500 '></span> Present
           </span>
-          <span className='flex items-center gap-1 text-gray-500 text-[13px]'>
-            <span className='block w-[15px] rounded-3xl h-[15px] bg-gray-500  '></span> Absent
+          <span className='flex items-center gap-1 text-red-500 text-[13px]'>
+            <span className='block w-[15px] rounded-3xl h-[15px] bg-red-500  '></span> Leave/Absent
           </span>
         </div>
 
