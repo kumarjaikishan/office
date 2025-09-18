@@ -258,6 +258,7 @@ const Attandence = () => {
     }
   }
 
+ 
   return (
     <div className='p-1'>
       {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}

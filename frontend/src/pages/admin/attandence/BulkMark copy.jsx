@@ -35,41 +35,42 @@ const BulkMark = ({
     status: 'absent'
   });
 
-  // Memoize filtered employees to prevent re-calculation on every render.
+  // 🔹 Filter employees based on branch & department
   const filteredEmployee = useMemo(() => {
-    if (!employee) return [];
-    return employee.filter(e => {
-      const isactive = e.status !== false;
-      const matchBranch = selectedBranch !== "all" ? e.branchId === selectedBranch : true;
-      const matchDepartment = selecteddepartment !== "all" ? e.department.department === selecteddepartment : true;
+    return employee?.filter(e => {
+      const isactive = e?.status !== false;
+      const matchBranch = selectedBranch !== "all" ? e.branchId == selectedBranch : true;
+      const matchDepartment = selecteddepartment !== "all" ? e.department.department == selecteddepartment : true;
       return matchBranch && matchDepartment && isactive;
-    });
+    }) || [];
   }, [employee, selectedBranch, selecteddepartment]);
 
-  // Memoize attendance data for the selected date.
+  // 🔹 Get attendance of selected date
   const alreadyAttendance = useMemo(() => {
-    if (!attandenceDate || !attandence) return [];
-    return attandence.filter(e => dayjs(e.date).isSame(dayjs(attandenceDate), "day"));
-  }, [attandenceDate, attandence]);
+    if (!attandenceDate || !employee?.length) return [];
+    return attandence.filter(e =>
+      dayjs(e.date).isSame(dayjs(attandenceDate), "day")
+    );
+  }, [attandenceDate, attandence, employee]);
 
-  // Initialize row data and checked employees only when dependencies change.
-  useEffect(() => {
-    if (!employee) return;
+  // 🔹 Default row data setup
+  const defaultRowData = useMemo(() => {
+    if (!employee?.length) return { data: {}, checked: [] };
 
-    const newRowData = {};
-    const newChecked = [];
+    const data = {};
+    const checked = [];
 
     employee.forEach(emp => {
       const existing = alreadyAttendance.find(a => a.employeeId._id === emp._id);
       if (existing) {
-        newChecked.push(emp._id);
-        newRowData[emp._id] = {
+        checked.push(emp._id);
+        data[emp._id] = {
           punchIn: existing.punchIn ? dayjs(existing.punchIn).format("HH:mm") : null,
           punchOut: existing.punchOut ? dayjs(existing.punchOut).format("HH:mm") : null,
           status: existing.status || "absent",
         };
       } else {
-        newRowData[emp._id] = {
+        data[emp._id] = {
           punchIn: null,
           punchOut: null,
           status: "absent",
@@ -77,19 +78,23 @@ const BulkMark = ({
       }
     });
 
-    setRowData(newRowData);
-    setcheckedemployee(newChecked);
+    return { data, checked };
   }, [employee, alreadyAttendance]);
 
-  // Apply-to-all handler, now more efficient.
+  useEffect(() => {
+    setRowData(defaultRowData.data);
+    setcheckedemployee(defaultRowData.checked);
+  }, [defaultRowData]);
+
+  // 🔹 Apply-to-all
   useEffect(() => {
     if (!toall || Object.keys(toall).length === 0) return;
 
     setRowData(prev => {
       const updated = { ...prev };
-      filteredEmployee.forEach(emp => { // Only update filtered employees
-        updated[emp._id] = {
-          ...updated[emp._id],
+      Object.keys(updated).forEach(empId => {
+        updated[empId] = {
+          ...updated[empId],
           ...(toall.punchIn && { punchIn: toall.punchIn }),
           ...(toall.punchOut && { punchOut: toall.punchOut }),
           ...(toall.status && { status: toall.status }),
@@ -101,7 +106,7 @@ const BulkMark = ({
     setcheckedemployee(filteredEmployee.map(e => e._id));
   }, [toall, filteredEmployee]);
 
-  // Memoized handlers
+  // 🔹 Handlers (memoized)
   const handleCheckbox = useCallback((empId) => {
     setcheckedemployee(prev =>
       prev.includes(empId) ? prev.filter(id => id !== empId) : [...prev, empId]
@@ -110,22 +115,30 @@ const BulkMark = ({
 
   const handleAllSelect = useCallback((e) => {
     if (e.target.checked) {
-      setcheckedemployee(filteredEmployee.map(e => e._id));
+      setcheckedemployee(employee.map(e => e._id));
     } else {
       setcheckedemployee([]);
     }
-  }, [filteredEmployee]);
+  }, [employee]);
 
   const handleTimeChange = useCallback((empId, field, value) => {
-    setRowData(prev => ({
-      ...prev,
-      [empId]: {
-        ...prev[empId],
-        [field]: value,
-        status: ['weekly off', 'holiday', 'half day'].includes(prev[empId].status) ? prev[empId].status : 'present',
-      }
-    }));
-    setcheckedemployee(prev => prev.includes(empId) ? prev : [...prev, empId]);
+    setRowData(prev => {
+      const updated = {
+        ...prev,
+        [empId]: {
+          ...prev[empId],
+          [field]: value,
+          status: ['weekly off', 'holiday', 'half day'].includes(prev[empId].status)
+            ? prev[empId].status
+            : 'present',
+        }
+      };
+      return updated;
+    });
+
+    setcheckedemployee(prev =>
+      prev.includes(empId) ? prev : [...prev, empId]
+    );
   }, []);
 
   const handleStatusChange = useCallback((empId, value) => {
@@ -136,10 +149,14 @@ const BulkMark = ({
         status: value
       }
     }));
-    setcheckedemployee(prev => prev.includes(empId) ? prev : [...prev, empId]);
+
+    setcheckedemployee(prev =>
+      prev.includes(empId) ? prev : [...prev, empId]
+    );
   }, []);
 
-  const handleSubmit = useCallback(async (e) => {
+  // 🔹 Submit
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (checkedemployee.length === 0) {
       toast.info("Please Mark at least one employee.");
@@ -147,40 +164,37 @@ const BulkMark = ({
     }
 
     const selectedData = checkedemployee.map(employeeId => {
-      const record = rowData[employeeId];
-      if (!record) return null; // Defensive check
-      const { punchIn, punchOut, status } = record;
-      const emp = employee.find(e => e._id === employeeId);
-      if (!emp) return null; // Defensive check
+      const { punchIn, punchOut, status } = rowData[employeeId];
+      const { branchId, empId } = employee.find(e => e._id === employeeId);
+
+      // return console.log(branchId,empId)
 
       const data = {
         employeeId,
-        empId: emp.empId,
+        empId,
         status,
-        branchId: emp.branchId,
+        branchId,
         date: attandenceDate.toISOString(),
       };
 
-      if (punchIn) {
+      if (punchIn != null) {
         data.punchIn = new Date(`${attandenceDate.format('YYYY-MM-DD')}T${punchIn}`).toISOString();
       }
-      if (punchOut) {
+      if (punchOut != null) {
         data.punchOut = new Date(`${attandenceDate.format('YYYY-MM-DD')}T${punchOut}`).toISOString();
       }
       return data;
-    }).filter(Boolean); // Filter out any null values
+    });
 
-    if (selectedData.length === 0) {
-      toast.info("No valid attendance data to submit.");
-      return;
-    }
+    // return console.log(selectedData)
 
     try {
+      const token = localStorage.getItem('emstoken');
       setisUpdate(true);
       const response = await fetch(`${import.meta.env.VITE_API_ADDRESS}bulkMarkAttendance`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('emstoken')}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ attendanceRecords: selectedData }),
@@ -200,13 +214,12 @@ const BulkMark = ({
       alert('Failed to mark attendance. Please try again.');
       setisUpdate(false);
     }
-  }, [checkedemployee, rowData, employee, attandenceDate, dispatch, setisUpdate, setopenmodal]);
+  };
 
   return (
     <Modalbox open={openmodal} outside={false} onClose={() => setopenmodal(false)}>
       <div className="membermodal w-[600px] md:w-[800px]">
         <form onSubmit={handleSubmit}>
-          {/* ... Rest of the JSX remains the same */}
           <div className="modalhead">Bulk Mark Attendance</div>
           <span className="modalcontent overflow-x-auto">
             <div className='flex flex-col gap-4'>
@@ -302,7 +315,7 @@ const BulkMark = ({
               </div>
 
               {/* 🔹 Employee Table */}
-              <div className='border border-dashed border-primary rounded w-full'>
+              <div className='border border-dashed border-primary rounded w-full '>
                 <TableContainer component={Paper}>
                   <Table size="small">
                     <TableHead>
@@ -310,8 +323,7 @@ const BulkMark = ({
                         <TableCell padding="checkbox">
                           <Checkbox
                             onChange={handleAllSelect}
-                            checked={checkedemployee.length > 0 && checkedemployee.length === filteredEmployee.length}
-                            indeterminate={checkedemployee.length > 0 && checkedemployee.length < filteredEmployee.length}
+                            checked={checkedemployee?.length === employee?.length}
                           />
                         </TableCell>
                         <TableCell>Employee Name</TableCell>
@@ -335,6 +347,7 @@ const BulkMark = ({
                             <div className="flex items-center gap-2">
                               <Avatar
                                 alt={emp.userid.name}
+                                // src={emp.profileimage}
                                 src={cloudinaryUrl(emp.profileimage, {
                                   format: "webp",
                                   width: 100,
