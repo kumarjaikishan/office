@@ -22,7 +22,6 @@ const Errorpage = lazy(() => import('./pages/error/Errorpage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const Employe = lazy(() => import('./pages/admin/employee/Employe'));
 const OrganizationSettings = lazy(() => import('./pages/admin/organization/organization'));
-const Salary = lazy(() => import('./pages/salary/salary'));
 const Attandence = lazy(() => import('./pages/admin/attandence/Attandence'));
 const AttenPerformance = lazy(() => import('./pages/admin/attandence/AttenPerformance'));
 const Adminleave = lazy(() => import('./pages/admin/leave/Adminleave'));
@@ -60,7 +59,6 @@ const routesByRole = {
       <Route index element={<AdminDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="organization" element={<OrganizationSettings />} />
-      <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="holiday" element={<HolidayForm />} />
@@ -94,7 +92,6 @@ const routesByRole = {
       <Route index element={<AdminDashboard />} />
       <Route path="employe" element={<Employe />} />
       <Route path="organization" element={<OrganizationSettings />} />
-      <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="holiday" element={<HolidayForm />} />
@@ -118,7 +115,6 @@ const routesByRole = {
     <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['manager']} />}>
       <Route index element={<ManagerDashboard />} />
       <Route path="employe" element={<Employe />} />
-      <Route path="salary" element={<Salary />} />
       <Route path="attandence" element={<Attandence />} />
       <Route path="attandence_Report" element={<AttendanceReport />} />
       <Route path="leave-request" element={<Adminleave />} />

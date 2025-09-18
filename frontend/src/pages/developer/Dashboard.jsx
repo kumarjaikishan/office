@@ -131,6 +131,24 @@ const DeveloperDashboard = () => {
         }
     }
 
+    const deploy = async () => {
+        console.log("hey");
+        try {
+            const token = localStorage.getItem('emstoken')
+            const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}deploy`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+            toast.success(res.data.message, { autoClose: 1800 });
+        } catch (error) {
+            console.log(error);
+            toast.warn(error.response?.data?.message || 'Error', { autoClose: 3000 });
+        }
+    }
+
     const cancel = () => {
         setpassmodal(false);
         setinp(init);
@@ -186,7 +204,15 @@ const DeveloperDashboard = () => {
 
     return (
         <div>
-            <div className='my-1 flex justify-end'>
+            <div className='my-1 flex justify-end gap-2'>
+                <Button
+                    variant="contained"
+                    className="flex-[2] md:w-fit md:flex-none"
+                    // startIcon={<GoPlus />}
+                    onClick={ deploy}
+                >
+                    Deploy
+                </Button>
                 <Button
                     variant="contained"
                     className="flex-[2] md:w-fit md:flex-none"

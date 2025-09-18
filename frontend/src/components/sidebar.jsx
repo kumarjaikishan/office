@@ -235,6 +235,7 @@ const menu = [
     title: "Menu",
     items: [
       { menu: "Dashboard", link: "/dashboard", icon: <VscDashboard />, roles: ["developer", "admin", "superadmin", "manager", "employee"] },
+      { menu: "Permissions", link: "/dashboard/permission", icon: <VscDashboard />, roles: ["developer"] },
       { menu: "Organization", link: "/dashboard/organization", icon: <FaSitemap />, roles: ["admin", "superadmin"] },
       {
         menu: "Employees",
