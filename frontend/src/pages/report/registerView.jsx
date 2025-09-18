@@ -112,7 +112,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
         A: "bg-red-200 text-red-900",
         // L: "bg-orange-200 text-orange-900",
         L: "bg-red-200 text-red-900",
-        W: "bg-gray-200 text-gray-900",
+        W: "bg-yellow-200 text-yellow-900",
         H: "bg-blue-200 text-blue-900",
       }
       : {
@@ -120,7 +120,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
         A: "bg-red-900 text-red-100",
         // L: "bg-orange-500 text-orange-100",
         L: "bg-red-500 text-red-100",
-        W: "bg-gray-900 text-gray-100",
+        W: "bg-yellow-900 text-yellow-100",
         H: "bg-blue-900 text-blue-100",
       };
 

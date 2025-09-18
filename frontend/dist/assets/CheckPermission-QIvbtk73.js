@@ -1,1 +1,0 @@
-import{g as n,r as i}from"./index-C0uMPCF7.js";const u=(s,r)=>{const{profile:e}=n(t=>t.user);return i.useEffect(()=>{},[]),e.role=="superadmin"?!0:(e==null?void 0:e.permissions[s])?e.permissions[s].includes(r):!1};export{u as C};
