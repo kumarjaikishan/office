@@ -146,7 +146,7 @@ router.route("/ledgerentry/:id")
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 3), ledger.updateEntry)
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
 
-router.route("/deploy").post(authmiddlewre, authorizeRoles("developer"), (req, res) => {
+router.route("/deploy").get(authmiddlewre, authorizeRoles("developer"), (req, res) => {
   exec(`bash ${DEPLOY_SCRIPT}`, (error, stdout, stderr) => {
     if (error) {
       console.error("Deployment error:", error.message);
