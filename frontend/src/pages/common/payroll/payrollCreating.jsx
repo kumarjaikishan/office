@@ -29,6 +29,7 @@ import isBetween from "dayjs/plugin/isBetween";
 import localeData from "dayjs/plugin/localeData";
 import { toast } from "react-toastify";
 import numberToWords from "../../../utils/numToWord";
+import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
 dayjs.extend(localeData);
 dayjs.extend(isBetween);
@@ -103,7 +104,9 @@ export default function PayrollCreatePage() {
     adjustPaidLeave: false, // ✅ toggle for paid leave adjustment
   });
 
-
+  useEffect(() => {
+    console.log(form)
+  }, [form])
   const [basic, setBasic] = useState({
     totalDays: 0,
     holidaysCount: 0,
@@ -166,6 +169,59 @@ export default function PayrollCreatePage() {
       })
     })
   }, [company.payrollPolicies]);
+
+  useEffect(() => {
+    if (!selectedEmployeedetail) return;
+
+    // Use a temporary object to hold the new form state
+    const newFormState = { ...form };
+
+    if (selectedEmployeedetail?.defaultPolicies) {
+      // Use employee-specific policies
+      newFormState.allowances = selectedEmployeedetail.allowances?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.bonuses = selectedEmployeedetail.bonuses?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.deductions = selectedEmployeedetail.deductions?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+    } else if (company?.payrollPolicies) {
+      // Fallback to company defaults
+      newFormState.allowances = company.payrollPolicies.allowances?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.bonuses = company.payrollPolicies.bonuses?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.deductions = company.payrollPolicies.deductions?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+    }
+
+    // Set the form state only once after all updates
+    setForm(newFormState);
+  }, [selectedEmployeedetail, company]);
+
 
   useEffect(() => {
     if (!selectedEmployeedetail || !basic?.totalDays || !company?.workingMinutes) return;
@@ -571,7 +627,13 @@ export default function PayrollCreatePage() {
               {employees.map((emp) => (
                 <MenuItem key={emp._id} value={emp._id}>
                   <div className="flex items-center gap-2">
-                    <Avatar src={emp.profileimage} sx={{ width: 24, height: 24 }} />
+                    <Avatar
+                      src={cloudinaryUrl(emp?.profileimage, {
+                        format: "webp",
+                        width: 100,
+                        height: 100,
+                      })}
+                      sx={{ width: 24, height: 24 }} />
                     {emp.userid?.name}
                   </div>
                 </MenuItem>
@@ -770,7 +832,7 @@ export default function PayrollCreatePage() {
             <Typography variant="h6">{formatRupee(totalAllowances)}</Typography>
           </div>
           <Divider />
-          {form.allowances.map((allowance, index) => (
+          {form?.allowances?.map((allowance, index) => (
             <div key={index} className="flex gap-2 items-start mt-4">
               <TextField
                 size="small"
@@ -813,7 +875,7 @@ export default function PayrollCreatePage() {
             <Typography variant="h6">{formatRupee(totalBonuses)}</Typography>
           </div>
           <Divider />
-          {form.bonuses.map((bonus, index) => (
+          {form?.bonuses?.map((bonus, index) => (
             <div key={index} className="flex gap-2 items-start mt-4">
               <TextField
                 size="small"
@@ -857,7 +919,7 @@ export default function PayrollCreatePage() {
             <Typography variant="h6">{formatRupee(totalDeductions)}</Typography>
           </div>
           <Divider />
-          {form.deductions.map((deduction, index) => (
+          {form?.deductions?.map((deduction, index) => (
             <div key={index} className="flex gap-2 items-start mt-4">
               <TextField
                 size="small"

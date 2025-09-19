@@ -155,7 +155,6 @@ const Employe = () => {
               height: 100,
             })}
             alt={emp.employeename}>
-            {!emp.profileimage && employepic}
           </Avatar>
           <Box>
             <Typography variant="body2">{emp?.userid?.name}</Typography>
@@ -212,45 +211,46 @@ const Employe = () => {
 
   const adddepartcall = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
 
-    formData.append('employeeName', inp.employeeName);
-    formData.append('branchId', inp.branchId);
-    formData.append('department', inp.department);
-    formData.append('email', inp.email);
-    formData.append('designation', inp.designation);
-    formData.append('salary', inp.salary);
+    if (isupdate) {
+      const formData = new FormData();
+      Object.keys(inp).forEach(key => {
+        const value = inp[key];
 
-    if (employeePhoto) {
-      let resizedfile = await handleImage(350, employeePhoto);
-      formData.append('photo', resizedfile);
-    }
+        // Handle complex types
+        if (Array.isArray(value) || typeof value === 'object') {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value);
+        }
+      });
 
-    await addemployee({ formData, dispatch, setisload, setInp, setopenmodal, init, resetPhoto });
-  };
-
-  const updatee = async () => {
-    console.log(inp)
-    const formData = new FormData();
-    Object.keys(inp).forEach(key => {
-      const value = inp[key];
-
-      // Handle complex types
-      if (Array.isArray(value) || typeof value === 'object') {
-        formData.append(key, JSON.stringify(value));
-      } else {
-        formData.append(key, value);
+      if (employeePhoto) {
+        let resizedfile = await handleImage(350, employeePhoto);
+        formData.append('photo', resizedfile);
       }
-    });
 
-    if (employeePhoto) {
-      let resizedfile = await handleImage(350, employeePhoto);
-      formData.append('photo', resizedfile);
+      await employeeupdate({ formData, dispatch, setisload, setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
+      setPhotoPreview(null);
+      setEmployeePhoto(null)
+    } else {
+      const formData = new FormData();
+
+      formData.append('employeeName', inp.employeeName);
+      formData.append('branchId', inp.branchId);
+      formData.append('department', inp.department);
+      formData.append('email', inp.email);
+      formData.append('designation', inp.designation);
+      formData.append('salary', inp.salary);
+
+      if (employeePhoto) {
+        let resizedfile = await handleImage(350, employeePhoto);
+        formData.append('photo', resizedfile);
+      }
+
+      await addemployee({ formData, dispatch, setisload, setInp, setopenmodal, init, resetPhoto });
     }
 
-    await employeeupdate({ formData, dispatch, setisload, setEmployeePhoto, setInp, setopenmodal, init, resetPhoto });
-    setPhotoPreview(null);
-    setEmployeePhoto(null)
   };
 
   const resetPhoto = () => {
@@ -329,6 +329,11 @@ const Employe = () => {
       maritalStatus: employee?.maritalStatus || true,
       achievements: employee?.achievements,
       education: employee?.education,
+
+      defaultPolicies: employee?.defaultPolicies,
+      allowances: employee?.allowances, // [{ name: "HRA", mode: "percentage", value: 40 }]
+      bonuses: employee?.bonuses,
+      deductions: employee?.deductions
     });
     if (employee.profileimage) {
       setPhotoPreview(employee.profileimage);
@@ -669,6 +674,8 @@ const Employe = () => {
 
                     </div>
                   </div>
+
+                  {/* Personal Deatils */}
                   {isupdate &&
                     <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                       <div
@@ -728,6 +735,8 @@ const Employe = () => {
 
                     </div>
                   }
+
+                  {/* Banking Details */}
                   {isupdate &&
                     <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                       <div
@@ -765,6 +774,7 @@ const Employe = () => {
                     </div>
                   }
 
+                  {/* Document & skills */}
                   {isupdate &&
                     <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                       <div
@@ -862,6 +872,7 @@ const Employe = () => {
                     sx={{ mt: 2 }}
                   />
 
+                  {/* payroll policies override */}
                   {isupdate && inp.defaultPolicies &&
                     <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                       <div
@@ -895,6 +906,7 @@ const Employe = () => {
                                     <TextField
                                       label="Name"
                                       size="small"
+                                      required
                                       value={item.name}
                                       onChange={(e) => {
                                         const updated = policies.map((policy, i) =>
@@ -902,9 +914,9 @@ const Employe = () => {
                                         );
                                         setInp({
                                           ...inp,
-                                         
-                                            [type]: updated
-                                          
+
+                                          [type]: updated
+
                                         });
                                       }}
                                     />
@@ -918,29 +930,30 @@ const Employe = () => {
                                         );
                                         setInp({
                                           ...inp,
-                                         
-                                            [type]: updated
-                                          
+
+                                          [type]: updated
+
                                         });
                                       }}
                                     >
                                       <MenuItem value="amount">Amount</MenuItem>
-                                      <MenuItem value="percentage">%</MenuItem>
+                                      {/* <MenuItem value="percentage">%</MenuItem> */}
                                     </Select>
                                     <TextField
                                       label={item.type === 'amount' ? '₹' : '%'}
                                       type="number"
                                       size="small"
                                       value={item.value}
+                                      required
                                       onChange={(e) => {
                                         const updated = policies.map((policy, i) =>
                                           i === idx ? { ...policy, value: Number(e.target.value) } : policy
                                         );
                                         setInp({
                                           ...inp,
-                                        
-                                            [type]: updated
-                                         
+
+                                          [type]: updated
+
                                         });
                                       }}
                                     />
@@ -950,9 +963,9 @@ const Employe = () => {
                                         const updated = policies.filter((_, i) => i !== idx);
                                         setInp({
                                           ...inp,
-                                        
-                                            [type]: updated
-                                         
+
+                                          [type]: updated
+
                                         });
                                       }}
                                     />
@@ -964,12 +977,12 @@ const Employe = () => {
                                   onClick={() =>
                                     setInp({
                                       ...inp,
-                                    
-                                        [type]: [
-                                          ...policies,
-                                          { name: '', type: 'amount', value: 0 }
-                                        ]
-                                      
+
+                                      [type]: [
+                                        ...policies,
+                                        { name: '', type: 'amount', value: 0 }
+                                      ]
+
                                     })
                                   }
                                 >
@@ -979,19 +992,9 @@ const Employe = () => {
                             );
                           })}
                         </div>
-                        <Box sx={{ mt: 2, textAlign: 'right' }}>
-                          <Button variant="contained"
-                          // onClick={handleSubmit}
-                          >
-                            Save Policies
-                          </Button>
-                        </Box>
                       </div>
-
                     </div>
                   }
-
-
                 </div>
               </span>
 
@@ -1004,7 +1007,7 @@ const Employe = () => {
                     Add
                   </Button>
                 ) : (
-                  <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" onClick={updatee}>
+                  <Button sx={{ mr: 2 }} loading={isload} loadingPosition="end" endIcon={<IoIosSend />} variant="contained" type="submit">
                     Update
                   </Button>
                 )}

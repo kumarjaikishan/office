@@ -71,27 +71,39 @@ const employeeSchema = new mongoose.Schema({
     defaultPolicies: {
         type: Boolean,
     },
-    allowances: [
-        {
-            name: { type: String, required: true },
-            type: { type: String, enum: ["amount", "percentage"], default: "amount" },
-            value: { type: Number, required: true }, // value can be fixed amount or % 
-        }
-    ],
-    bonuses: [
-        {
-            name: { type: String, required: true },
-            type: { type: String, enum: ["amount", "percentage"], default: "amount" },
-            value: { type: Number, required: true }, // value can be fixed amount or % 
-        }
-    ],
-    deductions: [
-        {
-            name: { type: String, required: true },
-            type: { type: String, enum: ["amount", "percentage"], default: "amount" },
-            value: { type: Number, required: true }, // value can be fixed amount or % 
-        }
-    ],
+    allowances: {
+        type: [
+            {
+                name: { type: String, required: true },
+                type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+                value: { type: Number, required: true }, // fixed amount or %
+            }
+        ],
+        default: []   // ✅ ensures empty array if not set
+    },
+
+    bonuses: {
+        type: [
+            {
+                name: { type: String, required: true },
+                type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+                value: { type: Number, required: true },
+            }
+        ],
+        default: []   // ✅
+    },
+
+    deductions: {
+        type: [
+            {
+                name: { type: String, required: true },
+                type: { type: String, enum: ["amount", "percentage"], default: "amount" },
+                value: { type: Number, required: true },
+            }
+        ],
+        default: []   // ✅
+    },
+
     weeklyOff: {
         type: [String],
         default: ['Sunday']
