@@ -131,22 +131,32 @@ const DeveloperDashboard = () => {
         }
     }
 
-    const deploy = async () => {
-        console.log("hey");
-        try {
-            const token = localStorage.getItem('emstoken')
-            const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}deploy`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+    const deploy = async (project) => {
+        // console.log("hey");
+
+        swal({
+            title: `Are you sure you want to Deploy ${project}?`,
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then(async (proceed) => {
+            if (proceed) {
+                try {
+                    const token = localStorage.getItem('emstoken')
+                    const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}deploy/${project}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    );
+                    toast.success(res.data.message, { autoClose: 1800 });
+                } catch (error) {
+                    console.log(error);
+                    toast.warn(error.response?.data?.message || 'Error', { autoClose: 3000 });
                 }
-            );
-            toast.success(res.data.message, { autoClose: 1800 });
-        } catch (error) {
-            console.log(error);
-            toast.warn(error.response?.data?.message || 'Error', { autoClose: 3000 });
-        }
+            }
+        });
     }
 
     const cancel = () => {
@@ -209,9 +219,25 @@ const DeveloperDashboard = () => {
                     variant="contained"
                     className="flex-[2] md:w-fit md:flex-none"
                     // startIcon={<GoPlus />}
-                    onClick={ deploy}
+                    onClick={() => deploy('accusoft')}
                 >
-                    Deploy
+                    Accusoft
+                </Button>
+                <Button
+                    variant="contained"
+                    className="flex-[2] md:w-fit md:flex-none"
+                    // startIcon={<GoPlus />}
+                    onClick={() => deploy('battlefiesta')}
+                >
+                    battlefiesta
+                </Button>
+                <Button
+                    variant="contained"
+                    className="flex-[2] md:w-fit md:flex-none"
+                    // startIcon={<GoPlus />}
+                    onClick={() => deploy('office')}
+                >
+                    office
                 </Button>
                 <Button
                     variant="contained"

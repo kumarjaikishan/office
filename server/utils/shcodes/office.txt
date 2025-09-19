@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+# Navigate to your project directory
+cd /home/ubuntu/office/frontend || exit
+
+echo "Pulling latest changes..."
+git pull
+
+echo "Syncing frontend dist/ to /var/www/office..."
+sudo rsync -av --delete dist/ /var/www/office/
+
+echo "Restarting PM2 process..."
+cd /home/ubuntu/office/server
+npm i
+pm2 restart 8
+
+echo "Deployment finished successfully!"

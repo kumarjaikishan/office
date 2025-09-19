@@ -20,7 +20,12 @@ const checkpermissionchange = require('../middleware/checkpermissionchange');
 const employeemiddlewre = require('../middleware/employee_middleware');
 const { exec } = require("child_process");
 
-const DEPLOY_SCRIPT = "/home/ubuntu/deploy.sh";
+// const DEPLOY_SCRIPT = "/home/ubuntu/deploy.sh";
+const deploy_script = {
+  office: '/home/ubuntu/office.sh',
+  accusoft: '/home/ubuntu/accusoft.sh',
+  battlefiesta: '/home/ubuntu/battlefiesta.sh',
+}
 
 router.route('/health').get(async (req, res) => {
   return res.status(200).json({ status: "ok" })
@@ -146,9 +151,10 @@ router.route("/ledgerentry/:id")
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 3), ledger.updateEntry)
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
 
-router.route("/deploy").get(authmiddlewre, authorizeRoles("developer"), (req, res) => {
-  // console.log('deployemnt request Received')
-  exec(`bash ${DEPLOY_SCRIPT}`, (error, stdout, stderr) => {
+router.route("/deploy/:project").get(authmiddlewre, authorizeRoles("developer"), (req, res) => {
+  const { project } = req.params;
+  // console.log(deploy_script[project])
+  exec(`bash ${deploy_script[project]}`, (error, stdout, stderr) => {
     if (error) {
       console.error("Deployment error:", error.message);
       return res.status(500).json({

@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+# Navigate to your project directory
+cd /home/ubuntu/accusoft/frontend || exit
+
+echo "Pulling latest changes..."
+git pull
+
+echo "Syncing frontend build/ to /var/www/accusoft..."
+sudo rsync -av --delete build/ /var/www/accusoft/
+
+echo "Restarting PM2 process..."
+cd /home/ubuntu/accusoft/server
+git pull
+npm i
+pm2 restart 0
+
+echo "Deployment finished successfully!"

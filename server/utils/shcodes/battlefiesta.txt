@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+# Navigate to your project directory
+cd /home/ubuntu/battefiesta/frontend || exit
+
+echo "Pulling latest changes..."
+git pull
+
+echo "Syncing frontend dist/ to /var/www/battefiesta..."
+sudo rsync -av --delete dist/ /var/www/battefiesta/
+
+echo "Restarting PM2 process..."
+cd /home/ubuntu/battefiesta/server
+npm i
+pm2 restart 1
+
+echo "Deployment finished successfully!"
