@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import { Accordion, AccordionDetails, AccordionSummary, Avatar, Box, Button, Checkbox, FormControlLabel, Grid, IconButton, OutlinedInput, Typography } from '@mui/material';
+import {  Avatar, Box, Button, FormControlLabel, IconButton, OutlinedInput, Switch, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../../components/custommodal/Modalbox';
@@ -20,7 +20,7 @@ import { CiFilter } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import EmployeeProfile from "./profile";
 import { useDispatch, useSelector } from "react-redux";
-import { MdClear, MdCurrencyRupee, MdExpandLess, MdOutlineModeEdit } from "react-icons/md";
+import { MdClear, MdExpandLess, MdOutlineModeEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { MdExpandMore } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -100,7 +100,7 @@ const Employe = () => {
     skills: [],
     achievements: [],
     education: [],
-    defaultPolicies: true,
+    overridedefaultPolicies: false,
     allowances: [], // [{ name: "HRA", mode: "percentage", value: 40 }]
     bonuses: [],
     deductions: []
@@ -330,7 +330,7 @@ const Employe = () => {
       achievements: employee?.achievements,
       education: employee?.education,
 
-      defaultPolicies: employee?.defaultPolicies,
+      overridedefaultPolicies: employee?.overridedefaultPolicies,
       allowances: employee?.allowances, // [{ name: "HRA", mode: "percentage", value: 40 }]
       bonuses: employee?.bonuses,
       deductions: employee?.deductions
@@ -862,18 +862,24 @@ const Employe = () => {
                   }
 
                   <FormControlLabel
+                    label="Override Payroll Policies"
                     control={
-                      <Checkbox
-                        checked={inp.defaultPolicies}
-                        onChange={e => setInp(prev => ({ ...prev, defaultPolicies: !inp.defaultPolicies }))}
+                      <Switch
+                        checked={inp.overridedefaultPolicies}
+                        onChange={() =>
+                          setInp(prev => ({
+                            ...prev,
+                            overridedefaultPolicies: !inp.overridedefaultPolicies,
+                          }))
+                        }
+                        color="primary"
                       />
                     }
-                    label="Override Payroll Policies"
                     sx={{ mt: 2 }}
                   />
 
                   {/* payroll policies override */}
-                  {isupdate && inp.defaultPolicies &&
+                  {isupdate && inp.overridedefaultPolicies &&
                     <div className='border flex flex-col w-full shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                       <div
                         className="flex justify-between items-center cursor-pointer bg-primary text-white px-4 py-2 rounded-md"
@@ -899,96 +905,97 @@ const Employe = () => {
                             const policies = inp?.[type] || [];
 
                             return (
-                              <Grid item xs={12} md={4} key={type}>
-                                <Typography variant="h6" className="capitalize">{type}</Typography>
-                                {policies.map((item, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 mb-2">
-                                    <TextField
-                                      label="Name"
-                                      size="small"
-                                      required
-                                      value={item.name}
-                                      onChange={(e) => {
-                                        const updated = policies.map((policy, i) =>
-                                          i === idx ? { ...policy, name: e.target.value } : policy
-                                        );
-                                        setInp({
-                                          ...inp,
+                              <div className="flex flex-col shadow-lg gap-2 px-2 pb-2 my-2 border rounded border-dashed relative border-primary" key={type}>
+                                <p className="capitalize absolute t-0 -translate-y-1/2 l-2 bg-white px-2">{type}</p>
+                                <div className="mt-6 flex flex-col gap-2">
+                                  {policies.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 mb-2">
+                                      <TextField
+                                        label="Name"
+                                        size="small"
+                                        required
+                                        className="flex-1"
+                                        value={item.name}
+                                        onChange={(e) => {
+                                          const updated = policies.map((policy, i) =>
+                                            i === idx ? { ...policy, name: e.target.value } : policy
+                                          );
+                                          setInp({
+                                            ...inp,
 
-                                          [type]: updated
+                                            [type]: updated
 
-                                        });
-                                      }}
-                                    />
-                                    <Select
-                                      size="small"
-                                      className="w-[120px]"
-                                      value={item.type}
-                                      onChange={(e) => {
-                                        const updated = policies.map((policy, i) =>
-                                          i === idx ? { ...policy, type: e.target.value } : policy
-                                        );
-                                        setInp({
-                                          ...inp,
+                                          });
+                                        }}
+                                      />
+                                      <Select
+                                        size="small"
+                                        className="w-[120px]"
+                                        value={item.type}
+                                        onChange={(e) => {
+                                          const updated = policies.map((policy, i) =>
+                                            i === idx ? { ...policy, type: e.target.value } : policy
+                                          );
+                                          setInp({
+                                            ...inp,
 
-                                          [type]: updated
+                                            [type]: updated
 
-                                        });
-                                      }}
-                                    >
-                                      <MenuItem value="amount">Amount</MenuItem>
-                                      {/* <MenuItem value="percentage">%</MenuItem> */}
-                                    </Select>
-                                    <TextField
-                                      label={item.type === 'amount' ? '₹' : '%'}
-                                      type="number"
-                                      size="small"
-                                      value={item.value}
-                                      required
-                                      onChange={(e) => {
-                                        const updated = policies.map((policy, i) =>
-                                          i === idx ? { ...policy, value: Number(e.target.value) } : policy
-                                        );
-                                        setInp({
-                                          ...inp,
+                                          });
+                                        }}
+                                      >
+                                        <MenuItem value="amount">Amount</MenuItem>
+                                        {/* <MenuItem value="percentage">%</MenuItem> */}
+                                      </Select>
+                                      <TextField
+                                        label={item.type === 'amount' ? '₹' : '%'}
+                                        type="number"
+                                        size="small"
+                                        value={item.value}
+                                        required
+                                        className="w-[90px]"
+                                        onChange={(e) => {
+                                          const updated = policies.map((policy, i) =>
+                                            i === idx ? { ...policy, value: Number(e.target.value) } : policy
+                                          );
+                                          setInp({
+                                            ...inp,
 
-                                          [type]: updated
+                                            [type]: updated
 
-                                        });
-                                      }}
-                                    />
-                                    <AiOutlineDelete
-                                      className="text-red-500 cursor-pointer text-lg"
-                                      onClick={() => {
-                                        const updated = policies.filter((_, i) => i !== idx);
-                                        setInp({
-                                          ...inp,
-
-                                          [type]: updated
-
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                ))}
+                                          });
+                                        }}
+                                      />
+                                      <AiOutlineDelete
+                                        className="text-red-500 w-8 h-8 p-1  cursor-pointer text-lg"
+                                        onClick={() => {
+                                          const updated = policies.filter((_, i) => i !== idx);
+                                          setInp({
+                                            ...inp,
+                                            [type]: updated
+                                          });
+                                        }}
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
                                 <Button
                                   size="small"
-                                  variant="outlined"
+                                  variant="contained"
+
                                   onClick={() =>
                                     setInp({
                                       ...inp,
-
                                       [type]: [
                                         ...policies,
                                         { name: '', type: 'amount', value: 0 }
                                       ]
-
                                     })
                                   }
                                 >
-                                  + Add {type.slice(0, -1)}
+                                  + Add more {type.slice(0, -1)}
                                 </Button>
-                              </Grid>
+                              </div>
                             );
                           })}
                         </div>

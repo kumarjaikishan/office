@@ -1,5 +1,5 @@
 import { CiFilter } from "react-icons/ci";
-import { Avatar, Box, Button, IconButton, OutlinedInput, TextField, Typography } from '@mui/material';
+import { Avatar, Box, Button, CircularProgress, IconButton, OutlinedInput, TextField, Typography } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -49,6 +49,8 @@ const Attandence = () => {
   const dispatch = useDispatch();
   const customStyles = useCustomStyles();
   const [sortConfig, setSortConfig] = useState({ column: null, direction: null });
+  const [loading, setLoading] = useState(false);
+
 
   const init = {
     employeeId: "",
@@ -110,23 +112,6 @@ const Attandence = () => {
     return attandence.filter((emp) => !dayjs(emp.date).isAfter(today, "day"));
   }, [attandence]);
 
-  function getAttendanceSetting(emp, branch, company) {
-    const ifdirretent = branch.find(
-      (e) => e._id === emp.branchId && e.defaultsetting === false
-    );
-
-    return ifdirretent
-      ? {
-        attendanceRules: ifdirretent?.setting?.attendanceRules,
-        workingMinutes: ifdirretent?.setting?.workingMinutes,
-        weeklyOffs: ifdirretent?.setting?.weeklyOffs,
-      }
-      : {
-        attendanceRules: company?.attendanceRules,
-        workingMinutes: company?.workingMinutes,
-        weeklyOffs: company?.weeklyOffs,
-      };
-  }
 
   // Filters
   const [filtere, setfiltere] = useState({
@@ -141,18 +126,20 @@ const Attandence = () => {
 
   const filteredData = useMemo(() => {
     const today = dayjs();
+    // console.log(attandencelist)
+    // console.log(filtere)
     return attandencelist.filter((val) => {
       const recordDate = dayjs(val.date, "DD MMM, YYYY");
       if (recordDate.isAfter(today, "day")) return false;
       const matchDate = !filtere.date || recordDate.isSame(filtere.date, "day");
       const matchMonth = filtere.month === "all" || recordDate.month() === Number(filtere.month);
       const matchYear = filtere.year === "all" || recordDate.year() === Number(filtere.year);
-      const matchBranch = filtere.branch === "all" || val.branchid === filtere.branch;
-      const matchDept = filtere.departmente === "all" || val.departmentId === filtere.departmente;
+      const matchBranch = filtere.branch === "all" || val.branchId === filtere.branch;
+      const matchDept = filtere.departmente === "all" || val?.employeeId?.department === filtere.departmente;
       const matchStatus = filtere.status === "all" || val.status === filtere.status;
       const matchEmployee =
         !filtere.employee.trim() ||
-        val.rawname?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
+        val?.employeeId?.userid?.name?.toLowerCase().includes(filtere.employee.trim().toLowerCase());
       return matchDate && matchBranch && matchDept && matchStatus && matchEmployee && matchMonth && matchYear;
     });
   }, [attandencelist, filtere]);
@@ -258,7 +245,21 @@ const Attandence = () => {
     }
   }
 
- 
+  const [inputValue, setInputValue] = useState(filtere.employee || "");
+
+  useEffect(() => {
+    if (inputValue === filtere.employee) return; // skip if same value
+
+    setLoading(true);
+    const handler = setTimeout(() => {
+      setfiltere((prev) => ({ ...prev, employee: inputValue }));
+      setLoading(false);
+    }, 700); // debounce delay (500ms)
+
+    return () => clearTimeout(handler);
+  }, [inputValue, setfiltere]);
+
+
   return (
     <div className='p-1'>
       {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
@@ -419,7 +420,7 @@ const Attandence = () => {
                   ))}
                 </Select>
               </FormControl>
-              <TextField
+              {/* <TextField
                 size="small"
                 className="col-span-1 md:w-[150px]"
                 value={filtere.employee}
@@ -439,6 +440,37 @@ const Attandence = () => {
                       >
                         <MdClear />
                       </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                label="Search Employee"
+              /> */}
+              <TextField
+                size="small"
+                className="col-span-1 md:w-[150px]"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IoSearch />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {loading ? (
+                        <CircularProgress size={18} />
+                      ) : (
+                        inputValue && (
+                          <IconButton
+                            onClick={() => setInputValue("")}
+                            edge="end"
+                            size="small"
+                          >
+                            <MdClear />
+                          </IconButton>
+                        )
+                      )}
                     </InputAdornment>
                   ),
                 }}

@@ -136,7 +136,7 @@ export const columns = ({
       name: "Name",
       selector: (row) => row?.employeeId?.userid?.name,
       sortable: true,
-      minWidth: "180px",
+      style: { minWidth: "180px" },
       cell: (row) => (
         <div className="flex items-center gap-3 ">
           <Avatar

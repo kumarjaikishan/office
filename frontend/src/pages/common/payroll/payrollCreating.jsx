@@ -47,7 +47,6 @@ export default function PayrollCreatePage() {
   const [employeeleavebal, setemployeeleavebal] = useState(0);
   const [previousAdvance, setpreviousAdvance] = useState(0);
 
-
   const { holidays, company, employee, attandence, leaveBalance, advance } = useSelector(
     (state) => state.user
   );
@@ -104,9 +103,6 @@ export default function PayrollCreatePage() {
     adjustPaidLeave: false, // ✅ toggle for paid leave adjustment
   });
 
-  useEffect(() => {
-    console.log(form)
-  }, [form])
   const [basic, setBasic] = useState({
     totalDays: 0,
     holidaysCount: 0,
@@ -139,88 +135,6 @@ export default function PayrollCreatePage() {
     setEmployees(employee || []);
   }, [employee]);
 
-  useEffect(() => {
-    if (!company.payrollPolicies || company.payrollPolicies == '') return;
-    setForm({
-      ...form,
-      allowances: company.payrollPolicies?.allowances?.map((e, i) => {
-        return {
-          name: e.name,
-          amount: e.value,
-          extraInfo: '',
-          inputDisabled: false
-        }
-      }),
-      bonuses: company.payrollPolicies?.bonuses?.map((e, i) => {
-        return {
-          name: e.name,
-          amount: e.value,
-          extraInfo: '',
-          inputDisabled: false
-        }
-      }),
-      deductions: company.payrollPolicies?.deductions?.map((e, i) => {
-        return {
-          name: e.name,
-          amount: e.value,
-          extraInfo: '',
-          inputDisabled: false
-        }
-      })
-    })
-  }, [company.payrollPolicies]);
-
-  useEffect(() => {
-    if (!selectedEmployeedetail) return;
-
-    // Use a temporary object to hold the new form state
-    const newFormState = { ...form };
-
-    if (selectedEmployeedetail?.defaultPolicies) {
-      // Use employee-specific policies
-      newFormState.allowances = selectedEmployeedetail.allowances?.map(e => ({
-        name: e.name,
-        amount: e.value,
-        extraInfo: '',
-        inputDisabled: false
-      })) || [];
-      newFormState.bonuses = selectedEmployeedetail.bonuses?.map(e => ({
-        name: e.name,
-        amount: e.value,
-        extraInfo: '',
-        inputDisabled: false
-      })) || [];
-      newFormState.deductions = selectedEmployeedetail.deductions?.map(e => ({
-        name: e.name,
-        amount: e.value,
-        extraInfo: '',
-        inputDisabled: false
-      })) || [];
-    } else if (company?.payrollPolicies) {
-      // Fallback to company defaults
-      newFormState.allowances = company.payrollPolicies.allowances?.map(e => ({
-        name: e.name,
-        amount: e.value,
-        extraInfo: '',
-        inputDisabled: false
-      })) || [];
-      newFormState.bonuses = company.payrollPolicies.bonuses?.map(e => ({
-        name: e.name,
-        amount: e.value,
-        extraInfo: '',
-        inputDisabled: false
-      })) || [];
-      newFormState.deductions = company.payrollPolicies.deductions?.map(e => ({
-        name: e.name,
-        amount: e.value,
-        extraInfo: '',
-        inputDisabled: false
-      })) || [];
-    }
-
-    // Set the form state only once after all updates
-    setForm(newFormState);
-  }, [selectedEmployeedetail, company]);
 
 
   useEffect(() => {
@@ -415,8 +329,60 @@ export default function PayrollCreatePage() {
   };
 
   useEffect(() => {
-    let updatedBonuses = [...form.bonuses];
-    let updatedDeductions = [...form.deductions];
+    if (!selectedEmployeedetail) return;
+
+    // Use a temporary object to hold the new form state
+    let newFormState = { ...form };
+
+    if (selectedEmployeedetail?.defaultPolicies) {
+      // Use employee-specific policies
+      newFormState.allowances = selectedEmployeedetail.allowances?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.bonuses = selectedEmployeedetail.bonuses?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.deductions = selectedEmployeedetail.deductions?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+
+    } else if (company?.payrollPolicies) {
+      // Fallback to company defaults
+      newFormState.allowances = company.payrollPolicies?.allowances?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.bonuses = company.payrollPolicies?.bonuses?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+      newFormState.deductions = company.payrollPolicies?.deductions?.map(e => ({
+        name: e.name,
+        amount: e.value,
+        extraInfo: '',
+        inputDisabled: false
+      })) || [];
+    }
+
+    // Set the form state only once after all updates
+    // setForm(newFormState);
+
+
+    let updatedBonuses = [...newFormState.bonuses];
+    let updatedDeductions = [...newFormState.deductions];
 
     // OVERTIME
     updatedBonuses = updatedBonuses.filter(b => b.name !== "Overtime");
@@ -485,9 +451,13 @@ export default function PayrollCreatePage() {
       }
     }
     // console.log(updatedDeductions)
+    newFormState.bonuses = updatedBonuses
+    newFormState.deductions = updatedDeductions
 
-    setForm(prev => ({ ...prev, bonuses: updatedBonuses, deductions: updatedDeductions }));
-  }, [options, perDayRate, form.leaveDays, form.absentDays, basic.shortmin]);
+    setForm(newFormState);
+    // setForm(prev => ({ ...prev, bonuses: updatedBonuses, deductions: updatedDeductions }));
+
+  }, [options, perDayRate, selectedEmployeedetail]);
 
 
   const addArrayItem = (field, item) =>

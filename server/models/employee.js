@@ -68,8 +68,8 @@ const employeeSchema = new mongoose.Schema({
             date: { type: String } // more descriptive than just "date"
         }
     ],
-    defaultPolicies: {
-        type: Boolean,
+    overridedefaultPolicies: {
+        type: Boolean, default: false
     },
     allowances: {
         type: [
