@@ -27,6 +27,7 @@ const DeveloperDashboard = () => {
     const [passmodal, setpassmodal] = useState(false);
     const [inp, setinp] = useState(init);
     const [isedit, setisedit] = useState(false)
+    const [isloading, setisloading] = useState(false)
 
     const fetche = async () => {
         try {
@@ -132,8 +133,6 @@ const DeveloperDashboard = () => {
     }
 
     const deploy = async (project) => {
-        // console.log("hey");
-
         swal({
             title: `Are you sure you want to Deploy ${project}?`,
             icon: "warning",
@@ -141,23 +140,41 @@ const DeveloperDashboard = () => {
             dangerMode: true,
         }).then(async (proceed) => {
             if (proceed) {
+                setisloading(true)
+                const toastId = toast.loading(`Deploying ${project}...`); // ⏳ show loading
+
                 try {
-                    const token = localStorage.getItem('emstoken')
-                    const res = await axios.get(`${import.meta.env.VITE_API_ADDRESS}deploy/${project}`,
+                    const token = localStorage.getItem('emstoken');
+                    const res = await axios.get(
+                        `${import.meta.env.VITE_API_ADDRESS}deploy/${project}`,
                         {
                             headers: {
-                                Authorization: `Bearer ${token}`
-                            }
+                                Authorization: `Bearer ${token}`,
+                            },
                         }
                     );
-                    toast.success(res.data.message, { autoClose: 1800 });
+
+                    toast.update(toastId, {
+                        render: res.data.message,
+                        type: "success",
+                        isLoading: false,
+                        autoClose: 1800,
+                    });
                 } catch (error) {
+                    toast.update(toastId, {
+                        render: error.response?.data?.message || "Error during deployment",
+                        type: "error",
+                        isLoading: false,
+                        autoClose: 3000,
+                    });
                     console.log(error);
-                    toast.warn(error.response?.data?.message || 'Error', { autoClose: 3000 });
+                } finally {
+                    setisloading(false)
                 }
             }
         });
-    }
+    };
+
 
     const cancel = () => {
         setpassmodal(false);
@@ -219,6 +236,7 @@ const DeveloperDashboard = () => {
                     variant="contained"
                     className="flex-[2] md:w-fit md:flex-none"
                     // startIcon={<GoPlus />}
+                    loading={isloading}
                     onClick={() => deploy('accusoft')}
                 >
                     Accusoft
@@ -227,6 +245,7 @@ const DeveloperDashboard = () => {
                     variant="contained"
                     className="flex-[2] md:w-fit md:flex-none"
                     // startIcon={<GoPlus />}
+                    loading={isloading}
                     onClick={() => deploy('battlefiesta')}
                 >
                     battlefiesta
@@ -235,6 +254,7 @@ const DeveloperDashboard = () => {
                     variant="contained"
                     className="flex-[2] md:w-fit md:flex-none"
                     // startIcon={<GoPlus />}
+                    loading={isloading}
                     onClick={() => deploy('office')}
                 >
                     office
