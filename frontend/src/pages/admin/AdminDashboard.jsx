@@ -298,7 +298,10 @@ const Main = () => {
                         ? "border-red-500"
                         : isPresent
                           ? "border-green-500"
-                          : "border-amber-400"} p-[2px] border-3 rounded-full`}
+                          : todaypresente
+                            ? "border-amber-400"
+                            : "border-gray-300"
+                        } p-[2px] border-3 rounded-full`}
                     >
                       <Avatar
                         src={cloudinaryUrl(emp?.profileimage, {
@@ -312,15 +315,20 @@ const Main = () => {
                       </Avatar>
                     </span>
 
+
                     <p
                       className={`${isAbsent || isLeave
                         ? "text-red-600 text-[14px]"
                         : isPresent
                           ? "text-green-600 text-[14px]"
-                          : "text-amber-700"} text-[12px] text-center transition-all duration-300 capitalize`}
+                          : todaypresente
+                            ? "text-amber-700"
+                            : "text-gray-500"
+                        } text-[12px] text-center transition-all duration-300 capitalize`}
                     >
                       {emp?.userid?.name}
                     </p>
+
                   </div>
                 </Tooltip>
               );
@@ -336,6 +344,9 @@ const Main = () => {
           </span>
           <span className='flex items-center gap-1 text-red-500 text-[13px]'>
             <span className='block w-[15px] rounded-3xl h-[15px] bg-red-500  '></span> Leave/Absent
+          </span>
+          <span className='flex items-center gap-1 text-gray-500 text-[13px]'>
+            <span className='block w-[15px] rounded-3xl h-[15px] bg-gray-500  '></span> No status
           </span>
         </div>
 

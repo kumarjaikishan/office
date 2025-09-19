@@ -1,1 +1,0 @@
-import{bC as r,a5 as p}from"./index-B-UsU4mf.js";function m(t){const{theme:e,name:o,props:s}=t;return!e||!e.components||!e.components[o]||!e.components[o].defaultProps?s:r(e.components[o].defaultProps,s)}function a({props:t,name:e,defaultTheme:o,themeId:s}){let n=p(o);return s&&(n=n[s]||n),m({theme:n,name:e,props:t})}export{m as g,a as u};
