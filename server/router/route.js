@@ -154,7 +154,7 @@ router.route("/ledgerentry/:id")
 router.route("/essl").post((req, res) => {
   console.log("Attendance log received:", req.body);
   // Save to your DB
-  // Example: insert into MySQL / MongoDB
+  // Example: insert into MySQL / MongoDB 
   res.send({ status: "OK" });
 })
 
