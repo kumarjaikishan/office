@@ -187,7 +187,7 @@ const AttenPerformance = () => {
                 overtimemin += workingMinutes;
             } else {
                 const isshort = workingMinutes < setting.workingMinutes.shortDayThreshold;
-                const isOvertime = workingMinutes >= setting.workingMinutes.overtimeAfterMinutes;
+                const isOvertime = workingMinutes > setting.workingMinutes.overtimeAfterMinutes;
 
                 if (isshort) {
                     shortDates.push(date);
@@ -195,6 +195,7 @@ const AttenPerformance = () => {
                 }
 
                 if (isOvertime) {
+                    // console.log(workingMinutes, setting.workingMinutes.overtimeAfterMinutes)
                     overtime.push(date);
                     overtimemin += workingMinutes - setting.workingMinutes.overtimeAfterMinutes;
                 }
@@ -219,7 +220,7 @@ const AttenPerformance = () => {
             if (dayjs(punchOut).isAfter(lateLeaveThreshold)) lateleave.push(date);
         });
         setwithremarks(finaliiy)
-        // console.log(finaliiy)
+        // console.log(overtime)
         sethell({
             present: presentDates,
             absent: absentDates,
