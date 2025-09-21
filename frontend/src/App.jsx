@@ -227,7 +227,7 @@ function App() {
           const emp = data.payload.data.employeeId;
 
           if (data.payload.action === "checkin") {
-            toast(
+            toast.info(
               <div className="flex items-center gap-2 pr-1">
                 <Avatar src={emp.profileimage} alt={emp.employeename}>
                   {!emp.profileimage && <FaRegUser />}
@@ -248,7 +248,7 @@ function App() {
           }
 
           if (data.payload.action === "checkOut") {
-            toast(
+            toast.info(
               <div className="flex items-center gap-2 pr-1">
                 <Avatar src={emp.profileimage} alt={emp.employeename}>
                   {!emp.profileimage && <FaRegUser />}

@@ -153,7 +153,7 @@ router.route("/ledgerentry/:id")
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
 
 router.route("/essl").post((req, res) => {
-  console.log("Attendance log received:", req.body);
+  console.log("Attendance log received from essl directly:", req.body);
   // Save to your DB
   // Example: insert into MySQL / MongoDB 
   res.send({ status: "OK" });
