@@ -222,6 +222,7 @@ function App() {
   useEffect(() => {
     if (islogin && user?.liveAttandence && ["superadmin", "admin", "manager"].includes(user?.profile?.role)) {
       const es = connectSSE((data) => {
+        // console.log("sse se event ayaa")
         if (data.type === "attendance_update") {
           const emp = data.payload.data.employeeId;
 

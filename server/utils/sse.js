@@ -47,9 +47,11 @@ function eventsHandler(req, res) {
   }
 }
 
-
+//checkOut , checkin
 function sendToClients(data, companyId, branchId = '') {
-  clients
+  // console.log("send to call reacieved:", data, companyId, branchId)
+  // console.log("clients", clients)
+  clients 
     .filter((c) => c.companyId === companyId)
     .forEach((client) => {
       // console.log(client.role, client.branchId, branchId)

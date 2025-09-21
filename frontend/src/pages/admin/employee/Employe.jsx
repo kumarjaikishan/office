@@ -1,6 +1,6 @@
 import { columns, addemployee, employeedelette, employeeupdate } from "./employeehelper";
 import TextField from '@mui/material/TextField';
-import {  Avatar, Box, Button, FormControlLabel, IconButton, OutlinedInput, Switch, Typography } from '@mui/material';
+import { Avatar, Box, Button, FormControlLabel, IconButton, OutlinedInput, Switch, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { IoIosSend } from "react-icons/io";
 import Modalbox from '../../../components/custommodal/Modalbox';
@@ -97,6 +97,7 @@ const Employe = () => {
     upi: '',
     adhaar: '',
     pan: '',
+    deviceUserId: '',
     skills: [],
     achievements: [],
     education: [],
@@ -318,6 +319,7 @@ const Employe = () => {
       upi: employee?.upi,
       adhaar: employee?.adhaar,
       pan: employee?.pan,
+      deviceUserId: employee?.deviceUserId,
 
       designation: employee?.designation,
       phone: employee?.phone,
@@ -655,6 +657,11 @@ const Employe = () => {
                         ),
                       }}
                     />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <TextField fullWidth type="number" value={inp.deviceUserId} onChange={(e) => handleChange(e, 'deviceUserId')} label="deviceUserId" size="small" />
+                    {/* <TextField fullWidth required value={inp.email} onChange={(e) => handleChange(e, 'email')} label="Email" size="small" /> */}
                   </div>
 
                   <div className="w-full  flex justify-center">

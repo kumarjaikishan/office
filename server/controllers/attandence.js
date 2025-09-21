@@ -107,7 +107,6 @@ const checkin = async (req, res, next) => {
   try {
     const { employeeId, date, punchIn, status } = req.body;
 
-
     if (!employeeId || !date || !status) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -190,6 +189,187 @@ const checkin = async (req, res, next) => {
     return res.status(500).json({ message: 'Server error', error });
   }
 };
+
+const checkout = async (req, res, next) => {
+  try {
+    const { employeeId, date, punchOut } = req.body;
+
+    if (!employeeId || !date || !punchOut) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Normalize date to UTC midnight
+    const parsedDate = new Date(date);
+    const dateObj = new Date(Date.UTC(
+      parsedDate.getUTCFullYear(),
+      parsedDate.getUTCMonth(),
+      parsedDate.getUTCDate()
+    ));
+
+    // Find the attendance record
+    const record = await Attendance.findOne({ employeeId, date: dateObj });
+
+    if (!record) {
+      return res.status(404).json({ message: 'Check-in not found' });
+    }
+
+    if (record.punchOut) {
+      return res.status(400).json({ message: 'Already checked out' });
+    }
+
+    // Parse punchOut time
+    const punchOutTime = new Date(punchOut);
+    if (isNaN(punchOutTime)) {
+      return res.status(400).json({ message: 'Invalid punchOut time' });
+    }
+
+    // Set punchOut
+    record.punchOut = punchOutTime;
+
+    // Calculate working minutes
+    const diffMinutes = (record.punchOut - record.punchIn) / (1000 * 60);
+    record.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+
+    // Calculate short minutes
+    const short = 480 - record.workingMinutes;
+    record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+
+    await record.save();
+
+    const updatedRecord = await Attendance.findById(record._id)
+      .populate({
+        path: 'employeeId',
+        select: 'userid profileimage',
+        populate: {
+          path: 'userid',
+          select: 'name'
+        }
+      });
+
+    // Notify connected clients
+    sendToClients({
+      type: 'attendance_update',
+      payload: {
+        action: 'checkOut',
+        data: updatedRecord
+      }
+    });
+
+    return res.status(200).json({ message: 'Punch-out recorded', record: updatedRecord });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const recordAttendanceFromLogs = async (req, res, next) => {
+  try {
+    const { deviceUserId, recordTime } = req.body;
+
+    // 1️⃣ Find employee by esslId
+    const employeeDoc = await employee.findOne({ deviceUserId }).select('_id branchId empId companyId');
+    if (!employeeDoc) {
+      console.warn(`⚠️ No employee found with esslId ${deviceUserId}`);
+      return;
+    }
+
+    // 2️⃣ Normalize punch time → strip seconds & ms
+    const punchDate = new Date(recordTime);
+    punchDate.setSeconds(0, 0); // ✅ keep only till minutes
+
+    // 2.1️⃣ Normalize attendance date to UTC midnight
+    const dateObj = new Date(Date.UTC(
+      punchDate.getUTCFullYear(),
+      punchDate.getUTCMonth(),
+      punchDate.getUTCDate()
+    ));
+
+    // 3️⃣ Check existing attendance for same employee + date
+    let attendance = await Attendance.findOne({
+      employeeId: employeeDoc._id,
+      date: dateObj
+    });
+
+    if (!attendance) {
+      // 4️⃣ First punch → create Punch In
+      attendance = new Attendance({
+        companyId: employeeDoc.companyId,
+        branchId: employeeDoc.branchId,
+        empId: employeeDoc.empId,
+        employeeId: employeeDoc._id,
+        date: dateObj,
+        status: 'present',
+        punchIn: punchDate,
+        source: 'device'
+      });
+      await attendance.save();
+
+      const updatedRecord = await Attendance.findById(attendance._id)
+        .populate({
+          path: 'employeeId',
+          select: 'userid profileimage',
+          populate: {
+            path: 'userid',
+            select: 'name'
+          }
+        });
+
+      sendToClients(
+        {
+          type: 'attendance_update',
+          payload: { action: 'checkin', data: updatedRecord }
+        },
+        (employeeDoc?.companyId).toString(),
+        (employeeDoc?.branchId).toString() || null
+      );
+
+      // console.log(`✅ Punch In recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
+    } else {
+      // 5️⃣ If already has punchIn but no punchOut → set Punch Out with calculations
+      if (!attendance.punchOut) {
+        attendance.punchOut = punchDate;
+
+        // ✅ Calculate working minutes
+        const diffMinutes = (attendance.punchOut - attendance.punchIn) / (1000 * 60);
+        attendance.workingMinutes = parseFloat(diffMinutes.toFixed(2));
+
+        // ✅ Calculate short minutes (assuming 480 min = 8 hours workday)
+        const short = 480 - attendance.workingMinutes;
+        attendance.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
+
+        await attendance.save();
+
+        const updatedRecord = await Attendance.findById(attendance._id)
+          .populate({
+            path: 'employeeId',
+            select: 'userid profileimage',
+            populate: {
+              path: 'userid',
+              select: 'name'
+            }
+          });
+
+        sendToClients(
+          {
+            type: 'attendance_update',
+            payload: { action: 'checkOut', data: updatedRecord }
+          },
+          (employeeDoc?.companyId).toString(),
+          (employeeDoc?.branchId).toString() || null
+        );
+
+        console.log(
+          // `✅ Punch Out recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()} | Working: ${attendance.workingMinutes} min | Short: ${attendance.shortMinutes} min`
+        );
+      } else {
+        console.log(`ℹ️ Extra punch ignored for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error recording attendance:", error.message);
+  }
+};
+
 
 
 const facecheckin = async (req, res, next) => {
@@ -330,81 +510,6 @@ const bulkMarkAttendance = async (req, res, next) => {
 };
 
 module.exports = { bulkMarkAttendance };
-
-
-
-
-const checkout = async (req, res, next) => {
-  try {
-    const { employeeId, date, punchOut } = req.body;
-
-    if (!employeeId || !date || !punchOut) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    // Normalize date to UTC midnight
-    const parsedDate = new Date(date);
-    const dateObj = new Date(Date.UTC(
-      parsedDate.getUTCFullYear(),
-      parsedDate.getUTCMonth(),
-      parsedDate.getUTCDate()
-    ));
-
-    // Find the attendance record
-    const record = await Attendance.findOne({ employeeId, date: dateObj });
-
-    if (!record) {
-      return res.status(404).json({ message: 'Check-in not found' });
-    }
-
-    if (record.punchOut) {
-      return res.status(400).json({ message: 'Already checked out' });
-    }
-
-    // Parse punchOut time
-    const punchOutTime = new Date(punchOut);
-    if (isNaN(punchOutTime)) {
-      return res.status(400).json({ message: 'Invalid punchOut time' });
-    }
-
-    // Set punchOut
-    record.punchOut = punchOutTime;
-
-    // Calculate working minutes
-    const diffMinutes = (record.punchOut - record.punchIn) / (1000 * 60);
-    record.workingMinutes = parseFloat(diffMinutes.toFixed(2));
-
-    // Calculate short minutes
-    const short = 480 - record.workingMinutes;
-    record.shortMinutes = short > 0 ? parseFloat(short.toFixed(2)) : 0;
-
-    await record.save();
-
-    const updatedRecord = await Attendance.findById(record._id)
-      .populate({
-        path: 'employeeId',
-        select: 'userid profileimage',
-        populate: {
-          path: 'userid',
-          select: 'name'
-        }
-      });
-
-    // Notify connected clients
-    sendToClients({
-      type: 'attendance_update',
-      payload: {
-        action: 'checkOut',
-        data: updatedRecord
-      }
-    });
-
-    return res.status(200).json({ message: 'Punch-out recorded', record: updatedRecord });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error', error });
-  }
-};
 
 
 const facecheckout = async (req, res, next) => {
@@ -633,4 +738,4 @@ const employeeAttandence = async (req, res, next) => {
 }
 
 
-module.exports = { checkout, deleteattandence, bulkMarkAttendance, facecheckin, facecheckout, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };
+module.exports = { checkout, deleteattandence, bulkMarkAttendance, facecheckin, recordAttendanceFromLogs, facecheckout, editattandence, employeeAttandence, checkin, webattandence, allAttandence, leaveapply, leaveupdate, allleave };

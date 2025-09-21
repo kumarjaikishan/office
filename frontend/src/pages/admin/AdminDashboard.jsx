@@ -61,7 +61,7 @@ const Main = () => {
     // console.log("department", attandence)
     if (!attandence) return;
     let todaysAttendance = attandence.filter(val => dayjs(val.date).isSame(dayjs(), 'day'));
-    console.log(todaysAttendance)
+    // console.log(todaysAttendance)
     let currentPresent = todaysAttendance?.filter((val) => {
       return !val.punchOut && val.status !== 'absent' && val.status !== 'leave'
     })
