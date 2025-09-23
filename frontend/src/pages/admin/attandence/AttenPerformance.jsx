@@ -426,6 +426,7 @@ const columns = (setting) => [
     },
     {
         name: "Punch In",
+        width: '140px',
         selector: (row) => row.punchIn,
         cell: (emp) => {
             if (!emp.punchIn) return '-';
@@ -452,6 +453,7 @@ const columns = (setting) => [
     },
     {
         name: "Punch Out",
+        width: '140px',
         selector: (row) => row.punchOut,
         cell: (emp) => {
             if (!emp.punchOut) return '-';
@@ -494,7 +496,7 @@ const columns = (setting) => [
                 </span>
             );
         },
-        width: '140px'
+        width: '120px'
     },
     {
         name: "Working Hours",

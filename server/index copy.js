@@ -5,41 +5,33 @@ const PORT = process.env.PORT || 5000;
 const errorHandle = require('./utils/error_util');
 const route = require('./router/route');
 const esslRoutes = require('./essl');
-const { eventsHandler } = require('./utils/sse'); // adjust path if needed
+const { eventsHandler, sendToClients } = require('./utils/sse'); // adjust path if needed
 require('./conn/conn')
 
-app.use(express.json({
-  verify: (req, res, buf) => {
-    req.bodyRaw = buf.toString(); // store raw body
-  }
-}));
-
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cors());
 
-// app.use((req, res, next) => {
-//   let raw = '';
-//   req.on('data', chunk => raw += chunk.toString());
-//   req.on('end', () => {
-//     req.bodyRaw = raw; // store raw body for later
-//     next();
-//   });
-// });
+app.use((req, res, next) => {
+  let raw = '';
+  req.on('data', chunk => raw += chunk.toString());
+  req.on('end', () => {
+    req.bodyRaw = raw; // store raw body for later
+    next();
+  });
+});
 
 // Debug all requests
 app.use((req, res, next) => {
-  // console.log(`📡 Incoming: ${req.method} ${req.url}`);
+  console.log(`📡 Incoming: ${req.method} ${req.url}`);
   // console.log("Headers:", req.headers);
   // if (req.bodyRaw) console.log("Raw Body:", req.bodyRaw);
   next();
 });
 
 app.use("/api", route);
+app.use('/', esslRoutes);
 app.get('/events', eventsHandler);
 
-
-
-app.use('/', esslRoutes);
 
 
 app.use((req, res, next) => {

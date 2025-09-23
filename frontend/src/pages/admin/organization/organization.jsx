@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, TextField, Button, Typography, MenuItem,
     Grid, FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText,
-    Avatar
+    Avatar,
+    IconButton
 } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -10,9 +11,9 @@ import Modalbox from '../../../components/custommodal/Modalbox';
 import Addbranch from './addbranch';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCompany } from './helper';
-import { MdExpandLess, MdExpandMore, MdOutlineModeEdit } from "react-icons/md";
+import { MdExpandLess, MdExpandMore, MdOutlineModeEdit, MdOutlineWifiOff } from "react-icons/md";
 import Department from './department/Department';
-import { FaRegUser } from 'react-icons/fa';
+import { FaCircle, FaRegUser, FaTrash, FaWifi } from 'react-icons/fa';
 import { AiFillAmazonCircle, AiOutlineDelete } from "react-icons/ai";
 import useImageUpload from "../../../utils/imageresizer";
 import SuperAdminDashboard from './admin';
@@ -150,6 +151,13 @@ export default function OrganizationSettings() {
     }
     const styles = useCustomStyles();
 
+    const isOnline = (lastHeartbeat) => {
+        if (!lastHeartbeat) return false; // never connected
+        const diff = Date.now() - new Date(lastHeartbeat).getTime();
+        return diff < 60000; // online if heartbeat within last 60 seconds
+    };
+
+
     return (
         <div className="w-full mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
             {/* Company Info */}
@@ -183,7 +191,7 @@ export default function OrganizationSettings() {
                                                 format: "webp",
                                                 width: 200,
                                                 height: 200,
-                                            }) || employepic}
+                                            })}
                                             alt="Company Logo"
                                             className="w-full h-full object-fill rounded-full border-2 border-dashed border-blue-300"
                                         />
@@ -297,37 +305,6 @@ export default function OrganizationSettings() {
                                         onChange={(e) => setcompany({ ...companyinp, deviceSN: e.target.value })}
                                     />
                                 </div>
-                                <div>
-                                    <h4>Devices</h4>
-                                    {companyinp.devices.map((device, index) => (
-                                        <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                            <TextField
-                                                label="Device Name"
-                                                variant="standard"
-                                                size="small"
-                                                value={device.name}
-                                                onChange={(e) => {
-                                                    const newDevices = [...companyinp.devices];
-                                                    newDevices[index].name = e.target.value;
-                                                    setcompany({ ...companyinp, devices: newDevices });
-                                                }}
-                                            />
-                                            <TextField
-                                                label="Device SN"
-                                                variant="standard"
-                                                size="small"
-                                                value={device.SN}
-                                                onChange={(e) => {
-                                                    const newDevices = [...companyinp.devices];
-                                                    newDevices[index].SN = e.target.value;
-                                                    setcompany({ ...companyinp, devices: newDevices });
-                                                }}
-                                            />
-                                            <Button variant="outlined" color="error" onClick={() => removeDevice(index)}>Remove</Button>
-                                        </div>
-                                    ))}
-                                     <Button variant="contained" onClick={addDevice}>Add Device</Button>
-                                </div>
 
                                 <div >
                                     <TextField
@@ -340,6 +317,8 @@ export default function OrganizationSettings() {
                                         onChange={(e) => setcompany({ ...companyinp, address: e.target.value })}
                                     />
                                 </div>
+
+
 
                                 {company ? (
                                     <Button variant="contained" loading={isload} onClick={handleSubmit}>
@@ -357,6 +336,7 @@ export default function OrganizationSettings() {
                 </div>
             }
 
+            {/* Branches Info */}
             {(profile?.role == 'superadmin' || profile?.role == 'admin') &&
                 <div className='border shadow-lg bg-green-50 border-dashed border-green-400 rounded-md'>
                     <div
@@ -439,7 +419,7 @@ export default function OrganizationSettings() {
                 </div>
             }
 
-
+            {/* Department Info */}
             <div className='border shadow-lg bg-teal-50 border-dashed border-teal-400 rounded-md'>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-teal-200 px-4 py-2 rounded-md"
@@ -464,6 +444,85 @@ export default function OrganizationSettings() {
 
             </div>
 
+            {/* DEvice Info */}
+            <div className='border shadow-lg bg-teal-50 border-dashed border-teal-400 rounded-md'>
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-teal-200 px-4 py-2 rounded-md"
+                    onClick={() => toggleSection('device')}
+                >
+                    <span className="font-semibold text-[16px] md:text-lg text-left">Devices</span>
+                    {openSection === 'device' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+
+                <div
+                    className={`
+                          rounded overflow-hidden transition-all duration-300
+                          ${openSection === 'device' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                >
+                    <div className='mb-2  '>
+                        {/* <h4>Devices</h4> */}
+                        {companyinp?.devices?.map((device, index) => {
+                            const online = isOnline(device.lastHeartbeat);
+
+                            return (
+                                <div
+                                    key={index}
+                                    className='flex w-full gap-2 items-center mb-2'
+                                >
+                                    {/* Device Name */}
+                                    <TextField
+                                        label="Device Name"
+                                        variant="standard"
+                                        size="small"
+                                        value={device.name}
+                                        onChange={(e) => updateDevice(index, "name", e.target.value)}
+                                    />
+
+                                    {/* Device SN */}
+                                    <TextField
+                                        label="Device SN"
+                                        variant="standard"
+                                        size="small"
+                                        value={device.SN}
+                                        onChange={(e) => updateDevice(index, "SN", e.target.value)}
+                                    />
+
+                                    {/* Status Icon */}
+                                    {online ? (
+                                        <FaWifi
+                                            title="Device Online"
+                                            style={{ color: "green", fontSize: "1.6rem" }}
+                                        />
+                                    ) : (
+                                        <MdOutlineWifiOff
+                                            title="Device Offline"
+                                            style={{ color: "red", fontSize: "1.6rem" }}
+                                        />
+                                    )}
+
+                                    {/* Delete Icon */}
+                                    <IconButton color="error" onClick={() => removeDevice(index)}>
+                                        <FaTrash />
+                                    </IconButton>
+                                </div>
+                            );
+                        })}
+
+                        <Button variant="contained" onClick={addDevice}>Add More Device</Button>
+                    </div>
+                    <Button className='f float-end' variant="contained" loading={isload} onClick={handleSubmit}>
+                        Save Changes
+                    </Button>
+                </div>
+
+            </div>
+
+            {/* Admin / Manager Info */}
             {profile?.role == 'superadmin' &&
                 <div className='border shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                     <div
@@ -490,6 +549,7 @@ export default function OrganizationSettings() {
                 </div>
             }
 
+            {/* Attendence rule Info */}
             <div className='border shadow-lg bg-yellow-50 border-dashed border-yellow-400 rounded-md'>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-yellow-200 px-4 py-2 rounded-md"
@@ -643,6 +703,7 @@ export default function OrganizationSettings() {
 
             </div>
 
+            {/* Default payroll policies Info */}
             <div className='border shadow-lg bg-purple-50 border-dashed border-purple-400 rounded-md'>
                 <div
                     className="flex justify-between items-center cursor-pointer bg-purple-200 px-4 py-2 rounded-md"
@@ -775,7 +836,6 @@ export default function OrganizationSettings() {
                     </div>
                 </form>
             </div>
-
 
             <Modalbox open={openviewmodal} onClose={() => {
                 setopenviewmodal(false);

@@ -37,6 +37,7 @@ const BulkMark = ({
 
   // Memoize filtered employees to prevent re-calculation on every render.
   const filteredEmployee = useMemo(() => {
+    // console.log("filtereed employee")
     if (!employee) return [];
     return employee.filter(e => {
       const isactive = e.status !== false;
@@ -48,6 +49,7 @@ const BulkMark = ({
 
   // Memoize attendance data for the selected date.
   const alreadyAttendance = useMemo(() => {
+    // console.log('already attendence')
     if (!attandenceDate || !attandence) return [];
     return attandence.filter(e => dayjs(e.date).isSame(dayjs(attandenceDate), "day"));
   }, [attandenceDate, attandence]);
@@ -83,6 +85,7 @@ const BulkMark = ({
 
   // Apply-to-all handler, now more efficient.
   useEffect(() => {
+    // console.log("useefect")
     if (!toall || Object.keys(toall).length === 0) return;
 
     setRowData(prev => {
@@ -103,6 +106,7 @@ const BulkMark = ({
 
   // Memoized handlers
   const handleCheckbox = useCallback((empId) => {
+    // console.log("handlecheck box")
     setcheckedemployee(prev =>
       prev.includes(empId) ? prev.filter(id => id !== empId) : [...prev, empId]
     );

@@ -113,12 +113,11 @@ const Sidebar = () => {
                       onClick={() => {
                         if (showText) setOpenSubmenu(openSubmenu === menuId ? null : menuId);
                       }}
-                      className={`relative flex w-full items-center px-2 py-2 text-gray-600 hover:bg-teal-50 rounded transition-all ${
-                        showText ? "justify-start gap-2" : "justify-center"
-                      }`}
+                      className={`relative flex w-full gap-3 items-center px-2 py-2 text-gray-600 hover:bg-teal-50 rounded transition-all ${showText ? "justify-start gap-2" : "justify-center"
+                        }`}
                     >
                       <span className="text-[18px]">{item.icon}</span>
-                      {showText && <span>{item.menu}</span>}
+                      {showText && <span className="text-[14px] md:text-[16px]">{item.menu}</span>}
                       {showText && (
                         <span className="absolute right-2 text-gray-600">
                           {isOpen ? <IoChevronDown /> : <IoChevronForward />}
@@ -178,8 +177,7 @@ const Sidebar = () => {
                                 key={child.menu}
                                 onClick={() => setHoveredMenu(null)}
                                 className={({ isActive }) =>
-                                  `block px-4 py-2 text-sm text-gray-600 whitespace-nowrap ${
-                                    isActive ? "bg-primary text-white" : "hover:bg-gray-100"
+                                  `block px-4 py-2 text-sm text-gray-600 whitespace-nowrap ${isActive ? "bg-primary text-white" : "hover:bg-gray-100"
                                   }`
                                 }
                               >
@@ -199,9 +197,8 @@ const Sidebar = () => {
                 <button
                   key={item.menu}
                   onClick={handleLogout}
-                  className={`flex cursor-pointer w-full mb-1 items-center rounded text-gray-600 hover:bg-teal-50 ${
-                    showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"
-                  }`}
+                  className={`flex cursor-pointer w-full mb-1 items-center rounded text-gray-600 hover:bg-teal-50 ${showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"
+                    }`}
                 >
                   <span className="text-[18px]">{item.icon}</span>
                   {showText && <span>{item.menu}</span>}
@@ -213,8 +210,7 @@ const Sidebar = () => {
                   key={item.link}
                   onClick={() => setOpenSubmenu(null)}
                   className={({ isActive }) =>
-                    `flex text-nowrap w-full mb-1 text-[14px] md:text-[16px] items-center rounded text-gray-600 ${
-                      showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"
+                    `flex text-nowrap w-full mb-1 text-[14px] md:text-[16px] items-center rounded text-gray-600 ${showText ? "justify-start gap-3 px-2 py-2" : "justify-center h-10"
                     } ${isActive ? "bg-primary text-white" : ""}`
                   }
                 >
