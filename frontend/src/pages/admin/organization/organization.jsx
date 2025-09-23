@@ -44,6 +44,11 @@ export default function OrganizationSettings() {
         address: '',
         contact: '',
         fullname: '',
+        deviceSN: '',
+        devices: [
+            // Each device has SN, name, and online status
+            { SN: 'BJ2C194460597', name: 'Head Branch', online: false }
+        ],
         officeTime: { in: '10:00', out: '18:00', breakMinutes: 30 },
         gracePeriod: { lateEntryMinutes: 10, earlyExitMinutes: 10 },
         workingMinutes: {
@@ -65,6 +70,20 @@ export default function OrganizationSettings() {
             deductions: []
         }
     })
+
+    // Add new device
+    const addDevice = () => {
+        setcompany({
+            ...companyinp,
+            devices: [...companyinp.devices, { SN: '', name: '', online: false }]
+        });
+    };
+
+    // Remove device
+    const removeDevice = (index) => {
+        const newDevices = companyinp.devices.filter((_, i) => i !== index);
+        setcompany({ ...companyinp, devices: newDevices });
+    };
 
     const dispatch = useDispatch();
     const { employee, company, branch, profile } = useSelector((state) => state.user);
@@ -268,6 +287,48 @@ export default function OrganizationSettings() {
                                         onChange={(e) => setcompany({ ...companyinp, fullname: e.target.value })}
                                     />
                                 </div>
+                                <div >
+                                    <TextField
+                                        label="BIometric Serial No."
+                                        variant="standard"
+                                        fullWidth
+                                        size='small'
+                                        value={companyinp?.deviceSN || ""}
+                                        onChange={(e) => setcompany({ ...companyinp, deviceSN: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <h4>Devices</h4>
+                                    {companyinp.devices.map((device, index) => (
+                                        <div key={index} style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                                            <TextField
+                                                label="Device Name"
+                                                variant="standard"
+                                                size="small"
+                                                value={device.name}
+                                                onChange={(e) => {
+                                                    const newDevices = [...companyinp.devices];
+                                                    newDevices[index].name = e.target.value;
+                                                    setcompany({ ...companyinp, devices: newDevices });
+                                                }}
+                                            />
+                                            <TextField
+                                                label="Device SN"
+                                                variant="standard"
+                                                size="small"
+                                                value={device.SN}
+                                                onChange={(e) => {
+                                                    const newDevices = [...companyinp.devices];
+                                                    newDevices[index].SN = e.target.value;
+                                                    setcompany({ ...companyinp, devices: newDevices });
+                                                }}
+                                            />
+                                            <Button variant="outlined" color="error" onClick={() => removeDevice(index)}>Remove</Button>
+                                        </div>
+                                    ))}
+                                     <Button variant="contained" onClick={addDevice}>Add Device</Button>
+                                </div>
+
                                 <div >
                                     <TextField
                                         label="Address"
