@@ -327,7 +327,7 @@ const recordAttendanceFromLogs = async (req, res, next) => {
         (employeeDoc?.branchId).toString() || null
       );
 
-      sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
+      // sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
 
       // console.log(`✅ Punch In recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
     } else {
