@@ -21,7 +21,7 @@ router.get('/api/iclock/devicecmd', (req, res) => {
     res.send('OK');
 });
 
-// GET request for device
+// GET request for device for server exist , is receive ok then next requesta on GET /iclock/getrequest
 router.get(['/api/iclock/cdata', '/api/iclock/cdata.aspx'], (req, res) => {
     // console.log("➡️ GET /iclock/cdata or /iclock/cdata.aspx");
     // console.log("Query params:", req.query);
@@ -52,6 +52,7 @@ router.post(['/api/iclock/cdata', '/api/iclock/cdata.aspx'], async (req, res) =>
     const raw = req.bodyRaw || '';
     const deviceSN = req.query.SN || null;
     // console.log('deviceSN', deviceSN)
+    // console.log('raw', raw)
 
     if (raw.startsWith('USER')) {
         // Parse user data

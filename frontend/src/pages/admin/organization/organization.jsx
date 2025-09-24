@@ -295,7 +295,7 @@ export default function OrganizationSettings() {
                                         onChange={(e) => setcompany({ ...companyinp, fullname: e.target.value })}
                                     />
                                 </div>
-                                <div >
+                                {/* <div >
                                     <TextField
                                         label="BIometric Serial No."
                                         variant="standard"
@@ -304,7 +304,7 @@ export default function OrganizationSettings() {
                                         value={companyinp?.deviceSN || ""}
                                         onChange={(e) => setcompany({ ...companyinp, deviceSN: e.target.value })}
                                     />
-                                </div>
+                                </div> */}
 
                                 <div >
                                     <TextField
