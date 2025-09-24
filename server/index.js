@@ -41,7 +41,7 @@ app.use([
 // Optional: log incoming requests
 // ----------------------
 app.use((req, res, next) => {
-  console.log(`📡 Incoming: ${req.method} ${req.url}`);
+  // console.log(`📡 Incoming: ${req.method} ${req.url}`);
   // if (req.bodyRaw) console.log('Raw Body:', req.bodyRaw);
   next();
 });

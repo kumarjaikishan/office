@@ -5,6 +5,8 @@ const Leave = require('../models/leave');
 const User = require('../models/user');
 const mongoose = require("mongoose");
 const { sendToClients } = require('../utils/sse');
+const { sendTelegramMessage } = require('../utils/telegram');
+const dayjs = require('dayjs');
 
 
 const webattandence = async (req, res, next) => {
@@ -182,6 +184,7 @@ const checkin = async (req, res, next) => {
         attendanceData?.branchId || null
       );
     }
+     sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
 
     return res.status(200).json({ message: 'Punch-in recorded', attendance });
   } catch (error) {
@@ -254,6 +257,7 @@ const checkout = async (req, res, next) => {
         data: updatedRecord
       }
     });
+    //  sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched Out at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
 
     return res.status(200).json({ message: 'Punch-out recorded', record: updatedRecord });
   } catch (error) {
@@ -323,6 +327,8 @@ const recordAttendanceFromLogs = async (req, res, next) => {
         (employeeDoc?.branchId).toString() || null
       );
 
+      sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
+
       // console.log(`✅ Punch In recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
     } else {
       // 5️⃣ If already has punchIn but no punchOut → set Punch Out with calculations
@@ -357,7 +363,7 @@ const recordAttendanceFromLogs = async (req, res, next) => {
           (employeeDoc?.companyId).toString(),
           (employeeDoc?.branchId).toString() || null
         );
-
+        sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched Out at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
         console.log(
           // `✅ Punch Out recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()} | Working: ${attendance.workingMinutes} min | Short: ${attendance.shortMinutes} min`
         );

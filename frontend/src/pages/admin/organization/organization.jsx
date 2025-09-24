@@ -3,7 +3,8 @@ import {
     Box, TextField, Button, Typography, MenuItem,
     Grid, FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText,
     Avatar,
-    IconButton
+    IconButton,
+    Tooltip
 } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -14,13 +15,14 @@ import { addCompany } from './helper';
 import { MdExpandLess, MdExpandMore, MdOutlineModeEdit, MdOutlineWifiOff } from "react-icons/md";
 import Department from './department/Department';
 import { FaCircle, FaRegUser, FaTrash, FaWifi } from 'react-icons/fa';
-import { AiFillAmazonCircle, AiOutlineDelete } from "react-icons/ai";
+import { AiFillAmazonCircle, AiOutlineDelete, AiOutlineInfoCircle } from "react-icons/ai";
 import useImageUpload from "../../../utils/imageresizer";
 import SuperAdminDashboard from './admin';
 import { FirstFetch } from '../../../../store/userSlice';
 import DataTable from 'react-data-table-component';
 import { useCustomStyles } from '../attandence/attandencehelper';
 import { cloudinaryUrl } from '../../../utils/imageurlsetter';
+import dayjs from 'dayjs';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -82,8 +84,17 @@ export default function OrganizationSettings() {
 
     // Remove device
     const removeDevice = (index) => {
-        const newDevices = companyinp.devices.filter((_, i) => i !== index);
-        setcompany({ ...companyinp, devices: newDevices });
+        swal({
+            title: "Delete this device?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then((willLogout) => {
+            if (willLogout) {
+                const newDevices = companyinp.devices.filter((_, i) => i !== index);
+                setcompany({ ...companyinp, devices: newDevices });
+            }
+        });
     };
 
     const dispatch = useDispatch();
@@ -467,7 +478,7 @@ export default function OrganizationSettings() {
                     <div className='mb-2  '>
                         {/* <h4>Devices</h4> */}
                         {companyinp?.devices?.map((device, index) => {
-                            const online = isOnline(device.lastHeartbeat);
+                            const online = isOnline(device?.lastHeartbeat);
 
                             return (
                                 <div
@@ -504,6 +515,13 @@ export default function OrganizationSettings() {
                                             style={{ color: "red", fontSize: "1.6rem" }}
                                         />
                                     )}
+
+                                    <Tooltip
+                                        title={`Last Sync: ${dayjs(device?.lastHeartbeat).format("HH:mm:ss, DD MMM YYYY")}`}
+                                        arrow
+                                    >
+                                        <AiOutlineInfoCircle style={{ color: "blue", fontSize: "1.6rem" }} />
+                                    </Tooltip>
 
                                     {/* Delete Icon */}
                                     <IconButton color="error" onClick={() => removeDevice(index)}>

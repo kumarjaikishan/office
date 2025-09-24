@@ -1,0 +1,1 @@
+import{bE as r,bX as p}from"./index-HcCGk6ri.js";function m(t){const{theme:e,name:o,props:s}=t;return!e||!e.components||!e.components[o]||!e.components[o].defaultProps?s:r(e.components[o].defaultProps,s)}function a({props:t,name:e,defaultTheme:o,themeId:s}){let n=p(o);return s&&(n=n[s]||n),m({theme:n,name:e,props:t})}export{m as g,a as u};
