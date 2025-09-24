@@ -517,7 +517,7 @@ export default function OrganizationSettings() {
                                     )}
 
                                     <Tooltip
-                                        title={`Last Sync: ${dayjs(device?.lastHeartbeat).format("HH:mm:ss, DD MMM YYYY")}`}
+                                      title={`Last Sync: ${dayjs(device?.lastHeartbeat).format("DD MMM YYYY, hh:mm:ss A")}`}
                                         arrow
                                     >
                                         <AiOutlineInfoCircle style={{ color: "blue", fontSize: "1.6rem" }} />
