@@ -21,11 +21,12 @@ app.use(express.urlencoded({ extended: true }));
 // ----------------------
 // Raw-body middleware only for ESSL device routes
 // ----------------------
+// Raw-body only for ESSL device routes
 app.use([
-  '/api/iclock/cdata',
-  '/api/iclock/cdata.aspx',
-  '/iclock/cdata',
-  '/iclock/cdata.aspx'
+  '/essl/iclock/cdata',
+  '/essl/iclock/cdata.aspx',
+  '/essl/iclock/getrequest.aspx',
+  '/essl/iclock/devicecmd'
 ], (req, res, next) => {
   let raw = '';
   req.on('data', chunk => raw += chunk.toString());
@@ -34,6 +35,7 @@ app.use([
     next();
   });
 });
+
 
 // ----------------------
 // Optional: log incoming requests

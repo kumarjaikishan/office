@@ -15,21 +15,21 @@ router.post('/', (req, res) => {
 });
 
 // Device command polling
-router.get('/api/iclock/devicecmd', (req, res) => {
+router.get('/essl/iclock/devicecmd', (req, res) => {
     console.log("➡️ GET /iclock/devicecmd");
     // console.log("Query:", req.query);
     res.send('OK');
 });
 
 // GET request for device for server exist , is receive ok then next requesta on GET /iclock/getrequest
-router.get(['/api/iclock/cdata', '/api/iclock/cdata.aspx'], (req, res) => {
+router.get(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], (req, res) => {
     // console.log("➡️ GET /iclock/cdata or /iclock/cdata.aspx");
     // console.log("Query params:", req.query);
     res.send('OK iclock/cdata');
 });
 
 // Device heartbeat / info request
-router.get('/api/iclock/getrequest.aspx', async (req, res) => {
+router.get('/essl/iclock/getrequest.aspx', async (req, res) => {
     // console.log("➡️ GET /iclock/getrequest.aspx");
     console.log("heartbeat ESSL SN:", req.query.SN);
 
@@ -48,7 +48,7 @@ router.get('/api/iclock/getrequest.aspx', async (req, res) => {
 });
 
 // POST request for device
-router.post(['/api/iclock/cdata', '/api/iclock/cdata.aspx'], async (req, res) => {
+router.post(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], async (req, res) => {
     const raw = req.bodyRaw || '';
     const deviceSN = req.query.SN || null;
     // console.log('deviceSN', deviceSN)

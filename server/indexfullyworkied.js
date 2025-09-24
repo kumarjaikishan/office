@@ -15,21 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware to capture raw body
-// app.use((req, res, next) => {
-//     console.log(`📡 Incoming: ${req.method} ${req.url}`);
-//     // console.log("Headers:", req.headers);
 
-//     let raw = "";
-//     req.on("data", chunk => raw += chunk.toString());
-//     req.on("end", () => {
-//         if (raw) {
-//             // console.log("Raw Body:", raw);
-//             req.bodyRaw = raw;
-//         }
-//         next(); // ✅ don’t forget this
-//     });
-// });
 
 // ✅ Raw-body only for ESSL device routes
 app.use(['/api/iclock/cdata', '/api/iclock/cdata.aspx', '/iclock/cdata', '/iclock/cdata.aspx'], (req, res, next) => {
