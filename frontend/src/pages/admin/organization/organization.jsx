@@ -549,8 +549,9 @@ export default function OrganizationSettings() {
                                         label="Last Sync"
                                         variant="standard"
                                         size="small"
-                                        disabled
-                                        value={!device?.lastHeartbeat ? 'N/A' : dayjs(device?.lastHeartbeat).format("DD MMM YYYY, hh:mm:ss A")}
+                                        // disabled
+                                        // value={!device?.lastHeartbeat ? 'N/A' : dayjs(device?.lastHeartbeat).format("DD MMM YYYY, hh:mm:ss A")}
+                                        value={!device?.lastHeartbeat ? 'N/A' : dayjs(device?.lastHeartbeat).format("DD/MM/YY, hh:mm:ss A")}
                                     />
 
                                     {/* Status Icon */}

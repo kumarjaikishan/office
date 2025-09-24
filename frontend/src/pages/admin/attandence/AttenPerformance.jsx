@@ -422,11 +422,17 @@ const columns = (setting) => [
         name: "Date",
         selector: (row) => dayjs(row.date).format('DD MMM, YYYY'),
         sortable: true,
-        width: '120px',
+        // width: '100px',
+         style: {
+            minWidth: "100px", // 👈 added here
+        },
     },
     {
         name: "Punch In",
-        width: '140px',
+        // width: '140px',
+        style: {
+            minWidth: "140px", // 👈 added here
+        },
         selector: (row) => row.punchIn,
         cell: (emp) => {
             if (!emp.punchIn) return '-';
@@ -453,7 +459,10 @@ const columns = (setting) => [
     },
     {
         name: "Punch Out",
-        width: '140px',
+        // width: '140px',
+        style: {
+            minWidth: "140px", // 👈 added here
+        },
         selector: (row) => row.punchOut,
         cell: (emp) => {
             if (!emp.punchOut) return '-';
@@ -496,11 +505,17 @@ const columns = (setting) => [
                 </span>
             );
         },
-        width: '120px'
+        // width: '120px',
+        style: {
+            minWidth: "120px", // 👈 added here
+        },
     },
     {
         name: "Working Hours",
-        width: '180px',
+        // width: '180px',
+         style: {
+            minWidth: "180px", // 👈 added here
+        },
         selector: (emp) => emp.workingMinutes,
         cell: (emp) => {
             const wm = emp.workingMinutes;
