@@ -21,7 +21,7 @@ const BulkMark = ({
   openmodal, init, setopenmodal,
   isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-  const { department, branch, employee, attandence } = useSelector((state) => state.user);
+  const { department, branch, employee, attandence, profile } = useSelector((state) => state.user);
 
   const [checkedemployee, setcheckedemployee] = useState([]);
   const [rowData, setRowData] = useState({});
@@ -224,9 +224,22 @@ const BulkMark = ({
                     onChange={(e) => setselectedBranch(e.target.value)}
                   >
                     <MenuItem value="all"><em>All</em></MenuItem>
-                    {branch?.map((b, i) => (
+                    {/* {branch?.map((b, i) => (
                       <MenuItem key={i} value={b._id}>{b.name}</MenuItem>
-                    ))}
+                    ))} */}
+
+                    {profile?.role === 'manager'
+                      ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                        ?.map((list) => (
+                          <MenuItem key={list._id} value={list._id}>
+                            {list.name}
+                          </MenuItem>
+                        ))
+                      :
+                      branch?.map((list) => (
+                        <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
+                      ))
+                    }
                   </Select>
                 </FormControl>
 

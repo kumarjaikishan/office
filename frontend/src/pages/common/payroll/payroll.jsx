@@ -27,6 +27,7 @@ import { payrollColumns } from "./payrollhelper";
 import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
 import { useSelector } from "react-redux";
+import CheckPermission from "../../../utils/CheckPermission";
 
 export default function PayrollPage() {
   const { employeeId } = useParams();
@@ -40,8 +41,8 @@ export default function PayrollPage() {
     branch: 'all',
     department: 'all'
   });
-    const {  employee, leaveBalance, branch, department } = useSelector((state) => state.user);
-  
+  const { employee, leaveBalance, branch, departmen, profile } = useSelector((state) => state.user);
+
 
   useEffect(() => {
     fetchPayroll();
@@ -88,12 +89,12 @@ export default function PayrollPage() {
     // console.log("Editing", row);
     navigate(`/dashboard/payroll/edit/${row._id}`)
   };
-     const handleFilterChange = (key, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [key]: value
-        }));
-    };
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
   const filteredEmployees = payroll?.filter(emp => {
     const name = emp.employeeId?.userid?.name?.toLowerCase() || '';
@@ -144,6 +145,12 @@ export default function PayrollPage() {
 
   };
 
+  const canCreate = CheckPermission('salary', 2);
+  const canView = CheckPermission('salary', 1);
+  const canEdit = CheckPermission('salary', 3);
+  const canDelete = CheckPermission('salary', 4);
+
+
   //   if (loading) return <p className="p-4 text-gray-500">Calculating payroll...</p>;
   //   if (error) return <p className="p-4 text-red-500">{error}</p>;
   if (!payroll) return <p className="p-4 text-gray-500">No payroll data found</p>;
@@ -191,11 +198,24 @@ export default function PayrollPage() {
               onChange={(e) => handleFilterChange("branch", e.target.value)}
             >
               <MenuItem value="all">All</MenuItem>
-              {branch?.map((list) => (
+              {/* {branch?.map((list) => (
                 <MenuItem key={list._id} value={list._id}>
                   {list.name}
                 </MenuItem>
-              ))}
+              ))} */}
+
+              {profile?.role === 'manager'
+                ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                  ?.map((list) => (
+                    <MenuItem key={list._id} value={list._id}>
+                      {list.name}
+                    </MenuItem>
+                  ))
+                :
+                branch?.map((list) => (
+                  <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
+                ))
+              }
             </Select>
           </FormControl>
 
@@ -236,20 +256,22 @@ export default function PayrollPage() {
                               </Select>
                           </FormControl> */}
         </div>
-        <div className="w-full md:w-fit">
-          <Button size="small"
-            className="w-full md:w-fit"
-            onClick={() => {
-              navigate('/dashboard/payroll/add')
-            }}
-            variant="contained"> Add Payroll
+        {canCreate &&
+          <div className="w-full md:w-fit">
+            <Button size="small"
+              className="w-full md:w-fit"
+              onClick={() => {
+                navigate('/dashboard/payroll/add')
+              }}
+              variant="contained"> Add Payroll
 
-          </Button>
-        </div>
+            </Button>
+          </div>
+        }
       </div>
       <div>
         <DataTable
-          columns={payrollColumns(handleView, handleEdit, handleDelete)}
+          columns={payrollColumns(handleView, handleEdit, handleDelete, canView, canEdit, canDelete)}
           data={filteredEmployees}
           pagination
           customStyles={themes}

@@ -676,7 +676,7 @@ const firstfetch = async (req, res, next) => {
         let advance = [];
         // let permissionName=[];
         // let defaultRolePermission=[];
-        user = await usermodal.findById(req.user.id).select('name email profileImage role');
+        user = await usermodal.findById(req.user.id).select('name email profileImage role permissions branchIds');
 
         if (req.user.role == 'manager') {
 
@@ -699,6 +699,8 @@ const firstfetch = async (req, res, next) => {
                 .populate('department', 'department')
                 .populate('userid', 'email name ')
                 .sort({ empId: 1 });
+
+                // console.log(employees)
 
             const employeeIds = employees.map(emp => emp._id);
 

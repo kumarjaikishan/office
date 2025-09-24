@@ -444,11 +444,20 @@ const Employe = () => {
               onChange={(e) => handleFilterChange("branch", e.target.value)}
             >
               <MenuItem value="all">All</MenuItem>
-              {branch?.map((list) => (
-                <MenuItem key={list._id} value={list._id}>
-                  {list.name}
-                </MenuItem>
-              ))}
+              {profile?.role === 'manager'
+                ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                  ?.map((list) => (
+                    <MenuItem key={list._id} value={list._id}>
+                      {list.name}
+                    </MenuItem>
+                  ))
+                :
+                branch?.map((list) => (
+                  <MenuItem key={list._id} value={list._id}>
+                    {list.name}
+                  </MenuItem>
+                ))
+              }
             </Select>
           </FormControl>
 
@@ -548,9 +557,20 @@ const Employe = () => {
                       label="branch"
                       onChange={(e) => handleChange(e, 'branchId')}
                     >
-                      {branch?.map((list) => (
-                        <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
-                      ))}
+                      {profile?.role === 'manager'
+                        ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                          ?.map((list) => (
+                            <MenuItem key={list._id} value={list._id}>
+                              {list.name}
+                            </MenuItem>
+                          ))
+                        :
+                        branch?.map((list) => (
+                          <MenuItem key={list._id} value={list._id}>
+                            {list.name}
+                          </MenuItem>
+                        ))
+                      }
                     </Select>
                   </FormControl>
                   <div className="flex gap-2">
@@ -660,7 +680,13 @@ const Employe = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <TextField fullWidth type="number" value={inp.deviceUserId} onChange={(e) => handleChange(e, 'deviceUserId')} label="deviceUserId" size="small" />
+                    <TextField fullWidth type="tel" value={inp.deviceUserId || ''}
+                      inputProps={{ maxLength: 1000, inputMode: 'numeric', pattern: '[0-9]*' }}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/\D/g, ''); // remove non-digits
+                        handleChange({ ...e, target: { ...e.target, value: onlyNums } }, 'deviceUserId');
+                      }}
+                      label="deviceUserId" size="small" />
                     {/* <TextField fullWidth required value={inp.email} onChange={(e) => handleChange(e, 'email')} label="Email" size="small" /> */}
                   </div>
 

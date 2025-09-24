@@ -77,7 +77,7 @@ router.route('/facecheckin').post(authmiddlewre, authorizeRoles('superadmin', 'a
 router.route('/facecheckout').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), attendance.facecheckout);
 router.route('/employeeAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 1), attendance.employeeAttandence);
 router.route('/deleteattandence').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 4), attendance.deleteattandence);
-router.route('/recordAttendanceFromLogs').post(authmiddlewre,attendance.recordAttendanceFromLogs);
+router.route('/recordAttendanceFromLogs').post(authmiddlewre, attendance.recordAttendanceFromLogs);
 
 router.route('/getholidays').get(authmiddlewre, holiday.getholidays);
 router.route('/addholiday').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("holiday", 2), holiday.addholiday);
@@ -98,13 +98,13 @@ router.route('/editAdmin/:id').post(authmiddlewre, authorizeRoles('superadmin'),
 router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmin'), admin.deleteAdmin);
 
 router.route('/payroll')
-  .post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), payroll.createPayroll)
-  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), payroll.allPayroll)
+  .post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 2), payroll.createPayroll)
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 1), payroll.allPayroll)
 
 router.route('/payroll/:id')
-  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), payroll.getPayroll)
-  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), payroll.editPayroll)
-  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), payroll.deletePayroll)
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 1), payroll.getPayroll)
+  .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 3), payroll.editPayroll)
+  .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 4), payroll.deletePayroll)
 
 router.route('/leave-balances')
   .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.getallleavebalnce)
@@ -151,13 +151,6 @@ router.route("/ledgerentry").post(authmiddlewre, authorizeRoles('superadmin', 'a
 router.route("/ledgerentry/:id")
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 3), ledger.updateEntry)
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager', 'grant'), checkPermission("ledger_entry", 4), ledger.deleteEntry);
-
-router.route("/essl").post((req, res) => {
-  console.log("Attendance log received from essl directly:", req.body);
-  // Save to your DB
-  // Example: insert into MySQL / MongoDB 
-  res.send({ status: "OK" });
-})
 
 router.route("/deploy/:project").get(authmiddlewre, authorizeRoles("developer"), (req, res) => {
   const { project } = req.params;

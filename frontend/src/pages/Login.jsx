@@ -30,6 +30,7 @@ const Login = () => {
             localStorage.setItem("emstoken", res.data.token);
             dispatch(setlogin(true));
             dispatch(setuser(res.data.user));
+            // console.log(res.data)
 
             return navigate("/dashboard");
         } catch (error) {

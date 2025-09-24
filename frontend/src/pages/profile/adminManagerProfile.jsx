@@ -158,7 +158,7 @@ const AdminManagerProfile = () => {
           </div>
 
           {/* Permissions for non-superadmin/developer */}
-          {profile?.role !== "superadmin" && profile?.role !== "developer" && (
+          {/* {profile?.role !== "superadmin" && profile?.role !== "developer" && (
             <div className="mt-2">
               <div
                 className="flex justify-between items-center cursor-pointer bg-teal-100 px-4 py-1 md:py-2 rounded-md"
@@ -215,7 +215,7 @@ const AdminManagerProfile = () => {
                 </div>
               )}
             </div>
-          )}
+          )} */}
 
           {/* Reset password for superadmin */}
           {profile?.role === "superadmin" && (

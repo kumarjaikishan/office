@@ -55,6 +55,7 @@ const userSlice = createSlice({
             state.attandence = action.payload;
         },
         setuser(state, action) {
+            // console.log('payload setting',action.payload)
             state.profile = action.payload;
         },
         tooglesidebar(state, action) {

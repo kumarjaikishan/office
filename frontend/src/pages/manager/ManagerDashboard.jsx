@@ -13,7 +13,7 @@ import OfficialNoticeBoard from '../../components/notice';
 
 const ManagerDashboard = () => {
 
-  const { attandence, employee, branch, department ,profile} = useSelector((state) => state.user);
+  const { attandence, employee, branch, department, profile } = useSelector((state) => state.user);
   const { islogin, isadmin } = useSelector((state) => state.auth);
   const [currentpresent, setcurrentpresent] = useState([]);
   const [todaypresent, settodaypresent] = useState([])
@@ -27,6 +27,7 @@ const ManagerDashboard = () => {
 
   useEffect(() => {
     !islogin && navigate('/login');
+    // console.log(profile)
   }, [])
 
   useEffect(() => {
@@ -183,7 +184,7 @@ const ManagerDashboard = () => {
   ];
 
   return (
-   <div className='p-0  md:p-3'>
+    <div className='p-0  md:p-3'>
       <div className="mb-3">
         {/* <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3> */}
         <DashboardCard employee={employee} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />
@@ -239,6 +240,7 @@ const ManagerDashboard = () => {
           </FormControl>
         </div>
 
+        {/* employee list */}
         <div className='grid grid-cols-5 md:grid-cols-10 lg:grid-cols-15 gap-2 md:gap-4'>
           {employeelist?.map((emp) => {
             const isPresent = currentpresent.some(att => att.employeeId._id === emp._id);

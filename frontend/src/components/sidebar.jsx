@@ -240,8 +240,8 @@ const menu = [
         children: [
           { menu: "Employee", link: "/dashboard/employe", roles: ["admin", "superadmin", "manager"] },
           { menu: "Leave Request", link: "/dashboard/leave-request", roles: ["employee", "admin", "superadmin", "manager"] },
-          { menu: "Leave", link: "/dashboard/leave-ledger", roles: ["admin", "superadmin", "manager"] },
-          { menu: "Advance", link: "/dashboard/advance", roles: ["admin", "superadmin", "manager"] },
+          { menu: "Leave", link: "/dashboard/leave-ledger", roles: ["admin", "superadmin"] },
+          { menu: "Advance", link: "/dashboard/advance", roles: ["admin", "superadmin"] },
         ],
       },
       {

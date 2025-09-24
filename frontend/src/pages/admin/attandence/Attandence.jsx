@@ -41,7 +41,7 @@ const Attandence = () => {
   const [isPunchIn, setisPunchIn] = useState(true);
   const [atteneditmodal, setatteneditmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
-  const { branch, attandence, department, company, holidays } = useSelector(
+  const { branch, attandence, department, company, holidays,profile } = useSelector(
     (state) => state.user
   );
   const [selectedRows, setselectedRows] = useState([]);
@@ -311,11 +311,23 @@ const Attandence = () => {
                   onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
                 >
                   <MenuItem value="all">All</MenuItem>
-                  {branch?.map((val) => (
+                  {/* {branch?.map((val) => (
                     <MenuItem key={val._id} value={val._id}>
                       {val.name}
                     </MenuItem>
-                  ))}
+                  ))} */}
+                  {profile?.role === 'manager'
+                    ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                      ?.map((list) => (
+                        <MenuItem key={list._id} value={list._id}>
+                          {list.name}
+                        </MenuItem>
+                      ))
+                    :
+                    branch?.map((list) => (
+                      <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
+                    ))
+                  }
                 </Select>
               </FormControl>
 

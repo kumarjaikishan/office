@@ -44,7 +44,7 @@ const AttendanceReport = () => {
     ];
 
 
-    const { department, branch, employee, attandence, holidays, company } = useSelector(e => e.user);
+    const { department, branch, employee, attandence, holidays, company, profile } = useSelector(e => e.user);
     const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp';
 
     // update department list when branch changes
@@ -270,9 +270,22 @@ const AttendanceReport = () => {
 
                         >
                             <MenuItem value="all">All</MenuItem>
-                            {branch?.map((list) => (
+                            {/* {branch?.map((list) => (
                                 <MenuItem key={list._id} value={list._id}>{list.name}</MenuItem>
-                            ))}
+                            ))} */}
+
+                            {profile?.role === 'manager'
+                                ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                                    ?.map((list) => (
+                                        <MenuItem key={list._id} value={list._id}>
+                                            {list.name}
+                                        </MenuItem>
+                                    ))
+                                :
+                                branch?.map((list) => (
+                                    <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
+                                ))
+                            }
                         </Select>
                     </FormControl>
 

@@ -4,10 +4,11 @@ import { useSelector } from 'react-redux';
 const CheckPermission = (resource, action) => {
     const { profile } = useSelector(e => e.user);
     useEffect(() => {
-        // console.log(profile)
+       
     }, [])
 
     if (profile.role == 'superadmin') return true;
+    // console.log(resource,action)
     const haveType = profile?.permissions[resource];
     if (!haveType) return false;
 

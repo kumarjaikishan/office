@@ -52,6 +52,7 @@ const employeeSchema = new mongoose.Schema({
     },
     deviceUserId: {
         type: String,
+        default:''
     },
     guardian: {
         relation: { type: String, },

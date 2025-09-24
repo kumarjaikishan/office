@@ -160,10 +160,9 @@ function App() {
   const primaryColor = useSelector((state) => state.user.primaryColor) || "#115e59";
 
   useEffect(() => {
-
     document.documentElement.style.setProperty("--color-primary", primaryColor);
   }, [primaryColor]);
-
+ 
   useEffect(() => {
     if (!islogin) {
       navigate("/login");
