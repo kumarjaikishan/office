@@ -5,6 +5,7 @@ const employee = require('./models/employee');
 const company = require('./models/company');
 const { sendToClients } = require('./utils/sse');
 const { sendTelegramMessage } = require('./utils/telegram');
+const dayjs = require('dayjs');
 
 router.get('/', (req, res) => {
     console.log("➡️ GET request on essl index page");
@@ -13,6 +14,16 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
     console.log("➡️ POst request on essl index page");
     res.send('OK');
+});
+router.get('/api/refreshDevice/:deviceSN', async (req, res, next) => {
+    const { deviceSN } = req.params;
+    const whichcomapny = await company.findOne({ "devices.SN": deviceSN }).select('_id devices');
+    // console.log(deviceSN)
+    // console.log(whichcomapny)
+    if (!whichcomapny) {
+        return res.status(400).json({ message: 'Device not Found' });
+    }
+    return res.status(200).json({ devices: whichcomapny.devices });
 });
 
 // Device command polling
@@ -204,7 +215,7 @@ router.post(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], async (req, res) 
                         (employeeDoc?.companyId).toString(),
                         (employeeDoc?.branchId).toString() || null
                     );
-                      sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched Out at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
+                    sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched Out at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
                     // console.log(`✅ Punch Out recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()} | Working: ${attendance.workingMinutes} min | Short: ${attendance.shortMinutes} min`);
                 } else {
                     console.log(`ℹ️ Extra punch ignored for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);

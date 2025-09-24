@@ -32,7 +32,7 @@ const BulkMark = ({
   const [toall, settoall] = useState({
     punchIn: null,
     punchOut: null,
-    status: 'absent'
+    status: ''
   });
 
   // Memoize filtered employees to prevent re-calculation on every render.
@@ -294,6 +294,7 @@ const BulkMark = ({
                       onChange={(e) => settoall({ ...toall, status: e.target.value })}
                       className="w-full"
                     >
+                      <MenuItem value=''>Select Status</MenuItem>
                       <MenuItem value="present">Present</MenuItem>
                       <MenuItem value="leave">Leave</MenuItem>
                       <MenuItem value="absent">Absent</MenuItem>

@@ -23,6 +23,7 @@ import DataTable from 'react-data-table-component';
 import { useCustomStyles } from '../attandence/attandencehelper';
 import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 import dayjs from 'dayjs';
+import { FiRefreshCw } from 'react-icons/fi';
 
 const weekdays = [
     { value: 0, label: 'Sunday' },
@@ -42,6 +43,7 @@ export default function OrganizationSettings() {
     const [isload, setisload] = useState(false);
     const { handleImage } = useImageUpload();
     const [editbranchdata, seteditbranchdata] = useState(null);
+    const [refreshload, setrefreshload] = useState(false);
     const [companyinp, setcompany] = useState({
         name: '',
         address: '',
@@ -167,6 +169,38 @@ export default function OrganizationSettings() {
         const diff = Date.now() - new Date(lastHeartbeat).getTime();
         return diff < 60000; // online if heartbeat within last 60 seconds
     };
+
+    const deviceRefresh = async (deviceSN) => {
+        const address = `${import.meta.env.VITE_API_ADDRESS}refreshDevice/${deviceSN}`;
+        try {
+            setrefreshload(true);
+            const token = localStorage.getItem('emstoken')
+            const res = await axios.get(
+                address,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            // console.log(res.data.devices)
+            setcompany((prev) => (
+                { ...prev, devices: res.data.devices }
+            ))
+        } catch (error) {
+            console.log(error);
+            if (error.response) {
+                toast.warn(error.response.data.message, { autoClose: 2700 });
+            } else if (error.request) {
+                console.error('No response from server:', error.request);
+            } else {
+                console.error('Error:', error.message);
+            }
+        } finally {
+            setrefreshload(false);
+        }
+    }
 
 
     return (
@@ -456,9 +490,9 @@ export default function OrganizationSettings() {
             </div>
 
             {/* DEvice Info */}
-            <div className='border shadow-lg bg-teal-50 border-dashed border-teal-400 rounded-md'>
+            <div className='border shadow-lg bg-indigo-50 border-dashed border-indigo-400 rounded-md'>
                 <div
-                    className="flex justify-between items-center cursor-pointer bg-teal-200 px-4 py-2 rounded-md"
+                    className="flex justify-between items-center cursor-pointer bg-indigo-200 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('device')}
                 >
                     <span className="font-semibold text-[16px] md:text-lg text-left">Devices</span>
@@ -483,8 +517,17 @@ export default function OrganizationSettings() {
                             return (
                                 <div
                                     key={index}
-                                    className='flex w-full gap-2 items-center mb-2'
+                                    className='flex w-full gap-4 items-center mb-2'
                                 >
+                                    {/* <p>{index+1}. </p> */}
+                                    <TextField
+                                        label="S.No"
+                                        variant="standard"
+                                        disabled
+                                        size="small"
+                                        value={index + 1}
+                                        className='w-10'
+                                    />
                                     {/* Device Name */}
                                     <TextField
                                         label="Device Name"
@@ -502,6 +545,13 @@ export default function OrganizationSettings() {
                                         value={device.SN}
                                         onChange={(e) => updateDevice(index, "SN", e.target.value)}
                                     />
+                                    <TextField
+                                        label="Last Sync"
+                                        variant="standard"
+                                        size="small"
+                                        disabled
+                                        value={!device?.lastHeartbeat ? 'N/A' : dayjs(device?.lastHeartbeat).format("DD MMM YYYY, hh:mm:ss A")}
+                                    />
 
                                     {/* Status Icon */}
                                     {online ? (
@@ -516,14 +566,18 @@ export default function OrganizationSettings() {
                                         />
                                     )}
 
-                                    <Tooltip
-                                      title={`Last Sync: ${dayjs(device?.lastHeartbeat).format("DD MMM YYYY, hh:mm:ss A")}`}
+                                    {/* <Tooltip
+                                        title={`Last Sync: ${dayjs(device?.lastHeartbeat).format("DD MMM YYYY, hh:mm:ss A")}`}
                                         arrow
                                     >
                                         <AiOutlineInfoCircle style={{ color: "blue", fontSize: "1.6rem" }} />
-                                    </Tooltip>
+                                    </Tooltip> */}
 
-                                    {/* Delete Icon */}
+
+                                    <IconButton color="primary" onClick={() => deviceRefresh(device?.SN)}>
+                                        <FiRefreshCw className={refreshload ? "animate-spin" : ""} />
+                                    </IconButton>
+
                                     <IconButton color="error" onClick={() => removeDevice(index)}>
                                         <FaTrash />
                                     </IconButton>
