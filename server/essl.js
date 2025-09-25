@@ -5,7 +5,12 @@ const employee = require('./models/employee');
 const company = require('./models/company');
 const { sendToClients } = require('./utils/sse');
 const { sendTelegramMessage } = require('./utils/telegram');
-const dayjs = require('dayjs');
+const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 router.get('/', (req, res) => {
     console.log("➡️ GET request on essl index page");
