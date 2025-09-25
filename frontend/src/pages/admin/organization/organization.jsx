@@ -666,7 +666,7 @@ export default function OrganizationSettings() {
                                 variant="standard"
                                 size="small"
                                 className='w-[350px]'
-                                value={companyinp.telegram.token}
+                                value={companyinp?.telegram?.token}
                                 onChange={e => handleChange('telegram', 'token', e.target.value)}
                             />
 
