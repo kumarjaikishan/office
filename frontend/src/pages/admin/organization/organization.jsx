@@ -54,6 +54,11 @@ export default function OrganizationSettings() {
             // Each device has SN, name, and online status
             { SN: 'BJ2C194460597', name: 'Head Branch', online: false }
         ],
+        telegram: {
+            token: '',
+            groupId: '',
+        },
+        telegramNotifcation: false,
         officeTime: { in: '10:00', out: '18:00', breakMinutes: 30 },
         gracePeriod: { lateEntryMinutes: 10, earlyExitMinutes: 10 },
         workingMinutes: {
@@ -152,6 +157,7 @@ export default function OrganizationSettings() {
             setisload(false);
         }
     };
+
     const setemployee = () => {
 
     }
@@ -199,6 +205,38 @@ export default function OrganizationSettings() {
             }
         } finally {
             setrefreshload(false);
+        }
+    }
+
+    const fetchgroup = async () => {
+        try {
+            const res = await axios.get(
+                `https://api.telegram.org/bot${companyinp.telegram.token}/getUpdates`,
+            );
+
+            // console.log(res.data?.result)
+            if (res.data.result.length > 0) {
+                let users = {}
+                let { id, title, type } = res.data.result[0].message.chat
+                let groupInfo = { id, title, type }
+                res.data.result.forEach((m) => {
+                    if (m.message?.from) {
+                        let usersId = m.message.from.id;
+                        if (!users.hasOwnProperty(usersId)) {
+                            users[usersId] = {
+                                name: m.message.from.first_name,
+                                username: m.message.from.username || ''
+                            };
+                        }
+                    }
+
+                });
+
+                console.log(groupInfo)
+                console.log(users)
+            }
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -589,6 +627,84 @@ export default function OrganizationSettings() {
                         <Button variant="contained" onClick={addDevice}>Add More Device</Button>
                     </div>
                     <Button className='f float-end' variant="contained" loading={isload} onClick={handleSubmit}>
+                        Save Changes
+                    </Button>
+                </div>
+            </div>
+
+            {/* Telegram Info */}
+            <div className='border shadow-lg bg-indigo-50 border-dashed border-indigo-400 rounded-md'>
+                <div
+                    className="flex justify-between items-center cursor-pointer bg-indigo-200 px-4 py-2 rounded-md"
+                    onClick={() => toggleSection('telegram')}
+                >
+                    <span className="font-semibold text-[16px] md:text-lg text-left">Telegram</span>
+                    {openSection === 'telegram' ? (
+                        <MdExpandLess className="text-xl" />
+                    ) : (
+                        <MdExpandMore className="text-xl" />
+                    )}
+                </div>
+
+                <div
+                    className={`
+                          rounded overflow-hidden transition-all duration-300
+                          ${openSection === 'telegram' ? 'max-h-fit p-2 my-2' : 'max-h-0 p-0 my-0'}
+                        `}
+                >
+                    <div className='mb-2  '>
+                        {/* <h4>Devices</h4> */}
+
+                        <div
+
+                            className='flex w-full gap-4 items-center mb-2'
+                        >
+
+
+                            <TextField
+                                label="Telegram Bot Token"
+                                variant="standard"
+                                size="small"
+                                className='w-[350px]'
+                                value={companyinp.telegram.token}
+                                onChange={e => handleChange('telegram', 'token', e.target.value)}
+                            />
+
+                            <TextField
+                                label="Group Id"
+                                variant="standard"
+                                size="small"
+                                value={companyinp?.telegram?.groupId}
+                                onChange={e => handleChange('telegram', 'groupId', e.target.value)}
+                            />
+
+                            <div className="flex items-center gap-2 mt-2">
+                                <label className="flex items-center cursor-pointer select-none">
+                                    <input
+                                        type="checkbox"
+                                        checked={companyinp?.telegramNotifcation}
+                                        onChange={e =>
+                                            setcompany(prev => ({
+                                                ...prev,
+                                                telegramNotifcation: e.target.checked
+                                            }))
+                                        }
+                                        className="w-5 h-5 text-blue-600 bg-gray-200 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                    />
+                                    <span className="ml-2 text-gray-700 font-medium">Enable Notifications</span>
+                                </label>
+                            </div>
+
+                            <IconButton color="error" onClick={() => 'kis'}>
+                                <FaTrash />
+                            </IconButton>
+                        </div>
+
+                    </div>
+                    <Button className=' float-end' variant="contained" loading={isload} onClick={fetchgroup}>
+                        Ftech group id
+                    </Button>
+                    <Button className=' float-end' variant="contained" loading={isload} onClick={handleSubmit}>
                         Save Changes
                     </Button>
                 </div>

@@ -41,7 +41,7 @@ const Attandence = () => {
   const [isPunchIn, setisPunchIn] = useState(true);
   const [atteneditmodal, setatteneditmodal] = useState(false);
   const [bullmodal, setbullmodal] = useState(false);
-  const { branch, attandence, department, company, holidays,profile } = useSelector(
+  const { branch, attandence, department, company, holidays, profile } = useSelector(
     (state) => state.user
   );
   const [selectedRows, setselectedRows] = useState([]);
@@ -71,6 +71,10 @@ const Attandence = () => {
     leaveid: '',
     leaveReason: ''
   }
+
+  useEffect(() => {
+    // console.log(selectedRows)
+  }, [selectedRows])
 
   const [inp, setinp] = useState(init);
   const [editinp, seteditinp] = useState(init2)
@@ -161,7 +165,8 @@ const Attandence = () => {
   }, [filteredData, sortConfig]);
 
   const multidelete = () => {
-    let multideletearray = selectedRows.map(id => id.attenid);
+    // return console.log(selectedRows)
+    let multideletearray = selectedRows.map(id => id._id);
     swal({
       title: `Are you sure you want to Delete these ${multideletearray.length} record?`,
       icon: "warning",
@@ -170,6 +175,10 @@ const Attandence = () => {
     }).then(async (proceed) => {
       if (proceed) {
         await deleteAttandence({ attandanceId: multideletearray, setselectedRows, setisload, dispatch });
+
+        // Remove deleted rows from finalData
+        const newData = finalData.filter(d => !multideletearray.includes(d._id));
+
         setselectedRows([]);
       }
     });
@@ -180,6 +189,7 @@ const Attandence = () => {
   }, []);
 
   const handleRowSelect = useCallback(({ selectedRows }) => {
+    // console.log(selectedRows)
     setselectedRows(selectedRows);
   }, []);
 
@@ -513,6 +523,7 @@ const Attandence = () => {
           customStyles={customStyles}
           conditionalRowStyles={conditionalRowStyles}
           onSelectedRowsChange={handleRowSelect}
+          selectedRows={selectedRows}
           highlightOnHover
           paginationPerPage={20}
           noDataComponent={

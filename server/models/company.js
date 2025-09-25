@@ -33,6 +33,15 @@ const companySchema = new mongoose.Schema({
 
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
 
+    telegram: {
+        token: { type: String },
+        groupId: { type: String },
+    },
+    telegramNotifcation: {
+        type: Boolean,
+        default: false
+    },
+
     officeTime: {
         in: { type: String, default: '10:00' },
         out: { type: String, default: '18:00' },

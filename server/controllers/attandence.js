@@ -5,8 +5,9 @@ const Leave = require('../models/leave');
 const User = require('../models/user');
 const mongoose = require("mongoose");
 const { sendToClients } = require('../utils/sse');
-const { sendTelegramMessage } = require('../utils/telegram');
+const { sendTelegramMessage, sendTelegramMessageseperate } = require('../utils/telegram');
 const dayjs = require('dayjs');
+const company = require('../models/company');
 
 
 const webattandence = async (req, res, next) => {
@@ -171,8 +172,10 @@ const checkin = async (req, res, next) => {
         populate: {
           path: 'userid',
           select: 'name'
-        }
-      });
+        },
+      })
+
+    // console.log('updatedRecord', updatedRecord)
 
     if (status == 'present') {
       sendToClients(
@@ -184,7 +187,21 @@ const checkin = async (req, res, next) => {
         attendanceData?.branchId || null
       );
     }
-     sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
+    let hey = await company.findById(updatedRecord.companyId).select('telegram telegramNotifcation');
+
+    if (
+      hey?.telegramNotifcation &&
+      hey?.telegram?.token &&
+      hey?.telegram?.groupId
+    ) {
+      sendTelegramMessageseperate(
+        hey.telegram.token,
+        hey.telegram.groupId,
+        `${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`
+      )
+    }
+
+    // sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
 
     return res.status(200).json({ message: 'Punch-in recorded', attendance });
   } catch (error) {
@@ -363,7 +380,7 @@ const recordAttendanceFromLogs = async (req, res, next) => {
           (employeeDoc?.companyId).toString(),
           (employeeDoc?.branchId).toString() || null
         );
-        sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched Out at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
+        // sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched Out at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)
         console.log(
           // `✅ Punch Out recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()} | Working: ${attendance.workingMinutes} min | Short: ${attendance.shortMinutes} min`
         );
