@@ -74,7 +74,7 @@ export default function PayslipPrintPage() {
           }
         );
 
-        console.log(res?.data?.payroll);
+        // console.log(res?.data?.payroll);
         setPayroll(res?.data?.payroll || employee); // fallback to dummy
       } catch (error) {
         console.error(error);

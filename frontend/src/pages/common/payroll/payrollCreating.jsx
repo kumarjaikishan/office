@@ -47,7 +47,7 @@ export default function PayrollCreatePage() {
   const [employeeleavebal, setemployeeleavebal] = useState(0);
   const [previousAdvance, setpreviousAdvance] = useState(0);
 
-  const { holidays, company, employee, attandence, leaveBalance, advance } = useSelector(
+  const { holidays, company, employee, attandence, leaveBalance, advance, payroll } = useSelector(
     (state) => state.user
   );
 
@@ -56,6 +56,7 @@ export default function PayrollCreatePage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+
     if (!selectedEmployeedetail || !leaveBalance) return;
 
     const latest = leaveBalance
@@ -66,6 +67,20 @@ export default function PayrollCreatePage() {
     // console.log("Latest Leave Balance:", latest);
     setemployeeleavebal(latest?.balance || 0)
   }, [leaveBalance, selectedEmployeedetail]);
+
+  const alredyPayroll = useMemo(() => {
+    let hey = {};
+    payroll.forEach((p) => {
+      let empId = p.employeeId._id;
+      if (hey.hasOwnProperty(empId)) {
+        hey[empId].push(`${p.month}-${p.year}`)
+      } else {
+        hey[empId] = [`${p.month}-${p.year}`]
+      }
+    })
+    // console.log(hey)
+    return hey;
+  }, [payroll])
 
   useEffect(() => {
     if (!selectedEmployeedetail || !advance) return;
@@ -78,7 +93,6 @@ export default function PayrollCreatePage() {
     // console.log("Latest advance Balance:", latest);
     setpreviousAdvance(latest?.balance)
   }, [advance, selectedEmployeedetail]);
-
 
   function formatRupee(amount) {
     return new Intl.NumberFormat("en-IN", {
@@ -124,7 +138,6 @@ export default function PayrollCreatePage() {
 
   const [options, setOptions] = useState(optionsinit);
 
-
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December",
@@ -134,8 +147,6 @@ export default function PayrollCreatePage() {
   useEffect(() => {
     setEmployees(employee || []);
   }, [employee]);
-
-
 
   useEffect(() => {
     if (!selectedEmployeedetail || !basic?.totalDays || !company?.workingMinutes) return;
@@ -153,7 +164,6 @@ export default function PayrollCreatePage() {
     setminuteRate(perMinute.toFixed(2));
     setPerDayRate(perDay.toFixed(2));
   }, [form.calculationBasis, basic, selectedEmployeedetail, company]);
-
 
   useEffect(() => {
     if (!holidays) return;
@@ -176,6 +186,12 @@ export default function PayrollCreatePage() {
   // Compute attendance
   useEffect(() => {
     if (!attandence || !selectedEmployee) return;
+    setError(null)
+
+    // console.log(alredyPayroll)
+    if (alredyPayroll[selectedEmployee] && alredyPayroll[selectedEmployee].includes(`${form.month}-${form.year}`)) {
+      return setError(`Payroll for this employee is already generated for: ${dayjs(`${form.year}-${form.month}-01`).format("MMM-YYYY")}`)
+    }
 
     const selected = employees.find((e) => e._id === selectedEmployee);
     setOptions(optionsinit)
@@ -261,7 +277,6 @@ export default function PayrollCreatePage() {
       shortmin,
     });
   }, [selectedEmployee, attandence, form.month, form.year, employees, company, holidays]);
-
 
   // ✅ Leave deduction logic
   const effectiveLeaveDays = useMemo(() => {
@@ -531,432 +546,479 @@ export default function PayrollCreatePage() {
   };
 
   return (
-    <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-0 md:p-6 space-y-1">
-      {/* Employee Selection */}
-      <Card className="shadow-md col-span-2 p-1 md:p-4 rounded-2xl">
-        <Typography variant="h6" gutterBottom>
-          Select Employee
-        </Typography>
-        <Divider />
-        <div className="grid gap-2 md:gap-4 grid-cols-2 mt-4 space-y-1">
-          <FormControl size="small">
-            <InputLabel>Month</InputLabel>
-            <Select
-              label="Month"
-              value={form.month}
-              onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
-            >
-              {months.map((month, ind) => (
-                <MenuItem key={ind} value={ind + 1}>
-                  {month}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small">
-            <InputLabel>Year</InputLabel>
-            <Select
-              label="year"
-              value={form.year}
-              onChange={(e) => setForm((prev) => ({ ...prev, year: e.target.value }))}
-            >
-              {["2024", "2025", "2026"].map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl size="small">
-            <InputLabel>Calc. Basis</InputLabel>
-            <Select
-              label="Calc. Basis"
-              value={form.calculationBasis}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, calculationBasis: e.target.value }))
-              }
-            >
-              <MenuItem value="monthDays">Month Days</MenuItem>
-              <MenuItem value="workingDays">Working Days</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl
-            disabled={!form.month || !form.year}
-            className="col-span-1"
-            size="small"
-          >
-            <InputLabel>Select Employee</InputLabel>
-            <Select
-              label="Select Employee"
-              value={selectedEmployee}
-              onChange={(e) => setSelectedEmployee(e.target.value)}
-            >
-              {employees.map((emp) => (
-                <MenuItem key={emp._id} value={emp._id}>
-                  <div className="flex items-center gap-2">
-                    <Avatar
-                      src={cloudinaryUrl(emp?.profileimage, {
-                        format: "webp",
-                        width: 100,
-                        height: 100,
-                      })}
-                      sx={{ width: 24, height: 24 }} />
-                    {emp.userid?.name}
-                  </div>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </div>
-      </Card>
-
-      {/* Attendance Summary */}
-      {selectedEmployeedetail &&
+    <div>
+      <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-0 md:p-6 space-y-1">
+        {/* Employee Selection */}
         <Card className="shadow-md col-span-2 p-1 md:p-4 rounded-2xl">
-          <Typography variant="h6">Attendance Summary</Typography>
+          <Typography variant="h6" gutterBottom>
+            Select Employee
+          </Typography>
           <Divider />
-          <div className="flex flex-col  gap-3">
-            <div className="grid grid-cols-2 gap-2 mt-4 text-sm md:flex md:flex-wrap">
-              {/* <p>Total Days: {basic.totalDays}</p> */}
-              <TextField
-                className="m max-w-full md:max-w-[120px]"
-                size="small"
-                label="Total Days"
-                value={basic.totalDays}
-              />
-              <TextField
-                className="m max-w-full md:max-w-[120px]"
-                size="small"
-                label="Holidays"
-                value={basic.holidaysCount}
-              />
-              <TextField
-                size="small"
-                className="m max-w-full md:max-w-[120px]"
-                label="Weekly Offs"
-                value={basic.weeklyOff}
-              />
-              <TextField
-                size="small"
-                className="m max-w-full md:max-w-[120px]"
-                label="Working Days"
-                value={basic.workingDays}
-              />
-              <TextField
-                size="small"
-                className="m max-w-full md:max-w-[120px]"
-                label="Present Days"
-                value={form.presentDays || 0}
-              />
-              <TextField
-                className="m max-w-full md:max-w-[120px]"
-                size="small"
-                label="Leave Days"
-                value={form.leaveDays || 0} //{perDayRate}
-              />
-              <TextField
-                className="m max-w-full md:max-w-[120px]"
-                size="small"
-                label="Absent Days"
-                value={form.absentDays || 0} //{perDayRate}
-              />
+          <div className="grid gap-2 md:gap-4 grid-cols-2 mt-4 space-y-1">
+            <FormControl size="small">
+              <InputLabel>Month</InputLabel>
+              {/* <Select
+                label="Month"
+                value={form.month}
+                onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
+              >
+                {months.map((month, ind) => (
+                  <MenuItem key={ind} value={ind + 1}>
+                    {month}
+                  </MenuItem>
+                ))}
+              </Select> */}
+              <Select
+                label="Month"
+                value={form.month}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, month: e.target.value }))
+                }
+              >
+                {months.map((month, ind) => {
+                  const monthValue = ind + 1;
+                  const disabled =
+                    alredyPayroll[selectedEmployee]?.includes(`${monthValue}-${form.year}`);
+
+                  return (
+                    <MenuItem key={ind} value={monthValue} disabled={disabled}>
+                      {month} {disabled && "(Already Exists)"}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small">
+              <InputLabel>Year</InputLabel>
+              <Select
+                label="year"
+                value={form.year}
+                onChange={(e) => setForm((prev) => ({ ...prev, year: e.target.value }))}
+              >
+                {["2024", "2025", "2026"].map((year) => (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl size="small">
+              <InputLabel>Calc. Basis</InputLabel>
+              <Select
+                label="Calc. Basis"
+                value={form.calculationBasis}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, calculationBasis: e.target.value }))
+                }
+              >
+                <MenuItem value="monthDays">Month Days</MenuItem>
+                <MenuItem value="workingDays">Working Days</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl
+              disabled={!form.month || !form.year}
+              className="col-span-1"
+              size="small"
+            >
+              <InputLabel>Select Employee</InputLabel>
+              {/* <Select
+                label="Select Employee"
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+              >
+                {employees.map((emp) => (
+                  <MenuItem key={emp._id} value={emp._id}>
+                    <div className="flex items-center gap-2">
+                      <Avatar
+                        src={cloudinaryUrl(emp?.profileimage, {
+                          format: "webp",
+                          width: 100,
+                          height: 100,
+                        })}
+                        sx={{ width: 24, height: 24 }} />
+                      {emp.userid?.name}
+                    </div>
+                  </MenuItem>
+                ))}
+              </Select> */}
+              <Select
+                label="Select Employee"
+                value={selectedEmployee}
+                onChange={(e) => setSelectedEmployee(e.target.value)}
+              >
+                {employees.map((emp) => {
+                  const disabled = alredyPayroll[emp._id]?.includes(`${form.month}-${form.year}`);
+                  return (
+                    <MenuItem key={emp._id} value={emp._id} disabled={disabled}>
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          src={cloudinaryUrl(emp?.profileimage, {
+                            format: "webp",
+                            width: 100,
+                            height: 100,
+                          })}
+                          sx={{ width: 24, height: 24 }}
+                        />
+                        {emp.userid?.name} {disabled && "(Payroll Exists)"}
+                      </div>
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+
+            </FormControl>
+          </div>
+        </Card>
+
+        {/* {error && <div className="border text-center text-red-600 font-semibold">{error}</div>} */}
+
+        {/* Attendance Summary */}
+        {selectedEmployeedetail && !error &&
+          <Card className="shadow-md col-span-2 p-1 md:p-4 rounded-2xl">
+            <Typography variant="h6">Attendance Summary</Typography>
+            <Divider />
+            <div className="flex flex-col  gap-3">
+              <div className="grid grid-cols-2 gap-2 mt-4 text-sm md:flex md:flex-wrap">
+                {/* <p>Total Days: {basic.totalDays}</p> */}
+                <TextField
+                  className="m max-w-full md:max-w-[120px]"
+                  size="small"
+                  label="Total Days"
+                  value={basic.totalDays}
+                />
+                <TextField
+                  className="m max-w-full md:max-w-[120px]"
+                  size="small"
+                  label="Holidays"
+                  value={basic.holidaysCount}
+                />
+                <TextField
+                  size="small"
+                  className="m max-w-full md:max-w-[120px]"
+                  label="Weekly Offs"
+                  value={basic.weeklyOff}
+                />
+                <TextField
+                  size="small"
+                  className="m max-w-full md:max-w-[120px]"
+                  label="Working Days"
+                  value={basic.workingDays}
+                />
+                <TextField
+                  size="small"
+                  className="m max-w-full md:max-w-[120px]"
+                  label="Present Days"
+                  value={form.presentDays || 0}
+                />
+                <TextField
+                  className="m max-w-full md:max-w-[120px]"
+                  size="small"
+                  label="Leave Days"
+                  value={form.leaveDays || 0} //{perDayRate}
+                />
+                <TextField
+                  className="m max-w-full md:max-w-[120px]"
+                  size="small"
+                  label="Absent Days"
+                  value={form.absentDays || 0} //{perDayRate}
+                />
+              </div>
+              <Divider />
+              <div className="grid grid-cols-2 gap-3 mt-4 text-sm md:flex md:flex-wrap">
+                <TextField
+                  size="small"
+                  label="OverTime Minutes"
+                  value={basic.overtime || 0}
+                />
+                <TextField
+                  size="small"
+                  label="ShortTime Minutes"
+                  value={basic.shortmin || 0}
+                />
+                <TextField
+                  size="small"
+                  label="Per day Salary"
+                  value={formatRupee(perDayRate)}
+                  helperText="For Leave/ Absent Calculations"
+                />
+                <TextField
+                  size="small"
+                  label="Per minute Salary"
+                  value={formatRupee(perminuteRate)}
+                  helperText="For OverTime/ ShortTime Calculations"
+                />
+
+                {/* <p>Overtime (minutes): {basic.overtime} min @{perminuteRate}</p>
+              <p>ShortTime (minutes): {basic.shortmin} min @{perminuteRate}</p> */}
+              </div>
+            </div>
+          </Card>}
+
+        {/* Adjustments */}
+        {selectedEmployeedetail && !error &&
+          <Card className="shadow-md col-span-2 p-1 md:p-4 rounded-2xl">
+            <Typography variant="h6">Adjustments</Typography>
+            <Divider />
+            <div className="flex flex-col gap-2 mt-4">
+              {basic?.overtime ?
+                <FormControlLabel
+                  // className="border"
+                  control={<Checkbox checked={options.addOvertime} onChange={(e) => setOptions(p => ({ ...p, addOvertime: e.target.checked }))} />}
+                  label="Add Overtime as Bonus"
+                /> : ''
+              }
+
+              {basic?.shortmin ?
+                <FormControlLabel
+                  control={<Checkbox checked={options.deductShortTime} onChange={(e) => setOptions(p => ({ ...p, deductShortTime: e.target.checked }))} />}
+                  label="Deduct Short Time"
+                /> : ''
+              }
+
+              {form?.absentDays ?
+                <FormControlLabel
+                  control={<Checkbox checked={options.deductAbsent} onChange={(e) => setOptions(p => ({ ...p, deductAbsent: e.target.checked }))} />}
+                  label="Deduct Absent Days"
+                /> : ''
+              }
+
+              {form?.leaveDays ?
+                <div className="flex items-center flex-wrap md:border-none md:shadow-none border border-slate-300 shadow rounded md:p-0 p-1 gap-4">
+                  <FormControlLabel
+                    control={<Checkbox checked={options.adjustLeave} onChange={(e) => setOptions(p => ({ ...p, adjustLeave: e.target.checked }))} />}
+                    label="Adjust Paid Leaves"
+                  />
+                  <p className="w-full md:w-fit">Available Paid leaves: {employeeleavebal}</p>
+                  {options.adjustLeave && (
+                    <TextField
+                      type="number"
+                      size="small"
+                      className="w-full md:w-[120px]"
+                      label="Adjust Count"
+                      inputProps={{
+                        min: 0,
+                        max: Math.min(employeeleavebal, form.leaveDays),
+                      }}
+                      value={options.adjustedLeaveCount}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        const max = Math.min(employeeleavebal, form.leaveDays);
+
+                        setOptions((p) => ({
+                          ...p,
+                          adjustedLeaveCount: Math.max(0, Math.min(val, max)), // clamp between 0 and max
+                        }));
+                      }}
+                    />
+
+                  )}
+                </div> : ''
+              }
+
+              {previousAdvance > 0 ?
+                <div className="flex items-center flex-wrap md:border-none md:shadow-none border border-slate-300 shadow rounded md:p-0 p-1 gap-4">
+                  <FormControlLabel
+                    control={<Checkbox checked={options.adjustAdvance} onChange={(e) => setOptions(p => ({ ...p, adjustAdvance: e.target.checked }))} />}
+                    label="Adjust Advance"
+                  />
+                  <p className="w-full md:w-fit">Advance: {previousAdvance}</p>
+                  {options.adjustAdvance && (
+                    <TextField
+                      type="number"
+                      size="small"
+                      className="w-full md:w-[120px]"
+                      label="Adjust Advance"
+                      inputProps={{
+                        min: 0,
+                        max: previousAdvance,
+                      }}
+                      value={options.adjustedAdvance}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+
+                        // Enforce min and max
+                        if (val < 0) {
+                          setOptions(p => ({ ...p, adjustedAdvance: 0 }));
+                        } else if (val > previousAdvance) {
+                          setOptions(p => ({ ...p, adjustedAdvance: previousAdvance }));
+                        } else {
+                          setOptions(p => ({ ...p, adjustedAdvance: val }));
+                        }
+                      }}
+                    />
+
+                  )}
+                </div> : ''
+              }
+            </div>
+          </Card>}
+
+        {/* Allowances */}
+        {selectedEmployeedetail && !error &&
+          <Card className="shadow-md col-span-2 md:col-span-1 p-1 md:p-4 space-y-2 rounded-2xl">
+            <div className="flex justify-between">
+              <Typography variant="h6">Allowances</Typography>
+              <Typography variant="h6">{formatRupee(totalAllowances)}</Typography>
             </div>
             <Divider />
-            <div className="grid grid-cols-2 gap-3 mt-4 text-sm md:flex md:flex-wrap">
-              <TextField
-                size="small"
-                label="OverTime Minutes"
-                value={basic.overtime || 0}
-              />
-              <TextField
-                size="small"
-                label="ShortTime Minutes"
-                value={basic.shortmin || 0}
-              />
-              <TextField
-                size="small"
-                label="Per day Salary"
-                value={formatRupee(perDayRate)}
-                helperText="For Leave/ Absent Calculations"
-              />
-              <TextField
-                size="small"
-                label="Per minute Salary"
-                value={formatRupee(perminuteRate)}
-                helperText="For OverTime/ ShortTime Calculations"
-              />
-
-              {/* <p>Overtime (minutes): {basic.overtime} min @{perminuteRate}</p>
-              <p>ShortTime (minutes): {basic.shortmin} min @{perminuteRate}</p> */}
-            </div>
-          </div>
-        </Card>}
-
-      {/* Adjustments */}
-      {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-2 p-1 md:p-4 rounded-2xl">
-          <Typography variant="h6">Adjustments</Typography>
-          <Divider />
-          <div className="flex flex-col gap-2 mt-4">
-            {basic?.overtime ?
-              <FormControlLabel
-                // className="border"
-                control={<Checkbox checked={options.addOvertime} onChange={(e) => setOptions(p => ({ ...p, addOvertime: e.target.checked }))} />}
-                label="Add Overtime as Bonus"
-              /> : ''
-            }
-
-            {basic?.shortmin ?
-              <FormControlLabel
-                control={<Checkbox checked={options.deductShortTime} onChange={(e) => setOptions(p => ({ ...p, deductShortTime: e.target.checked }))} />}
-                label="Deduct Short Time"
-              /> : ''
-            }
-
-            {form?.absentDays ?
-              <FormControlLabel
-                control={<Checkbox checked={options.deductAbsent} onChange={(e) => setOptions(p => ({ ...p, deductAbsent: e.target.checked }))} />}
-                label="Deduct Absent Days"
-              /> : ''
-            }
-
-            {form?.leaveDays ?
-              <div className="flex items-center flex-wrap md:border-none md:shadow-none border border-slate-300 shadow rounded md:p-0 p-1 gap-4">
-                <FormControlLabel
-                  control={<Checkbox checked={options.adjustLeave} onChange={(e) => setOptions(p => ({ ...p, adjustLeave: e.target.checked }))} />}
-                  label="Adjust Paid Leaves"
+            {form?.allowances?.map((allowance, index) => (
+              <div key={index} className="flex gap-2 items-start mt-4">
+                <TextField
+                  size="small"
+                  label="Name"
+                  className="flex-5"
+                  value={allowance.name}
+                  onChange={(e) => handleArrayChange("allowances", index, "name", e.target.value)}
                 />
-                <p className="w-full md:w-fit">Available Paid leaves: {employeeleavebal}</p>
-                {options.adjustLeave && (
-                  <TextField
-                    type="number"
-                    size="small"
-                    className="w-full md:w-[120px]"
-                    label="Adjust Count"
-                    inputProps={{
-                      min: 0,
-                      max: Math.min(employeeleavebal, form.leaveDays),
-                    }}
-                    value={options.adjustedLeaveCount}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      const max = Math.min(employeeleavebal, form.leaveDays);
-
-                      setOptions((p) => ({
-                        ...p,
-                        adjustedLeaveCount: Math.max(0, Math.min(val, max)), // clamp between 0 and max
-                      }));
-                    }}
-                  />
-
-                )}
-              </div> : ''
-            }
-
-            {previousAdvance > 0 ?
-              <div className="flex items-center flex-wrap md:border-none md:shadow-none border border-slate-300 shadow rounded md:p-0 p-1 gap-4">
-                <FormControlLabel
-                  control={<Checkbox checked={options.adjustAdvance} onChange={(e) => setOptions(p => ({ ...p, adjustAdvance: e.target.checked }))} />}
-                  label="Adjust Advance"
+                <TextField
+                  size="small"
+                  type="number"
+                  label="Amount"
+                  className="flex-2"
+                  InputProps={{
+                    readOnly: allowance.inputDisabled || false,
+                  }}
+                  value={allowance.amount}
+                  onChange={(e) => handleArrayChange("allowances", index, "amount", e.target.value)}
                 />
-                <p className="w-full md:w-fit">Advance: {previousAdvance}</p>
-                {options.adjustAdvance && (
-                  <TextField
-                    type="number"
-                    size="small"
-                    className="w-full md:w-[120px]"
-                    label="Adjust Advance"
-                    inputProps={{
-                      min: 0,
-                      max: previousAdvance,
-                    }}
-                    value={options.adjustedAdvance}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
+                <IconButton onClick={() => removeArrayItem("allowances", index)}>
+                  <MdDelete />
+                </IconButton>
+              </div>
+            ))}
+            <Button
+              startIcon={<AiOutlinePlus />}
+              variant="outlined"
+              onClick={() => addArrayItem("allowances", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
+              className="mt-2 flex-1"
+            >
+              Add Allowance
+            </Button>
+          </Card>}
 
-                      // Enforce min and max
-                      if (val < 0) {
-                        setOptions(p => ({ ...p, adjustedAdvance: 0 }));
-                      } else if (val > previousAdvance) {
-                        setOptions(p => ({ ...p, adjustedAdvance: previousAdvance }));
-                      } else {
-                        setOptions(p => ({ ...p, adjustedAdvance: val }));
-                      }
-                    }}
-                  />
-
-                )}
-              </div> : ''
-            }
-          </div>
-        </Card>}
-
-      {/* Allowances */}
-      {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-2 md:col-span-1 p-1 md:p-4 space-y-2 rounded-2xl">
-          <div className="flex justify-between">
-            <Typography variant="h6">Allowances</Typography>
-            <Typography variant="h6">{formatRupee(totalAllowances)}</Typography>
-          </div>
-          <Divider />
-          {form?.allowances?.map((allowance, index) => (
-            <div key={index} className="flex gap-2 items-start mt-4">
-              <TextField
-                size="small"
-                label="Name"
-                className="flex-5"
-                value={allowance.name}
-                onChange={(e) => handleArrayChange("allowances", index, "name", e.target.value)}
-              />
-              <TextField
-                size="small"
-                type="number"
-                label="Amount"
-                className="flex-2"
-                InputProps={{
-                  readOnly: allowance.inputDisabled || false,
-                }}
-                value={allowance.amount}
-                onChange={(e) => handleArrayChange("allowances", index, "amount", e.target.value)}
-              />
-              <IconButton onClick={() => removeArrayItem("allowances", index)}>
-                <MdDelete />
-              </IconButton>
+        {/* Bonuses */}
+        {selectedEmployeedetail && !error &&
+          <Card className="shadow-md col-span-2 md:col-span-1 p-1 md:p-4 space-y-2 rounded-2xl">
+            <div className="flex justify-between">
+              <Typography variant="h6">Bonuses</Typography>
+              <Typography variant="h6">{formatRupee(totalBonuses)}</Typography>
             </div>
-          ))}
-          <Button
-            startIcon={<AiOutlinePlus />}
-            variant="outlined"
-            onClick={() => addArrayItem("allowances", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
-            className="mt-2 flex-1"
-          >
-            Add Allowance
-          </Button>
-        </Card>}
+            <Divider />
+            {form?.bonuses?.map((bonus, index) => (
+              <div key={index} className="flex gap-2 items-start mt-4">
+                <TextField
+                  size="small"
+                  label="Name"
+                  className="flex-5"
+                  value={bonus.name}
+                  helperText={bonus.extraInfo ?? ''}
+                  onChange={(e) => handleArrayChange("bonuses", index, "name", e.target.value)}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  label="Amount"
+                  InputProps={{
+                    readOnly: bonus.inputDisabled || false,
+                  }}
+                  className="flex-2"
+                  value={bonus.amount}
+                  onChange={(e) => handleArrayChange("bonuses", index, "amount", e.target.value)}
+                />
+                <IconButton className="flex-1" onClick={() => removeArrayItem("bonuses", index)}>
+                  <MdDelete />
+                </IconButton>
+              </div>
+            ))}
+            <Button
+              variant="outlined"
+              startIcon={<AiOutlinePlus />}
+              onClick={() => addArrayItem("bonuses", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
+              className="mt-2"
+            >
+              Add Bonus
+            </Button>
+          </Card>}
 
-      {/* Bonuses */}
-      {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-2 md:col-span-1 p-1 md:p-4 space-y-2 rounded-2xl">
-          <div className="flex justify-between">
-            <Typography variant="h6">Bonuses</Typography>
-            <Typography variant="h6">{formatRupee(totalBonuses)}</Typography>
-          </div>
-          <Divider />
-          {form?.bonuses?.map((bonus, index) => (
-            <div key={index} className="flex gap-2 items-start mt-4">
-              <TextField
-                size="small"
-                label="Name"
-                className="flex-5"
-                value={bonus.name}
-                helperText={bonus.extraInfo ?? ''}
-                onChange={(e) => handleArrayChange("bonuses", index, "name", e.target.value)}
-              />
-              <TextField
-                size="small"
-                type="number"
-                label="Amount"
-                InputProps={{
-                  readOnly: bonus.inputDisabled || false,
-                }}
-                className="flex-2"
-                value={bonus.amount}
-                onChange={(e) => handleArrayChange("bonuses", index, "amount", e.target.value)}
-              />
-              <IconButton className="flex-1" onClick={() => removeArrayItem("bonuses", index)}>
-                <MdDelete />
-              </IconButton>
+        {/* Deductions */}
+        {selectedEmployeedetail && !error &&
+          <Card className="shadow-md col-span-2 md:col-span-1 p-1 md:p-4 space-y-2 rounded-2xl">
+            <div className="flex justify-between">
+              <Typography variant="h6">Deductions</Typography>
+              <Typography variant="h6">{formatRupee(totalDeductions)}</Typography>
             </div>
-          ))}
-          <Button
-            variant="outlined"
-            startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("bonuses", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
-            className="mt-2"
-          >
-            Add Bonus
-          </Button>
-        </Card>}
+            <Divider />
+            {form?.deductions?.map((deduction, index) => (
+              <div key={index} className="flex gap-2 items-start mt-4">
+                <TextField
+                  size="small"
+                  label="Deduction"
+                  className="flex-5"
+                  value={deduction.name}
+                  helperText={deduction.extraInfo ?? ''}
+                  onChange={(e) => handleArrayChange("deductions", index, "name", e.target.value)}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  className="flex-2"
+                  label="Amount"
+                  // disabled={deduction.inputDisabled || false}
+                  InputProps={{
+                    readOnly: deduction?.inputDisabled || false,
+                  }}
 
-      {/* Deductions */}
-      {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-2 md:col-span-1 p-1 md:p-4 space-y-2 rounded-2xl">
-          <div className="flex justify-between">
-            <Typography variant="h6">Deductions</Typography>
-            <Typography variant="h6">{formatRupee(totalDeductions)}</Typography>
-          </div>
-          <Divider />
-          {form?.deductions?.map((deduction, index) => (
-            <div key={index} className="flex gap-2 items-start mt-4">
-              <TextField
-                size="small"
-                label="Deduction"
-                className="flex-5"
-                value={deduction.name}
-                helperText={deduction.extraInfo ?? ''}
-                onChange={(e) => handleArrayChange("deductions", index, "name", e.target.value)}
-              />
-              <TextField
-                size="small"
-                type="number"
-                className="flex-2"
-                label="Amount"
-                // disabled={deduction.inputDisabled || false}
-                InputProps={{
-                  readOnly: deduction?.inputDisabled || false,
-                }}
+                  value={deduction.amount}
+                  onChange={(e) => handleArrayChange("deductions", index, "amount", e.target.value)}
+                />
+                <IconButton className="flex-1" onClick={() => removeArrayItem("deductions", index)}>
+                  <MdDelete />
+                </IconButton>
+              </div>
+            ))}
+            <Button
+              variant="outlined"
+              startIcon={<AiOutlinePlus />}
+              onClick={() => addArrayItem("deductions", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
+              className="mt-2"
+            >
+              Add Deduction
+            </Button>
+          </Card>}
 
-                value={deduction.amount}
-                onChange={(e) => handleArrayChange("deductions", index, "amount", e.target.value)}
-              />
-              <IconButton className="flex-1" onClick={() => removeArrayItem("deductions", index)}>
-                <MdDelete />
-              </IconButton>
-            </div>
-          ))}
-          <Button
-            variant="outlined"
-            startIcon={<AiOutlinePlus />}
-            onClick={() => addArrayItem("deductions", { name: "", amount: 0, extraInfo: '', inputDisabled: false })}
-            className="mt-2"
-          >
-            Add Deduction
-          </Button>
-        </Card>}
-
-      {/* Salary Summary */}
-      {selectedEmployeedetail &&
-        <Card className="shadow-md col-span-2 md:col-span-1 p-4 rounded-2xl">
-          <Typography variant="h6">Salary Summary</Typography>
-          <Divider />
-          <div className="flex flex-col gap-2 text-right mt-3">
-            <div className=" flex justify-end">
-              <div>Base Salary :</div>
-              {/* <div className="w-[100px] font-semibold">₹{selectedEmployeedetail?.salary || 0}</div> */}
-              <div className="w-[100px] font-semibold">{formatRupee(selectedEmployeedetail?.salary || 0)}</div>
-            </div>
-            <div className=" flex justify-end">
-              <div>Allowances :</div>
-              <div className="w-[100px] font-semibold">+{formatRupee(totalAllowances)}</div>
-            </div>
-            <div className=" flex justify-end">
-              <div>Bonuses :</div>
-              <div className="w-[100px] font-semibold">+{formatRupee(totalBonuses)}</div>
-            </div>
-            {/* <div className=" flex justify-end">
+        {/* Salary Summary */}
+        {selectedEmployeedetail && !error &&
+          <Card className="shadow-md col-span-2 md:col-span-1 p-4 rounded-2xl">
+            <Typography variant="h6">Salary Summary</Typography>
+            <Divider />
+            <div className="flex flex-col gap-2 text-right mt-3">
+              <div className=" flex justify-end">
+                <div>Base Salary :</div>
+                {/* <div className="w-[100px] font-semibold">₹{selectedEmployeedetail?.salary || 0}</div> */}
+                <div className="w-[100px] font-semibold">{formatRupee(selectedEmployeedetail?.salary || 0)}</div>
+              </div>
+              <div className=" flex justify-end">
+                <div>Allowances :</div>
+                <div className="w-[100px] font-semibold">+{formatRupee(totalAllowances)}</div>
+              </div>
+              <div className=" flex justify-end">
+                <div>Bonuses :</div>
+                <div className="w-[100px] font-semibold">+{formatRupee(totalBonuses)}</div>
+              </div>
+              {/* <div className=" flex justify-end">
               <div>Deductions :</div>
               <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
             </div> */}
 
-            <Divider />
-            <div className=" flex justify-end font-bold">
-              <div>Gross Salary :</div>
-              <div className="w-[100px]">{formatRupee(grossSalary)}</div>
-            </div>
-            {/* <div className=" flex justify-end items-center">
+              <Divider />
+              <div className=" flex justify-end font-bold">
+                <div>Gross Salary :</div>
+                <div className="w-[100px]">{formatRupee(grossSalary)}</div>
+              </div>
+              {/* <div className=" flex justify-end items-center">
               <div className="flex items-center">
                 Tax :
                 <div className="flex items-center border mx-1 rounded px-2 w-[80px] h-6 text-sm">
@@ -986,37 +1048,38 @@ export default function PayrollCreatePage() {
               </div>
               <div className="w-[100px]">{formatRupee(tax)}</div>
             </div> */}
-            <div className=" flex justify-end">
-              <div>Deductions :</div>
-              <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
+              <div className=" flex justify-end">
+                <div>Deductions :</div>
+                <div className="w-[100px] font-semibold">-{formatRupee(totalDeductions)} </div>
+              </div>
+
+              <Divider />
+
+              <div className=" flex justify-end font-bold">
+                <div> Net Salary </div>
+                <div className="w-[100px]">{formatRupee(netSalary)}</div>
+              </div>
+              <div className="capitalize text-xs"> In Words:- {numberToWords(netSalary)} </div>
             </div>
+          </Card>
+        }
 
-            <Divider />
+        {/* Submit */}
+        {selectedEmployeedetail && !error &&
+          <div className="col-span-2">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit}
+              disabled={loading || !selectedEmployee}
+            >
+              {loading ? "Saving..." : "Save Payroll"}
+            </Button>
+          </div>}
 
-            <div className=" flex justify-end font-bold">
-              <div> Net Salary </div>
-              <div className="w-[100px]">{formatRupee(netSalary)}</div>
-            </div>
-            <div className="capitalize text-xs"> In Words:- {numberToWords(netSalary)} </div>
-          </div>
-        </Card>
-      }
-
-      {/* Submit */}
-      {selectedEmployeedetail &&
-        <div className="col-span-2">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            disabled={loading || !selectedEmployee}
-          >
-            {loading ? "Saving..." : "Save Payroll"}
-          </Button>
-        </div>}
-
-      {success && <p className="text-green-600 mt-2">{success}</p>}
-      {error && <p className="text-red-600 mt-2">{error}</p>}
+      </div>
+      {success && <p className="text-green-600 font-semibold text-center mt-2">{success}</p>}
+      {error && <p className="text-red-600 font-semibold text-center mt-2">{error}</p>}
     </div>
   );
 }

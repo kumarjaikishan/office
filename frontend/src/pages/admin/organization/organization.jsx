@@ -699,7 +699,6 @@ export default function OrganizationSettings() {
                                 <FaTrash />
                             </IconButton>
                         </div>
-
                     </div>
                     <Button className=' float-end' variant="contained" loading={isload} onClick={fetchgroup}>
                         Ftech group id

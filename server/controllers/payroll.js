@@ -27,6 +27,19 @@ exports.createPayroll = async (req, res, next) => {
       taxRate = 0,
     } = req.body;
 
+    // 🔹 Check if payroll already exists for employee in given month & year
+    const existingPayroll = await Payroll.findOne({
+      employeeId,
+      month,
+      year,
+    }).session(session);
+
+    if (existingPayroll) {
+      throw new Error(
+        `Payroll already exists for this employee in ${month}-${year}`
+      );
+    }
+
     // 🔹 Find employee
     const whichEmployee = await Employee.findById(employeeId)
       .populate("department", "department")

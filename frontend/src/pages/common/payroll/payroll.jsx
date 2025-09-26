@@ -26,8 +26,9 @@ import dayjs from "dayjs";
 import { payrollColumns } from "./payrollhelper";
 import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CheckPermission from "../../../utils/CheckPermission";
+import { setpayroll } from "../../../../store/userSlice";
 
 export default function PayrollPage() {
   const { employeeId } = useParams();
@@ -35,7 +36,9 @@ export default function PayrollPage() {
   const [payroll, setPayroll] = useState(null);
   const [error, setError] = useState(null);
   let navigate = useNavigate();
-  const themes = useCustomStyles()
+  const themes = useCustomStyles();
+  const dispatch = useDispatch();
+
   const [filters, setFilters] = useState({
     searchText: '',
     branch: 'all',
@@ -64,6 +67,7 @@ export default function PayrollPage() {
       );
       // console.log(res.data.payrolls)
       setPayroll(res?.data?.payrolls)
+      dispatch(setpayroll(res?.data?.payrolls))
 
     } catch (error) {
       console.log(error);

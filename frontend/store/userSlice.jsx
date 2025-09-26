@@ -28,7 +28,7 @@ const userSlice = createSlice({
         ledger: null,
         leaveBalance: null,
         advance: null,
-        salary: null,
+        payroll: null,
         status: 'idle',
         sidebar: false,
         extendedonMobile: false,
@@ -49,10 +49,13 @@ const userSlice = createSlice({
             state.advance = null;
             state.attandence = null;
             state.ledger = null;
-            state.salary = null;
+            state.payroll = null;
         },
         updateAttendance(state, action) {
             state.attandence = action.payload;
+        },
+        setpayroll(state, action) {
+            state.payroll = action.payload;
         },
         setuser(state, action) {
             // console.log('payload setting',action.payload)
@@ -94,5 +97,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { userlogout, updateAttendance, setPrimaryColor, toogleliveAttandence, setuser, tooglesidebar, toogleextendedonMobile } = userSlice.actions;
+export const { userlogout, updateAttendance, setPrimaryColor,setpayroll, toogleliveAttandence, setuser, tooglesidebar, toogleextendedonMobile } = userSlice.actions;
 export default userSlice.reducer;
