@@ -14,7 +14,7 @@ import { toogleextendedonMobile, tooglesidebar } from '../../store/userSlice';
 const Navbar = () => {
   const location = useLocation();
   const [notificatione, setnotification] = useState([]);
-  const { notification } = useSelector((state) => state.employee);
+  const { notification, profile } = useSelector((state) => state.employee);
   const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   // console.log(isadmin, islogin, user)
@@ -23,6 +23,8 @@ const Navbar = () => {
     if (notification) {
       setnotification(notification)
     }
+    console.log(profile) //profile.profileimage
+    console.log(user) //user.profile.role
   }, [notification])
 
   const commonTitles = {
@@ -93,7 +95,7 @@ const Navbar = () => {
       read: false,
       createdAt: new Date("2025-08-18T08:45:00Z")
     },
-   
+
   ];
 
   const pathParts = location.pathname.split("/").filter(Boolean);
@@ -137,13 +139,16 @@ const Navbar = () => {
         {/* <NotificationIcon notifications={notifications} /> */}
         <NotificationIcon notifications={notificatione} />
         {/* <NotificationIcon1 notifications={notification} /> */}
+
         <div className='flex flex-col items-end px-1'>
           <span className='text-[10px] md:text-xs font-medium leading-4 capitalize'>{user?.profile?.name}</span>
-          <p className='text-[8px] md:text-[10px] text-gray-500 text-right capitalize'>{user?.profile?.role == 'grant' ? 'User':user?.profile?.role}</p>
+          <p className='text-[8px] md:text-[10px] text-gray-500 text-right capitalize'>{user?.profile?.role == 'grant' ? 'User' : user?.profile?.role}</p>
         </div>
-        <Avatar src={user?.profile?.profileImage} alt={user?.profile?.name}>
-          {!user?.profile?.profileImage && <FaRegUser />}
-        </Avatar>
+        {user?.profile?.role == 'employee' ?
+          <Avatar src={profile?.profileimage} alt={profile?.employeeName}>
+          </Avatar> :
+          <Avatar src={user?.profile?.profileImage} alt={user?.profile?.name}>
+          </Avatar>}
       </div>
     </div>
   )
