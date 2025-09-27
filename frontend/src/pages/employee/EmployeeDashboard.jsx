@@ -3,6 +3,9 @@ import { useSelector } from 'react-redux';
 import HolidayCalander from '../holidays/holidayCalander';
 import dayjs from 'dayjs';
 import OfficialNoticeBoard from '../../components/notice';
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrBefore);
 
 const EmployeeDashboard = () => {
   const { attendance, companysetting, holiday } = useSelector((state) => state.employee);
