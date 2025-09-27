@@ -4,7 +4,8 @@ import {
     Grid, FormControl, InputLabel, Select, OutlinedInput, Checkbox, ListItemText,
     Avatar,
     IconButton,
-    Tooltip
+    Tooltip,
+    InputAdornment
 } from '@mui/material';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -44,6 +45,7 @@ export default function OrganizationSettings() {
     const { handleImage } = useImageUpload();
     const [editbranchdata, seteditbranchdata] = useState(null);
     const [refreshload, setrefreshload] = useState(false);
+    const [teleloading, setteleloading] = useState(false);
     const [companyinp, setcompany] = useState({
         name: '',
         address: '',
@@ -209,37 +211,98 @@ export default function OrganizationSettings() {
     }
 
     const fetchgroup = async () => {
+        setteleloading(true)
         try {
             const res = await axios.get(
-                `https://api.telegram.org/bot${companyinp.telegram.token}/getUpdates`,
+                `https://api.telegram.org/bot${companyinp.telegram.token}/getUpdates`
             );
 
-            // console.log(res.data?.result)
             if (res.data.result.length > 0) {
-                let users = {}
-                let { id, title, type } = res.data.result[0].message.chat
-                let groupInfo = { id, title, type }
+                let groups = {};
+                let users = {};
+
                 res.data.result.forEach((m) => {
+                    if (m.message?.chat.type === "group") {
+                        let groupId = m.message.chat.id;
+                        if (!groups.hasOwnProperty(groupId)) {
+                            groups[groupId] = {
+                                groupId: Math.abs(m.message.chat.id),
+                                groupName: m.message.chat.title || "",
+                            };
+                        }
+                    }
+
                     if (m.message?.from) {
                         let usersId = m.message.from.id;
                         if (!users.hasOwnProperty(usersId)) {
                             users[usersId] = {
                                 name: m.message.from.first_name,
-                                username: m.message.from.username || ''
+                                username: m.message.from.username || "",
                             };
                         }
                     }
-
                 });
 
-                console.log(groupInfo)
-                console.log(users)
+                // Build a radio list of groups
+                let html = Object.values(groups)
+                    .map(
+                        (g, i) =>
+                            `<label style="display:block;margin:5px 0 , texal">
+               <input type="radio" name="groupRadio" value="${g.groupId}" ${i === 0 ? "checked" : ""
+                            } />
+               ${g.groupName}
+               
+             </label>`
+                    )
+                    .join("");
+
+                swal({
+                    title: "Select a Group",
+                    content: {
+                        element: "div",
+                        attributes: {
+                            innerHTML: html,
+                        },
+                    },
+                    buttons: {
+                        cancel: "Cancel",
+                        confirm: {
+                            text: "Select",
+                            closeModal: true,
+                        },
+                    },
+                }).then((willConfirm) => {
+                    if (willConfirm) {
+                        const selected = document.querySelector(
+                            "input[name='groupRadio']:checked"
+                        )?.value;
+
+                        if (selected) {
+                            console.log("Selected groupId:", selected);
+
+                            setcompany({
+                                ...companyinp,
+                                telegram: {
+                                    ...companyinp.telegram,
+                                    groupId: selected,
+                                },
+                            });
+                        }
+                    }
+                });
+
+                // console.log("Groups:", groups);
+                // console.log("Users:", users);
+            } else {
+                // toast.warn("kindly insert")
             }
         } catch (error) {
-            console.log(error)
+            toast.warn(error?.response?.data?.description);
+            console.log(error);
+        } finally {
+            setteleloading(false)
         }
-    }
-
+    };
 
     return (
         <div className="w-full mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
@@ -633,9 +696,9 @@ export default function OrganizationSettings() {
             </div>
 
             {/* Telegram Info */}
-            <div className='border shadow-lg bg-indigo-50 border-dashed border-indigo-400 rounded-md'>
+            <div className='border shadow-lg bg-emerald-50 border-dashed border-emerald-400 rounded-md'>
                 <div
-                    className="flex justify-between items-center cursor-pointer bg-indigo-200 px-4 py-2 rounded-md"
+                    className="flex justify-between items-center cursor-pointer bg-emerald-200 px-4 py-2 rounded-md"
                     onClick={() => toggleSection('telegram')}
                 >
                     <span className="font-semibold text-[16px] md:text-lg text-left">Telegram</span>
@@ -674,11 +737,24 @@ export default function OrganizationSettings() {
                                 label="Group Id"
                                 variant="standard"
                                 size="small"
+                                className='w-[150px]'
                                 value={companyinp?.telegram?.groupId}
                                 onChange={e => handleChange('telegram', 'groupId', e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={fetchgroup}
+                                                edge="end"
+                                            >
+                                                <FiRefreshCw className={teleloading ? "animate-spin" : ""} />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
 
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="flex ml-8 items-center gap-2 mt-2">
                                 <label className="flex items-center cursor-pointer select-none">
                                     <input
                                         type="checkbox"
@@ -700,10 +776,10 @@ export default function OrganizationSettings() {
                             </IconButton>
                         </div>
                     </div>
-                    <Button className=' float-end' variant="contained" loading={isload} onClick={fetchgroup}>
-                        Ftech group id
-                    </Button>
-                    <Button className=' float-end' variant="contained" loading={isload} onClick={handleSubmit}>
+                    {/* <Button className='mx-2 float-end' variant="outlined" loading={isload} onClick={fetchgroup}>
+                        Fetch group id
+                    </Button> */}
+                    <Button className='mx-2 float-end' variant="contained" loading={isload} onClick={handleSubmit}>
                         Save Changes
                     </Button>
                 </div>
