@@ -116,9 +116,12 @@ router.post(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], async (req, res) 
         const status = parseInt(attendancee.Status, 10);
 
         if (status > 1 || attendancee.VerifyMode != 1) {
+            console.log(`status code:${status}, not punch In or Out Code`)
             return res.send('ok')
         }
+
         // otherwise process further for attenense
+        // status code 0 = punchin and 1 = punchout
 
         try {
             let deviceUserId = attendancee.PIN;
@@ -126,7 +129,7 @@ router.post(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], async (req, res) 
 
             // const whichcomapny = await company.findOne({ deviceSN }).select('_id');
             const whichcomapny = await company.findOne({ "devices.SN": deviceSN }).select('_id devices');
-            console.log('whichcomapny', whichcomapny)
+            // console.log('whichcomapny', whichcomapny)
 
             // 1️⃣ Find employee by esslId
             const employeeDoc = await employee.findOne({ companyId: whichcomapny._id, deviceUserId }).select('_id branchId empId companyId');
@@ -219,7 +222,7 @@ router.post(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], async (req, res) 
                 //             .format("DD/MM/YY")}`
                 // );
 
-                console.log(`✅ Punch In recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
+                // console.log(`✅ Punch In recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
             } else {
                 // 5️⃣ If already has punchIn but no punchOut → set Punch Out with calculations
                 if (!attendance.punchOut) {
@@ -288,7 +291,7 @@ router.post(['/essl/iclock/cdata', '/essl/iclock/cdata.aspx'], async (req, res) 
                     //             .format("DD/MM/YY")}`
                     // );
 
-                    console.log(`✅ Punch Out recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()} | Working: ${attendance.workingMinutes} min | Short: ${attendance.shortMinutes} min`);
+                    // console.log(`✅ Punch Out recorded for employee ${employeeDoc.empId} on ${dateObj.toDateString()} | Working: ${attendance.workingMinutes} min | Short: ${attendance.shortMinutes} min`);
                 } else {
                     console.log(`ℹ️ Extra punch ignored for employee ${employeeDoc.empId} on ${dateObj.toDateString()}`);
                 }

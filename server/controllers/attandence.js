@@ -107,6 +107,8 @@ const deleteattandence = async (req, res, next) => {
 };
 
 const checkin = async (req, res, next) => {
+  // console.log(req.body)
+  //  return res.status(400).json({ message: 'Already checked in' });
   try {
     const { employeeId, date, punchIn, status } = req.body;
 
@@ -189,16 +191,12 @@ const checkin = async (req, res, next) => {
     }
     let hey = await company.findById(updatedRecord.companyId).select('telegram telegramNotifcation');
 
-    if (
-      hey?.telegramNotifcation &&
-      hey?.telegram?.token &&
-      hey?.telegram?.groupId
-    ) {
-      sendTelegramMessageseperate(
-        hey.telegram.token,
-        hey.telegram.groupId,
-        `${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`
-      )
+    if (hey?.telegramNotifcation && hey?.telegram?.token && hey?.telegram?.groupId) {
+      // sendTelegramMessageseperate(
+      //   hey.telegram.token,
+      //   hey.telegram.groupId,
+      //   `${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`
+      // )
     }
 
     // sendTelegramMessage(`${updatedRecord?.employeeId?.userid?.name} has Punched In at ${dayjs(updatedRecord.punchIn).format("hh:mm A")}`)

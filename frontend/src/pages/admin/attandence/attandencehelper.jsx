@@ -324,9 +324,6 @@ export const columns = ({
     },
   ];
 
-
-
-
 export const useCustomStyles = () => {
   const primaryColor = useSelector((state) => state.user.primaryColor) || "#115e59";
 

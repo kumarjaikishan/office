@@ -23,8 +23,8 @@ const Navbar = () => {
     if (notification) {
       setnotification(notification)
     }
-    console.log(profile) //profile.profileimage
-    console.log(user) //user.profile.role
+    // console.log(profile) //profile.profileimage
+    // console.log(user) //user.profile.role
   }, [notification])
 
   const commonTitles = {
