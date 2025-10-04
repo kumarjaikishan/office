@@ -1,0 +1,339 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate, useNavigation, useParams } from "react-router-dom";
+import axios from "axios";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardActions,
+  Typography,
+  Divider,
+  Button,
+  Grid,
+  TextField,
+  InputAdornment,
+  Select,
+  OutlinedInput,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { toast } from "react-toastify";
+import DataTable from "react-data-table-component";
+import { useCustomStyles } from "../../admin/attandence/attandencehelper";
+import { BiMessageRoundedError } from "react-icons/bi";
+import dayjs from "dayjs";
+import { payrollColumns } from "./payrollhelper";
+import { IoSearch } from "react-icons/io5";
+import { CiFilter } from "react-icons/ci";
+import { useDispatch, useSelector } from "react-redux";
+import CheckPermission from "../../../utils/CheckPermission";
+import { setpayroll } from "../../../../store/userSlice";
+
+export default function PayrollPage() {
+  const { employeeId } = useParams();
+  const [loading, setLoading] = useState(true);
+  const [payroll, setPayroll] = useState(null);
+  const [error, setError] = useState(null);
+  let navigate = useNavigate();
+  const themes = useCustomStyles();
+  const dispatch = useDispatch();
+
+  const [filters, setFilters] = useState({
+    searchText: '',
+    branch: 'all',
+    department: 'all',
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+
+  });
+  const { employee, leaveBalance, branch, departmen, profile } = useSelector((state) => state.user);
+
+
+  useEffect(() => {
+    fetchPayroll();
+  }, []);
+
+  const fetchPayroll = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem('emstoken');
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_ADDRESS}payroll`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      // console.log(res.data.payrolls)
+      setPayroll(res?.data?.payrolls)
+      dispatch(setpayroll(res?.data?.payrolls))
+
+    } catch (error) {
+      console.log(error);
+      if (error.response) {
+        setError(error.response?.data?.message || "Failed to create payroll");
+        toast.warn(error.response.data.message, { autoClose: 1200 });
+      } else if (error.request) {
+        console.error('No response from server:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleView = (row) => {
+    // console.log("Viewing", row);
+    navigate(`/dashboard/payroll/print/${row._id}`)
+  };
+
+  const handleEdit = (row) => {
+    // console.log("Editing", row);
+    navigate(`/dashboard/payroll/edit/${row._id}`)
+  };
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const filteredEmployees = payroll?.filter(emp => {
+    const name = emp.employeeId?.userid?.name?.toLowerCase() || '';
+    const branchId = emp.branchId || '';
+    // const deptId = emp.departmentid || '';
+
+    const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
+    const branchMatch = filters.branch === 'all' || branchId === filters.branch;
+    // const deptMatch = filters.department === 'all' || deptId === filters.department;
+
+    return nameMatch && branchMatch;
+  });
+
+  const handleDelete = async (id) => {
+    swal({
+      title: `Are you sure you want to Delete?`,
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then(async (proceed) => {
+      if (proceed) {
+        try {
+          setLoading(true);
+          setError(null);
+
+          const token = localStorage.getItem("emstoken");
+          const res = await axios.delete(
+            `${import.meta.env.VITE_API_ADDRESS}payroll/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          toast.success(res.data.message || 'Successfull deleted')
+          fetchPayroll();
+        } catch (error) {
+          console.error(error);
+          setError(error.response?.data?.message || "Failed to fetch payroll");
+          toast.warn("Using dummy payroll data for testing", { autoClose: 1500 });
+          setPayroll(employee); // fallback
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
+
+  };
+
+  const canCreate = CheckPermission('salary', 2);
+  const canView = CheckPermission('salary', 1);
+  const canEdit = CheckPermission('salary', 3);
+  const canDelete = CheckPermission('salary', 4);
+
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+
+  //   if (loading) return <p className="p-4 text-gray-500">Calculating payroll...</p>;
+  //   if (error) return <p className="p-4 text-red-500">{error}</p>;
+  if (!payroll) return <p className="p-4 text-gray-500">No payroll data found</p>;
+
+  return (
+    <div className="w-full mx-auto p-1 md:p-4">
+
+      <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
+        {/* Search (full on small, shrink on md+) */}
+        <div className="flex flex-wrap gap-3 justify-between w-full md:w-fit">
+          <TextField
+            size="small"
+            className="w-[100%] md:w-[160px]"
+            value={filters.searchText}
+            onChange={(e) => handleFilterChange("searchText", e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IoSearch />
+                </InputAdornment>
+              ),
+            }}
+            label="Search Employee"
+          />
+
+          {/* Branch (50% on small, shrink on md+) */}
+          <FormControl
+            size="small"
+            className="w-[47%] md:w-[160px]"
+          >
+            <InputLabel>Branch</InputLabel>
+            <Select
+              label="Branch"
+              value={filters.branch}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Branch"
+                />
+              }
+              onChange={(e) => handleFilterChange("branch", e.target.value)}
+            >
+              <MenuItem value="all">All</MenuItem>
+              {/* {branch?.map((list) => (
+                <MenuItem key={list._id} value={list._id}>
+                  {list.name}
+                </MenuItem>
+              ))} */}
+
+              {profile?.role === 'manager'
+                ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                  ?.map((list) => (
+                    <MenuItem key={list._id} value={list._id}>
+                      {list.name}
+                    </MenuItem>
+                  ))
+                :
+                branch?.map((list) => (
+                  <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
+                ))
+              }
+            </Select>
+          </FormControl>
+
+          {/* Department (50% on small, shrink on md+) */}
+          {/* <FormControl
+            size="small"
+            className="w-[47%] md:w-[160px]"
+          >
+            <InputLabel>Department</InputLabel>
+            <Select
+              label="Department"
+              disabled={filters.branch === "all"}
+              value={filters.department}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Department"
+                />
+              }
+              onChange={(e) =>
+                handleFilterChange("department", e.target.value)
+              }
+            >
+              <MenuItem value="all">All</MenuItem>
+              {departmentlist.length > 0 ? (
+                departmentlist.map((list) => (
+                  <MenuItem key={list._id} value={list._id}>
+                    {list.department}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>No departments found</MenuItem>
+              )}
+            </Select>
+          </FormControl> */}
+          {/* Period (Month & Year) */}
+          <FormControl size="small">
+            <InputLabel>Month</InputLabel>
+            <Select
+              label="Month"
+              value={filters.month}
+
+              onChange={(e) => setForm("month", e.target.value)}
+            >
+              {months.map((month, ind) => {
+                const monthValue = ind + 1;
+                {/* const disabled = alredyPayroll[selectedEmployee]?.includes(`${monthValue}-${form.year}`); */}
+                return (
+                  <MenuItem key={ind} value={monthValue} >
+                    {month} 
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small">
+            <InputLabel>Year</InputLabel>
+            <Select
+              label="year"
+              value={filters.year}
+              onChange={(e) => setForm("year", e.target.value)}
+            >
+              {["2024", "2025", "2026"].map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+        </div>
+        {canCreate &&
+          <div className="w-full md:w-fit">
+            <Button size="small"
+              className="w-full md:w-fit"
+              onClick={() => {
+                navigate('/dashboard/payroll/add')
+              }}
+              variant="contained"> Add Payroll
+
+            </Button>
+          </div>
+        }
+      </div>
+      <div>
+        <DataTable
+          columns={payrollColumns(handleView, handleEdit, handleDelete, canCreate,canView, canEdit, canDelete)}
+          data={filteredEmployees}
+          pagination
+          customStyles={themes}
+          highlightOnHover
+          paginationPerPage={20}
+          paginationRowsPerPageOptions={[20, 50, 100, 300]}
+          noDataComponent={
+            <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
+              <BiMessageRoundedError className="text-xl" /> No Employee records found.
+            </div>
+          }
+        />
+      </div>
+    </div>
+  );
+
+}

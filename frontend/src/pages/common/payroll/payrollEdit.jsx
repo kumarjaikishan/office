@@ -503,7 +503,7 @@ export default function PayrollEdit() {
           }
         }
       );
-      console.log(res)
+      // console.log(res)
       toast.success(res.data.message)
       setSuccess("Payroll updated successfully!");
 

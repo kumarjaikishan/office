@@ -3,8 +3,19 @@ import dayjs from "dayjs";
 import { BiEdit, BiTrash, BiShow } from "react-icons/bi"; // react-icons
 import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 
-
-export const payrollColumns = (onView, onEdit, onDelete,canView,canEdit,canDelete) => {
+export const payrollColumns = (
+  handleGenerate,
+  handleView,
+  handleEdit,
+  handleDelete,
+  canCreate,
+  canView,
+  canEdit,
+  canDelete,
+  payrollMap,
+  selectedMonth,
+  selectedYear
+) => {
   return [
     {
       name: "S.no",
@@ -14,21 +25,23 @@ export const payrollColumns = (onView, onEdit, onDelete,canView,canEdit,canDelet
     {
       name: "Employee",
       selector: (row) => (
-        <div className="flex items-center capitalize gap-3 ">
+        <div className="flex items-center capitalize gap-3">
           <Avatar
-            src={cloudinaryUrl(row?.employeeId?.profileimage, {
-              format: "webp",
-              width: 100,
-              height: 100,
-            }) || employepic}
-            alt={row?.employeeId?.userid?.name}
+            src={
+              cloudinaryUrl(row?.profileimage, {
+                format: "webp",
+                width: 100,
+                height: 100,
+              })
+            }
+            alt={row?.userid?.name}
           >
-            {!row?.employeeId?.profileimage && employepic}
+
           </Avatar>
           <Box>
-            <Typography variant="body2">{row?.employeeId?.userid?.name}</Typography>
-            <p className="t text-[10px] text-gray-600">
-              ({row?.employeeId?.designation})
+            <Typography variant="body2">{row?.userid?.name}</Typography>
+            <p className="text-[10px] text-gray-600">
+              ({row?.designation || "-"})
             </p>
           </Box>
         </div>
@@ -36,56 +49,65 @@ export const payrollColumns = (onView, onEdit, onDelete,canView,canEdit,canDelet
       sortable: true,
     },
     {
-      name: "Month",
-      selector: (row) => dayjs(`${row.year}-${row.month}-01`).format("MM-YYYY"),
-    },
-    {
       name: "Department",
-      selector: (row) => row.department,
+      selector: (row) => row.department?.department || "-", // <-- get the string
       width: "120px",
     },
-    {
-      name: "Status",
-      selector: (row) => row.status,
-      width: "120px",
-    },
+
     {
       name: "Actions",
-      cell: (row) => (
-        <Stack direction="row" spacing={1}>
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={!canView}
-            startIcon={<BiShow />}
-            onClick={() => onView(row)}
-          >
-            View
-          </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            color="primary"
-            disabled={!canEdit}
-            startIcon={<BiEdit />}
-            onClick={() => onEdit(row)}
-          >
-            Edit
-          </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            disabled={!canDelete}
-            startIcon={<BiTrash />}
-            onClick={() => onDelete(row._id)}
-          >
-            Delete
-          </Button>
-        </Stack>
-      ),
-      width: "300px",
+      cell: (row) => {
+        const key = `${row._id}-${selectedMonth}-${selectedYear}`;
+        const exists = payrollMap?.[key]; // check if payroll already generated
+
+        return (
+          <Stack direction="row" spacing={1}>
+            {canCreate && (
+              <Button
+                size="small"
+                variant="contained"
+                disabled={exists}
+                onClick={() => handleGenerate(row)}
+              >
+                Generate
+              </Button>
+            )}
+            {canView && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<BiShow />}
+                onClick={() => handleView(row)}
+              >
+                View
+              </Button>
+            )}
+            {canEdit && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="primary"
+                startIcon={<BiEdit />}
+                onClick={() => handleEdit(row)}
+              >
+                Edit
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                size="small"
+                variant="outlined"
+                color="error"
+                startIcon={<BiTrash />}
+                onClick={() => handleDelete(row._id)}
+              >
+                Delete
+              </Button>
+            )}
+          </Stack>
+        );
+      },
+      width: "450px",
     },
   ];
 };
-

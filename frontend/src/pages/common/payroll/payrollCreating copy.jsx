@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   Card,
@@ -37,7 +36,6 @@ dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
 
 export default function PayrollCreatePage() {
-  const location = useLocation();
   const { employeeId } = useParams();
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(employeeId || "");
@@ -48,19 +46,6 @@ export default function PayrollCreatePage() {
   const [taxrate, settaxrate] = useState(0);
   const [employeeleavebal, setemployeeleavebal] = useState(0);
   const [previousAdvance, setpreviousAdvance] = useState(0);
-
-  // The employee, month, and year from the previous page
-  const { employeee, month, year } = location.state || {};
-
-  useEffect(() => {
-    if (!employee) {
-      // Optional: Redirect or show error if no employee data is passed
-      console.error("No employee data provided");
-    } else {
-      setSelectedEmployee(employeee?._id)
-      console.log(location.state)
-    }
-  }, [employeee]);
 
   const { holidays, company, employee, attandence, leaveBalance, advance, payroll } = useSelector(
     (state) => state.user
@@ -204,15 +189,15 @@ export default function PayrollCreatePage() {
     setError(null)
 
     // console.log(alredyPayroll)
-    if (alredyPayroll[selectedEmployee] && alredyPayroll[selectedEmployee].includes(`${month}-${year}`)) {
-      return setError(`Payroll for this employee is already generated for: ${dayjs(`${year}-${month}-01`).format("MMM-YYYY")}`)
+    if (alredyPayroll[selectedEmployee] && alredyPayroll[selectedEmployee].includes(`${form.month}-${form.year}`)) {
+      return setError(`Payroll for this employee is already generated for: ${dayjs(`${form.year}-${form.month}-01`).format("MMM-YYYY")}`)
     }
 
     const selected = employees.find((e) => e._id === selectedEmployee);
     setOptions(optionsinit)
     setSelectedEmployeedetail(selected);
 
-    const monthStart = dayjs(`${year}-${String(month).padStart(2, "0")}-01`);
+    const monthStart = dayjs(`${form.year}-${String(form.month).padStart(2, "0")}-01`);
     const isCurrentMonth = monthStart.isSame(dayjs(), "month");
     const monthEnd = monthStart.endOf("month");
     const totalDays = monthEnd.date();
@@ -291,7 +276,7 @@ export default function PayrollCreatePage() {
       overtime,
       shortmin,
     });
-  }, [selectedEmployee, attandence, month, year, employees, company, holidays]);
+  }, [selectedEmployee, attandence, form.month, form.year, employees, company, holidays]);
 
   // ✅ Leave deduction logic
   const effectiveLeaveDays = useMemo(() => {
@@ -512,8 +497,8 @@ export default function PayrollCreatePage() {
       calculationBasis: form.calculationBasis,
       options,
       basic,
-      month: month,
-      year: year,
+      month: form.month,
+      year: form.year,
       present: form.presentDays,
       leave: form.leaveDays,
       absent: form.absentDays,
@@ -572,10 +557,20 @@ export default function PayrollCreatePage() {
           <div className="grid gap-2 md:gap-4 grid-cols-2 mt-4 space-y-1">
             <FormControl size="small">
               <InputLabel>Month</InputLabel>
-              <Select
-              disabled
+              {/* <Select
                 label="Month"
-                value={month}
+                value={form.month}
+                onChange={(e) => setForm((prev) => ({ ...prev, month: e.target.value }))}
+              >
+                {months.map((month, ind) => (
+                  <MenuItem key={ind} value={ind + 1}>
+                    {month}
+                  </MenuItem>
+                ))}
+              </Select> */}
+              <Select
+                label="Month"
+                value={form.month}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, month: e.target.value }))
                 }
@@ -583,7 +578,7 @@ export default function PayrollCreatePage() {
                 {months.map((month, ind) => {
                   const monthValue = ind + 1;
                   const disabled =
-                    alredyPayroll[selectedEmployee]?.includes(`${monthValue}-${year}`);
+                    alredyPayroll[selectedEmployee]?.includes(`${monthValue}-${form.year}`);
 
                   return (
                     <MenuItem key={ind} value={monthValue} disabled={disabled}>
@@ -597,9 +592,8 @@ export default function PayrollCreatePage() {
             <FormControl size="small">
               <InputLabel>Year</InputLabel>
               <Select
-              disabled
                 label="year"
-                value={year}
+                value={form.year}
                 onChange={(e) => setForm((prev) => ({ ...prev, year: e.target.value }))}
               >
                 {["2024", "2025", "2026"].map((year) => (
@@ -625,7 +619,7 @@ export default function PayrollCreatePage() {
             </FormControl>
 
             <FormControl
-              disabled
+              disabled={!form.month || !form.year}
               className="col-span-1"
               size="small"
             >
@@ -656,8 +650,9 @@ export default function PayrollCreatePage() {
                 onChange={(e) => setSelectedEmployee(e.target.value)}
               >
                 {employees.map((emp) => {
-                 return (
-                    <MenuItem key={emp._id} value={emp._id} >
+                  const disabled = alredyPayroll[emp._id]?.includes(`${form.month}-${form.year}`);
+                  return (
+                    <MenuItem key={emp._id} value={emp._id} disabled={disabled}>
                       <div className="flex items-center gap-2">
                         <Avatar
                           src={cloudinaryUrl(emp?.profileimage, {
@@ -667,7 +662,7 @@ export default function PayrollCreatePage() {
                           })}
                           sx={{ width: 24, height: 24 }}
                         />
-                        {emp.userid?.name}
+                        {emp.userid?.name} {disabled && "(Payroll Exists)"}
                       </div>
                     </MenuItem>
                   );
