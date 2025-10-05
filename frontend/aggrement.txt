@@ -1,0 +1,92 @@
+**SOFTWARE SERVICE AGREEMENT**
+
+This Agreement is made on **[Date]**, by and between:
+
+**[Your Company Name]**, having its office at [Address], hereinafter referred to as the "Service Provider",
+AND
+**[Client Company Name]**, having its office at [Address], hereinafter referred to as the "Client".
+
+### 1. Scope of Service
+
+The Service Provider agrees to provide the Client with access to its **Web-Based Attendance & Payroll Management System**, which includes:
+
+* Attendance Management
+* Payroll Management
+* Leave Management
+* Advance/Loan Management
+* Biometric Device Integration
+
+### 2. Charges & Payment Terms
+
+* The Client agrees to pay an **initial fee of ₹20,000 (Rupees Twenty Thousand only)** for 1 year of service.
+* This includes:
+
+  * Hosting and maintenance
+  * Bug fixing and support
+  * Minor updates (UI changes, text updates, minor report changes)
+* **Major updates or new features** (e.g., additional modules, custom integrations) will be charged separately as per mutual agreement.
+* Renewal charges after the first year will be **₹[X,000] per year** (or **₹[X,000] per quarter / ₹[X,000] per month** if opted).
+
+### 3. Service Inclusions
+
+* Regular bug fixes and system maintenance
+* Minor modifications as defined above
+* Email/phone/WhatsApp support (response within 48 hours)
+
+### 4. Exclusions
+
+The following are **not covered** under the initial fee:
+
+* New modules or custom development
+* Integration with third-party software beyond biometric devices
+* Hardware/device costs
+* Major workflow or functional modifications
+
+### 5. Major Updates / Custom Features
+
+Any additional feature or major update requested by the Client will be:
+
+* Evaluated by the Service Provider
+* Quoted separately
+* Taken up only after written approval from the Client
+
+### 6. Intellectual Property Rights
+
+* The software and its source code shall remain the **intellectual property** of the Service Provider.
+* The Client is granted a **non-exclusive, non-transferable license** to use the system during the subscription period.
+
+### 7. Term & Renewal
+
+* This agreement shall remain valid for **1 year** from the date of signing.
+* The Client may renew the service by paying the applicable renewal charges.
+* If renewal is not paid, access to the system will be discontinued.
+
+### 8. Termination
+
+* Either party may terminate this Agreement with **30 days written notice**.
+* No refund will be made for payments already received.
+
+### 9. Confidentiality
+
+Both parties agree to maintain confidentiality of data and not to disclose or misuse any sensitive information obtained during the term of this Agreement.
+
+### 10. Limitation of Liability
+
+* The Service Provider shall not be liable for indirect or consequential losses (e.g., loss of business, profit, or employee data mishandling by the Client).
+* Liability is limited to the fees paid under this Agreement.
+
+### 11. Jurisdiction
+
+This Agreement shall be governed by the laws of India. Any disputes shall be subject to the jurisdiction of the courts in **[Your City]**, India.
+
+---
+
+**Signed by:**
+
+---
+
+(Authorized Signatory, Service Provider)
+
+---
+
+(Authorized Signatory, Client)
