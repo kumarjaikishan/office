@@ -271,7 +271,7 @@ const Attandence = () => {
 
 
   return (
-    <div className='p-1'>
+    <div className='p-1 max-w-6xl mx-auto '>
       {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
       <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
         <div className="flex justify-between items-center mb-4 flex-wrap">

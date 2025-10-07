@@ -286,7 +286,7 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
   const defaultEmployeePic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
 
   return (
-    <div className="overflow-auto">
+    <div className="overflow-auto ">
       {(filteredEmployees?.length < 1 || Object.keys(attendanceByEmp).length === 0) && <p className="text-center font-semibold text-xl" colSpan={days.length + 6}>No Record Found</p>}
       {filteredEmployees?.length > 0 && Object.keys(attendanceByEmp).length !== 0 &&
         <table className="border-collapse text-xs">

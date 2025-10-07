@@ -229,7 +229,7 @@ const EmployeeAdvancePage = () => {
     ];
 
     return (
-        <div className="p-1 md:p-3">
+        <div className="p-1 md:p-3 max-w-6xl mx-auto ">
             {/* <h2>Employee Advance Management</h2> */}
             <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
                 <div className="flex flex-wrap gap-3 justify-between w-full md:w-fit">

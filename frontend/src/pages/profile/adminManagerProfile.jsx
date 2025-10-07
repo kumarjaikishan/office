@@ -111,7 +111,7 @@ const AdminManagerProfile = () => {
   };
 
   return (
-    <div className="p-0 md:p-4">
+    <div className="p-0 md:p-4 max-w-6xl mx-auto ">
       {isload ? (
         <div className="w-full h-[300px] flex gap-5 flex-col justify-center items-center overflow-auto bg-white">
           <div className="relative">

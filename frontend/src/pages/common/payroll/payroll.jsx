@@ -235,7 +235,7 @@ export default function PayrollPage() {
   ];
 
   return (
-    <div className="w-full mx-auto p-1 md:p-4">
+    <div className="w-full max-w-7xl  mx-auto p-1 md:p-4">
       <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
         <div className="flex flex-wrap gap-3 justify-between w-full md:w-fit">
           <TextField

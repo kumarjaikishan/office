@@ -562,7 +562,7 @@ export default function PayrollCreatePage() {
 
   return (
     <div>
-      <div className="max-w-full gap-4 grid grid-cols-2 mx-auto p-0 md:p-6 space-y-1">
+      <div className="max-w-6xl mx-auto  gap-4 grid grid-cols-2  p-0 md:p-6 space-y-1">
         {/* Employee Selection */}
         <Card className="shadow-md col-span-2 p-1 md:p-4 rounded-2xl">
           <Typography variant="h6" gutterBottom>

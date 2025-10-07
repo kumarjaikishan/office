@@ -183,7 +183,7 @@ const Main = () => {
 
 
   return (
-    <div className='p-0  md:p-3'>
+    <div className='p-0 md:p-3 max-w-7xl mx-auto'>
       <div className="mb-3 ">
         {/* <h3 className='mb-3 text-xl font-semibold capitalize'>Dashboar overview</h3> */}
         <DashboardCard employee={employee} todayleave={todayleave.length + todayabsent.length} todaypresent={todaypresent.length} currentpresent={currentpresent.length} />

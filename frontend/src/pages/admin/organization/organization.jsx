@@ -305,7 +305,7 @@ export default function OrganizationSettings() {
     };
 
     return (
-        <div className="w-full mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
+        <div className="w-full max-w-7xl mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
             {/* Company Info */}
             {profile?.role == 'superadmin' &&
                 <div className=' shadow-lg border bg-blue-50 border-dashed border-blue-400 rounded-md'>

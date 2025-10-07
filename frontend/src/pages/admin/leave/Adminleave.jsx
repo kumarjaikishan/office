@@ -146,7 +146,7 @@ const Adminleave = () => {
     }
 
     return (
-        <div>
+        <div className='max-w-6xl mx-auto '>
             <DataTable
                 customStyles={useCustomStyles()}
                 columns={columns}

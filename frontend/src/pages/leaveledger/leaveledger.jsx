@@ -235,7 +235,7 @@ const Leaveledger = () => {
     ];
 
     return (
-        <div className="w-full md:p-3 p-1">
+        <div className="max-w-6xl mx-auto  md:p-3 p-1">
             {/* <h2>Leave Balance Management</h2> */}
             <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
                 {/* Search (full on small, shrink on md+) */}

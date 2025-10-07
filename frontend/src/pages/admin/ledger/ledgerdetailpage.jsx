@@ -222,8 +222,7 @@ const LedgerDetailPage = () => {
 
 
     return (
-        <div className="bg-white rounded shadow-md p-1 md:p-5 relative ">
-
+        <div className="bg-white rounded shadow-md p-1 md:p-5 relative max-w-6xl mx-auto ">
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
                     <div className="flex items-start md:items-center  gap-3">

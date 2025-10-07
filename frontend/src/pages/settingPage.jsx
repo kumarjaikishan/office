@@ -23,7 +23,7 @@ const Settings = () => {
     ];
 
     return (
-        <div className="p-1 py-2 md:p-4 flex flex-col gap-2">
+        <div className="p-1 py-2 md:p-4 flex flex-col gap-2 max-w-6xl mx-auto ">
             <h2 className="text-xl font-semibold mb-4">Settings</h2>
 
             <div className="flex items-center justify-between bg-white p-3 rounded-lg shadow">

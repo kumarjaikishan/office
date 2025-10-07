@@ -180,7 +180,7 @@ const LedgerListPage = () => {
     const inputref = useRef(null);
 
     return (
-        <div className="w-full bg-white rounded">
+        <div className="w-full max-w-6xl mx-auto  bg-white rounded">
             <div className="p-1 md:p-4 py-4 mb-4">
                 <div className="flex mb-4 gap-2 flex-wrap justify-between">
                     <TextField
@@ -209,7 +209,7 @@ const LedgerListPage = () => {
                                 <div
                                     key={ind}
                                     onClick={() => handleNavigate(l)}
-                                    className="relative cursor-pointer overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all pl-3 pr-1 py-3 bg-gray-50"
+                                    className="relative cursor-pointer overflow-hidden max-w-[270px] rounded-xl shadow-lg hover:shadow-xl transition-all pl-3 pr-1 py-3 bg-gray-50"
                                 >
                                     {/* Card content */}
                                     <div className="flex justify-between items-start">

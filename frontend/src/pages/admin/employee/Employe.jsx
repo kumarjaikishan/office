@@ -392,7 +392,7 @@ const Employe = () => {
   };
 
   return (
-    <div className='employee p-1'>
+    <div className='employee p-1 max-w-6xl mx-auto '>
       {/* <h2 className="text-2xl mb-8 font-bold text-slate-800">Manage Employees</h2> */}
       <div className="flex gap-5 justify-between items-center flex-wrap">
         {/* Search + Filters */}
