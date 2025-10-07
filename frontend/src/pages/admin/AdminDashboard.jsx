@@ -292,7 +292,7 @@ const Main = () => {
                     </div>
                   }
                 >
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center cursor-help ">
                     <span
                       className={`${isAbsent || isLeave
                         ? "border-red-500"

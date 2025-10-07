@@ -92,25 +92,66 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
 
   const weeklyOffDays = company?.weeklyOffs || [];
 
-  // Helper for status
+  // Helper for status but if there is no weekly off and holiday attendnec then also it will show weekloff/holiday which is incorrect
+  // const renderStatus = (empId, day) => {
+  //   let status = attendanceByEmp[empId]?.[day] || "-";
+
+  //   if (status === "present") status = "P";
+  //   if (status === "leave") status = "L";
+  //   if (status === "absent") status = "A";
+
+  //   if (holidayDates.has(day)) status = "H";
+  //   else {
+  //     const weekday = monthStart.date(day).day(); // 0=Sunday
+  //     if (weeklyOffDays.includes(weekday)) status = "W";
+  //   }
+
+  //   const colors = theme
+  //     ? {
+  //       P: "bg-green-200 text-green-900",
+  //       A: "bg-red-200 text-red-900",
+  //       // L: "bg-orange-200 text-orange-900",
+  //       L: "bg-red-200 text-red-900",
+  //       W: "bg-yellow-200 text-yellow-900",
+  //       H: "bg-blue-200 text-blue-900",
+  //     }
+  //     : {
+  //       P: "bg-green-900 text-green-100",
+  //       A: "bg-red-900 text-red-100",
+  //       // L: "bg-orange-500 text-orange-100",
+  //       L: "bg-red-500 text-red-100",
+  //       W: "bg-yellow-900 text-yellow-100",
+  //       H: "bg-blue-900 text-blue-100",
+  //     };
+
+  //   return (
+  //     <td key={day} className="w-9 h-9 text-center">
+  //       <div
+  //         className={`${status == "-" || !theme ? "" : "border border-dashed"
+  //           } w-7 h-7 
+  //        flex items-center justify-center mx-auto font-semibold
+  //        rounded  ${colors[status] || ""}`}
+  //       >
+  //         {status}
+  //       </div>
+  //     </td>
+  //   );
+  // };
+
   const renderStatus = (empId, day) => {
     let status = attendanceByEmp[empId]?.[day] || "-";
 
+    // 1️⃣ Map attendance to short codes first
     if (status === "present") status = "P";
-    if (status === "leave") status = "L";
-    if (status === "absent") status = "A";
-
-    if (holidayDates.has(day)) status = "H";
-    else {
-      const weekday = monthStart.date(day).day(); // 0=Sunday
-      if (weeklyOffDays.includes(weekday)) status = "W";
-    }
+    else if (status === "leave") status = "L";
+    else if (status === "absent") status = "A";
+    else if (status === "weekly off") status = "W";
+    else if (status === "holiday") status = "H";
 
     const colors = theme
       ? {
         P: "bg-green-200 text-green-900",
         A: "bg-red-200 text-red-900",
-        // L: "bg-orange-200 text-orange-900",
         L: "bg-red-200 text-red-900",
         W: "bg-yellow-200 text-yellow-900",
         H: "bg-blue-200 text-blue-900",
@@ -118,7 +159,6 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
       : {
         P: "bg-green-900 text-green-100",
         A: "bg-red-900 text-red-100",
-        // L: "bg-orange-500 text-orange-100",
         L: "bg-red-500 text-red-100",
         W: "bg-yellow-900 text-yellow-100",
         H: "bg-blue-900 text-blue-100",
@@ -127,16 +167,16 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
     return (
       <td key={day} className="w-9 h-9 text-center">
         <div
-          className={`${status == "-" || !theme ? "" : "border border-dashed"
-            } w-7 h-7 
-         flex items-center justify-center mx-auto font-semibold
-         rounded  ${colors[status] || ""}`}
+          className={`${status === "-" || !theme ? "" : "border border-dashed"
+            } w-7 h-7 flex items-center justify-center mx-auto font-semibold rounded ${colors[status] || ""
+            }`}
         >
           {status}
         </div>
       </td>
     );
   };
+
 
   // Helper for counting totals per employee
   const getEmployeeTotals = (empId) => {
@@ -200,16 +240,18 @@ const RegisterView = ({ filters, theme, setcsvcall, csvcall }) => {
       const dailyStatus = days.map((d) => {
         let status = attendanceByEmp[emp._id]?.[d.date()] || "-";
 
-        if (holidayDates.has(d.date())) {
-          status = "H";
-        } else {
-          const weekday = monthStart.date(d.date()).day();
-          if (weeklyOffDays.includes(weekday)) status = "W";
-        }
+        // if (holidayDates.has(d.date())) {
+        //   status = "H";
+        // } else {
+        //   const weekday = monthStart.date(d.date()).day();
+        //   if (weeklyOffDays.includes(weekday)) status = "W";
+        // }
 
         if (status === "present") status = "P";
         if (status === "leave") status = "L";
         if (status === "absent") status = "A";
+        if (status === "weekly off") status = "W";
+        if (status === "holiday") status = "H";
 
         return status;
       });
