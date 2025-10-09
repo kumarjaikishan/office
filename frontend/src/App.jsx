@@ -27,7 +27,6 @@ const AttenPerformance = lazy(() => import('./pages/admin/attandence/AttenPerfor
 const Adminleave = lazy(() => import('./pages/admin/leave/Adminleave'));
 const HolidayForm = lazy(() => import('./pages/holidays/Holiday'));
 const Setting = lazy(() => import('./pages/settingPage'));
-const FaceAttandance = lazy(() => import('./pages/admin/facerecoginaion/faceAttandance'));
 const AttendanceReport = lazy(() => import('./pages/report/attandenceReport'));
 const PayrollPage = lazy(() => import('./pages/common/payroll/payroll'));
 const PayrollCreatePage = lazy(() => import('./pages/common/payroll/payrollCreating'));
@@ -66,7 +65,6 @@ const routesByRole = {
       <Route path="leave-ledger" element={<LeaveBalancePage />} />
       <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="setting" element={<Setting />} />
-      <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
@@ -99,7 +97,6 @@ const routesByRole = {
       <Route path="leave-ledger" element={<LeaveBalancePage />} />
       <Route path="advance" element={<EmployeeAdvancePage />} />
       <Route path="setting" element={<Setting />} />
-      <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="ledger" element={<LedgerListPage />} />
       <Route path="ledger/:id" element={<LedgerDetailPage />} />
@@ -120,7 +117,6 @@ const routesByRole = {
       <Route path="leave-request" element={<Adminleave />} />
       <Route path="leave-ledger" element={<LeaveBalancePage />} />
       <Route path="advance" element={<EmployeeAdvancePage />} />
-      <Route path="faceatten" element={<FaceAttandance />} />
       <Route path="profile" element={<AdminManagerProfile />} />
       <Route path="setting" element={<Setting />} />
       <Route path="ledger" element={<LedgerListPage />} />
