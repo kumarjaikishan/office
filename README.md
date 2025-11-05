@@ -15,6 +15,7 @@ It provides **real-time analytics, reports, and biometric sync support** for HR 
 **Demo credentials**
 - Email: `demo@gmail.com`
 - Password: `demo`
+
 *(Hosted on AWS EC2 with Nginx reverse proxy and Cloudinary for media storage)*
 ---
 
