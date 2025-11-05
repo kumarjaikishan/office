@@ -42,11 +42,11 @@ router.route('/resetrequest').get(authmiddlewre, authorizeRoles('superadmin'), u
 router.route('/setpassword').post(users.setpassword);
 // router.route('/signup').post(users.userRegister);
 
-router.route('/departmentlist').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), admin.departmentlist);
+router.route('/departmentlist').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager' , 'demo'), admin.departmentlist);
 router.route('/adddepartment').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("department", 2), admin.addDepartment);
 router.route('/updatedepartment').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("department", 3), admin.updatedepartment);
 router.route('/deletedepartment').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("department", 4), admin.deletedepartment);
-router.route('/firstfetch').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), admin.firstfetch);
+router.route('/firstfetch').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), admin.firstfetch);
 router.route('/leavehandle').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("leave", 3), admin.leavehandle);
 router.route('/leavehandle/:leaveid').delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("leave", 4), admin.deleteleave);
 // router.route('/addcompany').post(authmiddlewre, authorizeRoles('superadmin','superadmin'), admin.addcompany);
@@ -54,10 +54,10 @@ router.route('/updateCompany').post(authmiddlewre, authorizeRoles('superadmin'),
 router.route('/addBranch').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("branch", 2), admin.addBranch);
 router.route('/editBranch').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("branch", 3), admin.editBranch);
 router.route('/deleteBranch').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("branch", 4), admin.deleteBranch);
-router.route('/getemployee').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), admin.getemployee);
+router.route('/getemployee').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), admin.getemployee);
 router.route('/updatepassword').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), admin.updatepassword);
 
-router.route('/employeelist').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), admin.employeelist);
+router.route('/employeelist').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), admin.employeelist);
 router.route('/addemployee').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("employee", 2), upload.single('photo'), admin.addemployee);
 router.route('/updateemployee').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("employee", 3), upload.single('photo'), admin.updateemployee);
 router.route('/deleteemployee').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("employee", 4), admin.deleteemployee);
@@ -65,9 +65,9 @@ router.route('/enrollFace').post(authmiddlewre, authorizeRoles('superadmin', 'ad
 router.route('/deletefaceenroll').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 4), admin.deletefaceenroll);
 
 router.route('/addsalary').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), salary.addsalary);
-router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), salary.salaryfetch);
+router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), salary.salaryfetch);
 
-router.route('/allAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), attendance.allAttandence);
+router.route('/allAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), attendance.allAttandence);
 router.route('/editattandence').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 3), attendance.editattandence);
 router.route('/webattandence').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), attendance.webattandence);
 router.route('/bulkMarkAttendance').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 2), attendance.bulkMarkAttendance);
@@ -75,7 +75,7 @@ router.route('/checkout').post(authmiddlewre, authorizeRoles('superadmin', 'admi
 router.route('/checkin').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 2), attendance.checkin);
 router.route('/facecheckin').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), attendance.facecheckin);
 router.route('/facecheckout').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), attendance.facecheckout);
-router.route('/employeeAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 1), attendance.employeeAttandence);
+router.route('/employeeAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), checkPermission("attandence", 1), attendance.employeeAttandence);
 router.route('/deleteattandence').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 4), attendance.deleteattandence);
 router.route('/recordAttendanceFromLogs').post(authmiddlewre, attendance.recordAttendanceFromLogs);
 
@@ -86,7 +86,7 @@ router.route('/deleteholiday').post(authmiddlewre, authorizeRoles('superadmin', 
 
 router.route('/addleave').post(authmiddlewre, authorizeRoles('employee'), leave.addleave);
 router.route('/getleave').get(authmiddlewre, leave.getleave);
-router.route('/fetchleave').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("leave", 1), leave.fetchleave);
+router.route('/fetchleave').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), checkPermission("leave", 1), leave.fetchleave);
 router.route('/employeefetch').get(authmiddlewre, authorizeRoles('employee'), employeemiddlewre, leave.employeefetch);
 router.route('/empFirstFetch').get(authmiddlewre, authorizeRoles('employee'), leave.employeefetch);
 router.route('/updatenotification').get(authmiddlewre, leave.updatenotification);
@@ -99,22 +99,22 @@ router.route('/deleteAdmin/:id').delete(authmiddlewre, authorizeRoles('superadmi
 
 router.route('/payroll')
   .post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 2), payroll.createPayroll)
-  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 1), payroll.allPayroll)
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), checkPermission("salary", 1), payroll.allPayroll)
 
 router.route('/payroll/:id')
-  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 1), payroll.getPayroll)
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), checkPermission("salary", 1), payroll.getPayroll)
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 3), payroll.editPayroll)
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("salary", 4), payroll.deletePayroll)
 
 router.route('/leave-balances')
-  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.getallleavebalnce)
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), leaveBalance.getallleavebalnce)
   .post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.addleavebalance)
 router.route('/leave-balances/:id')
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.editleavebalance)
   .delete(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), leaveBalance.deleteleavebalance)
 
 router.route('/advance')
-  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.getAllAdvances)
+  .get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), advance.getAllAdvances)
   .post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.addAdvance)
 router.route('/advance/:id')
   .put(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), advance.editAdvance)
@@ -123,8 +123,9 @@ router.route('/advance/:id')
 router.route('/developerfetch').get(authmiddlewre, authorizeRoles('developer'), developer.allUser);
 router.route('/User').post(authmiddlewre, authorizeRoles('developer'), developer.addUser)
 router.route('/User/:id')
-  .put(authmiddlewre, authorizeRoles('developer'), developer.editUser)
-  .delete(authmiddlewre, authorizeRoles('developer'), developer.deleteUser);
+.put(authmiddlewre, authorizeRoles('developer'), developer.editUser)
+.delete(authmiddlewre, authorizeRoles('developer'), developer.deleteUser);
+router.route('/demo').post(authmiddlewre, authorizeRoles('developer'), developer.addDemo)
 
 // router.route('/User').get(developer.adddefaultpermission)
 // router.route('/Userper').get(developer.getdefaultpermission)

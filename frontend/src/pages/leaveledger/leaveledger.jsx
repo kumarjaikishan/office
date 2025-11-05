@@ -138,7 +138,7 @@ const Leaveledger = () => {
         } catch (error) {
             console.error("Error saving leave balance:", error);
             if (error.response) {
-                toast.error(error.response.data.message || "Failed to save");
+                toast.warn(error.response.data.message || "Failed to save");
             } else {
                 toast.error("Server error");
             }

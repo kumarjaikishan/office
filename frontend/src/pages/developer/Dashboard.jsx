@@ -6,7 +6,7 @@ import { BiMessageRoundedError } from 'react-icons/bi'
 import dayjs from 'dayjs'
 import { Button, TextField } from '@mui/material'
 import { GoPlus } from 'react-icons/go'
-import { MdOutlineModeEdit } from "react-icons/md";
+import { MdEmojiFlags, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import Modalbox from '../../components/custommodal/Modalbox'
 import { toast } from 'react-toastify'
@@ -28,6 +28,16 @@ const DeveloperDashboard = () => {
     const [inp, setinp] = useState(init);
     const [isedit, setisedit] = useState(false)
     const [isloading, setisloading] = useState(false)
+
+    const [demoModal, setDemoModal] = useState(false);
+    const [demoInp, setDemoInp] = useState({
+        companyId: "",
+        name: "",
+        email: "",
+        password: "",
+    });
+    const [demoListModal, setDemoListModal] = useState(false);
+    const [demoList, setDemoList] = useState([]);
 
     const fetche = async () => {
         try {
@@ -182,6 +192,11 @@ const DeveloperDashboard = () => {
         setisedit(false);
     }
 
+    const handleCreateDemo = (user) => {
+        setDemoInp({ companyId: user?.companyId, email: "", password: "" });
+        setDemoModal(true);
+    };
+
     const columns = [
         {
             name: "S.No",
@@ -210,6 +225,13 @@ const DeveloperDashboard = () => {
             width: "100px",
             cell: (row) => (
                 <div className="flex gap-2">
+                    <span
+                        className="text-[18px] text-blue-500 cursor-pointer"
+                        title="Edit"
+                        onClick={() => handleCreateDemo(row)}
+                    >
+                        <MdEmojiFlags />
+                    </span>
                     <span
                         className="text-[18px] text-blue-500 cursor-pointer"
                         title="Edit"
@@ -281,6 +303,7 @@ const DeveloperDashboard = () => {
                 }
             />
 
+            {/* creating new company id */}
             <Modalbox open={passmodal} onClose={() => {
                 setpassmodal(false);
             }}>
@@ -315,6 +338,90 @@ const DeveloperDashboard = () => {
                                     <Button variant="outlined" onClick={cancel} sx={{ mr: 2 }} >Cancel</Button>
                                 </div>
                             </div>
+                        </span>
+                    </form>
+                </div>
+            </Modalbox>
+
+            {/* 🧩 Create Demo Account Modal */}
+            <Modalbox open={demoModal} onClose={() => setDemoModal(false)}>
+                <div className="membermodal w-[400px]">
+                    <form
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            try {
+                                const token = localStorage.getItem("emstoken");
+                                const res = await axios.post(
+                                    `${import.meta.env.VITE_API_ADDRESS}demo`,
+                                    demoInp,
+                                    { headers: { Authorization: `Bearer ${token}` } }
+                                );
+                                toast.success(res.data.message, { autoClose: 2000 });
+                                setDemoModal(false);
+                            } catch (err) {
+                                toast.error(
+                                    err.response?.data?.message || "Error creating demo",
+                                    { autoClose: 2000 }
+                                );
+                            }
+                        }}
+                    >
+                        <h2>Create Demo Account</h2>
+                         <span className="modalcontent ">
+                        <div className="flex flex-col gap-3 mt-3">
+                            <TextField
+                                fullWidth
+                                label="Company ID"
+                                value={demoInp.companyId}
+                                disabled
+                                size="small"
+                            />
+                            <TextField
+                                fullWidth
+                                required
+                                variant='standard'
+                                label="Name"
+                                value={demoInp.name}
+                                onChange={(e) =>
+                                    setDemoInp({ ...demoInp, name: e.target.value })
+                                }
+                                size="small"
+                            />
+                            <TextField
+                                fullWidth
+                                required
+                                variant='standard'
+                                label="Demo Email"
+                                value={demoInp.email}
+                                onChange={(e) =>
+                                    setDemoInp({ ...demoInp, email: e.target.value })
+                                }
+                                size="small"
+                            />
+                            <TextField
+                                fullWidth
+                                required
+                                variant='standard'
+                                type="password"
+                                label="Password"
+                                value={demoInp.password}
+                                onChange={(e) =>
+                                    setDemoInp({ ...demoInp, password: e.target.value })
+                                }
+                                size="small"
+                            />
+                            <div className="flex justify-end gap-2 mt-2">
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => setDemoModal(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button variant="contained" type="submit">
+                                    Create
+                                </Button>
+                            </div>
+                        </div>
                         </span>
                     </form>
                 </div>

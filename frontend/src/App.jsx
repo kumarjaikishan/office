@@ -76,6 +76,29 @@ const routesByRole = {
       <Route path="*" element={<Errorpage />} />
     </Route>
   ),
+  demo: (
+    <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['demo']} />}>
+      <Route index element={<AdminDashboard />} />
+      <Route path="employe" element={<Employe />} />
+      <Route path="organization" element={<OrganizationSettings />} />
+      <Route path="attandence" element={<Attandence />} />
+      <Route path="attandence_Report" element={<AttendanceReport />} />
+      <Route path="holiday" element={<HolidayForm />} />
+      <Route path="leave-request" element={<Adminleave />} />
+      <Route path="leave-ledger" element={<LeaveBalancePage />} />
+      <Route path="advance" element={<EmployeeAdvancePage />} />
+      <Route path="setting" element={<Setting />} />
+      <Route path="profile" element={<AdminManagerProfile />} />
+      <Route path="ledger" element={<LedgerListPage />} />
+      <Route path="ledger/:id" element={<LedgerDetailPage />} />
+      <Route path="performance/:userid" element={<AttenPerformance />} />
+      <Route path="payroll" element={<PayrollPage />} />
+      <Route path="payroll/add" element={<PayrollCreatePage />} />
+      <Route path="payroll/print/:id" element={<PayslipPrintPage />} />
+      <Route path="payroll/edit/:id" element={<PayrollEdit />} />
+      <Route path="*" element={<Errorpage />} />
+    </Route>
+  ),
   grant: (
     <Route path="/dashboard" element={<ProtectedRoutes allowedRoles={['grant']} />}>
       <Route index element={<LedgerListPage />} />
@@ -166,7 +189,7 @@ function App() {
     }
     const role = user?.profile?.role;
 
-    if (['superadmin', 'admin', 'manager', 'grant'].includes(role)) {
+    if (['superadmin', 'admin', 'manager', 'grant','demo'].includes(role)) {
       dispatch(FirstFetch());
     } else if (role === 'employee') {
       dispatch(empFirstFetch());
@@ -215,7 +238,7 @@ function App() {
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
 
   useEffect(() => {
-    if (islogin && user?.liveAttandence && ["superadmin", "admin", "manager"].includes(user?.profile?.role)) {
+    if (islogin && user?.liveAttandence && ["superadmin", "admin", "manager","demo"].includes(user?.profile?.role)) {
       const es = connectSSE((data) => {
         // console.log("sse se event ayaa")
         if (data.type === "attendance_update") {

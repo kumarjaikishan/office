@@ -219,9 +219,9 @@ export default function PayrollPage() {
                 Generate
               </Button>
             )}
-            {canView && (
+            {/* {canView && ( */}
               <Button size="small" disabled={!exists} variant="outlined" startIcon={<BiShow />} onClick={() => handleView(row)}>View</Button>
-            )}
+            {/* )} */}
             {canEdit && (
               <Button size="small" disabled={!exists} variant="outlined" startIcon={<BiEdit />} onClick={() => handleEdit(row)}>Edit</Button>
             )}

@@ -292,7 +292,7 @@ export default function PayslipPrintPage() {
                   <span className="font-medium">{formatRupee(payroll?.baseSalary)}</span>
                 </li>
 
-                {payroll?.allowances.map((e, i) => (
+                {payroll?.allowances?.map((e, i) => (
                   <li key={i} className="flex justify-between px-4 py-1">
                     <div>
                       <span>{e.name}</span>
@@ -304,7 +304,7 @@ export default function PayslipPrintPage() {
                   </li>
                 ))}
 
-                {payroll?.bonuses.map((e, i) => (
+                {payroll?.bonuses?.map((e, i) => (
                   <li key={i} className="flex justify-between px-4 py-1">
                     <div>
                       <span>{e.name}</span>
@@ -319,8 +319,8 @@ export default function PayslipPrintPage() {
                 <li className="flex justify-between px-4 py-2 font-bold bg-gray-50">
                   <span>Gross Salary</span>
                   <span>
-                    {formatRupee(payroll?.allowances.reduce((acc, e) => acc + e.amount, 0) +
-                      payroll?.bonuses.reduce((acc, e) => acc + e.amount, 0) +
+                    {formatRupee(payroll?.allowances?.reduce((acc, e) => acc + e.amount, 0) +
+                      payroll?.bonuses?.reduce((acc, e) => acc + e.amount, 0) +
                       payroll?.baseSalary)}
                   </span>
                 </li>
@@ -331,7 +331,7 @@ export default function PayslipPrintPage() {
             <div className="bg-white shadow-none md:shadow-md overflow-hidden rounded-lg border border-gray-400">
               <h4 className="font-semibold px-4  py-2 border-b border-gray-400 bg-gray-50 text-gray-700">Deductions</h4>
               <ul className="divide-y divide-gray-200 text-xs md:text-sm">
-                {payroll?.deductions.map((d, i) => (
+                {payroll?.deductions?.map((d, i) => (
                   <li key={i} className="flex justify-between px-4 py-1">
                     <div>
                       <span>{d.name}</span>

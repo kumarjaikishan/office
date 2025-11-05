@@ -17,7 +17,6 @@ const branch = require('../models/branch');
 const removePhotoBySecureUrl = require('../utils/cloudinaryremove')
 const redisClient = require('../utils/redis');
 
-
 cloudinary.config({
     cloud_name: 'dusxlxlvm',
     api_key: '214119961949842',
@@ -659,6 +658,7 @@ const deleteAdmin = async (req, res, next) => {
 
 
 const firstfetch = async (req, res, next) => {
+    // console.log(req.user)
     try {
         // 1️⃣ Find the company for this admin
         // const companye = await company.findOne({ adminId: req.user.id });
@@ -740,7 +740,7 @@ const firstfetch = async (req, res, next) => {
             }).sort({ date: -1, createdAt: -1 });
         }
 
-        if ((req.user.role == 'superadmin' || req.user.role == 'admin') && companye) {
+        if ((req.user.role == 'superadmin' || req.user.role == 'admin' || req.user.role == 'demo') && companye) {
             const compId = companye._id;
 
             branches = await branch.find({ companyId: compId })

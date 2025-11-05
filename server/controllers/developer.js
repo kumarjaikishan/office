@@ -1,7 +1,7 @@
 const user = require('../models/user');
 const company = require('../models/company');
 const permissionschema = require('../models/permission');
-const permission = require('../utils/mongodefaultpermission');
+const permission = require('../utils/permission');
 
 const allUser = async (req, res, next) => {
     try {
@@ -42,6 +42,23 @@ const addUser = async (req, res, next) => {
     }
 }
 
+const addDemo = async (req, res, next) => {
+    const { companyId, name, email, password } = req.body;
+
+    try {
+        const newuser = new user({ name, companyId, email, password, permissions: permission.demo, role: "demo" });
+        const savedUser = await newuser.save();
+
+        return res.status(200).json({
+            message: "User created"
+        })
+
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
+
 const editUser = async (req, res, next) => {
     const { id } = req.params;
     const { name, email } = req.body;
@@ -50,7 +67,7 @@ const editUser = async (req, res, next) => {
     try {
         const query = await user.findByIdAndUpdate(id, {
             $set: {
-               registeredName:name, email
+                registeredName: name, email
             }
         });
 
@@ -138,4 +155,4 @@ const updatedefaultpermission = async (req, res, next) => {
 }
 
 
-module.exports = { allUser, addUser, editUser, deleteUser, saveModule, adddefaultpermission, updatedefaultpermission, getdefaultpermission };
+module.exports = { allUser, addUser, editUser, deleteUser, addDemo, saveModule, adddefaultpermission, updatedefaultpermission, getdefaultpermission };

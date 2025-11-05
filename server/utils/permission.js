@@ -47,6 +47,19 @@ const permission = {
     notification: [1],
     salary: [1],
   },
+  demo: {
+    attandence: [1],
+    branch: [1],
+    department: [1],
+    employee: [1],
+    ledger_entry: [1],
+    holiday: [1],
+    leave: [1],
+    ledger: [1],
+    notification: [1],
+    salary: [1],
+    user: [1],
+  },
 }
 
 module.exports = permission;

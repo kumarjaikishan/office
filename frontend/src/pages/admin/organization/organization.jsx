@@ -307,7 +307,7 @@ export default function OrganizationSettings() {
     return (
         <div className="w-full max-w-7xl mx-auto mt-1 p-1 py-2 md:p-6 bg-white rounded-xl shadow-md space-y-3 md:space-y-6">
             {/* Company Info */}
-            {profile?.role == 'superadmin' &&
+            {['superadmin', 'demo'].includes(profile?.role) &&
                 <div className=' shadow-lg border bg-blue-50 border-dashed border-blue-400 rounded-md'>
                     <div
                         className="flex justify-between items-center cursor-pointer  bg-blue-200 px-4 py-2 rounded-md"
@@ -483,7 +483,7 @@ export default function OrganizationSettings() {
             }
 
             {/* Branches Info */}
-            {(profile?.role == 'superadmin' || profile?.role == 'admin') &&
+            {['superadmin', 'admin', 'demo'].includes(profile?.role) &&
                 <div className='border shadow-lg bg-green-50 border-dashed border-green-400 rounded-md'>
                     <div
                         className="flex justify-between items-center cursor-pointer bg-green-200 px-4 py-2 rounded-md"
@@ -787,7 +787,7 @@ export default function OrganizationSettings() {
             </div>
 
             {/* Admin / Manager Info */}
-            {profile?.role == 'superadmin' &&
+            {['superadmin'].includes(profile?.role) &&
                 <div className='border shadow-lg bg-slate-50 border-dashed border-slate-400 rounded-md'>
                     <div
                         className="flex justify-between items-center cursor-pointer bg-slate-200 px-4 py-2 rounded-md"
