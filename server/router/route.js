@@ -25,6 +25,7 @@ const deploy_script = {
   office: '/home/ubuntu/office.sh',
   accusoft: '/home/ubuntu/accusoft.sh',
   battlefiesta: '/home/ubuntu/battlefiesta.sh',
+  portfolio: '/home/ubuntu/portfolio.sh',
 }
 
 router.route('/health').get(async (req, res) => {
@@ -125,6 +126,9 @@ router.route('/User').post(authmiddlewre, authorizeRoles('developer'), developer
 router.route('/User/:id')
 .put(authmiddlewre, authorizeRoles('developer'), developer.editUser)
 .delete(authmiddlewre, authorizeRoles('developer'), developer.deleteUser);
+
+router.route('/demo/:id').get(authmiddlewre, authorizeRoles('developer'), developer.getDemo)
+router.route('/demo/:id').delete(authmiddlewre, authorizeRoles('developer'), developer.deleteDemo)
 router.route('/demo').post(authmiddlewre, authorizeRoles('developer'), developer.addDemo)
 
 // router.route('/User').get(developer.adddefaultpermission)

@@ -10,6 +10,7 @@ import { MdEmojiFlags, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import Modalbox from '../../components/custommodal/Modalbox'
 import { toast } from 'react-toastify'
+import { IoInformation } from 'react-icons/io5'
 
 const DeveloperDashboard = () => {
 
@@ -196,6 +197,50 @@ const DeveloperDashboard = () => {
         setDemoInp({ companyId: user?.companyId, email: "", password: "" });
         setDemoModal(true);
     };
+    
+    const handleShowDemos = async (user) => {
+        // Dummy IDs for now
+        try {
+            const token = localStorage.getItem('emstoken');
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_ADDRESS}demo/${user.companyId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // console.log(res.data.demousers)
+            setDemoList(res.data.demousers);
+            setDemoListModal(true);
+        } catch (error) {
+
+            console.log(error);
+        }
+
+
+    };
+
+    const demodelete = async (userid) => {
+        // Dummy IDs for now
+        try {
+            const token = localStorage.getItem('emstoken');
+            const res = await axios.delete(
+                `${import.meta.env.VITE_API_ADDRESS}demo/${userid}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            console.log(res.data)
+            toast.success(res.data.message)
+        } catch (error) {
+
+            console.log(error);
+        }
+    };
 
     const columns = [
         {
@@ -206,25 +251,35 @@ const DeveloperDashboard = () => {
         {
             name: "Name",
             selector: (row) => row?.registeredName ?? '',
+            width: "160px",
         },
         {
             name: "Email",
             selector: (row) => row.email,
+            //  width: "160px",
         },
         {
             name: "Date",
             selector: (row) => dayjs(row.createdAt).format("DD MMM, YY"),
+            width: "90px",
         },
         {
             name: "Status",
             selector: (row) => row.stat || "-",
-            width: "130px",
+            width: "110px",
         },
         {
             name: "Action",
-            width: "100px",
+            width: "140px",
             cell: (row) => (
                 <div className="flex gap-2">
+                    <span
+                        className="text-[18px] text-blue-500 cursor-pointer"
+                        title="Edit"
+                        onClick={() => handleShowDemos(row)}
+                    >
+                        <IoInformation />
+                    </span>
                     <span
                         className="text-[18px] text-blue-500 cursor-pointer"
                         title="Edit"
@@ -279,7 +334,16 @@ const DeveloperDashboard = () => {
                     loading={isloading}
                     onClick={() => deploy('office')}
                 >
-                    office
+                    EMS
+                </Button>
+                <Button
+                    variant="contained"
+                    className="flex-[2] md:w-fit md:flex-none"
+                    // startIcon={<GoPlus />}
+                    loading={isloading}
+                    onClick={() => deploy('portfolio')}
+                >
+                    Portfolio
                 </Button>
                 <Button
                     variant="contained"
@@ -359,69 +423,102 @@ const DeveloperDashboard = () => {
                                 toast.success(res.data.message, { autoClose: 2000 });
                                 setDemoModal(false);
                             } catch (err) {
+                                console.log(err)
                                 toast.error(
                                     err.response?.data?.message || "Error creating demo",
-                                    { autoClose: 2000 }
+                                    { autoClose: 4000 }
                                 );
                             }
                         }}
                     >
                         <h2>Create Demo Account</h2>
-                         <span className="modalcontent ">
-                        <div className="flex flex-col gap-3 mt-3">
-                            <TextField
-                                fullWidth
-                                label="Company ID"
-                                value={demoInp.companyId}
-                                disabled
-                                size="small"
-                            />
-                            <TextField
-                                fullWidth
-                                required
-                                variant='standard'
-                                label="Name"
-                                value={demoInp.name}
-                                onChange={(e) =>
-                                    setDemoInp({ ...demoInp, name: e.target.value })
-                                }
-                                size="small"
-                            />
-                            <TextField
-                                fullWidth
-                                required
-                                variant='standard'
-                                label="Demo Email"
-                                value={demoInp.email}
-                                onChange={(e) =>
-                                    setDemoInp({ ...demoInp, email: e.target.value })
-                                }
-                                size="small"
-                            />
-                            <TextField
-                                fullWidth
-                                required
-                                variant='standard'
-                                type="password"
-                                label="Password"
-                                value={demoInp.password}
-                                onChange={(e) =>
-                                    setDemoInp({ ...demoInp, password: e.target.value })
-                                }
-                                size="small"
-                            />
-                            <div className="flex justify-end gap-2 mt-2">
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => setDemoModal(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button variant="contained" type="submit">
-                                    Create
-                                </Button>
+                        <span className="modalcontent ">
+                            <div className="flex flex-col gap-3 mt-3">
+                                <TextField
+                                    fullWidth
+                                    label="Company ID"
+                                    value={demoInp.companyId}
+                                    disabled
+                                    size="small"
+                                />
+                                <TextField
+                                    fullWidth
+                                    required
+                                    variant='standard'
+                                    label="Name"
+                                    value={demoInp.name}
+                                    onChange={(e) =>
+                                        setDemoInp({ ...demoInp, name: e.target.value })
+                                    }
+                                    size="small"
+                                />
+                                <TextField
+                                    fullWidth
+                                    required
+                                    variant='standard'
+                                    label="Demo Email"
+                                    value={demoInp.email}
+                                    onChange={(e) =>
+                                        setDemoInp({ ...demoInp, email: e.target.value })
+                                    }
+                                    size="small"
+                                />
+                                <TextField
+                                    fullWidth
+                                    required
+                                    variant='standard'
+                                    type="password"
+                                    label="Password"
+                                    value={demoInp.password}
+                                    onChange={(e) =>
+                                        setDemoInp({ ...demoInp, password: e.target.value })
+                                    }
+                                    size="small"
+                                />
+                                <div className="flex justify-end gap-2 mt-2">
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => setDemoModal(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button variant="contained" type="submit">
+                                        Create
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
+                        </span>
+                    </form>
+                </div>
+            </Modalbox>
+
+            {/* 🧾 Show Demo IDs Modal */}
+            <Modalbox open={demoListModal} onClose={() => setDemoListModal(false)}>
+                <div className="membermodal w-[400px]">
+                    <form>
+                        <h2>Demo Accounts</h2>
+                        <span className="modalcontent ">
+                            {demoList.length < 1 && <div className='text-center'>No Demo Id found</div>}
+                            <ul className="mt-3 space-y-2">
+                                {demoList?.map((demo, i) => (
+                                    <li
+                                        key={i}
+                                        className="flex justify-between bg-gray-50 p-2 rounded-md text-sm"
+                                    >
+                                        <span className="text-gray-500">{i + 1}. {demo.name}</span>
+                                        <span>{demo.email}</span>
+                                        <span onClick={() => demodelete(demo._id)} className=' text-red-600 text-2xl cursor-pointer'><AiOutlineDelete /> </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </span>
+                        <span className='modalbody'>
+                            <Button
+                                variant="outlined"
+                                onClick={() => setDemoListModal(false)}
+                            >
+                                Close
+                            </Button>
                         </span>
                     </form>
                 </div>

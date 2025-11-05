@@ -32,8 +32,39 @@ const addUser = async (req, res, next) => {
 
         await user.findByIdAndUpdate(savedUser._id, { companyId: savedcompany._id })
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: "User created"
+        })
+
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
+
+const getDemo = async (req, res, next) => {
+   
+    const { id } = req.params;
+    try {
+        const demousers = await user.find({ companyId: id, role: 'demo' }).select('email name');
+
+        return res.status(200).json({
+            demousers
+        })
+
+    } catch (error) {
+        console.log(error.message)
+        return next({ status: 500, message: error.message });
+    }
+}
+const deleteDemo = async (req, res, next) => {
+   
+    const { id } = req.params;
+    try {
+        const demousers = await user.findByIdAndDelete(id);
+
+        return res.status(200).json({
+            message:'Demo User Deleted'
         })
 
     } catch (error) {
@@ -49,7 +80,7 @@ const addDemo = async (req, res, next) => {
         const newuser = new user({ name, companyId, email, password, permissions: permission.demo, role: "demo" });
         const savedUser = await newuser.save();
 
-        return res.status(200).json({
+        return res.status(201).json({
             message: "User created"
         })
 
@@ -155,4 +186,4 @@ const updatedefaultpermission = async (req, res, next) => {
 }
 
 
-module.exports = { allUser, addUser, editUser, deleteUser, addDemo, saveModule, adddefaultpermission, updatedefaultpermission, getdefaultpermission };
+module.exports = { allUser, addUser, editUser, deleteUser, addDemo, getDemo,deleteDemo,saveModule, adddefaultpermission, updatedefaultpermission, getdefaultpermission };
