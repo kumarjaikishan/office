@@ -12,10 +12,14 @@ It provides **real-time analytics, reports, and biometric sync support** for HR 
 
 ## 🚀 Live Demo
 🔗 **[View Live Project](https://office.battlefiesta.in)**  
+**Demo credentials**
+- Email: `demo@gmail.com`
+- Password: `demo`
+
 *(Hosted on AWS EC2 with Nginx reverse proxy and Cloudinary for media storage)*
 
 ---
-*Demo Id - demo@gmail.com , password - demo*
+
 
 ## ⚙️ Tech Stack
 
