@@ -1,7 +1,7 @@
 # 🏢 Employee Attendance Management System
 
 <p align="center">
-  <img src="https://res.cloudinary.com/dusxlxlvm/image/upload/v1761295468/personal/Screenshot_2025-10-24_141228_coeqyb.webp" width="650" height="150" alt="Employee Attendance Logo">
+  <img src="https://res.cloudinary.com/dusxlxlvm/image/upload/v1761295468/personal/Screenshot_2025-10-24_141228_coeqyb.webp" width="100%"  alt="Employee Attendance Logo">
 </p>
 
 A **multi-tenant MERN stack application** designed to record, monitor, and manage employee attendance across multiple organizations.  
