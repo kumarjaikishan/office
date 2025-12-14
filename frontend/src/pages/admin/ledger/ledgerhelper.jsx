@@ -8,13 +8,13 @@ export const getLedgerColumns = (handleEdit, handleDelete, employee, navigate) =
     {
         name: "S.No",
         selector: (row, index) => index + 1,
-        width: "40px",
+        width: "50px",
     },
     {
         name: 'Date',
         selector: row => dayjs(row.date).format('DD MMM, YYYY'),
         sortable: true,
-        width: "90px",
+        width: "110px",
     },
     {
         name: 'Particular',

@@ -27,7 +27,7 @@ const createLedgerForEmployee = async () => {
       path: 'userid',
       select: 'name'
     });
-    // console.log(employees)
+    console.log("employess without ledgers", employees)
 
     if (!employees.length) {
       await session.commitTransaction();
@@ -39,30 +39,28 @@ const createLedgerForEmployee = async () => {
 
     // 2️⃣ Create ledger & update employee
     for (const emp of employees) {
-      const ledger = await Ledger.create(
+      const [ledger] = await Ledger.create(
         [
-          {
-            companyId: emp.companyId,
-            name: emp.userid.name,
-            employeeId: emp._id,
-            profileImage: emp.profileimage
-          },
-        ],
+        {
+          companyId: emp.companyId,
+          name: emp?.userid?.name,
+          employeeId: emp._id,
+          profileImage: emp?.profileimage
+        },
+      ],
         { session }
       );
 
       // 3️⃣ Save ledgerId to employee
-      emp.ledgerId = ledger[0]._id;
+      emp.ledgerId = ledger._id;
       await emp.save({ session });
     }
 
     await session.commitTransaction();
     console.log("ledgerid attached to each employee")
-
   } catch (error) {
     await session.abortTransaction();
     console.error("Ledger creation error:", error);
-
   } finally {
     session.endSession();
   }
@@ -81,7 +79,7 @@ const deleteLedgerIdfield = async () => {
   }
 };
 
-// createLedgerForEmployee()
+// createLedgerForEmployee();
 // deleteLedgerIdfield()
 
 createLedger = async (req, res) => {
@@ -197,7 +195,7 @@ ledger = async (req, res) => {
     const ledgersWithBalance = await Promise.all(
       ledgers.map(async (ledger) => {
         const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
-          .sort({ date: -1,_id:-1 });
+          .sort({ date: -1, _id: -1 });
 
         return {
           ...ledger.toObject(),

@@ -27,7 +27,10 @@ const employeeSchema = new mongoose.Schema({
         ref: 'Ledger',
         required: true
     },
-    empId: { type: String, required: true },
+    empId: {
+        type: String,
+        required: true
+    },
     employeeName: { type: String },
     department: {
         type: mongoose.Schema.Types.ObjectId,
@@ -57,7 +60,7 @@ const employeeSchema = new mongoose.Schema({
     },
     deviceUserId: {
         type: String,
-        default:''
+        default: ''
     },
     guardian: {
         relation: { type: String, },
