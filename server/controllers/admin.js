@@ -195,7 +195,12 @@ const addemployee = async (req, res, next) => {
         });
         const resulte = await query.save({ session });
 
+        // creating ledger for employee
+        const ledger = new Ledger({ companyId: req.user.companyId, name: employeeName, employeeId: resulten._id, profileImage: uploadResult?.secure_url });
+        const ledid = await ledger.save();
+
         await usermodal.findByIdAndUpdate(resulten._id, { employeeId: resulte._id }).session(session)
+        await employeeModal.findByIdAndUpdate(resulte._id, { ledgerId: ledid._id }).session(session)
 
         // Step 4: Commit transaction
         await session.commitTransaction();
@@ -700,7 +705,7 @@ const firstfetch = async (req, res, next) => {
                 .populate('userid', 'email name ')
                 .sort({ empId: 1 });
 
-                // console.log(employees)
+            // console.log(employees)
 
             const employeeIds = employees.map(emp => emp._id);
 

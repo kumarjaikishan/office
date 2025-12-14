@@ -22,6 +22,11 @@ const employeeSchema = new mongoose.Schema({
         ref: 'Branch',
         required: true
     },
+    ledgerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ledger',
+        required: true
+    },
     empId: { type: String, required: true },
     employeeName: { type: String },
     department: {

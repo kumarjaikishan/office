@@ -43,11 +43,12 @@ const LedgerListPage = () => {
     };
 
     useEffect(() => {
+        //  console.log("useEffect called");
         fetchLedgers();
         // console.log(ledger)
         // setLedgers(ledger);
         // setFilteredLedgers(ledger);
-    }, [ledger]);
+    }, []);
 
     useEffect(() => {
         if (ledgers.length < 1) return;
@@ -68,7 +69,7 @@ const LedgerListPage = () => {
                 `${import.meta.env.VITE_API_ADDRESS}ledger`,
                 { headers }
             );
-            // console.log(res.data)
+            console.log(res.data)
             setLedgers(res.data.ledgers);
             setFilteredLedgers(res.data.ledgers);
         } catch (err) {

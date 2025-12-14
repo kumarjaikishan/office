@@ -4,6 +4,7 @@ const advanceSchema = new mongoose.Schema({
     employeeId: { type: mongoose.Schema.Types.ObjectId, ref: "employee", required: true },
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Company", required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
+    ledgerEntryId: { type: mongoose.Schema.Types.ObjectId, ref: "Entry" },
 
     empId: { type: String },
     date: { type: Date, default: Date.now },

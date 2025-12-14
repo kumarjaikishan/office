@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const Payroll = require("../models/payroll");
 const Employee = require("../models/employee");
+const Entry = require("../models/entry");
 const Advance = require("../models/advance");
 const LeaveBalance = require("../models/leavebalance");
 const { recalculateLeaveBalances } = require("./leaveBalance");
 const { recalculateAdvanceBalances } = require("./advance");
+const { recalculateBalances } = require("./ledger");
 
 exports.createPayroll = async (req, res, next) => {
   const session = await mongoose.startSession();
@@ -85,7 +87,6 @@ exports.createPayroll = async (req, res, next) => {
       status: "pending", grossSalary, taxAmount, netSalary
     });
 
-
     await payroll.save({ session });
 
     // 🔹 Handle leave adjustment
@@ -126,10 +127,13 @@ exports.createPayroll = async (req, res, next) => {
       await recalculateLeaveBalances(employeeId, companyId);
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const entryDate = new Date(today);
+
     // 🔹 Handle advance adjustment
     if (options.adjustAdvance && options.adjustedAdvance > 0) {
       let hey = await Advance.find({ employeeId }).sort({ createdAt: -1 })
-      // console.log(advancebalance[0]);
 
       if (!hey) {
         throw new Error("Employee Advance Balance not found");
@@ -141,7 +145,7 @@ exports.createPayroll = async (req, res, next) => {
       }
 
       // Create an Advance ledger entry of type "adjusted"
-      await Advance.create(
+      const advanceadjusted = await Advance.create(
         [
           {
             employeeId,
@@ -160,7 +164,36 @@ exports.createPayroll = async (req, res, next) => {
 
       // Recalculate advance balances
       await recalculateAdvanceBalances(employeeId, companyId);
+
+      // handling ledgerEntry for salary
+      // const newEntry = await Entry.create({
+      //   ledgerId: whichEmployee.ledgerId,
+      //   date: entryDate,
+      //   particular: `Advance adjusted in Payroll ${month}-${year}`,
+      //   debit: options.adjustedAdvance,
+      //   credit: 0,
+      //   source: 'advance'
+      // });
+
+      // await Advance.findByIdAndUpdate(advanceadjusted._id, { ledgerEntryId: newEntry._id })
     }
+
+    // handling ledgerEntry for salary
+    const newEntry = await Entry.create({
+      ledgerId: whichEmployee.ledgerId,
+      date: entryDate,
+      particular: `Payroll for ${month}-${year}`,
+      debit: netSalary,
+      credit: 0,
+      source: 'salary'
+    });
+
+    // keeping record of ledger entry id in payroll entry for edit or delete further
+    payroll.ledgerEntryId = newEntry._id;
+    await payroll.save({ session });
+
+    await recalculateBalances(whichEmployee.ledgerId);
+    // handling ledgerEntry for salary ends here
 
     await whichEmployee.save({ session });
 
@@ -210,8 +243,6 @@ exports.editPayroll = async (req, res, next) => {
       address,
       guardian = { relation: "", name: "" },
     } = whichEmployee;
-
-    // console.log('guardian', guardian)
 
     // 🔹 Find payroll
     const payroll = await Payroll.findById(id).session(session);
@@ -322,9 +353,18 @@ exports.editPayroll = async (req, res, next) => {
       await recalculateAdvanceBalances(payroll.employeeId, payroll.companyId);
     }
 
+    // here about payrollentry edit also
+    const getpreviousEntry = await Entry.findById(payroll.ledgerEntryId);
+    getpreviousEntry.debit = netSalary;
+    getpreviousEntry.credit = 0;
+    await getpreviousEntry.save({ session });
+
+
     // 🔹 Commit transaction
     await session.commitTransaction();
     session.endSession();
+
+    await recalculateBalances(whichEmployee.ledgerId);
 
     return res.status(200).json({ success: true, payroll, message: 'Payroll Edited Successfully' });
   } catch (error) {
@@ -406,6 +446,16 @@ exports.deletePayroll = async (req, res, next) => {
 
     // 🔹 Delete linked advance adjustment if exists
     await Advance.deleteOne({ payrollId: payroll._id, type: "adjusted" }).session(session);
+
+    // 🔹 Delete ledger Entry
+    const deletedEntry = await Entry.findOneAndDelete(
+      { _id: payroll.ledgerEntryId },
+      { session }
+    );
+
+    if (deletedEntry) {
+      await recalculateBalances(deletedEntry.ledgerId);
+    }
 
     // 🔹 Delete payroll
     await payroll.deleteOne({ session });

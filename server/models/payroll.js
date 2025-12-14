@@ -5,6 +5,8 @@ const payrollSchema = new mongoose.Schema({
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
   branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
   employeeId: { type: mongoose.Schema.Types.ObjectId, ref: 'employee', required: true },
+  ledgerEntryId: { type: mongoose.Schema.Types.ObjectId, ref: "Entry" },
+
   month: { type: Number, required: true }, // 1-12
   year: { type: Number, required: true },
 
@@ -14,9 +16,9 @@ const payrollSchema = new mongoose.Schema({
   address: { type: String, default: '' },
 
   guardian: {
-        relation: { type: String, },
-        name: { type: String },
-    },
+    relation: { type: String, },
+    name: { type: String },
+  },
   department: { type: String, required: true },
   designation: { type: String, required: true },
 

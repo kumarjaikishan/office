@@ -11,6 +11,7 @@ import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import { FaRegUser } from "react-icons/fa";
 import { cloudinaryUrl } from "../../../utils/imageurlsetter";
+import { IoInformationCircleOutline } from "react-icons/io5";
 
 
 export const submitAttandence = async ({ isPunchIn, inp, setisload, dispatch }) => {
@@ -242,18 +243,23 @@ export const columns = ({
         const holiday = row.status === "holiday";
         const weeklyoff = row.status === "weekly off";
         return (
-          <span
-            title={leave ? row?.leave?.reason : ""}
-            className={`px-2 py-1 rounded
+          <>
+            <span
+              title={leave ? row?.leave?.reason : ""}
+              className={`px-2 py-1 rounded
              ${absent ? "bg-red-100 text-red-800"
-                : leave ? "bg-amber-100 text-amber-800"
-                  : holiday ? "bg-blue-50 text-blue-800"
-                    : weeklyoff ? "bg-gray-50 text-gray-800"
-                      : "bg-green-100 text-green-800"
-              }`}
-          >
-            {row.status}
-          </span>
+                  : leave ? "bg-amber-100 text-amber-800"
+                    : holiday ? "bg-blue-50 text-blue-800"
+                      : weeklyoff ? "bg-gray-50 text-gray-800"
+                        : "bg-green-100 text-green-800"
+                }`}
+            >
+              {row.status}
+            </span>
+            {leave && row?.leave?.reason &&
+              <span title={row?.leave?.reason} className="ml-1 text-blue-600 text-lg font-bold"> <IoInformationCircleOutline /> </span>
+            }
+          </>
         );
       },
     },

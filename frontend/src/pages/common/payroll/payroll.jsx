@@ -35,6 +35,7 @@ import { cloudinaryUrl } from "../../../utils/imageurlsetter";
 export default function PayrollPage() {
   const { employeeId } = useParams();
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
   const [payroll, setPayroll] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ export default function PayrollPage() {
     const branchId = emp.branchId || '';
     const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
     const branchMatch = filters.branch === 'all' || branchId === filters.branch;
-    return nameMatch && branchMatch;
+    return nameMatch && branchMatch && emp.status;
   });
 
   // Map payrolls for quick lookup
@@ -111,6 +112,7 @@ export default function PayrollPage() {
   };
 
   const handleDelete = async (empId) => {
+    // return console.log(empId)
     const existingPayroll = payroll.find(p => p.employeeId?._id === empId && p.month === filters.month && p.year === filters.year);
     if (!existingPayroll) return toast.info("No payroll to delete for this period");
 
@@ -122,7 +124,7 @@ export default function PayrollPage() {
     }).then(async (proceed) => {
       if (proceed) {
         try {
-          setLoading(true);
+          setDeletingId(empId);
           setError(null);
 
           const token = localStorage.getItem("emstoken");
@@ -143,7 +145,7 @@ export default function PayrollPage() {
           toast.warn("Using dummy payroll data for testing", { autoClose: 1500 });
           setPayroll(employee); // fallback
         } finally {
-          setLoading(false);
+          setDeletingId(null);
         }
       }
     });
@@ -220,13 +222,13 @@ export default function PayrollPage() {
               </Button>
             )}
             {/* {canView && ( */}
-              <Button size="small" disabled={!exists} variant="outlined" startIcon={<BiShow />} onClick={() => handleView(row)}>View</Button>
+            <Button size="small" disabled={!exists} variant="outlined" startIcon={<BiShow />} onClick={() => handleView(row)}>View</Button>
             {/* )} */}
             {canEdit && (
               <Button size="small" disabled={!exists} variant="outlined" startIcon={<BiEdit />} onClick={() => handleEdit(row)}>Edit</Button>
             )}
             {canDelete && (
-              <Button size="small" disabled={!exists} color="error" variant="outlined" startIcon={<BiTrash />} onClick={() => handleDelete(row._id)}>Delete</Button>
+              <Button size="small" loading={deletingId == row._id} disabled={!exists} color="error" variant="outlined" startIcon={<BiTrash />} onClick={() => handleDelete(row._id)}>Delete</Button>
             )}
           </div>
         );

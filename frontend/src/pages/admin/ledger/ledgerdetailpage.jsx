@@ -19,6 +19,7 @@ import { useCustomStyles } from '../attandence/attandencehelper';
 import { GoGear } from 'react-icons/go';
 import Loader from '../../../utils/loader';
 import { cloudinaryUrl } from '../../../utils/imageurlsetter';
+import { useSelector } from 'react-redux';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -40,6 +41,8 @@ const LedgerDetailPage = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+
+     const { employee } = useSelector((state) => state.user);
 
     const ledgerName = searchParams.get('name');
     const profile = decodeURIComponent(searchParams.get("profileimage"));
@@ -329,7 +332,7 @@ const LedgerDetailPage = () => {
             {/* Table */}
             <div className=" overflow-x-auto">
                 <DataTable
-                    columns={getLedgerColumns(handleEditEntry, handleDeleteEntry)}
+                    columns={getLedgerColumns(handleEditEntry, handleDeleteEntry, employee,navigate)}
                     data={filtered || []}
                     pagination
                     customStyles={useCustomStyles()}

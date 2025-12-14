@@ -13,6 +13,7 @@ import EmployeeProfileCard from '../../../components/performanceCard';
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { useCustomStyles } from './attandencehelper';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 dayjs.extend(isSameOrBefore);
 
 const AttenPerformance = () => {
@@ -242,6 +243,7 @@ const AttenPerformance = () => {
 
 
     const filteredData = withremarks.filter((entry) => {
+        // console.log(entry)
         const date = dayjs(entry.date).startOf('day');
 
         // Date Range Filter
@@ -423,7 +425,7 @@ const columns = (setting) => [
         selector: (row) => dayjs(row.date).format('DD MMM, YYYY'),
         sortable: true,
         // width: '100px',
-         style: {
+        style: {
             minWidth: "100px", // 👈 added here
         },
     },
@@ -491,6 +493,7 @@ const columns = (setting) => [
         selector: (emp) => emp.status,
         cell: (emp) => {
             const { status } = emp;
+            const { leave } = emp;
             const colorMap = {
                 absent: 'bg-red-100 text-red-800',
                 leave: 'bg-violet-100 text-violet-800',
@@ -500,20 +503,25 @@ const columns = (setting) => [
             const classes = colorMap[status] || 'bg-gray-100 text-gray-800';
 
             return (
-                <span className={`${classes} px-2 py-1 rounded text-xs`}>
-                    {status}
-                </span>
+                <>
+                    <span className={`${classes} px-2 py-1 rounded text-xs`}>
+                        {status}
+                    </span>
+                    {leave && leave?.reason &&
+                        <span title={leave?.reason} className="ml-1 text-blue-600 text-lg font-bold"> <IoInformationCircleOutline /> </span>
+                    }
+                </>
             );
         },
         // width: '120px',
         style: {
-            minWidth: "120px", // 👈 added here
+            minWidth: "120px",
         },
     },
     {
         name: "Working Hours",
         // width: '180px',
-         style: {
+        style: {
             minWidth: "180px", // 👈 added here
         },
         selector: (emp) => emp.workingMinutes,

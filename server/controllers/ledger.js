@@ -1,7 +1,9 @@
 const Ledger = require("../models/ledger");
+const employee = require('../models/employee');
 const Entry = require("../models/entry");
 const fs = require("fs");
 const removePhotoBySecureUrl = require("../utils/cloudinaryremove");
+const { default: mongoose } = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
@@ -10,9 +12,82 @@ cloudinary.config({
   api_secret: "kAFLEVAA5twalyNYte001m_zFno"
 });
 
-exports.createLedger = async (req, res) => {
+const createLedgerForEmployee = async () => {
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    // 1️⃣ Find employees without ledgerId
+    const employees = await employee.find(
+      { ledgerId: { $exists: false } },
+      null,
+      { session }
+    ).populate({
+      path: 'userid',
+      select: 'name'
+    });
+    // console.log(employees)
+
+    if (!employees.length) {
+      await session.commitTransaction();
+      return res.status(200).json({
+        success: true,
+        message: "All employees already have ledgers",
+      });
+    }
+
+    // 2️⃣ Create ledger & update employee
+    for (const emp of employees) {
+      const ledger = await Ledger.create(
+        [
+          {
+            companyId: emp.companyId,
+            name: emp.userid.name,
+            employeeId: emp._id,
+            profileImage: emp.profileimage
+          },
+        ],
+        { session }
+      );
+
+      // 3️⃣ Save ledgerId to employee
+      emp.ledgerId = ledger[0]._id;
+      await emp.save({ session });
+    }
+
+    await session.commitTransaction();
+    console.log("ledgerid attached to each employee")
+
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("Ledger creation error:", error);
+
+  } finally {
+    session.endSession();
+  }
+};
+
+const deleteLedgerIdfield = async () => {
+  try {
+    const result = await employee.updateMany(
+      {},
+      { $unset: { ledgerId: "" } }
+    );
+
+    console.log(`ledgerId removed from ${result.modifiedCount} employees`);
+  } catch (error) {
+    console.error("Ledger creation error:", error);
+  }
+};
+
+// createLedgerForEmployee()
+// deleteLedgerIdfield()
+
+createLedger = async (req, res) => {
   try {
     const { name } = req.body;
+    if (!req.userid) return res.status(400).json({ message: "Creating User is required." });
 
     const existing = await Ledger.findOne({ companyId: req.user.companyId, name, userId: req.userid });
     if (existing) {
@@ -44,7 +119,7 @@ exports.createLedger = async (req, res) => {
 
 
 // Update a ledger name
-exports.updateLedger = async (req, res) => {
+updateLedger = async (req, res) => {
   try {
     const { name } = req.body;
 
@@ -89,7 +164,7 @@ exports.updateLedger = async (req, res) => {
 
 
 // Get all ledgers and entries for user
-exports.ledgerEntries = async (req, res) => {
+ledgerEntries = async (req, res) => {
   try {
     const ledgers = await Ledger.find({ userId: req.userid });
     const entries = await Entry.find({ userId: req.userid }).sort({ date: -1, _id: -1 });
@@ -98,14 +173,31 @@ exports.ledgerEntries = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch ledgers" });
   }
 };
-exports.ledger = async (req, res) => {
+
+ledger = async (req, res) => {
   try {
-    const ledgers = await Ledger.find({ userId: req.userid });
+    // const ledgers = await Ledger.find({ userId: req.userid });
+
+    // finding personal & common ledgers
+    const ledgers = await Ledger.find({
+      $or: [
+        // case: userId field is present and matches
+        { userId: req.userid },
+
+        // case: userId is missing OR null, and companyId matches
+        {
+          $and: [
+            { $or: [{ userId: { $exists: false } }, { userId: null }] },
+            { companyId: req.user.companyId }
+          ]
+        }
+      ]
+    });
 
     const ledgersWithBalance = await Promise.all(
       ledgers.map(async (ledger) => {
         const lastEntry = await Entry.findOne({ ledgerId: ledger._id })
-          .sort({ date: -1 });
+          .sort({ date: -1,_id:-1 });
 
         return {
           ...ledger.toObject(),
@@ -122,7 +214,7 @@ exports.ledger = async (req, res) => {
 };
 
 
-exports.Entries = async (req, res) => {
+Entries = async (req, res) => {
   try {
     const entries = await Entry.find({ ledgerId: req.params.id }).sort({ date: -1, _id: -1 });
 
@@ -133,7 +225,7 @@ exports.Entries = async (req, res) => {
 };
 
 // Delete a ledger
-exports.deleteLedger = async (req, res) => {
+deleteLedger = async (req, res) => {
   try {
     const { id } = req.params;
     // Delete the ledger
@@ -155,7 +247,7 @@ exports.deleteLedger = async (req, res) => {
 
 // Helper: Recalculate balances
 const recalculateBalances = async (ledgerId, userId) => {
-  const entries = await Entry.find({ ledgerId, userId }).sort({ date: 1, _id: 1 });
+  const entries = await Entry.find({ ledgerId }).sort({ date: 1, _id: 1 });
   let balance = 0;
 
   for (let entry of entries) {
@@ -166,7 +258,7 @@ const recalculateBalances = async (ledgerId, userId) => {
 };
 
 // Create entry
-exports.createEntry = async (req, res) => {
+createEntry = async (req, res) => {
   try {
     const { ledgerId, date, particular, debit, credit } = req.body;
 
@@ -193,7 +285,7 @@ exports.createEntry = async (req, res) => {
 };
 
 // Update entry
-exports.updateEntry = async (req, res) => {
+updateEntry = async (req, res) => {
   try {
     const { id } = req.params;
     const { date, ...rest } = req.body;
@@ -222,7 +314,7 @@ exports.updateEntry = async (req, res) => {
 };
 
 // Delete entry
-exports.deleteEntry = async (req, res) => {
+deleteEntry = async (req, res) => {
   try {
     const { id } = req.params;
     const entry = await Entry.findByIdAndDelete(id);
@@ -234,4 +326,17 @@ exports.deleteEntry = async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to delete entry" });
   }
+};
+
+module.exports = {
+  createLedger,
+  updateLedger,
+  ledgerEntries,
+  ledger,
+  Entries,
+  deleteLedger,
+  createEntry,
+  updateEntry,
+  deleteEntry,
+  recalculateBalances   // <-- add this
 };

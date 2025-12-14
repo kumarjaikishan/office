@@ -13,6 +13,7 @@ import {
     InputAdornment,
     OutlinedInput,
     Typography,
+    Autocomplete,
 } from "@mui/material";
 import axios from "axios";
 import { MdClear, MdDelete, MdEdit } from "react-icons/md";
@@ -23,12 +24,29 @@ import { IoSearch } from "react-icons/io5";
 import { CiFilter } from "react-icons/ci";
 import { FirstFetch } from "../../../store/userSlice";
 import { cloudinaryUrl } from "../../utils/imageurlsetter";
+import { useParams } from "react-router-dom";
+import dayjs from "dayjs";
 
 const EmployeeAdvancePage = () => {
+    const paramEmployeeId = new URLSearchParams(window.location.search).get("employeeId");
+    const dispatch = useDispatch();
+
+    const { employee, advance, branch } = useSelector((state) => state.user);
+
     const [rows, setRows] = useState([]);
     const [open, setOpen] = useState(false);
-    const [departmentlist, setdepartmentlist] = useState([]);
-    const dispatch = useDispatch();
+    const [editingId, setEditingId] = useState(null);
+    const [branchEmp, setbranchEmp] = useState([])
+    const [loading, setloading] = useState(false)
+
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState(
+        paramEmployeeId || "all"
+    );
+
+    const [filters, setFilters] = useState({
+        branch: "all",
+    });
+
     const [form, setForm] = useState({
         employeeId: "",
         companyId: "",
@@ -38,38 +56,72 @@ const EmployeeAdvancePage = () => {
         type: "given",
         remarks: "",
     });
-    const [filters, setFilters] = useState({
-        searchText: '',
-        branch: 'all',
-        department: 'all'
-    });
-    const [editingId, setEditingId] = useState(null);
-    const { employee, advance, branch, department } = useSelector((state) => state.user);
+
+    /* -------------------- LOAD DATA -------------------- */
 
     useEffect(() => {
-        if (advance) setRows(advance);
-        // fetchData()
         // console.log(advance)
+        if (advance) setRows(advance);
     }, [advance]);
 
+    useEffect(() => {
+        if (filters.branch == 'all') {
+            setbranchEmp(employee)
+        } else {
+            const filtered = employee.filter((val) => val.branchId == filters.branch);
+            // console.log(filtered)
+            setbranchEmp(filtered)
+        }
+    }, [filters.branch]);
+
+    useEffect(() => {
+        if (paramEmployeeId) {
+            setSelectedEmployeeId(paramEmployeeId);
+        }
+    }, [paramEmployeeId]);
+
+    const selectedEmployee =
+        selectedEmployeeId !== "all"
+            ? employee?.find((e) => e._id === selectedEmployeeId)
+            : null;
+
+    /* -------------------- FILTERING -------------------- */
+
+    const filteredEmployees = rows?.filter((row) => {
+        const branchMatch =
+            filters.branch === "all" || row.branchId === filters.branch;
+
+        const employeeMatch =
+            row.employeeId?._id === selectedEmployeeId;
+
+        return branchMatch && employeeMatch;
+    });
+
+    /* -------------------- HANDLERS -------------------- */
+
     const handleFilterChange = (key, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [key]: value
-        }));
+        setFilters((prev) => ({ ...prev, [key]: value }));
     };
 
-    const filteredEmployees = rows?.filter(emp => {
-        const name = emp.employeeId?.userid?.name?.toLowerCase() || '';
-        const branchId = emp.branchId || '';
-        // const deptId = emp.departmentid || '';
+    // const handleEmployeeSelect = (e) => {
+    //     console.log(e.target.value)
+    //     setSelectedEmployeeId(e.target.value);
+    // };
+    const handleEmployeeSelect = (e) => {
+        const empId = e.target.value;
+        setSelectedEmployeeId(empId);
 
-        const nameMatch = filters.searchText.trim() === '' || name.includes(filters.searchText.toLowerCase());
-        const branchMatch = filters.branch === 'all' || branchId === filters.branch;
-        // const deptMatch = filters.department === 'all' || deptId === filters.department;
+        const url = new URL(window.location.href);
 
-        return nameMatch && branchMatch;
-    });
+        if (empId === "all") {
+            url.searchParams.delete("employeeId");
+        } else {
+            url.searchParams.set("employeeId", empId);
+        }
+
+        window.history.replaceState({}, "", url);
+    };
+
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -104,10 +156,10 @@ const EmployeeAdvancePage = () => {
 
     const handleClose = () => setOpen(false);
 
-    const handleSubmit = async () => {
-
-        // return console.log(form)
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
+            setloading(true)
             const token = localStorage.getItem("emstoken");
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -126,231 +178,207 @@ const EmployeeAdvancePage = () => {
                 );
                 toast.success("Advance added");
             }
-            dispatch(FirstFetch())
+
+            dispatch(FirstFetch());
             handleClose();
-            fetchData();
         } catch (error) {
-            console.error("Error saving advance:", error);
             toast.error(error.response?.data?.message || "Server error");
+        } finally {
+            setloading(false)
         }
     };
 
     const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this record?")) {
-            try {
-                const token = localStorage.getItem("emstoken");
-                await axios.delete(
-                    `${import.meta.env.VITE_API_ADDRESS}advance/${id}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-                toast.success("Advance deleted");
-                dispatch(FirstFetch())
-                fetchData();
-            } catch (error) {
-                console.error("Error deleting advance:", error);
-                toast.error("Failed to delete record");
-            }
-        }
-    };
+        // if (!window.confirm("Are you sure you want to delete this record?")) return;
 
-    const fetchData = async () => {
-        try {
-            const token = localStorage.getItem("emstoken");
-            const { data } = await axios.get(
-                `${import.meta.env.VITE_API_ADDRESS}advance`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            // console.log(data)
-            setRows(data.data);
-        } catch (error) {
-            console.error("Error fetching advances:", error);
-        }
+        swal({
+            title: `Are you sure to Delete this entry?`,
+            text: 'Once deleted, you will not be able to recover this',
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        }).then(async (proceed) => {
+            if (proceed) {
+                try {
+                    const token = localStorage.getItem("emstoken");
+                    await axios.delete(
+                        `${import.meta.env.VITE_API_ADDRESS}advance/${id}`,
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    toast.success("Advance deleted");
+                    dispatch(FirstFetch());
+                } catch {
+                    toast.error("Failed to delete record");
+                }
+            }
+        });
     };
 
     const setEmployee = (e) => {
-        const empId = e.target.value;
-        const emp = employee.find((emp) => emp._id === empId);
-        if (emp) {
-            setForm({
-                ...form,
-                employeeId: emp._id,
-                companyId: emp.companyId,
-                branchId: emp.branchId,
-                empId: emp.empId,
-            });
-        }
+        const emp = employee.find((emp) => emp._id === e.target.value);
+        if (!emp) return;
+
+        setForm({
+            ...form,
+            employeeId: emp._id,
+            companyId: emp.companyId,
+            branchId: emp.branchId,
+            empId: emp.empId,
+        });
     };
-    const employepic = 'https://res.cloudinary.com/dusxlxlvm/image/upload/v1753113610/ems/assets/employee_fi3g5p.webp'
+
+    /* -------------------- TABLE -------------------- */
 
     const columns = [
-        { name: "S.no", selector: (row, ind) => ind + 1, width: "60px" },
+        { name: "S.no", selector: (_, i) => i + 1, width: "60px" },
+        // {
+        //     name: "Employee",
+        //     selector: (row) => (
+        //         <div className="flex items-center gap-3">
+        //             <Avatar
+        //                 src={cloudinaryUrl(row?.employeeId?.profileimage)}
+        //             />
+        //             <Box>
+        //                 <Typography variant="body2">
+        //                     {row?.employeeId?.userid?.name}
+        //                 </Typography>
+        //                 <p className="text-[10px] text-gray-600">
+        //                     ({row?.employeeId?.designation})
+        //                 </p>
+        //             </Box>
+        //         </div>
+        //     ),
+        // },
+        { name: "Date", selector: (r) => dayjs(r.date).format('DD MMM, YYYY'),width: "120px" },
+        { name: "Remarks", selector: (r) => r.remarks || "-" },
+        { name: "Given", selector: (r) => (r.type === "given" ? r.amount : "-"),width: "90px" },
         {
-            name: "Employee",
-            selector: (row) => (<div className="flex items-center capitalize gap-3 ">
-                <Avatar
-                    //  src={row?.employeeId?.profileimage || employepic} 
-                    src={cloudinaryUrl(row?.employeeId?.profileimage, {
-                        format: "webp",
-                        width: 100,
-                        height: 100,
-                    }) || employepic}
-                    alt={row?.employeeId?.userid?.name}>
-                    {!row?.employeeId?.profileimage && employepic}
-                </Avatar>
-                <Box>
-                    <Typography variant="body2">{row?.employeeId?.userid?.name}</Typography>
-                    <p className="t text-[10px] text-gray-600">({row?.employeeId?.designation})</p>
-                </Box>
-            </div>),
-            sortable: true,
+            name: "Adjusted",
+            selector: (r) => (r.type === "adjusted" ? r.amount : "-"),
+            width: "90px"
         },
-        // { name: "type", selector: (row) => row.type || "-", sortable: true, width: "120px" },
-        // { name: "Amount", selector: (row) => row.type == 'given' ? `${row.amount}` : `-${row.amount}`, sortable: true, width: "100px" },
-        { name: "Given", selector: (row) => row.type == 'given' ? row.amount : '-', sortable: true, width: '90px' },
-        { name: "Adjusted", selector: (row) => row.type == 'adjusted' ? row.amount : '-', sortable: true, width: '100px' },
-        { name: "Balance", selector: (row) => row.balance, sortable: true, width: "100px" },
-        { name: "Remarks", selector: (row) => row.remarks || "-", sortable: true },
+        { name: "Balance", selector: (r) => r.balance, width: "100px" },
+        
         {
             name: "Actions",
-            cell: (row) => (
-                <> {!row?.payrollId && <>
-                    <IconButton color="primary" onClick={() => handleOpen(row)}>
-                        <MdEdit />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(row._id)}>
-                        <MdDelete />
-                    </IconButton>
-                </>
-                }
-                </>
-            ),
-            width: "120px",
+            cell: (row) =>
+                !row.payrollId && (
+                    <>
+                        <IconButton onClick={() => handleOpen(row)}>
+                            <MdEdit />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleDelete(row._id)}>
+                            <MdDelete />
+                        </IconButton>
+                    </>
+                ),
+                width: "140px"
         },
     ];
 
+    /* -------------------- RENDER -------------------- */
+
     return (
-        <div className="p-1 md:p-3 max-w-6xl mx-auto ">
-            {/* <h2>Employee Advance Management</h2> */}
-            <div className="flex my-3 items-center flex-wrap justify-between gap-2 mt-1 w-full">
-                <div className="flex flex-wrap gap-3 justify-between w-full md:w-fit">
-                    {/* Search (full on small, shrink on md+) */}
-                    <TextField
-                        size="small"
-                        className="w-[47%] md:w-[160px]"
-                        value={filters.searchText}
-                        onChange={(e) => handleFilterChange("searchText", e.target.value)}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <IoSearch />
-                                </InputAdornment>
-                            ),
-                            endAdornment: filters.searchText && (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={() => handleFilterChange("searchText", '')}
-                                        edge="end"
-                                        size="small"
-                                    >
-                                        <MdClear />
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
-                        label="Search Employee"
-                    />
+        <div className="p-3 max-w-6xl mx-auto">
+            <div className="flex flex-wrap gap-3 mb-3">
 
-                    {/* Branch (50% on small, shrink on md+) */}
-                    <FormControl
-                        size="small"
-                        className="w-[47%] md:w-[160px]"
+                <FormControl size="small" className="w-[160px]">
+                    <InputLabel>Branch</InputLabel>
+                    <Select
+                        value={filters.branch}
+                        onChange={(e) => handleFilterChange("branch", e.target.value)}
+                        label="Branch"
                     >
-                        <InputLabel>Branch</InputLabel>
-                        <Select
-                            label="Branch"
-                            value={filters.branch}
-                            input={
-                                <OutlinedInput
-                                    startAdornment={
-                                        <InputAdornment position="start">
-                                            <CiFilter fontSize="small" />
-                                        </InputAdornment>
-                                    }
-                                    label="Branch"
-                                />
-                            }
-                            onChange={(e) => handleFilterChange("branch", e.target.value)}
-                        >
-                            <MenuItem value="all">All</MenuItem>
-                            {branch?.map((list) => (
-                                <MenuItem key={list._id} value={list._id}>
-                                    {list.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                        <MenuItem value="all">All</MenuItem>
+                        {branch?.map((b) => (
+                            <MenuItem key={b._id} value={b._id}>
+                                {b.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
 
-                    {/* Department (50% on small, shrink on md+) */}
-                    {/* <FormControl
-                        size="small"
-                        className="w-[47%] md:w-[160px]"
-                    >
-                        <InputLabel>Department</InputLabel>
-                        <Select
-                            label="Department"
-                            disabled={filters.branch === "all"}
-                            value={filters.department}
-                            input={
-                                <OutlinedInput
-                                    startAdornment={
-                                        <InputAdornment position="start">
-                                            <CiFilter fontSize="small" />
-                                        </InputAdornment>
-                                    }
-                                    label="Department"
-                                />
-                            }
-                            onChange={(e) =>
-                                handleFilterChange("department", e.target.value)
-                            }
-                        >
-                            <MenuItem value="all">All</MenuItem>
-                            {departmentlist.length > 0 ? (
-                                departmentlist.map((list) => (
-                                    <MenuItem key={list._id} value={list._id}>
-                                        {list.department}
-                                    </MenuItem>
-                                ))
-                            ) : (
-                                <MenuItem disabled>No departments found</MenuItem>
-                            )}
-                        </Select>
-                    </FormControl> */}
-                </div>
+                <Autocomplete
+                    size="small"
+                    className="w-[350px]"
+                    // options={employee || []}
+                    options={branchEmp || []}
+                    getOptionLabel={(option) =>
+                        option
+                            ? `${option.userid?.name || ""} (${option.empId || option.empCode || ""})`
+                            : ""
+                    }
 
-                <div className="w-full md:w-fit">
-                    <Button
-                        className="w-full md:w-fit"
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleOpen()}
-                        sx={{ mb: 2 }}
-                    >
-                        Add Advance
-                    </Button>
-                </div>
+                    value={
+                        selectedEmployeeId === "all"
+                            ? null
+                            : employee.find((emp) => emp._id === selectedEmployeeId) || null
+                    }
+                    onChange={(event, newValue) => {
+                        handleEmployeeSelect({
+                            target: { value: newValue ? newValue._id : "all" },
+                        });
+                    }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="Employee"
+                            placeholder="Search employee"
+                        />
+                    )}
+                    isOptionEqualToValue={(option, value) => option._id === value._id}
+                    clearOnEscape
+                />
+
+                <Button variant="contained" onClick={() => handleOpen()}>
+                    Add Advance
+                </Button>
             </div>
 
+            {/* showing seelcted employee details */}
+            {selectedEmployee && (
+                <div className="flex items-center gap-4 p-3 mb-3 rounded border border-gray-400 bg-gray-50">
+
+                    <Avatar sx={{ width: 55, height: 55 }}
+                        alt={selectedEmployee.userid?.name}
+                        // src={profile}
+                        src={cloudinaryUrl(selectedEmployee.profileimage, {
+                            format: "webp",
+                            width: 100,
+                            height: 100,
+                        })}
+                    />
+
+                    <div className="flex flex-col leading-tight">
+                        <span className="text-base font-medium capitalize text-gray-800">
+                            {selectedEmployee.userid?.name}
+                        </span>
+
+                        <span className="text-sm text-gray-600">
+                            {selectedEmployee.designation}
+                        </span>
+
+                        <span className="text-xs text-gray-500">
+                            Emp ID: {selectedEmployee.empId}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             <DataTable
                 columns={columns}
                 data={filteredEmployees}
                 pagination
-                highlightOnHover
                 striped
-                responsive
-            />
+                noDataComponent={
+                    <div className="py-4 my-2 text-center text-gray-500  font-semibold">
+                        {!selectedEmployee
+                            ? "Please select an employee"
+                            : "No record found"}
+                    </div>
+                }
 
+            />
 
             <Modalbox open={open} outside={false} onClose={handleClose}>
                 <div className="membermodal w-[500px]">
@@ -359,9 +387,9 @@ const EmployeeAdvancePage = () => {
                         <form onSubmit={handleSubmit}>
                             <span className="modalcontent ">
                                 <div className='flex flex-col gap-3 w-full'>
-                                    <FormControl className="w-full mt-4" size="small">
+                                    <FormControl  required className="w-full mt-4" size="small">
                                         <InputLabel>Select Employee</InputLabel>
-                                        <Select label="select employee" value={form.employeeId} onChange={setEmployee}>
+                                        <Select required label="select employee" value={form.employeeId} onChange={setEmployee}>
                                             <MenuItem value="">Select Employee</MenuItem>
                                             {employee?.map((emp) => (
                                                 <MenuItem key={emp._id} value={emp._id}>
@@ -422,13 +450,13 @@ const EmployeeAdvancePage = () => {
                                     />
                                 </div>
                             </span>
-                        </form>
                         <div className='modalfooter'>
                             <Button onClick={handleClose} variant="outlined">Cancel</Button>
-                            <Button onClick={handleSubmit} variant="contained" color="primary">
+                            <Button loading={loading} type="submit" variant="contained" color="primary">
                                 {editingId ? "Update" : "Save"}
                             </Button>
                         </div>
+                        </form>
                     </div>
                 </div>
             </Modalbox>

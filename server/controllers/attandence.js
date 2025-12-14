@@ -749,7 +749,11 @@ const employeeAttandence = async (req, res, next) => {
       path: 'branchId',
       select: 'name defaultsetting setting'
     });
-    const attandence = await Attendance.find({ employeeId: employeedetail._id }).sort({ date: -1 });
+    const attandence = await Attendance.find({ employeeId: employeedetail._id })
+      .populate({
+        path: 'leave',
+        select: 'reason'
+      }).sort({ date: -1 });
 
     return res.status(200).json({ user, employee: employeedetail, attandence });
   } catch (error) {
