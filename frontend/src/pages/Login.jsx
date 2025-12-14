@@ -10,6 +10,7 @@ import { setuser } from "../../store/userSlice";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading,setIsLoading]= useState(false);
     const dispatch = useDispatch();
     let navigate = useNavigate();
 
@@ -21,6 +22,7 @@ const Login = () => {
         }
 
         try {
+            setIsLoading(true)
             const res = await axios.post(
                 `${import.meta.env.VITE_API_ADDRESS}signin`,
                 { email, password }
@@ -41,6 +43,8 @@ const Login = () => {
             } else {
                 console.error("Error:", error.message);
             }
+        } finally{
+            setIsLoading(false)
         }
     };
 
@@ -92,6 +96,8 @@ const Login = () => {
                             <Button
                                 type="submit"
                                 variant="contained"
+                                loading={isLoading}
+                                loadingPosition="start"
                                 fullWidth
                                 sx={{ marginTop: 2 }}
                             >
