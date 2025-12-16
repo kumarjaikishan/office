@@ -13,6 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Modalbox from "../../../components/custommodal/Modalbox";
 import Loader from "../../../utils/loader";
 import { cloudinaryUrl } from "../../../utils/imageurlsetter";
+import { motion } from "framer-motion";
 
 const LedgerListPage = () => {
     const [ledgers, setLedgers] = useState([]);
@@ -31,6 +32,7 @@ const LedgerListPage = () => {
     const headers = { Authorization: `Bearer ${token}` };
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const MotionAvatar = motion.create(Avatar);
 
     const handleMenuOpen = (event) => {
         event.stopPropagation(); // prevent card click
@@ -215,14 +217,23 @@ const LedgerListPage = () => {
                                     {/* Card content */}
                                     <div className="flex justify-between items-start">
                                         <div className="flex gap-1 items-center">
-                                            <Avatar sx={{ width: 35, height: 35 }} alt={l.name}
-                                                // src={l.profileImage} 
+                                            <MotionAvatar
+                                                layoutId={`ledger-avatar-${l._id}`}   // 🔑 shared ID
+                                                sx={{ width: 35, height: 35 }}
+                                                alt={l.name}
                                                 src={cloudinaryUrl(l.profileImage, {
                                                     format: "webp",
                                                     width: 100,
                                                     height: 100,
                                                 })}
+                                                transition={{
+                                                    layout: {
+                                                        duration: 0.3,
+                                                        ease: "easeInOut",
+                                                    },
+                                                }}
                                             />
+
                                             <div className="text-[14px] md:text-[16px] font-semibold text-gray-800 mb-2 capitalize">
                                                 {l.name}
                                             </div>
@@ -249,7 +260,7 @@ const LedgerListPage = () => {
                                                     handleNavigate(l);
                                                 }}
                                             >
-                                                <MdVisibility className="text-teal-600 mr-2" /> See
+                                                <MdVisibility className=" mr-2" /> See
                                             </MenuItem>
                                             <MenuItem
                                                 onClick={(e) => {
@@ -258,7 +269,7 @@ const LedgerListPage = () => {
                                                     handleOpenLedgerDialog(l);
                                                 }}
                                             >
-                                                <MdEdit className="text-blue-600 mr-2" /> Edit
+                                                <MdEdit className=" mr-2" /> Edit
                                             </MenuItem>
                                             <MenuItem
                                                 onClick={(e) => {

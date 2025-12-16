@@ -20,6 +20,7 @@ import { GoGear } from 'react-icons/go';
 import Loader from '../../../utils/loader';
 import { cloudinaryUrl } from '../../../utils/imageurlsetter';
 import { useSelector } from 'react-redux';
+import { motion } from 'framer-motion';
 
 const SummaryBox = ({ label, value }) => {
     const isNegative = parseFloat(value) < 0;
@@ -42,7 +43,7 @@ const LedgerDetailPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
-     const { employee } = useSelector((state) => state.user);
+    const { employee } = useSelector((state) => state.user);
 
     const ledgerName = searchParams.get('name');
     const profile = decodeURIComponent(searchParams.get("profileimage"));
@@ -222,21 +223,32 @@ const LedgerDetailPage = () => {
         setEditIndex(entry._id);
         setOpen(true);
     };
-
+   const MotionAvatar = motion.create(Avatar);
 
     return (
         <div className="bg-white rounded shadow-md p-1 md:p-5 relative max-w-6xl mx-auto ">
             <div className="border border-teal-600 border-dashed rounded-md p-3 md:p-5 mb-4 space-y-4">
                 <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
                     <div className="flex items-start md:items-center  gap-3">
-                        <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName}
+                        {/* <Avatar sx={{ width: 55, height: 55 }} alt={ledgerName}
                             // src={profile}
                             src={cloudinaryUrl(profile, {
                                 format: "webp",
                                 width: 100,
                                 height: 100,
                             })}
+                        /> */}
+                        <MotionAvatar
+                            layoutId={`ledger-avatar-${ledgerId}`}   // 👈 SAME layoutId
+                            sx={{ width: 70, height: 70 }}
+                            alt={ledgerName}
+                            src={cloudinaryUrl(profile, {
+                                format: "webp",
+                                width: 100,
+                                height: 100,
+                            })}
                         />
+
                         <h2 className="text-2xl font-semibold text-teal-700 capitalize">{ledgerName}</h2>
                     </div>
                     <Button className=' w-full md:w-auto' onClick={() => navigate(-1)} variant="contained">Ledger Page</Button>
@@ -332,7 +344,7 @@ const LedgerDetailPage = () => {
             {/* Table */}
             <div className=" overflow-x-auto">
                 <DataTable
-                    columns={getLedgerColumns(handleEditEntry, handleDeleteEntry, employee,navigate)}
+                    columns={getLedgerColumns(handleEditEntry, handleDeleteEntry, employee, navigate)}
                     data={filtered || []}
                     pagination
                     customStyles={useCustomStyles()}

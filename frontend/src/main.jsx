@@ -9,6 +9,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import { ThemeProvider } from "@mui/material/styles";
 import { getTheme } from "./theme.js";
+import { AnimatePresence, LayoutGroup } from "framer-motion";
 
 let persistor = persistStore(store);
 
@@ -24,9 +25,13 @@ createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <BrowserRouter>
       <PersistGate persistor={persistor}>
-        <ThemeWrapper>
-          <App />
-        </ThemeWrapper>
+        <LayoutGroup>
+          <AnimatePresence mode="wait">
+            <ThemeWrapper>
+              <App />
+            </ThemeWrapper>
+          </AnimatePresence>
+        </LayoutGroup>
       </PersistGate>
     </BrowserRouter>
   </Provider>
