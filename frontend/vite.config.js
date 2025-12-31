@@ -13,10 +13,8 @@ export default defineConfig({
     //   open: true,
     // })
   ],
-  // server: {
-  //   host: '0.0.0.0',              // so Playit can reach it
-  //   allowedHosts: [
-  //     'means-according.gl.at.ply.gg'  // add your Playit hostname here
-  //   ]
-  // }
+  server: {
+    host: true,      // listen on all interfaces (IPv4 + IPv6)
+    port: 5173
+  }
 })
