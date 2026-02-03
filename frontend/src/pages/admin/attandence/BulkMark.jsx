@@ -37,7 +37,7 @@ const BulkMark = ({
 
   // Memoize filtered employees to prevent re-calculation on every render.
   const filteredEmployee = useMemo(() => {
-    // console.log("filtereed employee")
+    console.log("filtereed employee")
     if (!employee) return [];
     return employee.filter(e => {
       const isactive = e.status !== false;
@@ -49,7 +49,7 @@ const BulkMark = ({
 
   // Memoize attendance data for the selected date.
   const alreadyAttendance = useMemo(() => {
-    // console.log('already attendence')
+    console.log("alreadyAttendance function")
     if (!attandenceDate || !attandence) return [];
     return attandence.filter(e => dayjs(e.date).isSame(dayjs(attandenceDate), "day"));
   }, [attandenceDate, attandence]);
@@ -60,8 +60,10 @@ const BulkMark = ({
 
     const newRowData = {};
     const newChecked = [];
+    let count = 0;
 
     employee.forEach(emp => {
+      console.log(++count)
       const existing = alreadyAttendance.find(a => a.employeeId._id === emp._id);
       if (existing) {
         newChecked.push(emp._id);
