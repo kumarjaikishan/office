@@ -1,6 +1,7 @@
 import { CiFilter } from "react-icons/ci";
 import { Avatar, Box, Button, CircularProgress, IconButton, OutlinedInput, TextField, Typography } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
+import React from "react";
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -11,7 +12,7 @@ import { useCustomStyles } from "./attandencehelper";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MdClear, MdOutlineModeEdit } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
-import {  IoSearch } from "react-icons/io5";
+import { IoSearch } from "react-icons/io5";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { FiDownload } from "react-icons/fi";
@@ -40,7 +41,7 @@ const Attandence = () => {
   const [openmodal, setopenmodal] = useState(false);
   const [isPunchIn, setisPunchIn] = useState(true);
   const [atteneditmodal, setatteneditmodal] = useState(false);
-  const [bullmodal, setbullmodal] = useState(false);
+  const [bulkmodal, setbulkmodal] = useState(false);
   const { branch, attandence, department, company, holidays, profile } = useSelector(
     (state) => state.user
   );
@@ -113,7 +114,12 @@ const Attandence = () => {
     if (!attandence) return [];
     const today = dayjs().startOf("day");
 
-    return attandence.filter((emp) => !dayjs(emp.date).isAfter(today, "day"));
+    return attandence
+      .map(emp => ({
+        ...emp,
+        parsedDate: dayjs(emp.date)
+      }))
+      .filter((emp) => !dayjs(emp.date).isAfter(today, "day"));
   }, [attandence]);
 
 
@@ -133,7 +139,7 @@ const Attandence = () => {
     // console.log(attandencelist)
     // console.log(filtere)
     return attandencelist.filter((val) => {
-      const recordDate = dayjs(val.date, "DD MMM, YYYY");
+      const recordDate = val.parsedDate;
       if (recordDate.isAfter(today, "day")) return false;
       const matchDate = !filtere.date || recordDate.isSame(filtere.date, "day");
       const matchMonth = filtere.month === "all" || recordDate.month() === Number(filtere.month);
@@ -269,282 +275,375 @@ const Attandence = () => {
     return () => clearTimeout(handler);
   }, [inputValue, setfiltere]);
 
+  const openModal = useCallback(() => {
+    setopenmodal(true)
+  }, [])
+  const openBulkModal = useCallback(() => {
+    setbulkmodal(true)
+  }, [])
+
+  const memoColumns = useMemo(() => columns({
+    branch,
+    company,
+    holidaydate,
+    minutesinhours,
+    canEdit,
+    canDelete,
+    edite,
+    deletee,
+  }), [
+    branch,
+    company,
+    holidaydate,
+    minutesinhours,
+    canEdit,
+    canDelete,
+    edite,
+    deletee,
+  ]);
+
+
 
   return (
     <div className='p-1 max-w-6xl mx-auto '>
-      {/* <div className="text-2xl mb-4 font-bold text-slate-800">Attendance Tracker</div> */}
-      <div className="bg-white flex flex-col rounded mb-4 shadow-xl  p-2">
-        <div className="flex justify-between items-center mb-4 flex-wrap">
-          <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-primary text-white">
-            <p onClick={() => setmarkattandence(false)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${!markattandence && `text-primary  bg-white`}`}>View Attendance</p>
-            {canAdd && <p onClick={() => setmarkattandence(true)} className={`px-2 text-center flex-1 md:flex-none py-1 rounded cursor-pointer ${markattandence && `text-primary  bg-white`}`}>Mark Attendance</p>}
-          </div>
 
-          <div className="flex w-full md:w-[320px]  mt-1 md:mt-0  gap-2">
-            {selectedRows.length > 0 && <Button className="flex-1" variant='contained' onClick={multidelete} color="error" startIcon={<AiOutlineDelete />} >Delete ({selectedRows.length})</Button>}
-            <Button onClick={exportCSV} className="flex-1" variant='outlined' startIcon={<FiDownload />} >Export</Button>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 ">
-          {markattandence ?
-            <div className="flex p-1 items-center gap-2">
-              <Button variant='contained' onClick={() => setopenmodal(true)} startIcon={<GoPlus />} >Mark Indivisual</Button>
-              <Button variant='outlined' onClick={() => setbullmodal(true)} startIcon={<BiGroup />} >Mark Bulk</Button>
-            </div> :
-            <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-7 gap-2 mt-1 w-full md:w-fit">
-              {/* <CiFilter className="hidden md:block" size={24} color="teal" /> */}
+      {/* control component */}
+      <AttendanceControls
+        markattandence={markattandence}
+        setmarkattandence={setmarkattandence}
+        canAdd={canAdd}
+        selectedRows={selectedRows}
+        multidelete={multidelete}
+        exportCSV={exportCSV}
+        openModal={openModal}
+        openBulkModal={openBulkModal}
+        filtere={filtere}
+        setfiltere={setfiltere}
+        branch={branch}
+        department={department}
+        profile={profile}
+        months={months}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        loading={loading}
+      />
 
-              <TextField
-                size="small"
-                type="date"
-                className="col-span-2 md:col-span-1 md:w-[150px]"
-                value={filtere.date}
-                onChange={(e) => setfiltere({ ...filtere, date: e.target.value })}
-                label="Select Date"
-                InputLabelProps={{ shrink: true }}
-              />
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Branch</InputLabel>
-                <Select
-                  value={filtere.branch}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Branch"
-                    />
-                  }
-                  onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
-                >
-                  <MenuItem value="all">All</MenuItem>
-                  {/* {branch?.map((val) => (
-                    <MenuItem key={val._id} value={val._id}>
-                      {val.name}
-                    </MenuItem>
-                  ))} */}
-                  {profile?.role === 'manager'
-                    ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
-                      ?.map((list) => (
-                        <MenuItem key={list._id} value={list._id}>
-                          {list.name}
-                        </MenuItem>
-                      ))
-                    :
-                    branch?.map((list) => (
-                      <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
-                    ))
-                  }
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Department</InputLabel>
-                <Select
-                  value={filtere.departmente}
-                  disabled={filtere.branch === "all"}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Department"
-                    />
-                  }
-                  onChange={(e) => setfiltere({ ...filtere, departmente: e.target.value })}
-                >
-                  <MenuItem value="all">All</MenuItem>
-                  {department
-                    ?.filter((e) => e.branchId?._id === filtere.branch)
-                    .map((val) => (
-                      <MenuItem key={val._id} value={val._id}>
-                        {val.department}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={filtere.status}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Status"
-                    />
-                  }
-                  onChange={(e) => setfiltere({ ...filtere, status: e.target.value })}
-                >
-                  <MenuItem value={'all'}>All</MenuItem>
-                  <MenuItem value={'present'}>Present</MenuItem>
-                  <MenuItem value={'leave'}>Leave</MenuItem>
-                  <MenuItem value={'absent'}>Absent</MenuItem>
-                  <MenuItem value={'weekly off'}>Weekly off</MenuItem>
-                  <MenuItem value={'holiday'}>Holiday</MenuItem>
-                  <MenuItem value={'half day'}>Half Day</MenuItem>
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Month</InputLabel>
-                <Select
-                  value={filtere.month}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Branch"
-                    />
-                  }
-                  label="Month"
-                  onChange={(e) => setfiltere({ ...filtere, month: e.target.value })}
-                >
-                  <MenuItem value='all'>All</MenuItem>
-                  {months.map((m, idx) => (
-                    <MenuItem key={idx} value={idx}>{m}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" className="col-span-1 md:w-[150px]">
-                <InputLabel>Year</InputLabel>
-                <Select
-                  value={filtere.year}
-                  input={
-                    <OutlinedInput
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CiFilter fontSize="small" />
-                        </InputAdornment>
-                      }
-                      label="Branch"
-                    />
-                  }
-                  label="Year"
-                  onChange={(e) => setfiltere({ ...filtere, year: e.target.value })}
-                >
-                  <MenuItem value='all'>All</MenuItem>
-                  {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
-                    <MenuItem key={y} value={y}>{y}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {/* <TextField
-                size="small"
-                className="col-span-1 md:w-[150px]"
-                value={filtere.employee}
-                onChange={(e) => setfiltere({ ...filtere, employee: e.target.value })}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IoSearch />
-                    </InputAdornment>
-                  ),
-                  endAdornment: filtere.employee && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setfiltere({ ...filtere, employee: "" })}
-                        edge="end"
-                        size="small"
-                      >
-                        <MdClear />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                label="Search Employee"
-              /> */}
-              <TextField
-                size="small"
-                className="col-span-1 md:w-[150px]"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IoSearch />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {loading ? (
-                        <CircularProgress size={18} />
-                      ) : (
-                        inputValue && (
-                          <IconButton
-                            onClick={() => setInputValue("")}
-                            edge="end"
-                            size="small"
-                          >
-                            <MdClear />
-                          </IconButton>
-                        )
-                      )}
-                    </InputAdornment>
-                  ),
-                }}
-                label="Search Employee"
-              />
-            </div>
-          }
-
-        </div>
-      </div>
-
+      {/* tabledata */}
       <div className="capitalize ">
-        <DataTable
-          columns={columns({
-            branch,
-            company,
-            holidaydate,
-            minutesinhours,
-            canEdit,
-            canDelete,
-            edite,
-            deletee,
-          })}
-          data={finalData}
-          pagination
-          onSort={handleSort}
-          selectableRows
+        <AttendanceTableSection
+          memoColumns={memoColumns}
+          finalData={finalData}
+          handleSort={handleSort}
           customStyles={customStyles}
           conditionalRowStyles={conditionalRowStyles}
-          onSelectedRowsChange={handleRowSelect}
+          handleRowSelect={handleRowSelect}
           selectedRows={selectedRows}
-          highlightOnHover
-          paginationPerPage={20}
-          noDataComponent={
-            <div className="flex items-center gap-2 py-6 text-center text-gray-600 text-sm">
-              <BiMessageRoundedError className="text-xl" /> No records found.
-            </div>
-          }
         />
-
       </div>
+
       <MarkAttandence isPunchIn={isPunchIn} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={openmodal} inp={inp} setinp={setinp}
         setopenmodal={setopenmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
       <MarkAttandenceedit dispatch={dispatch} setisload={setisload} submitHandle={submitHandle} init={init2} openmodal={atteneditmodal} inp={editinp} setinp={seteditinp}
         setopenmodal={setatteneditmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
-      <BulkMark isPunchIn={isPunchIn} dispatch={dispatch} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={bullmodal} inp={inp} setinp={setinp}
-        setopenmodal={setbullmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
+      <BulkMark isPunchIn={isPunchIn} dispatch={dispatch} setisPunchIn={setisPunchIn} submitHandle={submitHandle} init={init} openmodal={bulkmodal} inp={inp} setinp={setinp}
+        setopenmodal={setbulkmodal} isUpdate={isUpdate} setisUpdate={setisUpdate} isload={isload}
       />
     </div>
   )
 }
+
+const AttendanceControls = React.memo(({
+  markattandence,
+  setmarkattandence,
+  canAdd,
+  selectedRows,
+  multidelete,
+  exportCSV,
+  openModal,
+  openBulkModal,
+  filtere,
+  setfiltere,
+  branch,
+  department,
+  profile,
+  months,
+  inputValue,
+  setInputValue,
+  loading
+}) => {
+
+  return (
+    <div className="bg-white flex flex-col rounded mb-4 shadow-xl p-2">
+
+      {/* top buttons */}
+      <div className="flex justify-between items-center mb-4 flex-wrap">
+        <div className="flex w-full md:w-auto p-1 items-center gap-2 rounded bg-primary text-white">
+          <p
+            onClick={() => setmarkattandence(false)}
+            className={`px-2 py-1 rounded cursor-pointer ${!markattandence && "text-primary bg-white"}`}
+          >
+            View Attendance
+          </p>
+
+          {canAdd && (
+            <p
+              onClick={() => setmarkattandence(true)}
+              className={`px-2 py-1 rounded cursor-pointer ${markattandence && "text-primary bg-white"}`}
+            >
+              Mark Attendance
+            </p>
+          )}
+        </div>
+
+        <div className="flex w-full md:w-[320px] gap-2">
+          {selectedRows.length > 0 && (
+            <Button
+              className="flex-1"
+              variant="contained"
+              onClick={multidelete}
+              color="error"
+            >
+              Delete ({selectedRows.length})
+            </Button>
+          )}
+
+          <Button
+            onClick={exportCSV}
+            className="flex-1"
+            variant="outlined"
+          >
+            Export
+          </Button>
+        </div>
+      </div>
+
+      {/* conditional section */}
+      {markattandence ? (
+        <div className="flex gap-2">
+          <Button variant="contained" onClick={openModal}>
+            Mark Individual
+          </Button>
+
+          <Button variant="outlined" onClick={openBulkModal}>
+            Mark Bulk
+          </Button>
+        </div>
+      ) : (
+        <div className="border-1 border-gray-400 rounded p-3 md:p-0 md:border-0 grid grid-cols-2 md:grid-cols-7 gap-2 mt-1 w-full md:w-fit">
+          {/* <CiFilter className="hidden md:block" size={24} color="teal" /> */}
+
+          <TextField
+            size="small"
+            type="date"
+            className="col-span-2 md:col-span-1 md:w-[150px]"
+            value={filtere.date}
+            onChange={(e) => setfiltere({ ...filtere, date: e.target.value })}
+            label="Select Date"
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <FormControl size="small" className="col-span-1 md:w-[150px]">
+            <InputLabel>Branch</InputLabel>
+            <Select
+              value={filtere.branch}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Branch"
+                />
+              }
+              onChange={(e) => setfiltere({ ...filtere, branch: e.target.value })}
+            >
+              <MenuItem value="all">All</MenuItem>
+              {profile?.role === 'manager'
+                ? branch?.filter((e) => profile?.branchIds?.includes(e._id))
+                  ?.map((list) => (
+                    <MenuItem key={list._id} value={list._id}>
+                      {list.name}
+                    </MenuItem>
+                  ))
+                :
+                branch?.map((list) => (
+                  <MenuItem key={list._id} value={list._id}> {list.name} </MenuItem>
+                ))
+              }
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" className="col-span-1 md:w-[150px]">
+            <InputLabel>Department</InputLabel>
+            <Select
+              value={filtere.departmente}
+              disabled={filtere.branch === "all"}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Department"
+                />
+              }
+              onChange={(e) => setfiltere({ ...filtere, departmente: e.target.value })}
+            >
+              <MenuItem value="all">All</MenuItem>
+              {department
+                ?.filter((e) => e.branchId?._id === filtere.branch)
+                .map((val) => (
+                  <MenuItem key={val._id} value={val._id}>
+                    {val.department}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" className="col-span-1 md:w-[150px]">
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={filtere.status}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Status"
+                />
+              }
+              onChange={(e) => setfiltere({ ...filtere, status: e.target.value })}
+            >
+              <MenuItem value={'all'}>All</MenuItem>
+              <MenuItem value={'present'}>Present</MenuItem>
+              <MenuItem value={'leave'}>Leave</MenuItem>
+              <MenuItem value={'absent'}>Absent</MenuItem>
+              <MenuItem value={'weekly off'}>Weekly off</MenuItem>
+              <MenuItem value={'holiday'}>Holiday</MenuItem>
+              <MenuItem value={'half day'}>Half Day</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" className="col-span-1 md:w-[150px]">
+            <InputLabel>Month</InputLabel>
+            <Select
+              value={filtere.month}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Branch"
+                />
+              }
+              label="Month"
+              onChange={(e) => setfiltere({ ...filtere, month: e.target.value })}
+            >
+              <MenuItem value='all'>All</MenuItem>
+              {months.map((m, idx) => (
+                <MenuItem key={idx} value={idx}>{m}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" className="col-span-1 md:w-[150px]">
+            <InputLabel>Year</InputLabel>
+            <Select
+              value={filtere.year}
+              input={
+                <OutlinedInput
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CiFilter fontSize="small" />
+                    </InputAdornment>
+                  }
+                  label="Branch"
+                />
+              }
+              label="Year"
+              onChange={(e) => setfiltere({ ...filtere, year: e.target.value })}
+            >
+              <MenuItem value='all'>All</MenuItem>
+              {Array.from({ length: 5 }, (_, i) => dayjs().year() - 2 + i).map(y => (
+                <MenuItem key={y} value={y}>{y}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            size="small"
+            className="col-span-1 md:w-[150px]"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IoSearch />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  {loading ? (
+                    <CircularProgress size={18} />
+                  ) : (
+                    inputValue && (
+                      <IconButton
+                        onClick={() => setInputValue("")}
+                        edge="end"
+                        size="small"
+                      >
+                        <MdClear />
+                      </IconButton>
+                    )
+                  )}
+                </InputAdornment>
+              ),
+            }}
+            label="Search Employee"
+          />
+        </div>
+      )}
+
+    </div>
+  );
+});
+
+const AttendanceTableSection = React.memo(({
+  memoColumns,
+  finalData,
+  handleSort,
+  customStyles,
+  conditionalRowStyles,
+  handleRowSelect,
+  selectedRows
+}) => {
+
+  return (
+    <div className="capitalize">
+      <DataTable
+        columns={memoColumns}
+        data={finalData}
+        pagination
+        onSort={handleSort}
+        selectableRows
+        customStyles={customStyles}
+        conditionalRowStyles={conditionalRowStyles}
+        onSelectedRowsChange={handleRowSelect}
+        selectedRows={selectedRows}
+        highlightOnHover
+        paginationPerPage={20}
+      />
+    </div>
+  );
+});
+
 
 export default Attandence

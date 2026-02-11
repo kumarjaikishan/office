@@ -31,8 +31,5 @@ export default defineConfig({
       threshold: 1024
     })
   ],
-  server: {
-    host: true,      // listen on all interfaces (IPv4 + IPv6)
-    port: 5173
-  }
+
 })

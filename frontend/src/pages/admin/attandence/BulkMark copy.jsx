@@ -16,18 +16,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { cloudinaryUrl } from '../../../utils/imageurlsetter';
-import { bulkMarkAttendanceApi } from '../../../api/attendance.api';
 
 const BulkMark = ({
   openmodal, init, setopenmodal,
   isUpdate, isload, setinp, setisUpdate, dispatch
 }) => {
-
-  const profile = useSelector((state) => state.user.profile);
-  const attandence = useSelector((state) => state.user.attandence);
-  const employee = useSelector((state) => state.user.employee);
-  const branch = useSelector((state) => state.user.branch);
-  const department = useSelector((state) => state.user.department);
+  const { department, branch, employee, attandence, profile } = useSelector((state) => state.user);
 
   const [checkedemployee, setcheckedemployee] = useState([]);
   const [rowData, setRowData] = useState({});
@@ -41,69 +35,41 @@ const BulkMark = ({
     status: ''
   });
 
-  // 🔥 OPTIMIZATION 1: Employee Map (O(1) lookup in submit)
-  const employeeMap = useMemo(() => {
-    const map = new Map();
-    employee?.forEach(e => map.set(e._id, e));
-    return map;
-  }, [employee]);
-
-  // 🔥 OPTIMIZATION 2: Attendance Map (O(1) lookup instead of .find O(n))
-  const attendanceMap = useMemo(() => {
-    if (!attandenceDate || !attandence) return new Map();
-
-    const map = new Map();
-    const selectedDateStr = dayjs(attandenceDate).format("YYYY-MM-DD");
-
-    attandence.forEach(a => {
-      if (dayjs(a.date).format("YYYY-MM-DD") === selectedDateStr) {
-        map.set(a.employeeId._id, a);
-      }
-    });
-
-    return map;
-  }, [attandenceDate, attandence]);
-
-  // Filter employees
+  // Memoize filtered employees to prevent re-calculation on every render.
   const filteredEmployee = useMemo(() => {
+    // console.log("filtereed employee")
     if (!employee) return [];
-
     return employee.filter(e => {
       const isactive = e.status !== false;
-      const matchBranch =
-        selectedBranch !== "all" ? e.branchId === selectedBranch : true;
-
-      // 🔥 FIX: Compare department by _id (not department name)
-      const matchDepartment =
-        selecteddepartment !== "all"
-          ? e.department?._id === selecteddepartment
-          : true;
-
+      const matchBranch = selectedBranch !== "all" ? e.branchId === selectedBranch : true;
+      const matchDepartment = selecteddepartment !== "all" ? e.department.department === selecteddepartment : true;
       return matchBranch && matchDepartment && isactive;
     });
   }, [employee, selectedBranch, selecteddepartment]);
 
-  // 🔥 OPTIMIZATION 3: O(n) initialization using attendanceMap
-  useEffect(() => {
-    if (!openmodal) return;   // 🔥 ADD THIS
+  // Memoize attendance data for the selected date.
+  const alreadyAttendance = useMemo(() => {
+    // console.log("alreadyAttendance function")
+    if (!attandenceDate || !attandence) return [];
+    return attandence.filter(e => dayjs(e.date).isSame(dayjs(attandenceDate), "day"));
+  }, [attandenceDate, attandence]);
 
+  // Initialize row data and checked employees only when dependencies change.
+  useEffect(() => {
     if (!employee) return;
 
     const newRowData = {};
     const newChecked = [];
+    let count = 0;
 
     employee.forEach(emp => {
-      const existing = attendanceMap.get(emp._id);
-
+      // console.log(++count)
+      const existing = alreadyAttendance.find(a => a.employeeId._id === emp._id);
       if (existing) {
         newChecked.push(emp._id);
         newRowData[emp._id] = {
-          punchIn: existing.punchIn
-            ? dayjs(existing.punchIn).format("HH:mm")
-            : null,
-          punchOut: existing.punchOut
-            ? dayjs(existing.punchOut).format("HH:mm")
-            : null,
+          punchIn: existing.punchIn ? dayjs(existing.punchIn).format("HH:mm") : null,
+          punchOut: existing.punchOut ? dayjs(existing.punchOut).format("HH:mm") : null,
           status: existing.status || "absent",
         };
       } else {
@@ -117,18 +83,16 @@ const BulkMark = ({
 
     setRowData(newRowData);
     setcheckedemployee(newChecked);
+  }, [employee, alreadyAttendance]);
 
-  }, [openmodal, employee, attendanceMap]);
-
-
-  // Apply to all (kept same logic)
+  // Apply-to-all handler, now more efficient.
   useEffect(() => {
-    if (!toall) return;
+    // console.log("useefect")
+    if (!toall || Object.keys(toall).length === 0) return;
 
     setRowData(prev => {
       const updated = { ...prev };
-
-      filteredEmployee.forEach(emp => {
+      filteredEmployee.forEach(emp => { // Only update filtered employees
         updated[emp._id] = {
           ...updated[emp._id],
           ...(toall.punchIn && { punchIn: toall.punchIn }),
@@ -136,19 +100,17 @@ const BulkMark = ({
           ...(toall.status && { status: toall.status }),
         };
       });
-
       return updated;
     });
 
     setcheckedemployee(filteredEmployee.map(e => e._id));
-
   }, [toall, filteredEmployee]);
 
+  // Memoized handlers
   const handleCheckbox = useCallback((empId) => {
+    // console.log("handlecheck box")
     setcheckedemployee(prev =>
-      prev.includes(empId)
-        ? prev.filter(id => id !== empId)
-        : [...prev, empId]
+      prev.includes(empId) ? prev.filter(id => id !== empId) : [...prev, empId]
     );
   }, []);
 
@@ -166,17 +128,10 @@ const BulkMark = ({
       [empId]: {
         ...prev[empId],
         [field]: value,
-        status: ['weekly off', 'holiday', 'half day']
-          .includes(prev[empId].status)
-          ? prev[empId].status
-          : 'present',
+        status: ['weekly off', 'holiday', 'half day'].includes(prev[empId].status) ? prev[empId].status : 'present',
       }
     }));
-
-    setcheckedemployee(prev =>
-      prev.includes(empId) ? prev : [...prev, empId]
-    );
-
+    setcheckedemployee(prev => prev.includes(empId) ? prev : [...prev, empId]);
   }, []);
 
   const handleStatusChange = useCallback((empId, value) => {
@@ -187,34 +142,22 @@ const BulkMark = ({
         status: value
       }
     }));
-
-    setcheckedemployee(prev =>
-      prev.includes(empId) ? prev : [...prev, empId]
-    );
-
+    setcheckedemployee(prev => prev.includes(empId) ? prev : [...prev, empId]);
   }, []);
 
-  // 🔥 OPTIMIZATION 4: O(1) employee lookup in submit
   const handleSubmit = useCallback(async (e) => {
-
     e.preventDefault();
-
     if (checkedemployee.length === 0) {
       toast.info("Please Mark at least one employee.");
       return;
     }
 
-    const selectedDateStr = attandenceDate.format('YYYY-MM-DD');
-
     const selectedData = checkedemployee.map(employeeId => {
-
       const record = rowData[employeeId];
-      if (!record) return null;
-
+      if (!record) return null; // Defensive check
       const { punchIn, punchOut, status } = record;
-
-      const emp = employeeMap.get(employeeId); // O(1)
-      if (!emp) return null;
+      const emp = employee.find(e => e._id === employeeId);
+      if (!emp) return null; // Defensive check
 
       const data = {
         employeeId,
@@ -225,18 +168,13 @@ const BulkMark = ({
       };
 
       if (punchIn) {
-        data.punchIn =
-          new Date(`${selectedDateStr}T${punchIn}`).toISOString();
+        data.punchIn = new Date(`${attandenceDate.format('YYYY-MM-DD')}T${punchIn}`).toISOString();
       }
-
       if (punchOut) {
-        data.punchOut =
-          new Date(`${selectedDateStr}T${punchOut}`).toISOString();
+        data.punchOut = new Date(`${attandenceDate.format('YYYY-MM-DD')}T${punchOut}`).toISOString();
       }
-
       return data;
-
-    }).filter(Boolean);
+    }).filter(Boolean); // Filter out any null values
 
     if (selectedData.length === 0) {
       toast.info("No valid attendance data to submit.");
@@ -245,31 +183,30 @@ const BulkMark = ({
 
     try {
       setisUpdate(true);
+      const response = await fetch(`${import.meta.env.VITE_API_ADDRESS}bulkMarkAttendance`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('emstoken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ attendanceRecords: selectedData }),
+      });
 
-      await bulkMarkAttendanceApi(selectedData);
+      if (!response.ok) throw new Error('Failed to submit attendance');
+      await response.json();
 
       dispatch(FirstFetch());
       setcheckedemployee([]);
       setattandenceDate(dayjs());
       setopenmodal(false);
       setisUpdate(false);
-
-      toast.success("Attendance marked successfully.");
+      toast.success('Attendance marked successfully.');
     } catch (error) {
-      console.error("Bulk Attendance Error:", error);
-      toast.error("Failed to mark attendance.");
+      console.error('Bulk Attendance Error:', error);
+      alert('Failed to mark attendance. Please try again.');
       setisUpdate(false);
     }
-
-  }, [
-    checkedemployee,
-    rowData,
-    employeeMap,
-    attandenceDate,
-    dispatch,
-    setisUpdate,
-    setopenmodal
-  ]);
+  }, [checkedemployee, rowData, employee, attandenceDate, dispatch, setisUpdate, setopenmodal]);
 
   return (
     <Modalbox open={openmodal} outside={false} onClose={() => setopenmodal(false)}>
@@ -405,7 +342,7 @@ const BulkMark = ({
                     </TableHead>
 
                     <TableBody>
-                      {filteredEmployee?.slice(0, 10).map((emp) => (
+                      {filteredEmployee?.map((emp) => (
                         <TableRow key={emp._id}>
                           <TableCell padding="checkbox">
                             <Checkbox
@@ -499,4 +436,4 @@ const BulkMark = ({
   );
 };
 
-export default React.memo(BulkMark);
+export default BulkMark;
