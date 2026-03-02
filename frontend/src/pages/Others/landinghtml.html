@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMS - Enterprise Employee Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617;
+            color: #cbd5e1;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.4) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 40px -10px rgba(59, 130, 246, 0.2);
+            transform: translateY(-4px);
+        }
+
+        /* Scroll Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* Custom Glows */
+        .glow-bg {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(56,189,248,0.15) 0%, rgba(30,58,138,0) 70%);
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .glow-bg-bottom {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, rgba(2,6,23,0) 70%);
+            bottom: -200px;
+            right: -200px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Animation for dashboard elements */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500/30 selection:text-white relative">
+
+    <!-- Ambient Background Glows -->
+    <div class="glow-bg"></div>
+    <div class="glow-bg-bottom"></div>
+
+    <!-- 1. Navbar -->
+    <nav class="fixed w-full top-0 z-50 glass border-b border-white/5 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <span class="text-white font-bold text-xl tracking-tight">EMS</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Features</a>
+                    <a href="#highlights" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Architecture</a>
+                    <a href="#analytics" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Analytics</a>
+                    <a href="#contact" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Contact</a>
+                </div>
+
+                <!-- CTA -->
+                <div class="hidden md:flex items-center">
+                    <a href="#" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/10 rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                        Get Started
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-slate-300 hover:text-white focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. Hero Section -->
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-8 reveal">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                v2.0 MERN Stack Release
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 reveal delay-100">
+                Smart Employee <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
+                    Management System
+                </span>
+            </h1>
+            
+            <p class="mt-4 max-w-2xl text-lg md:text-xl text-slate-400 mx-auto reveal delay-200">
+                A powerful multi-tenant architecture designed for modern HR. Seamlessly integrate biometric attendance, automate salary calculations, and secure data with advanced RBAC & ABAC controls.
+            </p>
+            
+            <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4 reveal delay-300">
+                <a href="#" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
+                    Live Demo
+                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </a>
+                <a href="#" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-sm font-medium text-slate-300 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all duration-300">
+                    Documentation
+                </a>
+            </div>
+
+            <!-- Hero Image/Abstract visual -->
+            <div class="mt-20 relative mx-auto max-w-5xl reveal delay-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 h-full"></div>
+                <div class="glass-card rounded-t-2xl border-b-0 p-2 mx-auto">
+                    <div class="bg-slate-900 rounded-t-xl overflow-hidden border border-white/5">
+                        <!-- Mac Window Dots -->
+                        <div class="bg-slate-800/50 px-4 py-3 flex items-center gap-2 border-b border-white/5">
+                            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                            <div class="ml-4 text-xs text-slate-500 font-mono">ems.dashboard / overview</div>
+                        </div>
+                        <!-- Mockup Content -->
+                        <div class="p-6 grid grid-cols-4 gap-4 opacity-50 relative h-64">
+                            <!-- Sidebar -->
+                            <div class="col-span-1 space-y-3">
+                                <div class="h-6 w-3/4 bg-white/5 rounded"></div>
+                                <div class="h-4 w-1/2 bg-white/5 rounded"></div>
+                                <div class="h-4 w-2/3 bg-white/5 rounded"></div>
+                                <div class="h-4 w-1/2 bg-white/5 rounded"></div>
+                            </div>
+                            <!-- Main -->
+                            <div class="col-span-3 space-y-4">
+                                <div class="flex gap-4">
+                                    <div class="h-20 flex-1 bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-xl"></div>
+                                    <div class="h-20 flex-1 bg-gradient-to-br from-indigo-500/10 to-transparent border border-indigo-500/20 rounded-xl"></div>
+                                    <div class="h-20 flex-1 bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-xl"></div>
+                                </div>
+                                <div class="h-32 w-full bg-white/5 rounded-xl"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Features Section (3-column) -->
+    <section id="features" class="py-24 relative border-t border-white/5 bg-slate-900/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Everything you need to manage your workforce</h2>
+                <p class="text-slate-400">Automate tedious HR tasks, track time accurately, and generate payroll seamlessly with our all-in-one suite.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-card rounded-2xl p-8 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 text-blue-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-3">Attendance Tracking</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Accurate clock-ins across devices. Supports shifts, overtime, and leave management with automated approval workflows.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card rounded-2xl p-8 reveal delay-100">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6 text-indigo-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-3">Salary Calculation</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Dynamic payroll engine tied directly to attendance. Handles taxes, deductions, bonuses, and generates compliant payslips instantly.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card rounded-2xl p-8 reveal delay-200">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 text-purple-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-3">Advanced Reporting</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Exportable multi-format reports for management. Get actionable insights into absenteeism, departmental costs, and workforce efficiency.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Highlight Cards (2x2 grid) -->
+    <section id="highlights" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Highlight 1 -->
+                <div class="group relative overflow-hidden rounded-3xl bg-slate-800/30 border border-white/5 p-8 hover:bg-slate-800/50 transition-colors reveal">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <svg class="w-24 h-24 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2 relative z-10">Multi-Tenant Architecture</h3>
+                    <p class="text-slate-400 mb-6 relative z-10 max-w-sm">Manage multiple organizations or subsidiaries from a single MERN stack instance with isolated databases and configurations.</p>
+                    <div class="flex gap-2 relative z-10">
+                        <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs font-mono text-slate-300">MongoDB</span>
+                        <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs font-mono text-slate-300">Express</span>
+                        <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs font-mono text-slate-300">React</span>
+                        <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-xs font-mono text-slate-300">Node.js</span>
+                    </div>
+                </div>
+
+                <!-- Highlight 2 -->
+                <div class="group relative overflow-hidden rounded-3xl bg-slate-800/30 border border-white/5 p-8 hover:bg-slate-800/50 transition-colors reveal delay-100">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <svg class="w-24 h-24 text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2 relative z-10">RBAC & ABAC Security</h3>
+                    <p class="text-slate-400 mb-6 relative z-10 max-w-sm">Enterprise-grade security. Define granular access based on user roles (Admin, HR, Employee) and specific attributes (Location, Department).</p>
+                    <a href="#" class="inline-flex items-center text-sm font-medium text-indigo-400 hover:text-indigo-300 relative z-10">
+                        View Security Docs <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
+                </div>
+
+                <!-- Highlight 3 -->
+                <div class="group relative overflow-hidden rounded-3xl bg-slate-800/30 border border-white/5 p-8 hover:bg-slate-800/50 transition-colors reveal">
+                     <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <svg class="w-24 h-24 text-cyan-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2 relative z-10">Live Biometric Sync</h3>
+                    <p class="text-slate-400 relative z-10 max-w-sm">Hardware agnostic. Connect fingerprint scanners and facial recognition devices directly via secure APIs for real-time punch data.</p>
+                </div>
+
+                <!-- Highlight 4 -->
+                <div class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-900/20 to-indigo-900/10 border border-blue-500/20 p-8 hover:border-blue-500/40 transition-colors reveal delay-100">
+                    <h3 class="text-2xl font-bold text-white mb-2 relative z-10">Real-Time Analytics</h3>
+                    <p class="text-slate-400 mb-6 relative z-10 max-w-sm">Live dashboards built with WebSockets. Monitor employee presence, track live working hours, and predict overtime costs instantly.</p>
+                    
+                    <!-- Mini visual -->
+                    <div class="flex items-end gap-2 h-12 relative z-10 mt-4">
+                        <div class="w-8 bg-blue-500/40 rounded-t-sm h-1/3 animate-pulse-slow"></div>
+                        <div class="w-8 bg-blue-500/60 rounded-t-sm h-2/3 animate-pulse-slow delay-100"></div>
+                        <div class="w-8 bg-indigo-500/80 rounded-t-sm h-full animate-pulse-slow delay-200"></div>
+                        <div class="w-8 bg-blue-500/50 rounded-t-sm h-1/2 animate-pulse-slow delay-300"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Analytics Mockup Section -->
+    <section id="analytics" class="py-24 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                
+                <!-- Text Content -->
+                <div class="lg:w-1/3 reveal">
+                    <div class="w-12 h-12 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-6 text-green-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Insights that drive performance.</h2>
+                    <p class="text-slate-400 mb-8">
+                        Our management dashboard provides a bird's-eye view of your entire organization. Spot attendance trends, analyze payroll summaries, and reduce absenteeism with data-driven decisions.
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center text-slate-300">
+                            <svg class="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Live Attendance Trends
+                        </li>
+                        <li class="flex items-center text-slate-300">
+                            <svg class="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Payroll Cost Forecasting
+                        </li>
+                        <li class="flex items-center text-slate-300">
+                            <svg class="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Departmental Absenteeism
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Dashboard UI Mockup -->
+                <div class="lg:w-2/3 w-full reveal delay-200">
+                    <div class="glass-card rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+                        <!-- Top bar -->
+                        <div class="bg-slate-900/80 border-b border-white/5 px-6 py-4 flex justify-between items-center">
+                            <div class="text-sm font-medium text-slate-300">Overview / Q3 Report</div>
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                </div>
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 border border-white/10"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 bg-slate-950/50">
+                            <!-- Stats row -->
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="bg-slate-900/50 border border-white/5 rounded-xl p-4">
+                                    <div class="text-xs text-slate-500 mb-1">Total Employees</div>
+                                    <div class="text-2xl font-bold text-white">1,248</div>
+                                    <div class="text-xs text-green-400 mt-2 flex items-center">+12% <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg></div>
+                                </div>
+                                <div class="bg-slate-900/50 border border-white/5 rounded-xl p-4">
+                                    <div class="text-xs text-slate-500 mb-1">Present Today</div>
+                                    <div class="text-2xl font-bold text-white">1,180</div>
+                                    <div class="text-xs text-slate-400 mt-2">94.5% Rate</div>
+                                </div>
+                                <div class="bg-slate-900/50 border border-white/5 rounded-xl p-4">
+                                    <div class="text-xs text-slate-500 mb-1">Est. Payroll (MTD)</div>
+                                    <div class="text-2xl font-bold text-white">$452k</div>
+                                    <div class="text-xs text-red-400 mt-2 flex items-center">-2% <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg></div>
+                                </div>
+                            </div>
+
+                            <!-- Chart Area -->
+                            <div class="bg-slate-900/50 border border-white/5 rounded-xl p-6 h-64 relative flex items-end justify-between pb-8">
+                                <div class="absolute top-4 left-6 text-sm text-slate-400 font-medium">Weekly Attendance</div>
+                                
+                                <!-- Mock Line Chart SVG -->
+                                <svg class="absolute inset-0 h-full w-full pt-10 px-6 pb-8" preserveAspectRatio="none">
+                                    <path d="M0 100 Q 50 80 100 120 T 200 60 T 300 90 T 400 30 T 500 70 T 600 20" fill="none" stroke="rgba(59, 130, 246, 0.5)" stroke-width="3" stroke-linecap="round" class="drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]"/>
+                                    <path d="M0 100 Q 50 80 100 120 T 200 60 T 300 90 T 400 30 T 500 70 T 600 20 L 600 200 L 0 200 Z" fill="url(#gradient)" opacity="0.2"/>
+                                    <defs>
+                                        <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="rgba(59, 130, 246, 1)" />
+                                            <stop offset="100%" stop-color="rgba(59, 130, 246, 0)" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                
+                                <!-- Grid Lines -->
+                                <div class="absolute inset-x-6 top-16 border-t border-dashed border-white/5"></div>
+                                <div class="absolute inset-x-6 top-1/2 border-t border-dashed border-white/5"></div>
+                                <div class="absolute inset-x-6 bottom-8 border-t border-dashed border-white/5"></div>
+
+                                <!-- X Axis Labels -->
+                                <div class="absolute bottom-2 left-6 text-[10px] text-slate-500">Mon</div>
+                                <div class="absolute bottom-2 left-1/4 text-[10px] text-slate-500">Tue</div>
+                                <div class="absolute bottom-2 left-2/4 text-[10px] text-slate-500">Wed</div>
+                                <div class="absolute bottom-2 left-3/4 text-[10px] text-slate-500">Thu</div>
+                                <div class="absolute bottom-2 right-6 text-[10px] text-slate-500">Fri</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. CTA Section -->
+    <section class="py-24 relative">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 reveal">
+            <div class="relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 p-12 text-center shadow-2xl">
+                <!-- CTA Background Gradient -->
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-slate-900 to-indigo-900/40 opacity-80 z-0"></div>
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/20 blur-3xl rounded-full z-0"></div>
+                <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/20 blur-3xl rounded-full z-0"></div>
+
+                <div class="relative z-10">
+                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">Ready to Modernize Your Workforce?</h2>
+                    <p class="text-lg text-slate-300 mb-10 max-w-2xl mx-auto">
+                        Join hundreds of enterprises managing attendance, payroll, and security through a single, intelligent platform.
+                    </p>
+                    <a href="#" class="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white bg-white/10 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition-all duration-300 shadow-[0_0_30px_-5px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_-5px_rgba(255,255,255,0.2)] hover:-translate-y-1">
+                        Get Started Now
+                        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Footer -->
+    <footer class="border-t border-white/10 bg-slate-950 pt-12 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+            <div class="flex items-center gap-2 mb-6 opacity-50">
+                 <div class="w-6 h-6 rounded flex items-center justify-center bg-slate-800 border border-slate-700">
+                    <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </div>
+                <span class="text-slate-400 font-bold tracking-tight">EMS</span>
+            </div>
+            
+            <div class="flex space-x-6 mb-8 text-sm text-slate-500">
+                <a href="#" class="hover:text-slate-300 transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-slate-300 transition-colors">Terms of Service</a>
+                <a href="#" class="hover:text-slate-300 transition-colors">API Documentation</a>
+                <a href="#" class="hover:text-slate-300 transition-colors">Support</a>
+            </div>
+
+            <p class="text-slate-600 text-sm">
+                &copy; 2026 EMS - Employee Management System. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Interactions -->
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('bg-slate-900/80', 'shadow-lg', 'border-white/10');
+                navbar.classList.remove('bg-transparent', 'border-transparent');
+            } else {
+                navbar.classList.remove('bg-slate-900/80', 'shadow-lg', 'border-white/10');
+                navbar.classList.add('bg-transparent', 'border-transparent');
+            }
+        });
+
+        // Scroll Reveal Animation via Intersection Observer
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+
+            const revealOptions = {
+                threshold: 0.15,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Run once
+                });
+            }, revealOptions);
+
+            reveals.forEach(reveal => {
+                revealOnScroll.observe(reveal);
+            });
+        });
+    </script>
+</body>
+</html>

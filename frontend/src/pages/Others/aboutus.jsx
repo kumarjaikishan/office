@@ -1,0 +1,122 @@
+const AboutUs = () => {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-300 px-6 py-20">
+      
+      <div className="max-w-5xl mx-auto">
+
+        {/* Heading */}
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            About Employee Management System (EMS)
+          </h1>
+          <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+            A modern workforce management platform built to automate attendance,
+            payroll, security, and real-time organizational insights.
+          </p>
+        </div>
+
+        {/* Introduction */}
+        <div className="space-y-6 text-lg leading-relaxed mb-16">
+          <p>
+            Employee Management System (EMS) is a powerful, enterprise-ready
+            solution designed to simplify workforce operations. Built with a
+            scalable MERN stack architecture, EMS helps organizations manage
+            employees, track attendance, automate payroll, and monitor
+            performance — all from a single platform.
+          </p>
+          <p>
+            Whether you're a startup, mid-sized company, or enterprise,
+            EMS eliminates manual HR processes and replaces them with secure,
+            automated, and data-driven systems.
+          </p>
+        </div>
+
+        {/* Vision */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-semibold text-white mb-4">
+            Our Vision
+          </h2>
+          <p className="text-lg text-slate-400 leading-relaxed">
+            To empower organizations with intelligent workforce management
+            tools that improve operational efficiency, ensure transparency,
+            and enable data-driven decision-making.
+          </p>
+        </div>
+
+        {/* Features Section */}
+        <div>
+          <h2 className="text-3xl font-semibold text-white mb-10 text-center">
+            What EMS Offers
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-10">
+
+            {[
+              {
+                title: "Multi-Tenant Architecture",
+                desc: "Manage multiple organizations or branches securely within a single system while keeping data isolated and protected."
+              },
+              {
+                title: "Role-Based & Attribute-Based Access",
+                desc: "Enterprise-grade RBAC & ABAC security ensures precise control over user permissions based on roles and attributes."
+              },
+              {
+                title: "Attendance & Shift Management",
+                desc: "Track check-ins, check-outs, shift schedules, overtime, and absenteeism in real time."
+              },
+              {
+                title: "Automated Payroll System",
+                desc: "Dynamic salary calculations based on attendance, working hours, overtime, deductions, and bonuses."
+              },
+              {
+                title: "Biometric Device Integration",
+                desc: "Seamlessly sync fingerprint and biometric devices for accurate, real-time attendance tracking."
+              },
+              {
+                title: "Real-Time Analytics Dashboard",
+                desc: "Monitor employee trends, payroll summaries, and workforce performance through live dashboards."
+              },
+              {
+                title: "Advanced Reporting",
+                desc: "Generate daily, monthly, and custom reports for HR and management insights."
+              },
+              {
+                title: "Scalable & Secure Infrastructure",
+                desc: "Designed to grow with your organization while maintaining strong data security standards."
+              }
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="bg-slate-900 border border-slate-800 rounded-2xl p-8 hover:border-blue-500/30 transition"
+              >
+                <h3 className="text-xl font-semibold text-white mb-3">
+                  {item.title}
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+
+          </div>
+        </div>
+
+        {/* Contact */}
+        <div className="mt-20 text-center border-t border-slate-800 pt-12">
+          <h3 className="text-2xl font-semibold text-white mb-4">
+            Get in Touch
+          </h3>
+          <p className="text-slate-400">
+            Have questions about EMS or want to modernize your workforce?
+          </p>
+          <p className="text-blue-400 font-medium mt-2">
+            support@emsplatform.com
+          </p>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default AboutUs;

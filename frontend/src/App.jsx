@@ -11,12 +11,20 @@ import { Avatar } from '@mui/material';
 import dayjs from 'dayjs';
 import { FaRegUser } from 'react-icons/fa';
 import LeaveBalancePage from './pages/leaveledger/leaveledger';
+import EMSLandingPage from './pages/landingPage/landingPage';
+import PublicLayout from './pages/landingPage/PublicLayout';
 // import  Errorpage  from './pages/error/Errorpage';
+
 
 // ✅ Lazy imports
 const Login = lazy(() => import('./pages/Login'));
 const Logout = lazy(() => import('./pages/logout'));
 const Errorpage = lazy(() => import('./pages/error/Errorpage'));
+const AboutUs = lazy(() => import('./pages/Others/aboutus'));
+const Contact = lazy(() => import('./pages/Others/contact'));
+const PrivacyPolicy = lazy(() => import('./pages/Others/privacy'));
+const TermsAndConditions = lazy(() => import('./pages/Others/terms'));
+const RefundAndCancellationPolicy = lazy(() => import('./pages/Others/refund'));
 
 // Admin/Manager
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -181,7 +189,7 @@ function App() {
   useEffect(() => {
     document.documentElement.style.setProperty("--color-primary", primaryColor);
   }, [primaryColor]);
- 
+
   useEffect(() => {
     if (!islogin) {
       navigate("/login");
@@ -189,7 +197,7 @@ function App() {
     }
     const role = user?.profile?.role;
 
-    if (['superadmin', 'admin', 'manager', 'grant','demo'].includes(role)) {
+    if (['superadmin', 'admin', 'manager', 'grant', 'demo'].includes(role)) {
       dispatch(FirstFetch());
     } else if (role === 'employee') {
       dispatch(empFirstFetch());
@@ -238,7 +246,7 @@ function App() {
   const roleRoute = islogin ? routesByRole[user?.profile?.role] || [] : [];
 
   useEffect(() => {
-    if (islogin && user?.liveAttandence && ["superadmin", "admin", "manager","demo"].includes(user?.profile?.role)) {
+    if (islogin && user?.liveAttandence && ["superadmin", "admin", "manager", "demo"].includes(user?.profile?.role)) {
       const es = connectSSE((data) => {
         // console.log("sse se event ayaa")
         if (data.type === "attendance_update") {
@@ -320,6 +328,19 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Navigate to="/dashboard" />} />
+          {/* <Route path="/" element={<Navigate to="/EMSLandingPage" />} /> */}
+
+          <Route element={<PublicLayout />}>
+            <Route path="/landing" element={<EMSLandingPage />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-conditions" element={<TermsAndConditions />} />
+            <Route path="/refund-policy" element={<RefundAndCancellationPolicy />} />
+            <Route path="/cancellation-policy" element={<RefundAndCancellationPolicy />} />
+          </Route>
+
+
           <Route path="/resetpassword/:token" element={<PasswordReset />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
