@@ -10,9 +10,10 @@ import { connectSSE, closeSSE } from "./utils/sse";
 import { Avatar } from '@mui/material';
 import dayjs from 'dayjs';
 import { FaRegUser } from 'react-icons/fa';
-import LeaveBalancePage from './pages/leaveledger/leaveledger';
-import EMSLandingPage from './pages/landingPage/landingPage';
+
 import PublicLayout from './pages/landingPage/PublicLayout';
+import LandingPage from './pages/landingPage/landingPage';
+import ScrollToTop from './components/ScrollToTop';
 // import  Errorpage  from './pages/error/Errorpage';
 
 
@@ -20,11 +21,14 @@ import PublicLayout from './pages/landingPage/PublicLayout';
 const Login = lazy(() => import('./pages/Login'));
 const Logout = lazy(() => import('./pages/logout'));
 const Errorpage = lazy(() => import('./pages/error/Errorpage'));
+
 const AboutUs = lazy(() => import('./pages/Others/aboutus'));
 const Contact = lazy(() => import('./pages/Others/contact'));
 const PrivacyPolicy = lazy(() => import('./pages/Others/privacy'));
 const TermsAndConditions = lazy(() => import('./pages/Others/terms'));
 const RefundAndCancellationPolicy = lazy(() => import('./pages/Others/refund'));
+const Membership = lazy(() => import('./pages/membership/membership'));
+const LeaveBalancePage = lazy(() => import('./pages/leaveledger/leaveledger'));
 
 // Admin/Manager
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -302,11 +306,10 @@ function App() {
     }
   }, [user?.liveAttandence]);
 
-
-
   return (
     <>
       <ToastContainer closeOnClick />
+      <ScrollToTop />
       <Suspense
         fallback={<div className="flex items-center justify-center h-screen w-screen bg-white">
           <div className="relative">
@@ -327,22 +330,26 @@ function App() {
       >
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Navigate to="/dashboard" />} />
+          {/* <Route path="/" element={<Navigate to="/dashboard" />} /> */}
           {/* <Route path="/" element={<Navigate to="/EMSLandingPage" />} /> */}
 
           <Route element={<PublicLayout />}>
-            <Route path="/landing" element={<EMSLandingPage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsAndConditions />} />
             <Route path="/refund-policy" element={<RefundAndCancellationPolicy />} />
             <Route path="/cancellation-policy" element={<RefundAndCancellationPolicy />} />
+            <Route path="/pricing" element={<Membership />} />
           </Route>
 
-
           <Route path="/resetpassword/:token" element={<PasswordReset />} />
-          <Route path="/login" element={<Login />} />
+          {/* <Route path="/login" element={<Login />} /> */}
+          <Route
+            path="/login"
+            element={islogin ? <Navigate to="/dashboard" replace /> : <Login />}
+          />
           <Route path="/logout" element={<Logout />} />
 
           {/* Role based routes */}
