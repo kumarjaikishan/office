@@ -49,6 +49,12 @@ app.use((req, res, next) => {
 // ----------------------
 // Routes
 // ----------------------
+// app.post(
+//   "/webhook",
+//   express.raw({ type: "application/json" }),
+//   webhook
+// );
+
 app.use('/api', route);
 app.get('/events', eventsHandler);
 app.use('/', esslRoutes);
