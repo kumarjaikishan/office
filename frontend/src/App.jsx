@@ -14,6 +14,8 @@ import { FaRegUser } from 'react-icons/fa';
 import PublicLayout from './pages/landingPage/PublicLayout';
 import LandingPage from './pages/landingPage/landingPage';
 import ScrollToTop from './components/ScrollToTop';
+import PaymentSuccess from './pages/membership/PaymentSuccess';
+import Rukhi from './pages/membership/rukhi';
 // import  Errorpage  from './pages/error/Errorpage';
 
 
@@ -334,12 +336,15 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsAndConditions />} />
             <Route path="/refund-policy" element={<RefundAndCancellationPolicy />} />
             <Route path="/cancellation-policy" element={<RefundAndCancellationPolicy />} />
             <Route path="/pricing" element={<Membership />} />
           </Route>
+            <Route path="/rukhi" element={<Rukhi />} />
+
 
           <Route path="/resetpassword/:token" element={<PasswordReset />} />
           {/* <Route path="/login" element={<Login />} /> */}

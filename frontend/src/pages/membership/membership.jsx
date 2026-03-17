@@ -12,6 +12,7 @@ import {
     Loader2
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 // Custom Hook for Scroll Animations
 const useScrollReveal = () => {
@@ -48,6 +49,8 @@ const Reveal = ({ children, className = "" }) => {
 
 const EMSPricing = () => {
     const [isProcessing, setIsProcessing] = useState(false);
+    const navigate = useNavigate();
+    const [timer,settimer]= useState(3)
 
     // Load Razorpay Script
     useEffect(() => {
@@ -107,6 +110,7 @@ const EMSPricing = () => {
                         const verifyRes = await fetch(`${import.meta.env.VITE_API_ADDRESS}verify-payment`, {
                             method: "POST",
                             headers: {
+                                Authorization: `Bearer ${localStorage.getItem("emstoken")}`,
                                 "Content-Type": "application/json",
                             },
                             body: JSON.stringify(response),
@@ -118,6 +122,7 @@ const EMSPricing = () => {
 
                         if (data.success) {
                             toast.success("Payment Successful 🎉");
+                            setTimeout(() => navigate("/payment-success"), 3000);
                         } else {
                             toast.error("Verification Failed ❌");
                         }
@@ -173,7 +178,7 @@ const EMSPricing = () => {
     const pricingPlans = [
         {
             name: "STARTUP HUB",
-            price: "₹2",
+            price: "₹1",
             duration: "/MO",
             features: [
                 "Up to 25 Employees",
@@ -187,7 +192,7 @@ const EMSPricing = () => {
         },
         {
             name: "BUSINESS PRO",
-            price: "₹3",
+            price: "₹1",
             duration: "/MO",
             features: [
                 "Unlimited Employees",

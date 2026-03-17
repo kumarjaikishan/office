@@ -11,8 +11,8 @@ const Create_Order = async (req, res, next) => {
         const { plan } = req.body;
 
         const plans = {
-            STARTUP: 2 * 100, // ₹200
-            PRO: 3 * 100      // ₹350
+            STARTUP: 1 * 100, // ₹200
+            PRO: 1 * 100      // ₹350
         };
 
         if (!plans[plan]) {
@@ -32,6 +32,8 @@ const Create_Order = async (req, res, next) => {
                 forsite: "EMS",
             }
         });
+
+        // console.log("order created", order)
 
         // 🔹 Create subscription (PENDING)
         const subscription = await Subscription.create({
@@ -62,6 +64,8 @@ const Create_Order = async (req, res, next) => {
 
 // 🔐 VERIFY PAYMENT (FRONTEND CALLBACK)
 const verify_payment = async (req, res, next) => {
+
+    console.log("user callback_verify paymnet",req.body)
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
@@ -73,6 +77,7 @@ const verify_payment = async (req, res, next) => {
         if (generated_signature !== razorpay_signature) {
             return res.status(400).json({ success: false });
         }
+        console.log("razorpay signature matched")
 
         // 🔹 Find subscription
         const subscription = await Subscription.findOne({ orderId: razorpay_order_id });
@@ -127,6 +132,8 @@ const webhook = async (req, res, next) => {
 
         const signature = req.headers["x-razorpay-signature"];
 
+        console.log("razorpay webhook aaya", signature)
+
         const generatedSignature = crypto
             .createHmac("sha256", webhookSecret)
             .update(req.body)
@@ -136,6 +143,7 @@ const webhook = async (req, res, next) => {
             console.log("❌ Invalid webhook signature");
             return res.status(400).send("Invalid signature");
         }
+        console.log("razorpay signature matched")
 
         const body = JSON.parse(req.body.toString());
         const event = body.event;
