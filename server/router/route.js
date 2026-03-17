@@ -71,7 +71,7 @@ router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('superadmin', 'ad
 
 router.route('/create-order').post(authmiddlewre,  Create_Order);
 router.route('/verify-payment').post(authmiddlewre,  verify_payment);
-router.route('/webhook').post(webhook);
+// router.route('/webhook').post(webhook);
 
 
 router.route('/allAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), attendance.allAttandence);

@@ -7,10 +7,17 @@ const errorHandle = require('./utils/error_util');
 const route = require('./router/route');
 const esslRoutes = require('./essl');
 const { eventsHandler } = require('./utils/sse'); 
+const { webhook } = require('./services/payment');
 require('./conn/conn');
 
 // Enable CORS
 app.use(cors());
+
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  webhook
+);
 
 // ----------------------
 // Normal API parsers
@@ -49,11 +56,7 @@ app.use((req, res, next) => {
 // ----------------------
 // Routes
 // ----------------------
-// app.post(
-//   "/webhook",
-//   express.raw({ type: "application/json" }),
-//   webhook
-// );
+
 
 app.use('/api', route);
 app.get('/events', eventsHandler);
