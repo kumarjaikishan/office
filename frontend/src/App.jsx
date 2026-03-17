@@ -195,10 +195,7 @@ function App() {
   }, [primaryColor]);
 
   useEffect(() => {
-    if (!islogin) {
-      navigate("/login");
-      return;
-    }
+   
     const role = user?.profile?.role;
 
     if (['superadmin', 'admin', 'manager', 'grant', 'demo'].includes(role)) {

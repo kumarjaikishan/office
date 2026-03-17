@@ -10,45 +10,53 @@ const ProtectedRoutes = ({ allowedRoles = [] }) => {
   const user = useSelector((state) => state.user);
 
   const role = user?.profile?.role;
-  const isAllowed = islogin && allowedRoles.includes(role);
+
+  const isAuthenticated = islogin;
+  const isAuthorized = allowedRoles.includes(role);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 600);
 
   useEffect(() => {
-    if (!isAllowed) {
+    // ✅ Only show toast if logged in but not authorized
+    if (isAuthenticated && !isAuthorized) {
       toast.warn('Access denied. You are not authorized.', { autoClose: 1900 });
     }
 
-    // listen for screen resize
     const handleResize = () => setIsMobile(window.innerWidth < 600);
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, [isAllowed]);
+  }, [isAuthenticated, isAuthorized]);
 
-  // Ensure sidebar is always boolean
+  // Sidebar logic
   const sidebarOpen = Boolean(user?.sidebar);
   const extended = Boolean(user?.extendedonMobile);
 
-  // Sidebar width logic
   const sidebarWidth = isMobile
     ? sidebarOpen
-      ? extended
-        ? 'w-[160px]'
-        : "w-[60px]"
+      ? extended ? 'w-[160px]' : "w-[60px]"
       : "w-0"
     : sidebarOpen
       ? "w-[180px]"
       : "w-[70px]";
 
-  return isAllowed ? (
+  // ❌ Not logged in → go to login
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // ❌ Logged in but wrong role → go home (or dashboard)
+  if (!isAuthorized) {
+    return <Navigate to="/" replace />;
+  }
+
+  // ✅ Allowed
+  return (
     <div className="h-screen w-full flex bg-amber-200">
-      {/* Sidebar */}
       <div className={`${sidebarWidth} no-print bg-white shadow-xl transition-all duration-300 overflow-hidden`}>
         <Sidebar />
       </div>
 
-      {/* Right content */}
       <div className="flex-1 bg-gray-100 overflow-auto overflow-x-hidden">
         <Navbar />
         <div className="p-1 md:p-2">
@@ -56,8 +64,6 @@ const ProtectedRoutes = ({ allowedRoles = [] }) => {
         </div>
       </div>
     </div>
-  ) : (
-    <Navigate to="/login" />
   );
 };
 
