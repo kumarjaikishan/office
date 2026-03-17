@@ -14,7 +14,7 @@ require('./conn/conn');
 app.use(cors());
 
 app.post(
-  "/webhook",
+  "/api/webhook",
   express.raw({ type: "application/json" }),
   webhook
 );

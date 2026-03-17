@@ -65,7 +65,7 @@ const Create_Order = async (req, res, next) => {
 // 🔐 VERIFY PAYMENT (FRONTEND CALLBACK)
 const verify_payment = async (req, res, next) => {
 
-    console.log("user callback_verify paymnet",req.body)
+    // console.log("user callback_verify paymnet",req.body)
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
@@ -77,7 +77,7 @@ const verify_payment = async (req, res, next) => {
         if (generated_signature !== razorpay_signature) {
             return res.status(400).json({ success: false });
         }
-        console.log("razorpay signature matched")
+        // console.log("razorpay signature matched")
 
         // 🔹 Find subscription
         const subscription = await Subscription.findOne({ orderId: razorpay_order_id });
