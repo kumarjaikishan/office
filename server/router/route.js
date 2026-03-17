@@ -19,6 +19,7 @@ const checkPermission = require('../middleware/checkpermission');
 const checkpermissionchange = require('../middleware/checkpermissionchange');
 const employeemiddlewre = require('../middleware/employee_middleware');
 const { exec } = require("child_process");
+const { Create_Order, verify_payment } = require('../services/payment');
 
 // const DEPLOY_SCRIPT = "/home/ubuntu/deploy.sh";
 const deploy_script = {
@@ -67,6 +68,11 @@ router.route('/deletefaceenroll').post(authmiddlewre, authorizeRoles('superadmin
 
 router.route('/addsalary').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), salary.addsalary);
 router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), salary.salaryfetch);
+
+router.route('/create-order').post(authmiddlewre,  Create_Order);
+router.route('/verify-payment').post(authmiddlewre,  verify_payment);
+router.route('/webhook').post(verify_payment);
+
 
 router.route('/allAttandence').get(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager','demo'), attendance.allAttandence);
 router.route('/editattandence').post(authmiddlewre, authorizeRoles('superadmin', 'admin', 'manager'), checkPermission("attandence", 3), attendance.editattandence);

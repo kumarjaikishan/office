@@ -51,6 +51,20 @@ const userSchema = new mongoose.Schema({
     AllPermissionNames: {
         type: Array,
     },
+    subscription: {
+  plan: {
+    type: String,
+    enum: ["FREE", "STARTUP", "PRO", "ENTERPRISE"],
+    default: "FREE"
+  },
+
+  isActive: {
+    type: Boolean,
+    default: false
+  },
+
+  expiresAt: Date
+}
 }, { timestamps: true })
 
 

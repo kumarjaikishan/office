@@ -59,9 +59,9 @@ const LandingFooter = () => {
             </div>
 
             {/* BOTTOM */}
-            <div className="max-w-7xl mx-auto pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="max-w-7xl mx-auto pt-4 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-2">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    © {new Date().getFullYear()} EMS Global Technologies Inc.
+                    © {new Date().getFullYear()} EMS- Employee Management System.
                 </p>
 
                 {/* <div className="flex gap-8 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
