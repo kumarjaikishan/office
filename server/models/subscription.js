@@ -30,6 +30,11 @@ const subscriptionSchema = new mongoose.Schema({
     type: String,
     default: "INR",
   },
+  conf_type: {
+    type: String,
+     enum: ["FRONTEND", "WEBOOK", "NODECRON"],
+    default: "",
+  },
 
   orderId: {
     type: String, // Razorpay order_id

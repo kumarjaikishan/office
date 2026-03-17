@@ -61,7 +61,6 @@ const Create_Order = async (req, res, next) => {
     }
 };
 
-
 // 🔐 VERIFY PAYMENT (FRONTEND CALLBACK)
 const verify_payment = async (req, res, next) => {
 
@@ -91,6 +90,7 @@ const verify_payment = async (req, res, next) => {
         const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
         subscription.status = "ACTIVE";
+        subscription.conf_type = "FRONTEND";
         subscription.paymentId = razorpay_payment_id;
         subscription.startDate = startDate;
         subscription.endDate = endDate;
@@ -124,7 +124,6 @@ const verify_payment = async (req, res, next) => {
     }
 };
 
-
 // 📡 WEBHOOK (FINAL SOURCE OF TRUTH)
 const webhook = async (req, res, next) => {
     try {
@@ -132,7 +131,7 @@ const webhook = async (req, res, next) => {
 
         const signature = req.headers["x-razorpay-signature"];
 
-        console.log("razorpay webhook aaya", signature)
+        // console.log("razorpay webhook aaya", signature)
 
         const generatedSignature = crypto
             .createHmac("sha256", webhookSecret)
@@ -143,7 +142,7 @@ const webhook = async (req, res, next) => {
             console.log("❌ Invalid webhook signature");
             return res.status(400).send("Invalid signature");
         }
-        console.log("razorpay signature matched")
+        // console.log("razorpay signature matched")
 
         const body = JSON.parse(req.body.toString());
         const event = body.event;
@@ -155,6 +154,7 @@ const webhook = async (req, res, next) => {
             const payment = body.payload.payment.entity;
 
             console.log("✅ Payment Captured:", payment.id);
+            console.log("✅ Payment notes:", payment.notes);
 
             const subscription = await Subscription.findOne({ orderId: payment.order_id });
 
@@ -164,6 +164,7 @@ const webhook = async (req, res, next) => {
                 const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
                 subscription.status = "ACTIVE";
+                subscription.conf_type = "WEBOOK";
                 subscription.paymentId = payment.id;
                 subscription.startDate = startDate;
                 subscription.endDate = endDate;
@@ -214,5 +215,54 @@ const webhook = async (req, res, next) => {
     }
 };
 
+const checkstatus = async (req, res) => {
+    try {
+        const subscriptions = await Subscription.find({
+            status: { $ne: "ACTIVE" }
+        });
 
-module.exports = { Create_Order, verify_payment, webhook };
+        if (!subscriptions.length) {
+            return res.json({ message: "No subscriptions found" });
+        }
+        // console.log(subscriptions)
+
+        for (const sub of subscriptions) {
+            if (!sub.paymentId) continue;
+
+            try {
+                const payment = await razorpay.payments.fetch(sub.paymentId);
+
+                // console.log("Checking:", sub.paymentId, payment.status);
+
+                // ✅ Update only if needed
+                if (payment.status === "captured" && sub.status !== "ACTIVE") {
+
+                    const startDate = new Date();
+                    const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+                    sub.status = "ACTIVE";
+                    sub.conf_type = "NODECRON";
+                    sub.startDate = startDate;
+                    sub.endDate = endDate;
+
+                    await sub.save();
+
+                    console.log("✅ Updated:", sub.paymentId);
+                }
+                return res.status(200).send("thik hai")
+
+            } catch (err) {
+                console.log("❌ Error fetching payment:", sub.paymentId);
+            }
+        }
+
+        res.json({ message: "Status check completed" });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+module.exports = { Create_Order, verify_payment, webhook, checkstatus };

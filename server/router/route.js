@@ -19,7 +19,7 @@ const checkPermission = require('../middleware/checkpermission');
 const checkpermissionchange = require('../middleware/checkpermissionchange');
 const employeemiddlewre = require('../middleware/employee_middleware');
 const { exec } = require("child_process");
-const { Create_Order, verify_payment, webhook } = require('../services/payment');
+const { Create_Order, verify_payment, webhook, checkstatus } = require('../services/payment');
 
 // const DEPLOY_SCRIPT = "/home/ubuntu/deploy.sh";
 const deploy_script = {
@@ -71,6 +71,7 @@ router.route('/salaryfetch').get(authmiddlewre, authorizeRoles('superadmin', 'ad
 
 router.route('/create-order').post(authmiddlewre,  Create_Order);
 router.route('/verify-payment').post(authmiddlewre,  verify_payment);
+router.route('/checkstatus').get(  checkstatus);
 // router.route('/webhook').post(webhook);
 
 
