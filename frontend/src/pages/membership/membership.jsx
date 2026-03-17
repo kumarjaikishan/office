@@ -62,115 +62,115 @@ const EMSPricing = () => {
         }
     }, []);
 
- const handlePayment = async (plan) => {
-    if (plan.price === "Custom") {
-        toast.info("Please contact sales for enterprise plan");
-        return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-        // 🔹 Create order
-        const res = await fetch(`${import.meta.env.VITE_API_ADDRESS}create-order`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("emstoken")}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                plan: plan.name.includes("STARTUP") ? "STARTUP" : "PRO"
-            })
-        });
-
-        const order = await res.json();
-
-        console.log("🧾 ORDER CREATED:", order);
-
-        if (!order?.id) {
-            throw new Error("Order creation failed");
+    const handlePayment = async (plan) => {
+        if (plan.price === "Custom") {
+            toast.info("Please contact sales for enterprise plan");
+            return;
         }
 
-        const options = {
-            key: 'rzp_test_24l81VEe4kldIm',
-            amount: order.amount,
-            currency: "INR",
-            name: "EMS Pro Solutions",
-            description: plan.name,
-            order_id: order.id,
+        setIsProcessing(true);
 
-            // ✅ SUCCESS
-            handler: async function (response) {
-                console.log("✅ PAYMENT SUCCESS:", response);
+        try {
+            // 🔹 Create order
+            const res = await fetch(`${import.meta.env.VITE_API_ADDRESS}create-order`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("emstoken")}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    plan: plan.name.includes("STARTUP") ? "STARTUP" : "PRO"
+                })
+            });
 
-                try {
-                    const verifyRes = await fetch(`${import.meta.env.VITE_API_ADDRESS}verify-payment`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(response),
-                    });
+            const order = await res.json();
 
-                    const data = await verifyRes.json();
+            console.log("🧾 ORDER CREATED:", order);
 
-                    console.log("🔐 VERIFY RESPONSE:", data);
+            if (!order?.id) {
+                throw new Error("Order creation failed");
+            }
 
-                    if (data.success) {
-                        toast.success("Payment Successful 🎉");
-                    } else {
-                        toast.error("Verification Failed ❌");
+            const options = {
+                key: 'rzp_live_SSEdhM9TsH0zjZ',
+                amount: order.amount,
+                currency: "INR",
+                name: "EMS Pro Solutions",
+                description: plan.name,
+                order_id: order.id,
+
+                // ✅ SUCCESS
+                handler: async function (response) {
+                    console.log("✅ PAYMENT SUCCESS:", response);
+
+                    try {
+                        const verifyRes = await fetch(`${import.meta.env.VITE_API_ADDRESS}verify-payment`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(response),
+                        });
+
+                        const data = await verifyRes.json();
+
+                        console.log("🔐 VERIFY RESPONSE:", data);
+
+                        if (data.success) {
+                            toast.success("Payment Successful 🎉");
+                        } else {
+                            toast.error("Verification Failed ❌");
+                        }
+                    } catch (err) {
+                        console.error("❌ VERIFY ERROR:", err);
+                        toast.error("Server verification failed");
                     }
-                } catch (err) {
-                    console.error("❌ VERIFY ERROR:", err);
-                    toast.error("Server verification failed");
-                }
+
+                    setIsProcessing(false);
+                },
+
+                // 🚫 CANCEL
+                modal: {
+                    ondismiss: function () {
+                        console.log("🚫 USER CANCELLED PAYMENT");
+                        toast.info("Payment Cancelled");
+                        setIsProcessing(false);
+                    }
+                },
+
+                prefill: {
+                    name: "Client Name",
+                    email: "admin@company.com",
+                },
+
+                theme: {
+                    color: "#f97316",
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+
+            // ❌ FAILURE
+            rzp.on("payment.failed", function (response) {
+                console.error("❌ PAYMENT FAILED:", response.error);
+
+                toast.error(
+                    response.error.description || "Payment Failed ❌"
+                );
 
                 setIsProcessing(false);
-            },
+            });
 
-            // 🚫 CANCEL
-            modal: {
-                ondismiss: function () {
-                    console.log("🚫 USER CANCELLED PAYMENT");
-                    toast.info("Payment Cancelled");
-                    setIsProcessing(false);
-                }
-            },
+            rzp.open();
 
-            prefill: {
-                name: "Client Name",
-                email: "admin@company.com",
-            },
-
-            theme: {
-                color: "#f97316",
-            },
-        };
-
-        const rzp = new window.Razorpay(options);
-
-        // ❌ FAILURE
-        rzp.on("payment.failed", function (response) {
-            console.error("❌ PAYMENT FAILED:", response.error);
-
-            toast.error(
-                response.error.description || "Payment Failed ❌"
-            );
-
+        } catch (err) {
+            console.error("❌ PAYMENT INIT ERROR:", err);
+            toast.error("Something went wrong while initiating payment");
             setIsProcessing(false);
-        });
+        }
+    };
 
-        rzp.open();
-
-    } catch (err) {
-        console.error("❌ PAYMENT INIT ERROR:", err);
-        toast.error("Something went wrong while initiating payment");
-        setIsProcessing(false);
-    }
-};
-
-        const pricingPlans = [
+    const pricingPlans = [
         {
             name: "STARTUP HUB",
             price: "₹2",
